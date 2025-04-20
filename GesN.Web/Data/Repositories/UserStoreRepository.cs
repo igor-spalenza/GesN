@@ -229,13 +229,13 @@ namespace GesN.Web.Data.Repositories
         public async Task<IList<Claim>> GetClaimsAsync(IdentityUser user, CancellationToken cancellationToken)
         {
             var sql = "SELECT ClaimType, ClaimValue FROM AspNetUserClaims WHERE UserId = @UserId";
-            var claims = await _dbConnection.QueryAsync<ClaimDto>(sql, new { UserId = user.Id });
+            var claims = await _dbConnection.QueryAsync<Claim>(sql, new { UserId = user.Id });
 
             // Criar uma lista de Claim manualmente
             var claimList = new List<Claim>();
             foreach (var c in claims)
             {
-                claimList.Add(new Claim(c.ClaimType, c.ClaimValue));
+                claimList.Add(new Claim(c.Type, c.Value));
             }
 
             return claimList;
