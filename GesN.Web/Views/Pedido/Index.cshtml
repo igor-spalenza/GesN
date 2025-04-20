@@ -1,0 +1,80 @@
+﻿@model IEnumerable<GesN.Web.Models.Pedido>
+@{
+    ViewData["Title"] = "Módulo de Vendas";
+}
+
+<div class="venda-main">
+    <div class="venda-lateral-fixa">
+        <h3>Workspace de Vendas</h3>
+
+        <img class="tela-inicial" id="btnHomeVendas" src="~/img/inicio-icon.png" alt="Ícone de redirecionamento para a tela inicial" />
+        <br /><br />
+        <button id="btnAbrirPedido" class="btn btn-sales mb-3">
+            Criar Novo Pedido
+        </button>
+        <h3 class="text-lg font-semibold mb-2">Lembretes</h3>
+        <p class="text-sm">Sem lembretes no momento.</p>
+    </div>
+
+    <div class="venda-conteudo-dinamico">
+        <!-- Abas Dinâmicas -->
+        <ul class="nav nav-tabs" id="pedidoTabs" role="tablist"></ul>
+
+        <!-- Conteúdo das Abas -->
+        <div class="tab-content" id="pedidoTabsContent">
+            <div class="tab-pane fade active show" id="main-tab" role="tabpanel">
+                <h2>Pedidos dos Próximos 3 Dias</h2>
+                <p>Tá saindo da jaula o monstro mulecote, marcha.</p>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Pedido Id</th>
+                            <th>Cliente Id</th>
+                            <th>Data de Criação</th>
+                            <th>Data do Pedido</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var pedido in Model)
+                        {
+                            <tr id="pedido-@pedido.PedidoId">
+                                <td>@pedido.PedidoId</td>
+                                <td>@pedido.ClienteId</td>
+                                <td>@pedido.DataCadastro</td>
+                                <td>@pedido.DataPedido</td>
+                                <td>
+                                    <a class="btn btn-light" href="/Venda/Details/@pedido.PedidoId">
+                                        Ver Pedido
+                                    </a>
+
+                                    <a class="btn btn-info" onclick="EditarPedido(@pedido.PedidoId)" @*href="/Venda/Edit/@pedido.PedidoId"*@>
+                                        Editar Pedido
+                                    </a>
+
+                                    <a class="btn btn-danger">
+                                        Deletar Pedido
+                                        @*onclick="DeletarConcurso(@cliente.ClienteId, '@pedido.PedidoId');"*@
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="~/js/venda.js" asp-append-version="true"></script>
+
+<script>
+
+function abrirEtapaDois() {
+    console.log("deu bom!");
+}
+</script>

@@ -1,0 +1,56 @@
+﻿@model IEnumerable<GesN.Web.Models.Cliente>
+@{
+    ViewData["Title"] = "Clientes";
+}
+
+<h1></h1>
+
+<div>
+    <h4>Clientes</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ClienteId</th>
+                <th>Nome</th>
+                <th>Sobrenome</th>
+                <th>Telefone Principal</th>
+                <th>Data de Cadastro</th>
+                <th>CPF</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var cliente in Model)
+            {
+                <tr id="cliente-@cliente.ClienteId">
+                    <td>@cliente.ClienteId</td>
+                    <td>@cliente.Nome</td>
+                    <td>@cliente.Sobrenome</td>
+                    <td>@cliente.TelefonePrincipal</td>
+                    <td>@cliente.DataCadastro</td>
+                    <td>@cliente.Cpf</td>
+                    <td>
+                        <a class="btn btn-light" href="/Cliente/Details/@cliente.ClienteId">
+                            Visualizar Cliente
+                        </a>
+
+                        <a class="btn btn-info" href="/Cliente/Edit/@cliente.ClienteId">
+                            Editar Cliente
+                        </a>
+
+                        <a class="btn btn-danger">
+                            Deletar Cliente
+                            @*onclick="DeletarConcurso(@cliente.ClienteId, '@cliente.Nome');"*@
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a class="btn btn-primary" asp-controller="Cliente" asp-action="Create">
+        Cadastrar Novo Cliente 
+        @* <img src="~/Images/add.png" style="height: 1.6rem;" /> Cadastrar Concurso *@
+    </a>
+</div>
