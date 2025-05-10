@@ -6,7 +6,7 @@ namespace GesN.Web.Interfaces.Repositories
     {
         Task<Pedido> GetByIdAsync(int id);
         Task<IEnumerable<Pedido>> GetAllAsync();
-        Task AddAsync(Pedido pedido);
+        Task<int> AddAsync(Pedido pedido);
         Task UpdateAsync(Pedido pedido);
         Task DeleteAsync(int id);
     }

@@ -1,6 +1,7 @@
 ﻿using GesN.Web.Interfaces.Repositories;
 using GesN.Web.Interfaces.Services;
 using GesN.Web.Models;
+using GesN.Web.Models.DTOs;
 
 namespace GesN.Web.Services
 {
@@ -41,15 +42,17 @@ namespace GesN.Web.Services
             });
         }
 
-        public async Task AddAsync(Cliente clienteDto)
+        public async Task AddAsync(ClienteCreateDto clienteDto)
         {
+            var dataAtual = DateTime.Now;
             var cliente = new Cliente
             {
                 Nome = clienteDto.Nome,
                 Sobrenome = clienteDto.Sobrenome,
                 Cpf = clienteDto.Cpf,
                 TelefonePrincipal = clienteDto.TelefonePrincipal,
-                DataCadastro = clienteDto.DataCadastro
+                DataCadastro = dataAtual,
+                DataModificacao = dataAtual
             };
             await _clienteRepository.AddAsync(cliente);
         }

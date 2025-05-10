@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GesN.Web.Models
+namespace GesN.Web.Models.DTOs
 {
-    public class Pedido
+    public class PedidoCreateDto
     {
         public int PedidoId { get; set; }
         public int ClienteId { get; set; }
-        public int ColaboradorId { get; set; }
+        public string ColaboradorId { get; set; }
 
         [Display(Name = "Data do Pedido")]
         public DateTime DataPedido { get; set; }

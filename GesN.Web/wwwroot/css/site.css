@@ -1,22 +1,99 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+}
+
+.home {
+    display: flex;
+}
+
+.home-logo {
+    width: 50%;
+}
+
+.teste {
+    margin-left: 16px;
+    margin-top: 7px;
+}
+
+.logo-gpn {
+    margin-right: 30px;
+    width: 80%;
+}
+
+.logo-cliente {
+    margin-top: 50px;
+    margin-left: 30px;
+    width: 90%;
+}
+
+.btn-lg-home {
+    padding: .99rem 6rem;
+    font-size: 1.25rem;
+    border-radius: .3rem;
+}
+
+.btn-sales {
+    color: #fff;
+    background-color: #007a86;
+    border-color: #198754;
+}
+
+    .btn-sales:hover {
+        color: #fff;
+        background-color: #005159;
+        border-color: #146c43;
+    }
+
+.venda-main {
+    display: flex !important;
+    width: 100%;
+}
+
+.venda-lateral-fixa {
+    width: 20%;
+}
+
+.venda-conteudo-dinamico {
+    width: 80%;
+}
+
+.tela-inicial {
+    width: 50px;
+    align-content: end;
+    cursor: pointer;
+}
+
+.spinner-border {
+    margin-right: 5px;
+}
+
+.d-none {
+    display: none !important;
+}
+
+/* Estilo para o autocomplete */
+.ui-autocomplete {
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 1000;
 }

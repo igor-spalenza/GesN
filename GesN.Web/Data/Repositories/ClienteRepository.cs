@@ -29,8 +29,8 @@ namespace GesN.Web.Data.Repositories
         public async Task AddAsync(Cliente cliente)
         {
             var sql = @"
-                INSERT INTO Cliente (Nome, Sobrenome, Cpf, TelefonePrincipal, DataCadastro)
-                VALUES (@Nome, @Sobrenome, @Cpf, @TelefonePrincipal, @DataCadastro)";
+                INSERT INTO Cliente (Nome, Sobrenome, Cpf, TelefonePrincipal, DataCadastro, DataModificacao)
+                VALUES (@Nome, @Sobrenome, @Cpf, @TelefonePrincipal, @DataCadastro, @DataModificacao)";
             await _dbConnection.ExecuteAsync(sql, cliente);
         }
 

@@ -1,0 +1,33 @@
+﻿@model IEnumerable<Pedido>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>ID do Colaborador</th>
+                <th>ID Cliente</th>
+                <th>Data Pedido</th>
+                <th>Data Modificação</th>
+                <th>Data Cadastro</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model?.Any() == true)
+            {
+                foreach (var pedido in Model)
+                {
+                    <partial name="_PedidoItem" model="pedido" />
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center py-3">
+                        Nenhum pedido encontrado.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

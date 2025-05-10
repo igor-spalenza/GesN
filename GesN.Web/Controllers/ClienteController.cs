@@ -1,5 +1,6 @@
 ﻿using GesN.Web.Interfaces.Services;
 using GesN.Web.Models;
+using GesN.Web.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GesN.Web.Controllers
@@ -30,23 +31,23 @@ namespace GesN.Web.Controllers
         // GET: ClienteController/Create
         public ActionResult Create()
         {
-            return View("Cadastro");
+            return View("Create");
         }
 
         // POST: ClienteController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(Cliente cliente)
+        public async Task<ActionResult> Create(ClienteCreateDto clienteCreateDto)
         {
             ModelState.Remove("ClienteId");
             ModelState.Remove("Cpf");
             if (ModelState.IsValid)
             {
-                if (cliente.ClienteId == 0)
+                if (clienteCreateDto.ClienteId == 0)
                 {
                     try
                     {
-                        await _clienteService.AddAsync(cliente);
+                        await _clienteService.AddAsync(clienteCreateDto);
                         return RedirectToAction(nameof(Index));
                     }
                     catch
@@ -56,7 +57,7 @@ namespace GesN.Web.Controllers
                 }
             }
 
-            return View(cliente);
+            return View(clienteCreateDto);
         }
 
         // GET: ClienteController/Edit/5

@@ -1,32 +1,48 @@
-﻿@model IEnumerable<Pedido>
+﻿@page
+@using GesN.Web.PageModels
+@model PedidosIndexModel
+@* @model IEnumerable<Pedido> *@
 @{
-    ViewData["Title"] = "Módulo de Vendas";
+    //ViewData["Title"] = "Vendas";
 }
 
 <div class="venda-main">
-    <div class="venda-lateral-fixa">
+    <div class="container-fluid venda-lateral-fixa">
         <h3>Workspace de Vendas</h3>
 
         <img class="tela-inicial" id="btnHomeVendas" src="~/img/inicio-icon.png" alt="Ícone de redirecionamento para a tela inicial" />
         <br /><br />
-        <button id="btnAbrirPedido" class="btn btn-sales mb-3">
-            Criar Novo Pedido
+
+        <button type="button" class="btn btn-sales mb-3" onclick="pedidosManager.novoPedido()">
+            Novo Pedido
         </button>
+
+        <button type="button" class="btn btn-outline-secondary" onclick="pedidosManager.carregarListaPedidos()">
+            <i class="bi bi-arrow-clockwise"></i> Atualizar
+        </button>
+
         <h3 class="text-lg font-semibold mb-2">Lembretes</h3>
         <p class="text-sm">Sem lembretes no momento.</p>
     </div>
 
     <div class="venda-conteudo-dinamico">
         <!-- Abas Dinâmicas -->
-        <ul class="nav nav-tabs" id="pedidoTabs" role="tablist"></ul>
+
+        <ul class="nav nav-tabs" id="pedidos-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="tab-lista-pedidos" data-bs-toggle="tab" href="#conteudo-lista-pedidos" role="tab">
+                    Lista de Pedidos
+                </a>
+            </li>
+        </ul>
 
         <!-- Conteúdo das Abas -->
         <div class="tab-content" id="pedidoTabsContent">
             <div class="tab-pane fade active show" id="main-tab" role="tabpanel">
                 <h2>Pedidos dos Próximos 3 Dias</h2>
-                <p>Tá saindo da jaula o monstro mulecote, marcha.</p>
+                <p>Lorem Ipsum.</p>
 
-                <table class="table">
+@*                 <table class="table">
                     <thead>
                         <tr>
                             <th>Pedido Id</th>
@@ -46,23 +62,23 @@
                                 <td>@pedido.DataCadastro</td>
                                 <td>@pedido.DataPedido</td>
                                 <td>
-                                    <a class="btn btn-light" href="/Venda/Details/@pedido.PedidoId">
+                                    <a class="btn btn-light" onclick="EditarPedido(@pedido.PedidoId, false)">
                                         Ver Pedido
                                     </a>
 
-                                    <a class="btn btn-info" onclick="EditarPedido(@pedido.PedidoId)" @*href="/Venda/Edit/@pedido.PedidoId"*@>
+                                    <a class="btn btn-info" onclick="EditarPedido(@pedido.PedidoId, true)" href="/Pedido/Edit/@pedido.PedidoId">
                                         Editar Pedido
                                     </a>
 
                                     <a class="btn btn-danger">
                                         Deletar Pedido
-                                        @*onclick="DeletarConcurso(@cliente.ClienteId, '@pedido.PedidoId');"*@
+                                        onclick="DeletarConcurso(@cliente.ClienteId, '@pedido.PedidoId');"
                                     </a>
                                 </td>
                             </tr>
                         }
                     </tbody>
-                </table>
+                </table>*@
 
             </div>
         </div>
@@ -70,11 +86,6 @@
 
 </div>
 
-<script src="~/js/venda.js" asp-append-version="true"></script>
-
-<script>
-
-function abrirEtapaDois() {
-    console.log("deu bom!");
+@section Scripts {
+    <script src="~/js/Pedido.js" asp-append-version="true"></script>
 }
-</script>

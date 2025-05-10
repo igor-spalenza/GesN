@@ -1,4 +1,5 @@
 ﻿using GesN.Web.Models;
+using GesN.Web.Models.DTOs;
 
 namespace GesN.Web.Interfaces.Services
 {
@@ -6,7 +7,7 @@ namespace GesN.Web.Interfaces.Services
     {
         Task<Pedido> GetByIdAsync(int id);
         Task<IEnumerable<Pedido>> GetAllAsync();
-        Task AddAsync(Pedido clienteDto);
+        Task<int> AddAsync(Pedido clienteDto);
         Task UpdateAsync(Pedido clienteDto);
         Task DeleteAsync(int id);
     }

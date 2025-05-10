@@ -1,0 +1,126 @@
+﻿@model Pedido
+@{
+    ViewData["Title"] = "Módulo de Vendas";
+}
+<!-- Div com a partial view de criação -->
+<div class="row" id="createPedidoContainer">
+    <div class="row">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Identificação do Cliente</h2>
+                <input type="text" id="buscarCliente" placeholder="Buscar Cliente..." class="border p-2 mb-2 w-full" /><br />
+                <select id="tipoPedido" class="border p-2 mb-2 w-full">
+                    <option value="encomenda">Encomenda</option>
+                    <option value="evento">Evento</option>
+                </select><br />
+                <button class="btn btn-sales mb-3" id="btnAnotarPedido">Anotar Pedido</button>
+            </div>
+        </div>
+        <h4>PedidoCreateDto</h4>
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                <form id="createPedidoForm" >
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="DataCadastro" value="@DateTime.Now" />
+                    <input type="hidden" asp-for="DataModificacao" value="@DateTime.Now" />
+
+                    <div class="form-group">
+                        <label asp-for="PedidoId" class="control-label"></label>
+                        <input asp-for="PedidoId" class="form-control" />
+                        <span asp-validation-for="PedidoId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ClienteId" class="control-label"></label>
+                        <input asp-for="ClienteId" class="form-control" />
+                        <span asp-validation-for="ClienteId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ColaboradorId" class="control-label"></label>
+                        <input asp-for="ColaboradorId" class="form-control" />
+                        <span asp-validation-for="ColaboradorId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="DataPedido" class="control-label"></label>
+                        <input asp-for="DataPedido" class="form-control" />
+                        <span asp-validation-for="DataPedido" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <button type="submit" class="btn btn-primary" id="btnSalvarPedido">
+                            <span class="spinner-border spinner-border-sm d-none" id="loadingSpinner" role="status" aria-hidden="true"></span>
+                            Salvar Pedido
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div>
+            <a asp-action="Index">Back to List</a>
+        </div>
+    </div>
+</div>
+
+<!-- Div que receberá a partial view de edição -->
+<div id="editPedidoContainer" style="display: none;"></div>
+
+@* @section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#createPedidoForm').on('submit', function (e) {
+                e.preventDefault();
+                $('#btnSalvarPedido').prop('disabled', true);
+
+                var formData = $(this).serialize();
+                $.ajax({
+                    url: '@Url.Action("CreatePartial", "Pedido")',
+                    type: 'POST',
+                    data: formData,
+                    success: function (response) {
+                        if (response.success) {
+                            $.get('@Url.Action("EditPartial", "Pedido")/' + response.pedidoId, function (data) {
+                                $('#createPedidoContainer').hide();
+
+                                $('#editPedidoContainer')
+                                    .html(data)
+                                    .show();
+
+                                toastr.success('Pedido criado com sucesso!');
+                            });
+                        } else {
+                            toastr.error('Erro ao criar o pedido: ' + response.message);
+                            $('#btnSalvarPedido').prop('disabled', false);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error('Erro ao processar a requisição: ' + error);
+                        $('#btnSalvarPedido').prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
+}
+<script>
+    $("#buscarCliente").autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "GPN.API/Cliente/BuscarClienteNomeTel",
+                data: { termo: request.term },
+                success: function(data) {
+                    response(data.map(c => ({ label: c.nome + " - " + c.telefone, value: c.id })));
+                }
+            });
+        },
+        select: function(event, ui) {
+            console.log("Cliente selecionado:", ui.item.value);
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("btnAnotarPedido").addEventListener("click", () => {
+            alert("deu bom!");
+        });
+    });
+</script> *@

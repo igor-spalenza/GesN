@@ -5,7 +5,7 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GesN.Web", "GesN.Web\GesN.Web.csproj", "{4B5A2CF2-3BA6-4809-9E7A-9F1773ACDBA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GesN.API", "GesN.API\GesN.API.csproj", "{060B0624-847B-4285-B7CC-6993BBF2CE07}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GesN.API", "GesN.API\GesN.API.csproj", "{060B0624-847B-4285-B7CC-6993BBF2CE07}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -26,12 +26,13 @@ namespace GesN.Web.Data.Repositories
             return await _dbConnection.QueryAsync<Pedido>(sql);
         }
 
-        public async Task AddAsync(Pedido pedido)
+        public async Task<int> AddAsync(Pedido pedido)
         {
             var sql = @"
-                INSERT INTO Pedido (PedidoId, Status, DataPedido)
-                VALUES (@ClienteId, @Status, @DataPedido)";
-            await _dbConnection.ExecuteAsync(sql, pedido);
+                INSERT INTO Pedido (ClienteId, ColaboradorId, DataPedido, DataCadastro, DataModificacao)
+                VALUES (@ClienteId, @ColaboradorId, @DataPedido, @DataCadastro, @DataModificacao);
+                SELECT last_insert_rowid();";
+            return await _dbConnection.QuerySingleAsync<int>(sql, pedido);
         }
 
         public async Task UpdateAsync(Pedido pedido)
