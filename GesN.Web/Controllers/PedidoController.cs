@@ -23,32 +23,16 @@ namespace GesN.Web.Controllers
             return View();
         }
 
-        public async Task<IActionResult> OnGetListaPedidos()
-        {
-            var pedidos = await _pedidoService.GetAllAsync();
-            return new PartialViewResult
-            {
-                ViewName = "_ListaPedidos",
-                Model = pedidos
-            };
-        }
-
         // Action para a Etapa 1 de criação do Pedido
         public IActionResult NovoPedido()
         {
             return PartialView("_Create");
         }
-
-        /*public async Task<IActionResult> AnotarPedido(int idCliente)
+        public async Task<IActionResult> ListaPedidos()
         {
-            var cliente = await _clienteService.GetByIdAsync(1);
-            var pedido = new PedidoCreateDto
-            {
-                ClienteId = cliente.ClienteId
-            };
-            return PartialView("_PedidoCriacao", pedido);
+            var pedidos = await _pedidoService.GetAllAsync();
+            return PartialView("_ListaPedidos", pedidos);
         }
-        */
 
         // GET: VendaController/Details/5
         public async Task<ActionResult> Details(int id)
@@ -96,6 +80,14 @@ namespace GesN.Web.Controllers
                 }
             }
             return PartialView();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Criar()
+        {
+            var clientes = await _clienteService.GetAllAsync();
+            ViewBag.Clientes = clientes;
+            return PartialView("_Create");
         }
 
         // POST: VendaController/Create
@@ -177,6 +169,70 @@ namespace GesN.Web.Controllers
             catch
             {
                 return View();
+            }
+        }
+
+        // GET: Pedido/Editar/5 - Retorna a partial view de edição
+        public async Task<IActionResult> Editar(int id)
+        {
+            var pedido = await _pedidoService.GetByIdAsync(id);
+            if (pedido == null)
+                return NotFound();
+
+            var clientes = await _clienteService.GetAllAsync();
+            ViewBag.Clientes = clientes;
+            return PartialView("_Edit", pedido);
+        }
+
+        // POST: Pedido/SalvarEdicao - Salva a edição de um pedido via AJAX
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SalvarEdicao(int id, [FromForm]Pedido pedido)
+        {
+            if (id != pedido.PedidoId)
+                return NotFound();
+                
+            if (!ModelState.IsValid)
+            {
+                var clientes = await _clienteService.GetAllAsync();
+                ViewBag.Clientes = clientes;
+                return PartialView("_Edit", pedido);
+            }
+
+            try
+            {
+                await _pedidoService.UpdateAsync(pedido);
+                return Json(new { success = true, message = "Pedido atualizado com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Erro ao atualizar pedido: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SalvarNovo([FromForm]Pedido pedido)
+        {
+            ModelState.Remove("PedidoId");
+            ModelState.Remove("DataCadastro");
+            ModelState.Remove("DataModificacao");
+            
+            if (!ModelState.IsValid)
+            {
+                var clientes = await _clienteService.GetAllAsync();
+                ViewBag.Clientes = clientes;
+                return PartialView("_Create", pedido);
+            }
+
+            try
+            {
+                var id = await _pedidoService.AddAsync(pedido);
+                return Json(new { success = true, id = id, message = "Pedido criado com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Erro ao criar pedido: " + ex.Message });
             }
         }
     }

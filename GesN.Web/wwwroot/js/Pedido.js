@@ -214,15 +214,15 @@ const pedidosManager = {
         // Ativa a nova aba
         $(`#${tabId}`).tab('show');
     },
-    
+
     // Cria uma nova aba para editar um pedido
     editarPedido: function(id) {
         this.contador++;
         this.qtdAbasAbertas++;
-        const tabId = `tab-editar-pedido-${this.contador}`;
-        const contentId = `conteudo-editar-pedido-${this.contador}`;
+        const tabId = `tab-pedido-${id}`;
+        const contentId = `conteudo-pedido-${id}`;
         
-        this.adicionarAba(tabId, contentId, `Editar Pedido #${id}`);
+        this.adicionarAba(tabId, contentId, `Pedido #${id}`);
         
         $(`#${contentId}`).html('<div class="d-flex justify-content-center my-5"><div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div></div>');
         
@@ -245,15 +245,15 @@ const pedidosManager = {
     visualizarPedido: function(id) {
         this.contador++;
         this.qtdAbasAbertas++;
-        const tabId = `tab-detalhes-pedido-${this.contador}`;
-        const contentId = `conteudo-detalhes-pedido-${this.contador}`;
+        const tabId = `tab-pedido-${id}`;
+        const contentId = `conteudo-pedido-${id}`;
         
         this.adicionarAba(tabId, contentId, `Pedido #${id}`);
         
         $(`#${contentId}`).html('<div class="d-flex justify-content-center my-5"><div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div></div>');
         
         $.ajax({
-            url: `/Pedido/Detalhes/${id}`,
+            url: `/Pedido/DetailsPartialView/${id}`,
             type: 'GET',
             success: function(data) {
                 $(`#${contentId}`).html(data);

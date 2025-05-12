@@ -54,6 +54,7 @@ namespace GesN.Web.Services
             {
                 PedidoId = p.PedidoId,
                 ClienteId = p.ClienteId,
+                ColaboradorId = p.ColaboradorId,
                 DataCadastro = p.DataCadastro,
                 DataPedido = p.DataPedido,
                 DataModificacao = p.DataModificacao

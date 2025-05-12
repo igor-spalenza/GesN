@@ -1,25 +1,18 @@
-﻿@page
+﻿@* @page *@
 @using GesN.Web.PageModels
-@model PedidosIndexModel
-@* @model IEnumerable<Pedido> *@
+@* @model PedidosIndexModel *@
+@model IEnumerable<Pedido>
 @{
-    //ViewData["Title"] = "Vendas";
+    ViewData["Title"] = "Vendas";
 }
 
 <div class="venda-main">
     <div class="container-fluid venda-lateral-fixa">
-        <h3>Workspace de Vendas</h3>
+        <h1>Vendas</h1><br />
 
-        <img class="tela-inicial" id="btnHomeVendas" src="~/img/inicio-icon.png" alt="Ícone de redirecionamento para a tela inicial" />
-        <br /><br />
-
-        <button type="button" class="btn btn-sales mb-3" onclick="pedidosManager.novoPedido()">
+        <button type="button" class="btn btn-sales mb-3" onclick="pedidoManager.novoPedidoModal()">
             Novo Pedido
-        </button>
-
-        <button type="button" class="btn btn-outline-secondary" onclick="pedidosManager.carregarListaPedidos()">
-            <i class="bi bi-arrow-clockwise"></i> Atualizar
-        </button>
+        </button><br />
 
         <h3 class="text-lg font-semibold mb-2">Lembretes</h3>
         <p class="text-sm">Sem lembretes no momento.</p>
@@ -27,65 +20,85 @@
 
     <div class="venda-conteudo-dinamico">
         <!-- Abas Dinâmicas -->
-
-        <ul class="nav nav-tabs" id="pedidos-tabs" role="tablist">
-            <li class="nav-item">
+        <ul class="nav nav-tabs" id="pedidosTabs" role="tablist">
+            <li class="nav-item" role="presentation">
                 <a class="nav-link active" id="tab-lista-pedidos" data-bs-toggle="tab" href="#conteudo-lista-pedidos" role="tab">
-                    Lista de Pedidos
+                    <img class="vendas-principal" id="btnHomeVendas" src="~/img/inicio-icon.png" alt="Ícone de redirecionamento para a tela inicial" />
+                    @* Principal *@
                 </a>
             </li>
+            <!-- Novas abas serão inseridas aqui dinamicamente -->
         </ul>
+
+        <div class="modal fade" id="pedidoModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Pedido</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- O conteúdo do formulário será carregado aqui via AJAX -->
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Conteúdo das Abas -->
         <div class="tab-content" id="pedidoTabsContent">
-            <div class="tab-pane fade active show" id="main-tab" role="tabpanel">
-                <h2>Pedidos dos Próximos 3 Dias</h2>
-                <p>Lorem Ipsum.</p>
-
-@*                 <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Pedido Id</th>
-                            <th>Cliente Id</th>
-                            <th>Data de Criação</th>
-                            <th>Data do Pedido</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach (var pedido in Model)
-                        {
-                            <tr id="pedido-@pedido.PedidoId">
-                                <td>@pedido.PedidoId</td>
-                                <td>@pedido.ClienteId</td>
-                                <td>@pedido.DataCadastro</td>
-                                <td>@pedido.DataPedido</td>
-                                <td>
-                                    <a class="btn btn-light" onclick="EditarPedido(@pedido.PedidoId, false)">
-                                        Ver Pedido
-                                    </a>
-
-                                    <a class="btn btn-info" onclick="EditarPedido(@pedido.PedidoId, true)" href="/Pedido/Edit/@pedido.PedidoId">
-                                        Editar Pedido
-                                    </a>
-
-                                    <a class="btn btn-danger">
-                                        Deletar Pedido
-                                        onclick="DeletarConcurso(@cliente.ClienteId, '@pedido.PedidoId');"
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>*@
-
+            <div class="tab-pane fade active show" id="conteudo-lista-pedidos" role="tabpanel">
+                <div id="lista-pedidos-container">
+                    <!-- A lista de pedidos será carregada aqui via AJAX -->
+                    <div class="d-flex justify-content-center my-5">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+            <!-- O conteúdo das novas abas será inserido aqui dinamicamente -->
         </div>
     </div>
-
 </div>
 
 @section Scripts {
     <script src="~/js/Pedido.js" asp-append-version="true"></script>
+    <script>
+        const pedidoManager = {
+            novoPedidoModal: function () {
+                $.get('@Url.Action("NovoPedido", "Pedido")', function (data) {
+                    $('#pedidoModal .modal-body').html(data);
+                    $('#pedidoModal').modal('show');
+                });
+            },
+
+            visualizarPedido: function (id) {
+                $.get('@Url.Action("Detalhes", "Pedido")/' + id, function (data) {
+                    $('#pedidoModal .modal-body').html(data);
+                    $('#pedidoModal').modal('show');
+                });
+            },
+
+            salvarPedido: function (form) {
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            $('#pedidoModal').modal('hide');
+                            pedidoManager.carregarListaPedidos();
+                            toastr.success(response.message);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Ocorreu um erro ao processar a requisição.');
+                    }
+                });
+            }
+        };
+
+    </script>
 }

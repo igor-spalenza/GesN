@@ -1,8 +1,31 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using Microsoft.AspNetCore.Identity
+@using GesN.Web.Areas.Identity.Data.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<br />
+<div class="home">
+    <div class="home-logo">
+        <img class="logo-gpn" src="~/img/GPN.png" alt="Logomarca GPN" />
+        <h3>Sua plataforma de administração online!</h3>
+    </div>
+    <div class="home-logo">
+        <img class="logo-cliente" src="~/img/horizontallogo.png" alt="Logomarca Spalenza Buffet" />
+    </div>
 </div>
+
+<br />
+<br />
+<br />
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <div class="text-center">
+        <a class="btn btn-sales btn-lg-home" asp-area="" asp-controller="Pedido" asp-action="Index">Área de Vendas</a>
+    </div>
+
+}
