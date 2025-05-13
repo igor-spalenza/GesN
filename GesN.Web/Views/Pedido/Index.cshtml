@@ -10,7 +10,7 @@
     <div class="container-fluid venda-lateral-fixa">
         <h1>Vendas</h1><br />
 
-        <button type="button" class="btn btn-sales mb-3" onclick="pedidoManager.novoPedidoModal()">
+        <button type="button" class="btn btn-sales mb-3" onclick="pedidosManager.novoPedidoModal()">
             Novo Pedido
         </button><br />
 
@@ -63,42 +63,5 @@
 
 @section Scripts {
     <script src="~/js/Pedido.js" asp-append-version="true"></script>
-    <script>
-        const pedidoManager = {
-            novoPedidoModal: function () {
-                $.get('@Url.Action("NovoPedido", "Pedido")', function (data) {
-                    $('#pedidoModal .modal-body').html(data);
-                    $('#pedidoModal').modal('show');
-                });
-            },
 
-            visualizarPedido: function (id) {
-                $.get('@Url.Action("Detalhes", "Pedido")/' + id, function (data) {
-                    $('#pedidoModal .modal-body').html(data);
-                    $('#pedidoModal').modal('show');
-                });
-            },
-
-            salvarPedido: function (form) {
-                $.ajax({
-                    url: form.attr('action'),
-                    type: 'POST',
-                    data: form.serialize(),
-                    success: function (response) {
-                        if (response.success) {
-                            $('#pedidoModal').modal('hide');
-                            pedidoManager.carregarListaPedidos();
-                            toastr.success(response.message);
-                        } else {
-                            toastr.error(response.message);
-                        }
-                    },
-                    error: function () {
-                        toastr.error('Ocorreu um erro ao processar a requisição.');
-                    }
-                });
-            }
-        };
-
-    </script>
 }

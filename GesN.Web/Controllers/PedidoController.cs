@@ -41,7 +41,7 @@ namespace GesN.Web.Controllers
             return View("_Details", pedido);
         }
         
-        public async Task<ActionResult> DetailsPartialView(int id)
+        public async Task<IActionResult> DetailsPartialView(int id)
         {
             var pedido = await _pedidoService.GetByIdAsync(id);
             return PartialView("_Details", pedido);

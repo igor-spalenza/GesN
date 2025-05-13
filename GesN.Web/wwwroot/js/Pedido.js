@@ -167,7 +167,11 @@ function CriarPedido(IdPedido, editing) {
     tabTrigger.show();
 }
 
-// Objeto para gerenciar os pedidos
+
+
+//
+// NOVO Objeto para gerenciar os pedidos
+// 
 const pedidosManager = {
     contador: 0,
     qtdAbasAbertas: 0,
@@ -187,6 +191,20 @@ const pedidosManager = {
             }
         });
     },
+    novoPedidoModal: function () {
+        $.get('/Pedido/NovoPedido', function (data) {
+            $('#pedidoModal .modal-body').html(data);
+            $('#pedidoModal').modal('show');
+        });
+    },
+
+    visualizarPedidoModal: function (id) {
+        $.get('/Pedido/DetailsPartialView/' + id, function (data) {
+            $('#pedidoModal .modal-body').html(data);
+            $('#pedidoModal').modal('show');
+        });
+    },
+
     
     // Cria uma nova aba para criar um pedido
     novoPedido: function() {
@@ -213,6 +231,62 @@ const pedidosManager = {
         
         // Ativa a nova aba
         $(`#${tabId}`).tab('show');
+    },
+
+    salvarNovoModal: function () {
+        // Obtém o formulário dentro do modal
+        const form = $('#pedidoModal .modal-body form');
+
+        // Verifica se o formulário existe
+        if (form.length === 0) {
+            console.error('Formulário não encontrado no modal');
+            return;
+        }
+
+        // Cria os dados do formulário
+        const formData = new FormData(form[0]);
+
+        // Desabilita o botão de submit para evitar múltiplos envios
+        const submitButton = form.find('button[type="submit"]');
+        const buttonText = submitButton.text();
+        submitButton.prop('disabled', true).text('Salvando...');
+
+        // Faz a requisição AJAX para SalvarNovo
+        return $.ajax({
+            url: '/Pedido/SalvarNovo',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    //alert(response.message || 'Pedido criado com sucesso!');
+                    $('#pedidoModal').modal('hide');
+
+                    if (response.id) {
+                        // Chama o método editarPedido, se estiver usando o gerenciador de pedidos
+                        if (typeof pedidosManager !== 'undefined') {
+                            pedidosManager.editarPedido(response.id);
+                        } else if (typeof EditarPedido === 'function') {
+                            // Usa a função global EditarPedido como fallback
+                            EditarPedido(response.id, true);
+                        } else {
+                            console.error('Não foi possível encontrar uma função para editar o pedido');
+                        }
+                    }
+                } else {
+                    alert('Erro: ' + (response.message || 'Não foi possível criar o pedido'));
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Erro ao salvar pedido:', error);
+                alert('Ocorreu um erro ao salvar o pedido. Por favor, tente novamente.');
+            },
+            complete: function () {
+                // Reativa o botão de submit
+                submitButton.prop('disabled', false).text(buttonText);
+            }
+        });
     },
 
     // Cria uma nova aba para editar um pedido
