@@ -136,7 +136,23 @@ namespace GesN.Web.Controllers
             return PartialView("_Edit", pedido);
         }
 
-        // POST: VendaController/Edit/5
+        [HttpGet]
+        public async Task<IActionResult> BuscarClienteNomeTel(string termo)
+        {
+            if (string.IsNullOrWhiteSpace(termo))
+                return Json(new List<object>());
+
+            var clientes = await _clienteService.BuscarPorNomeOuTelefoneAsync(termo);
+
+            var resultado = clientes.Select(c => new {
+                id = c.ClienteId,
+                nome = c.Nome + " " + c.Sobrenome,
+                telefonePrincipal = c.TelefonePrincipal
+            });
+
+            return Json(resultado);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, IFormCollection collection)

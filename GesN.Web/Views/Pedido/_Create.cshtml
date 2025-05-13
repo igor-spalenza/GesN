@@ -2,7 +2,46 @@
 @{
     //ViewData["Title"] = "Módulo de Vendas";
 }
-<!-- Div com a partial view de criação -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+<style>
+    .ui-autocomplete {
+        position: absolute !important;
+        display: block !important;
+        background-color: white !important;
+        border: 1px solid #ccc !important;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 9999 !important;
+    }
+
+    .ui-menu {
+        list-style: none;
+        padding: 5px;
+        margin: 0;
+        display: block;
+    }
+
+    .ui-menu-item {
+        margin: 0;
+        padding: 3px 0;
+        cursor: pointer;
+    }
+
+        .ui-menu-item div {
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+
+    .ui-state-active,
+    .ui-widget-content .ui-state-active {
+        background-color: #007bff !important;
+        color: white !important;
+    }
+</style>
+
 <div class="row" id="createPedidoContainer">
     <div class="row">
         <div class="row">
@@ -64,63 +103,112 @@
 
 <!-- Div que receberá a partial view de edição -->
 <div id="editPedidoContainer" style="display: none;"></div>
-
-@* @section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#createPedidoForm').on('submit', function (e) {
-                e.preventDefault();
-                $('#btnSalvarPedido').prop('disabled', true);
-
-                var formData = $(this).serialize();
-                $.ajax({
-                    url: '@Url.Action("CreatePartial", "Pedido")',
-                    type: 'POST',
-                    data: formData,
-                    success: function (response) {
-                        if (response.success) {
-                            $.get('@Url.Action("EditPartial", "Pedido")/' + response.pedidoId, function (data) {
-                                $('#createPedidoContainer').hide();
-
-                                $('#editPedidoContainer')
-                                    .html(data)
-                                    .show();
-
-                                toastr.success('Pedido criado com sucesso!');
-                            });
-                        } else {
-                            toastr.error('Erro ao criar o pedido: ' + response.message);
-                            $('#btnSalvarPedido').prop('disabled', false);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        toastr.error('Erro ao processar a requisição: ' + error);
-                        $('#btnSalvarPedido').prop('disabled', false);
-                    }
-                });
-            });
-        });
-    </script>
-}
 <script>
-    $("#buscarCliente").autocomplete({
-        source: function(request, response) {
-            $.ajax({
-                url: "GPN.API/Cliente/BuscarClienteNomeTel",
-                data: { termo: request.term },
-                success: function(data) {
-                    response(data.map(c => ({ label: c.nome + " - " + c.telefone, value: c.id })));
+    $(document).ready(function () {
+        // Inicializa o autocomplete quando o modal for aberto/mostrado
+        $("#pedidoModal").on("shown.bs.modal", function () {
+            inicializarAutocomplete();
+        });
+
+        // Ou se você já está dentro do modal carregado, inicialize diretamente
+        inicializarAutocomplete();
+
+        function inicializarAutocomplete() {
+            // Verificar se o elemento existe dentro do modal
+            if ($("#buscarCliente").length === 0) {
+                console.error("Campo #buscarCliente não encontrado");
+                return;
+            }
+
+            console.log("Inicializando autocomplete no campo:", $("#buscarCliente").attr("id"));
+
+            // Configuração especial para modal
+            $("#buscarCliente").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/Pedido/BuscarClienteNomeTel",
+                        data: { termo: request.term },
+                        dataType: "json",
+                        success: function (data) {
+                            console.log("Dados recebidos:", data);
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.nome + " - " + item.telefonePrincipal,
+                                    value: item.nome,
+                                    id: item.id
+                                };
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Erro na requisição:", error);
+                            response([]);
+                        }
+                    });
+                },
+                minLength: 2,
+                delay: 300,
+                // Configurações específicas para modal
+                appendTo: "#pedidoModal", // Anexa o menu ao modal
+                position: {
+                    my: "left top",
+                    at: "left bottom",
+                    collision: "none",
+                    of: "#buscarCliente"
+                },
+                open: function (event, ui) {
+                    // Garante que o menu fique visível
+                    $(".ui-autocomplete").css("z-index", $("#pedidoModal").css("z-index") + 1);
+                },
+                select: function (event, ui) {
+                    $("#ClienteId").val(ui.item.id);
+                    return true;
                 }
-            });
-        },
-        select: function(event, ui) {
-            console.log("Cliente selecionado:", ui.item.value);
+            }).data("ui-autocomplete")._renderMenu = function (ul, items) {
+                var self = this;
+                // Adiciona classe ao menu para estilos específicos
+                $(ul).addClass("autocomplete-modal-menu");
+                $.each(items, function (index, item) {
+                    self._renderItemData(ul, item);
+                });
+            };
+
+            console.log("Autocomplete inicializado com sucesso");
         }
     });
+</script>
 
-    document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("btnAnotarPedido").addEventListener("click", () => {
-            alert("deu bom!");
-        });
-    });
-</script> *@
+<style>
+    /* Estilos específicos para autocomplete em modal */
+    .autocomplete-modal-menu {
+        z-index: 9999999 !important; /* Z-index extremamente alto */
+        position: absolute !important;
+        background-color: white !important;
+        border: 2px solid #007bff !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+        max-height: 300px !important;
+        overflow-y: auto !important;
+        width: auto !important;
+        min-width: 300px !important;
+        font-size: 14px !important;
+    }
+
+        .autocomplete-modal-menu .ui-menu-item {
+            padding: 0 !important;
+            margin: 0 !important;
+            border-bottom: 1px solid #eee !important;
+        }
+
+        .autocomplete-modal-menu .ui-menu-item-wrapper {
+            padding: 8px 12px !important;
+            display: block !important;
+            cursor: pointer !important;
+        }
+
+            .autocomplete-modal-menu .ui-menu-item-wrapper:hover,
+            .autocomplete-modal-menu .ui-state-active {
+                background-color: #007bff !important;
+                color: white !important;
+                border: none !important;
+                margin: 0 !important;
+            }
+</style>

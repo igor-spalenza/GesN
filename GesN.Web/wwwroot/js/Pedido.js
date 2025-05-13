@@ -205,9 +205,58 @@ const pedidosManager = {
         });
     },
 
+    inicializarBuscaCliente: function (container) {
+        // Se não existir o container, tenta buscar pelo documento
+        if (!container) {
+            container = document;
+        }
+
+        const buscarClienteInput = $(container).find('#buscarCliente');
+
+        if (buscarClienteInput.length > 0) {
+            buscarClienteInput.autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/Pedido/BuscarClienteNomeTel",
+                        data: { termo: request.term },
+                        dataType: "json",
+                        success: function (data) {
+                            response(data.map(c => ({
+                                label: c.nome + " - " + c.telefonePrincipal,
+                                value: c.id
+                            })));
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Erro ao buscar clientes:", error);
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    // Preenche o campo ClienteId com o ID do cliente selecionado
+                    $(container).find('#ClienteId').val(ui.item.value);
+
+                    // Registra o cliente selecionado no console
+                    console.log("Cliente selecionado:", ui.item.value);
+
+                    // Previne o comportamento padrão que substituiria o campo
+                    // de busca com o valor (id) em vez do texto (label)
+                    event.preventDefault();
+
+                    // Mantém o texto do cliente no campo de busca
+                    $(this).val(ui.item.label);
+
+                    return false;
+                }
+            }).autocomplete("instance")._renderItem = function (ul, item) {
+                return $("<li>")
+                    .append("<div>" + item.label + "</div>")
+                    .appendTo(ul);
+            };
+        }
+    },
     
-    // Cria uma nova aba para criar um pedido
-    novoPedido: function() {
+    /*novoPedido: function() {
         this.contador++;
         this.qtdAbasAbertas++;
         const tabId = `tab-novo-pedido-${this.contador}`;
@@ -231,7 +280,7 @@ const pedidosManager = {
         
         // Ativa a nova aba
         $(`#${tabId}`).tab('show');
-    },
+    },*/
 
     salvarNovoModal: function () {
         // Obtém o formulário dentro do modal
@@ -315,8 +364,7 @@ const pedidosManager = {
         $(`#${tabId}`).tab('show');
     },
     
-    // Cria uma nova aba para visualizar os detalhes de um pedido
-    visualizarPedido: function(id) {
+    /*visualizarPedido: function(id) {
         this.contador++;
         this.qtdAbasAbertas++;
         const tabId = `tab-pedido-${id}`;
@@ -338,7 +386,7 @@ const pedidosManager = {
         });
         
         $(`#${tabId}`).tab('show');
-    },
+    },*/
     
     adicionarAba: function(tabId, contentId, titulo) {
         const novaAba = `
