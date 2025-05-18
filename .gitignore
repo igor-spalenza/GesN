@@ -69,6 +69,10 @@ ScaffoldingReadMe.txt
 # StyleCop
 StyleCopReport.xml
 
+# Database files
+*.db
+*.db-journal
+
 # Files built by Visual Studio
 *_i.c
 *_p.c
@@ -361,3 +365,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/GesN.Web/Data/Database/gesn.db

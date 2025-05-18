@@ -192,9 +192,14 @@ const pedidosManager = {
         });
     },
     novoPedidoModal: function () {
+        $('#pedidoModal .modal-body').html('<div class="text-center"><div class="spinner-border" role="status"></div></div>');
+        $('#pedidoModal').modal('show');
+
         $.get('/Pedido/NovoPedido', function (data) {
             $('#pedidoModal .modal-body').html(data);
-            $('#pedidoModal').modal('show');
+            pedidosManager.inicializarAutocomplete($('#pedidoModal'));
+        }).fail(function () {
+            $('#pedidoModal .modal-body').html('<div class="alert alert-danger">Erro ao carregar formulário</div>');
         });
     },
 
@@ -205,94 +210,57 @@ const pedidosManager = {
         });
     },
 
-    inicializarBuscaCliente: function (container) {
-        // Se não existir o container, tenta buscar pelo documento
-        if (!container) {
-            container = document;
+    inicializarAutocomplete: function (container) {
+        const buscarClienteField = container.find('#buscarCliente');
+
+        if (buscarClienteField.length === 0) {
+            console.error('Campo #buscarCliente não encontrado');
+            return;
         }
 
-        const buscarClienteInput = $(container).find('#buscarCliente');
-
-        if (buscarClienteInput.length > 0) {
-            buscarClienteInput.autocomplete({
-                source: function (request, response) {
-                    $.ajax({
-                        url: "/Pedido/BuscarClienteNomeTel",
-                        data: { termo: request.term },
-                        dataType: "json",
-                        success: function (data) {
-                            response(data.map(c => ({
-                                label: c.nome + " - " + c.telefonePrincipal,
-                                value: c.id
-                            })));
-                        },
-                        error: function (xhr, status, error) {
-                            console.error("Erro ao buscar clientes:", error);
-                        }
-                    });
-                },
-                minLength: 2,
-                select: function (event, ui) {
-                    // Preenche o campo ClienteId com o ID do cliente selecionado
-                    $(container).find('#ClienteId').val(ui.item.value);
-
-                    // Registra o cliente selecionado no console
-                    console.log("Cliente selecionado:", ui.item.value);
-
-                    // Previne o comportamento padrão que substituiria o campo
-                    // de busca com o valor (id) em vez do texto (label)
-                    event.preventDefault();
-
-                    // Mantém o texto do cliente no campo de busca
-                    $(this).val(ui.item.label);
-
-                    return false;
-                }
-            }).autocomplete("instance")._renderItem = function (ul, item) {
-                return $("<li>")
-                    .append("<div>" + item.label + "</div>")
-                    .appendTo(ul);
-            };
+        if (buscarClienteField.data('ui-autocomplete')) {
+            buscarClienteField.autocomplete('destroy');
         }
-    },
-    
-    /*novoPedido: function() {
-        this.contador++;
-        this.qtdAbasAbertas++;
-        const tabId = `tab-novo-pedido-${this.contador}`;
-        const contentId = `conteudo-novo-pedido-${this.contador}`;
-        
-        this.adicionarAba(tabId, contentId, 'Novo Pedido');
-        
-        $(`#${contentId}`).html('<div class="d-flex justify-content-center my-5"><div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div></div>');
-        
-        $.ajax({
-            url: '/Pedido/NovoPedido',
-            type: 'GET',
-            success: function(data) {
-                $(`#${contentId}`).html(data);
-                pedidosManager.inicializarFormulario($(`#${contentId} form`), 'SalvarNovo');
+
+        buscarClienteField.autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '/Pedido/BuscarClienteNomeTel',
+                    data: { termo: request.term },
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log('Dados recebidos:', data);
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.nome + ' - ' + item.telefonePrincipal,
+                                value: item.nome,
+                                id: item.id
+                            };
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Erro na requisição:', error);
+                        response([]);
+                    }
+                });
             },
-            error: function() {
-                $(`#${contentId}`).html('<div class="alert alert-danger">Erro ao carregar o formulário de pedido.</div>');
+            minLength: 2,
+            delay: 300,
+            appendTo: container, // Anexa ao container fornecido (modal)
+            select: function (event, ui) {
+                container.find('#ClienteId').val(ui.item.id);
+                $(this).autocomplete('close');
+                return true;
             }
         });
-        
-        // Ativa a nova aba
-        $(`#${tabId}`).tab('show');
-    },*/
+    },
 
     salvarNovoModal: function () {
-        // Obtém o formulário dentro do modal
         const form = $('#pedidoModal .modal-body form');
-
-        // Verifica se o formulário existe
         if (form.length === 0) {
             console.error('Formulário não encontrado no modal');
             return;
         }
-
-        // Cria os dados do formulário
         const formData = new FormData(form[0]);
 
         // Desabilita o botão de submit para evitar múltiplos envios
@@ -300,7 +268,6 @@ const pedidosManager = {
         const buttonText = submitButton.text();
         submitButton.prop('disabled', true).text('Salvando...');
 
-        // Faz a requisição AJAX para SalvarNovo
         return $.ajax({
             url: '/Pedido/SalvarNovo',
             type: 'POST',
@@ -309,7 +276,6 @@ const pedidosManager = {
             contentType: false,
             success: function (response) {
                 if (response.success) {
-                    //alert(response.message || 'Pedido criado com sucesso!');
                     $('#pedidoModal').modal('hide');
 
                     if (response.id) {
@@ -338,7 +304,6 @@ const pedidosManager = {
         });
     },
 
-    // Cria uma nova aba para editar um pedido
     editarPedido: function(id) {
         this.contador++;
         this.qtdAbasAbertas++;
@@ -363,31 +328,12 @@ const pedidosManager = {
         
         $(`#${tabId}`).tab('show');
     },
-    
-    /*visualizarPedido: function(id) {
-        this.contador++;
-        this.qtdAbasAbertas++;
-        const tabId = `tab-pedido-${id}`;
-        const contentId = `conteudo-pedido-${id}`;
-        
-        this.adicionarAba(tabId, contentId, `Pedido #${id}`);
-        
-        $(`#${contentId}`).html('<div class="d-flex justify-content-center my-5"><div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div></div>');
-        
-        $.ajax({
-            url: `/Pedido/DetailsPartialView/${id}`,
-            type: 'GET',
-            success: function(data) {
-                $(`#${contentId}`).html(data);
-            },
-            error: function() {
-                $(`#${contentId}`).html('<div class="alert alert-danger">Erro ao carregar os detalhes do pedido.</div>');
-            }
-        });
-        
-        $(`#${tabId}`).tab('show');
-    },*/
-    
+
+    salvarPedido: function () {
+        var i;
+        console.log(i);
+    },
+
     adicionarAba: function(tabId, contentId, titulo) {
         const novaAba = `
             <li class="nav-item" role="presentation">
@@ -504,6 +450,14 @@ const pedidosManager = {
 
 // Inicializa o gerenciador de pedidos quando o documento estiver pronto
 $(document).ready(function() {
-    // Carrega a lista de pedidos na aba principal
     pedidosManager.carregarListaPedidos();
+
+    $('#pedidoModal').on('shown.bs.modal', function () {
+        pedidosManager.inicializarAutocomplete($(this));
+    });
+
+    $('#pedidoModal').on('hidden.bs.modal', function () {
+        $(this).find('.modal-body').html('');
+    });
+
 });

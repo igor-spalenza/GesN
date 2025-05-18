@@ -102,3 +102,73 @@ body {
     margin-top: 1px;
     margin-bottom: 1px;
 }
+.ui-autocomplete {
+    position: absolute !important;
+    display: block !important;
+    background-color: white !important;
+    border: 1px solid #ccc !important;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 9999 !important;
+}
+
+.ui-menu {
+    list-style: none;
+    padding: 5px;
+    margin: 0;
+    display: block;
+}
+
+.ui-menu-item {
+    margin: 0;
+    padding: 3px 0;
+    cursor: pointer;
+}
+
+.ui-menu-item div {
+    padding: 5px 10px;
+    border-radius: 3px;
+}
+
+.ui-state-active,
+.ui-widget-content .ui-state-active {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+/* Estilos específicos para autocomplete em modal */
+
+.autocomplete-modal-menu {
+    z-index: 9999999 !important;
+    position: absolute !important;
+    background-color: white !important;
+    border: 2px solid #007bff !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    width: auto !important;
+    min-width: 300px !important;
+    font-size: 14px !important;
+}
+
+.autocomplete-modal-menu .ui-menu-item {
+    padding: 0 !important;
+    margin: 0 !important;
+    border-bottom: 1px solid #eee !important;
+}
+
+.autocomplete-modal-menu .ui-menu-item-wrapper {
+    padding: 8px 12px !important;
+    display: block !important;
+    cursor: pointer !important;
+}
+
+.autocomplete-modal-menu .ui-menu-item-wrapper:hover,
+.autocomplete-modal-menu .ui-state-active {
+    background-color: #007bff !important;
+    color: white !important;
+    border: none !important;
+    margin: 0 !important;
+}
+/* Estilo para o autocomplete */
+
