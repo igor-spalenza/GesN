@@ -1,9 +1,9 @@
 ﻿@* @page *@
 @using GesN.Web.PageModels
-@* @model PedidosIndexModel *@
 @model IEnumerable<Pedido>
 @{
     ViewData["Title"] = "Vendas";
+    ViewData["App"] = "Ferramenta de Vendas";
 }
 
 <div class="venda-main">
@@ -27,7 +27,6 @@
                     @* Principal *@
                 </a>
             </li>
-            <!-- Novas abas serão inseridas aqui dinamicamente -->
         </ul>
 
         <div class="modal fade" id="pedidoModal" tabindex="-1">
@@ -37,9 +36,7 @@
                         <h5 class="modal-title">Pedido</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
-                        <!-- O conteúdo do formulário será carregado aqui via AJAX -->
-                    </div>
+                    <div class="modal-body"> </div>
                 </div>
             </div>
         </div>
@@ -48,7 +45,6 @@
         <div class="tab-content" id="pedidoTabsContent">
             <div class="tab-pane fade active show" id="conteudo-lista-pedidos" role="tabpanel">
                 <div id="lista-pedidos-container">
-                    <!-- A lista de pedidos será carregada aqui via AJAX -->
                     <div class="d-flex justify-content-center my-5">
                         <div class="spinner-border" role="status">
                             <span class="visually-hidden">Carregando...</span>
@@ -56,7 +52,6 @@
                     </div>
                 </div>
             </div>
-            <!-- O conteúdo das novas abas será inserido aqui dinamicamente -->
         </div>
     </div>
 </div>

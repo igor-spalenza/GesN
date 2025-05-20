@@ -16,7 +16,11 @@ namespace GesN.Web.Data.Repositories
 
         public async Task<Pedido> GetByIdAsync(int id)
         {
-            var sql = "SELECT * FROM Pedido WHERE PedidoId = @Id";
+            var sql = @"
+                SELECT p.*, c.Nome AS NomeCliente
+                FROM Pedido p
+                JOIN Cliente c ON p.ClienteId = c.ClienteId 
+                WHERE p.PedidoId = @Id";
             return await _dbConnection.QueryFirstOrDefaultAsync<Pedido>(sql, new { Id = id });
         }
 
@@ -39,9 +43,11 @@ namespace GesN.Web.Data.Repositories
         {
             var sql = @"
                 UPDATE Pedido 
-                SET PedidoId = @PedidoId, 
-                    Status = @Status 
-                WHERE Id = @Id";
+                SET ClienteId = @ClienteId, 
+                    ColaboradorId = @ColaboradorId,
+                    DataPedido = @DataPedido,
+                    DataModificacao = @DataModificacao
+                WHERE PedidoId = @PedidoId";
             await _dbConnection.ExecuteAsync(sql, pedido);
         }
 

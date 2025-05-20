@@ -7,8 +7,8 @@ namespace GesN.Web.Interfaces.Services
     {
         Task<Pedido> GetByIdAsync(int id);
         Task<IEnumerable<Pedido>> GetAllAsync();
-        Task<int> AddAsync(Pedido clienteDto);
-        Task UpdateAsync(Pedido clienteDto);
+        Task<int> AddAsync(Pedido pedidoDto);
+        Task UpdateAsync(Pedido pedidoDto);
         Task DeleteAsync(int id);
     }
 }

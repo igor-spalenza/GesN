@@ -1,6 +1,4 @@
-﻿let abaContador = 1;
-let qtdAbasAbertas = 0;
-
+﻿
 /*document.getElementById('btnAbrirPedido').addEventListener('click', () => {
     abaContador++;
     qtdAbasAbertas++;
@@ -45,7 +43,7 @@ let qtdAbasAbertas = 0;
     const tabTrigger = new bootstrap.Tab(document.getElementById(`${pedidoId}-tab`));
     tabTrigger.show();
 });*/
-
+/*
 document.getElementById('btnHomeVendas').addEventListener('click', () => {
     // 1. Remover as classes "active" e "show" de todas as abas ativas
     document.querySelectorAll('.tab-pane.active, .nav-link.active').forEach(element => {
@@ -165,7 +163,7 @@ function CriarPedido(IdPedido, editing) {
     // Ativar a nova aba automaticamente
     const tabTrigger = new bootstrap.Tab(document.getElementById(`${pedidoId}-tab`));
     tabTrigger.show();
-}
+}*/
 
 
 
@@ -176,7 +174,6 @@ const pedidosManager = {
     contador: 0,
     qtdAbasAbertas: 0,
     
-    // Carrega a lista de pedidos na primeira aba
     carregarListaPedidos: function() {
         $('#lista-pedidos-container').html('<div class="d-flex justify-content-center my-5"><div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div></div>');
         
@@ -277,6 +274,7 @@ const pedidosManager = {
             success: function (response) {
                 if (response.success) {
                     $('#pedidoModal').modal('hide');
+                    toastr.success('Pedido atualizado com sucesso!');
 
                     if (response.id) {
                         // Chama o método editarPedido, se estiver usando o gerenciador de pedidos
@@ -296,10 +294,6 @@ const pedidosManager = {
             error: function (xhr, status, error) {
                 console.error('Erro ao salvar pedido:', error);
                 alert('Ocorreu um erro ao salvar o pedido. Por favor, tente novamente.');
-            },
-            complete: function () {
-                // Reativa o botão de submit
-                submitButton.prop('disabled', false).text(buttonText);
             }
         });
     },
@@ -319,26 +313,55 @@ const pedidosManager = {
             type: 'GET',
             success: function(data) {
                 $(`#${contentId}`).html(data);
-                pedidosManager.inicializarFormulario($(`#${contentId} form`), 'SalvarEdicao');
             },
             error: function() {
                 $(`#${contentId}`).html('<div class="alert alert-danger">Erro ao carregar o pedido.</div>');
+            },
+            complete: function () {
+                var nome = $(`#${contentId}`).find('input[name="NomeCliente"]').val();
+                $(`#${tabId} .nome-pedido`).text(nome + ` #${id}`);
             }
         });
-        
+
         $(`#${tabId}`).tab('show');
     },
 
-    salvarPedido: function () {
-        var i;
-        console.log(i);
+    salvarEdicao: function (button) {
+        var form = $(button).closest('form');
+        var formData = form.serialize();
+        var pedidoId = form.find('input[name="PedidoId"]').val();
+        //var abaContainer = form.closest('.tab-pane');
+
+        $(button).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Salvando...');
+
+        $.ajax({
+            url: `/Pedido/SalvarEdicao/${pedidoId}`,
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    form.find('input[name="ClienteId"]').val(response.pedido.clienteId);
+                    form.find('input[name="ColaboradorId"]').val(response.pedido.colaboradorId);
+                    form.find('input[name="DataPedido"]').val(response.pedido.dataPedido);
+                    form.find('input[name="DataCadastro"]').val(response.pedido.dataCadastro);
+                    form.find('input[name="DataModificacao"]').val(response.pedido.dataModificacao);
+                }
+                //abaContainer.empty().html(partialHtml);
+                toastr.success('Pedido atualizado com sucesso!');
+                $(button).prop('disabled', false).html('Salvar Alterações');
+            },
+            error: function () {
+                $(button).prop('disabled', false).html('Salvar Alterações');
+                toastr.error('Erro ao salvar o pedido.');
+            }
+        });
     },
 
     adicionarAba: function(tabId, contentId, titulo) {
         const novaAba = `
             <li class="nav-item" role="presentation">
                 <a class="nav-link" id="${tabId}" data-bs-toggle="tab" href="#${contentId}" role="tab">
-                    ${titulo}
+                    <span class="nome-pedido">${titulo}</span>
                     <button type="button" class="btn-close ms-2" onclick="pedidosManager.fecharAba('${tabId}', '${contentId}')"></button>
                 </a>
             </li>
@@ -357,7 +380,6 @@ const pedidosManager = {
         $('#pedidoTabsContent').append(novoConteudo);
     },
     
-    // Fecha uma aba
     fecharAba: function(tabId, contentId) {
         // Verifica se a aba a ser fechada está ativa
         const estaAtiva = $(`#${tabId}`).hasClass('active');
@@ -374,56 +396,47 @@ const pedidosManager = {
         }
     },
     
-    // Inicializa um formulário para usar AJAX
-    inicializarFormulario: function(form, actionName) {
-        form.submit(function(e) {
-            e.preventDefault();
+    inicializarFormulario: function(form) {
+        //form.submit(function(e) {
+        //    e.preventDefault();
             
-            const formData = new FormData(form[0]);
-            const pedidoId = formData.get('PedidoId');
-            let url = `/Pedido/${actionName}`;
-            
-            if (actionName === 'SalvarEdicao' && pedidoId) {
-                url += `/${pedidoId}`;
-            }
-            
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if (response.success) {
-                        // Exibe mensagem de sucesso
-                        alert(response.message);
+        //    const formData = new FormData(form[0]);
+        //    const pedidoId = formData.get('PedidoId');
+
+        //    $.ajax({
+        //        url: `/Pedido/${pedidoId}`,
+        //        type: 'POST',
+        //        data: formData,
+        //        processData: false,
+        //        contentType: false,
+        //        success: function(response) {
+        //            if (response.success) {
+        //                alert(response.message);
                         
-                        // Recarrega a lista de pedidos
-                        pedidosManager.carregarListaPedidos();
+        //                pedidosManager.carregarListaPedidos();
                         
-                        // Se for uma criação bem-sucedida e tiver um ID, abre a edição
-                        if (actionName === 'SalvarNovo' && response.id) {
-                            // Fecha a aba atual (último contador)
-                            const tabIdAtual = `tab-novo-pedido-${pedidosManager.contador}`;
-                            const contentIdAtual = `conteudo-novo-pedido-${pedidosManager.contador}`;
-                            pedidosManager.fecharAba(tabIdAtual, contentIdAtual);
+        //                // Se for uma criação bem-sucedida e tiver um ID, abre a edição
+        //                if (actionName === 'SalvarNovo' && response.id) {
+        //                    // Fecha a aba atual (último contador)
+        //                    const tabIdAtual = `tab-novo-pedido-${pedidosManager.contador}`;
+        //                    const contentIdAtual = `conteudo-novo-pedido-${pedidosManager.contador}`;
+        //                    pedidosManager.fecharAba(tabIdAtual, contentIdAtual);
                             
-                            // Abre a aba de edição
-                            pedidosManager.editarPedido(response.id);
-                        }
-                    } else {
-                        // Exibe mensagem de erro
-                        alert('Erro: ' + response.message);
-                    }
-                },
-                error: function() {
-                    alert('Ocorreu um erro ao processar a requisição.');
-                }
-            });
-        });
+        //                    // Abre a aba de edição
+        //                    pedidosManager.editarPedido(response.id);
+        //                }
+        //            } else {
+        //                // Exibe mensagem de erro
+        //                alert('Erro: ' + response.message);
+        //            }
+        //        },
+        //        error: function() {
+        //            alert('Ocorreu um erro ao processar a requisição.');
+        //        }
+        //    });
+        //});
     },
     
-    // Exclui um pedido
     excluirPedido: function(id) {
         if (confirm('Tem certeza que deseja excluir este pedido?')) {
             $.ajax({
@@ -458,6 +471,11 @@ $(document).ready(function() {
 
     $('#pedidoModal').on('hidden.bs.modal', function () {
         $(this).find('.modal-body').html('');
+    });
+
+    $(document).on('submit', '.form-editar-pedido', function (e) {
+        e.preventDefault();
+        $(this).find('button[onclick^="pedidosManager.salvarEdicao"]').click();
     });
 
 });

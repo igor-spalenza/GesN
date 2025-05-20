@@ -195,8 +195,6 @@ namespace GesN.Web.Controllers
             if (pedido == null)
                 return NotFound();
 
-            var clientes = await _clienteService.GetAllAsync();
-            ViewBag.Clientes = clientes;
             return PartialView("_Edit", pedido);
         }
 
@@ -210,15 +208,27 @@ namespace GesN.Web.Controllers
                 
             if (!ModelState.IsValid)
             {
-                var clientes = await _clienteService.GetAllAsync();
-                ViewBag.Clientes = clientes;
                 return PartialView("_Edit", pedido);
             }
 
             try
             {
                 await _pedidoService.UpdateAsync(pedido);
-                return Json(new { success = true, message = "Pedido atualizado com sucesso!" });
+                var pedidoAtualizado = await _pedidoService.GetByIdAsync(id);
+                return Json(new
+                {
+                    success = true,
+                    message = "Pedido atualizado com sucesso",
+                    pedido = new
+                    {
+                        pedidoId = pedidoAtualizado.PedidoId,
+                        clienteId = pedidoAtualizado.ClienteId,
+                        colaboradorId = pedidoAtualizado.ColaboradorId,
+                        dataPedido = pedidoAtualizado.DataPedido,
+                        dataCadastro = pedidoAtualizado.DataCadastro,
+                        dataModificacao = pedidoAtualizado.DataModificacao
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -233,11 +243,10 @@ namespace GesN.Web.Controllers
             ModelState.Remove("PedidoId");
             ModelState.Remove("DataCadastro");
             ModelState.Remove("DataModificacao");
-            
+            ModelState.Remove("NomeCliente");
+
             if (!ModelState.IsValid)
             {
-                var clientes = await _clienteService.GetAllAsync();
-                ViewBag.Clientes = clientes;
                 return PartialView("_Create", pedido);
             }
 

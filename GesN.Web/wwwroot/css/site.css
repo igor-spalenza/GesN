@@ -98,6 +98,10 @@ body {
     z-index: 1000;
 }
 
+.toast-top-right {
+    top: 65px !important;
+}
+
 #barra-btns {
     margin-top: 1px;
     margin-bottom: 1px;
