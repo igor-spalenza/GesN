@@ -4,8 +4,10 @@ using GesN.Web.Areas.Infrastructure;
 using GesN.Web.Data;
 using GesN.Web.Data.Migrations;
 using GesN.Web.Data.Repositories;
+using GesN.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,31 +25,24 @@ SQLitePCL.Batteries.Init();
 string dbPath = Path.Combine(AppContext.BaseDirectory, "/GesN.Web/Data/Database/gesn.db");
 
 
-builder.Services.AddIdentityCore<ApplicationUser>(options =>
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = true;
+    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedEmail = false;
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 6;
 })
-.AddRoles<ApplicationRole>()
-.AddSignInManager()
-.AddDefaultTokenProviders();
+.AddDefaultTokenProviders()
+.AddUserStore<DapperUserStore>()
+.AddRoleStore<DapperRoleStore>()
+.AddDefaultUI();
 
-builder.Services.AddScoped<IUserStore<ApplicationUser>, DapperUserStore>();
-builder.Services.AddScoped<IRoleStore<ApplicationRole>, DapperRoleStore>();
-builder.Services.AddScoped<SignInManager<ApplicationUser>>();
-builder.Services.AddScoped<UserManager<ApplicationUser>>();
-builder.Services.AddScoped<RoleManager<ApplicationRole>>();
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = IdentityConstants.ApplicationScheme;
-    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-})
-.AddIdentityCookies();
+// Add services directly instead of separately registering them
+builder.Services.AddTransient<IUserClaimsPrincipalFactory<ApplicationUser>, UserClaimsPrincipalFactory<ApplicationUser, ApplicationRole>>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -80,7 +75,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    //app.UseMigrationsEndPoint();  Remoção -> EF Core
+    //app.UseMigrationsEndPoint();  RemoÃ§Ã£o -> EF Core
 }
 else
 {
@@ -97,12 +92,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
-});
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
 

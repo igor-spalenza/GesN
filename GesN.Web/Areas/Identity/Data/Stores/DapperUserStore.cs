@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using GesN.Web.Areas.Identity.Data.Models;
+using GesN.Web.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using System;
@@ -16,26 +17,26 @@ namespace GesN.Web.Areas.Identity.Data.Stores
                                    IUserEmailStore<ApplicationUser>,
                                    IUserPasswordStore<ApplicationUser>,
                                    IUserSecurityStampStore<ApplicationUser>,
-                                   IUserRoleStore<ApplicationUser>
+                                   IUserRoleStore<ApplicationUser>,
+                                   IUserClaimStore<ApplicationUser>,
+                                   IUserLoginStore<ApplicationUser>,
+                                   IUserAuthenticationTokenStore<ApplicationUser>
                                    /*IUserTwoFactorStore<ApplicationUser>,
                                    IUserLockoutStore<ApplicationUser>,
                                    IUserPhoneNumberStore<ApplicationUser>
         UserStoreBase<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>, IdentityUserRole<string>, IdentityUserLogin<string>, IdentityUserToken<string>, IdentityRoleClaim<string>>,*/
     {
-        private readonly string _connectionString;
+        private readonly IDbConnection _connection;
 
-        public DapperUserStore(IConfiguration configuration)
+        public DapperUserStore(ProjectDataContext context)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connection = context.Connection;
         }
 
         #region IUserStore Implementation
         public async Task<IdentityResult> CreateAsync(ApplicationUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
 
             user.Id = user.Id ?? Guid.NewGuid().ToString();
             user.ConcurrencyStamp = Guid.NewGuid().ToString();
@@ -56,7 +57,7 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
             try
             {
-                await connection.ExecuteAsync(query, user);
+                await _connection.ExecuteAsync(query, user);
                 return IdentityResult.Success;
             }
             catch (Exception ex)
@@ -67,12 +68,9 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
         public async Task<IdentityResult> DeleteAsync(ApplicationUser user, CancellationToken cancellationToken)
         {
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
             try
             {
-                await connection.ExecuteAsync("DELETE FROM AspNetUsers WHERE Id = @Id", new { user.Id });
+                await _connection.ExecuteAsync("DELETE FROM AspNetUsers WHERE Id = @Id", new { user.Id });
                 return IdentityResult.Success;
             }
             catch (Exception ex)
@@ -83,10 +81,7 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
         public async Task<ApplicationUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
-            return await connection.QuerySingleOrDefaultAsync<ApplicationUser>(
+            return await _connection.QuerySingleOrDefaultAsync<ApplicationUser>(
                 "SELECT * FROM AspNetUsers WHERE Id = @Id",
                 new { Id = userId }
             );
@@ -94,10 +89,7 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
         public async Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
-            return await connection.QuerySingleOrDefaultAsync<ApplicationUser>(
+            return await _connection.QuerySingleOrDefaultAsync<ApplicationUser>(
                 "SELECT * FROM AspNetUsers WHERE NormalizedUserName = @NormalizedUserName",
                 new { NormalizedUserName = normalizedUserName }
             );
@@ -132,30 +124,27 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
         public async Task<IdentityResult> UpdateAsync(ApplicationUser user, CancellationToken cancellationToken)
         {
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
             var query = @"
-            UPDATE AspNetUsers SET 
-                UserName = @UserName,
-                NormalizedUserName = @NormalizedUserName,
-                Email = @Email,
-                NormalizedEmail = @NormalizedEmail,
-                EmailConfirmed = @EmailConfirmed,
-                PasswordHash = @PasswordHash,
-                SecurityStamp = @SecurityStamp,
-                ConcurrencyStamp = @ConcurrencyStamp,
-                PhoneNumber = @PhoneNumber,
-                PhoneNumberConfirmed = @PhoneNumberConfirmed,
-                TwoFactorEnabled = @TwoFactorEnabled,
-                LockoutEnd = @LockoutEnd,
-                LockoutEnabled = @LockoutEnabled,
-                AccessFailedCount = @AccessFailedCount
-            WHERE Id = @Id";
+                UPDATE AspNetUsers SET 
+                    UserName = @UserName,
+                    NormalizedUserName = @NormalizedUserName,
+                    Email = @Email,
+                    NormalizedEmail = @NormalizedEmail,
+                    EmailConfirmed = @EmailConfirmed,
+                    PasswordHash = @PasswordHash,
+                    SecurityStamp = @SecurityStamp,
+                    ConcurrencyStamp = @ConcurrencyStamp,
+                    PhoneNumber = @PhoneNumber,
+                    PhoneNumberConfirmed = @PhoneNumberConfirmed,
+                    TwoFactorEnabled = @TwoFactorEnabled,
+                    LockoutEnd = @LockoutEnd,
+                    LockoutEnabled = @LockoutEnabled,
+                    AccessFailedCount = @AccessFailedCount
+                WHERE Id = @Id";
 
             try
             {
-                await connection.ExecuteAsync(query, user);
+                await _connection.ExecuteAsync(query, user);
                 return IdentityResult.Success;
             }
             catch (Exception ex)
@@ -168,10 +157,7 @@ namespace GesN.Web.Areas.Identity.Data.Stores
         #region IUserEmailStore Implementation
         public async Task<ApplicationUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
         {
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
-            return await connection.QuerySingleOrDefaultAsync<ApplicationUser>(
+            return await _connection.QuerySingleOrDefaultAsync<ApplicationUser>(
                 "SELECT * FROM AspNetUsers WHERE NormalizedEmail = @NormalizedEmail",
                 new { NormalizedEmail = normalizedEmail }
             );
@@ -245,11 +231,8 @@ namespace GesN.Web.Areas.Identity.Data.Stores
         #region IUserRoleStore Implementation
         public async Task AddToRoleAsync(ApplicationUser user, string roleName, CancellationToken cancellationToken)
         {
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
             var normalizedRoleName = roleName.ToUpper();
-            var roleId = await connection.QuerySingleOrDefaultAsync<string>(
+            var roleId = await _connection.QuerySingleOrDefaultAsync<string>(
                 "SELECT Id FROM AspNetRoles WHERE NormalizedName = @NormalizedName",
                 new { NormalizedName = normalizedRoleName }
             );
@@ -257,7 +240,7 @@ namespace GesN.Web.Areas.Identity.Data.Stores
             if (roleId == null)
                 throw new InvalidOperationException($"Role '{roleName}' not found.");
 
-            await connection.ExecuteAsync(
+            await _connection.ExecuteAsync(
                 "INSERT INTO AspNetUserRoles (UserId, RoleId) VALUES (@UserId, @RoleId)",
                 new { UserId = user.Id, RoleId = roleId }
             );
@@ -265,11 +248,8 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
         public async Task RemoveFromRoleAsync(ApplicationUser user, string roleName, CancellationToken cancellationToken)
         {
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
             var normalizedRoleName = roleName.ToUpper();
-            await connection.ExecuteAsync(@"
+            await _connection.ExecuteAsync(@"
             DELETE FROM AspNetUserRoles 
             WHERE UserId = @UserId AND RoleId IN 
                 (SELECT Id FROM AspNetRoles WHERE NormalizedName = @NormalizedName)",
@@ -279,10 +259,7 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
         public async Task<IList<string>> GetRolesAsync(ApplicationUser user, CancellationToken cancellationToken)
         {
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
-            var roles = await connection.QueryAsync<string>(@"
+            var roles = await _connection.QueryAsync<string>(@"
             SELECT r.Name 
             FROM AspNetRoles r 
             INNER JOIN AspNetUserRoles ur ON ur.RoleId = r.Id 
@@ -295,11 +272,8 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
         public async Task<bool> IsInRoleAsync(ApplicationUser user, string roleName, CancellationToken cancellationToken)
         {
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
             var normalizedRoleName = roleName.ToUpper();
-            var roleExists = await connection.QuerySingleOrDefaultAsync<bool>(@"
+            var roleExists = await _connection.QuerySingleOrDefaultAsync<bool>(@"
             SELECT COUNT(1) 
             FROM AspNetUserRoles ur 
             INNER JOIN AspNetRoles r ON r.Id = ur.RoleId 
@@ -312,11 +286,8 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
         public async Task<IList<ApplicationUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
         {
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
             var normalizedRoleName = roleName.ToUpper();
-            var users = await connection.QueryAsync<ApplicationUser>(@"
+            var users = await _connection.QueryAsync<ApplicationUser>(@"
             SELECT u.* 
             FROM AspNetUsers u 
             INNER JOIN AspNetUserRoles ur ON ur.UserId = u.Id 
@@ -334,6 +305,198 @@ namespace GesN.Web.Areas.Identity.Data.Stores
             // Nothing to dispose
         }
 
+        #region IUserClaimStore Implementation
+        public async Task<IList<Claim>> GetClaimsAsync(ApplicationUser user, CancellationToken cancellationToken)
+        {
+            var userClaims = await _connection.QueryAsync<IdentityUserClaim<string>>(
+                "SELECT * FROM AspNetUserClaims WHERE UserId = @UserId",
+                new { UserId = user.Id }
+            );
+
+            return userClaims.Select(c => new Claim(c.ClaimType, c.ClaimValue)).ToList();
+        }
+
+        public async Task AddClaimsAsync(ApplicationUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
+        {
+            foreach (var claim in claims)
+            {
+                await _connection.ExecuteAsync(
+                    @"INSERT INTO AspNetUserClaims (UserId, ClaimType, ClaimValue)
+                    VALUES (@UserId, @ClaimType, @ClaimValue)",
+                    new
+                    {
+                        UserId = user.Id,
+                        ClaimType = claim.Type,
+                        ClaimValue = claim.Value
+                    });
+            }
+        }
+
+        public async Task ReplaceClaimAsync(ApplicationUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
+        {
+            await _connection.ExecuteAsync(
+                @"UPDATE AspNetUserClaims
+                SET ClaimType = @NewClaimType, ClaimValue = @NewClaimValue
+                WHERE UserId = @UserId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue",
+                new
+                {
+                    UserId = user.Id,
+                    ClaimType = claim.Type,
+                    ClaimValue = claim.Value,
+                    NewClaimType = newClaim.Type,
+                    NewClaimValue = newClaim.Value
+                });
+        }
+
+        public async Task RemoveClaimsAsync(ApplicationUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
+        {
+            foreach (var claim in claims)
+            {
+                await _connection.ExecuteAsync(
+                    @"DELETE FROM AspNetUserClaims
+                    WHERE UserId = @UserId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue",
+                    new
+                    {
+                        UserId = user.Id,
+                        ClaimType = claim.Type,
+                        ClaimValue = claim.Value
+                    });
+            }
+        }
+
+        public async Task<IList<ApplicationUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
+        {
+            var userIds = await _connection.QueryAsync<string>(
+                @"SELECT UserId FROM AspNetUserClaims
+                WHERE ClaimType = @ClaimType AND ClaimValue = @ClaimValue",
+                new { ClaimType = claim.Type, ClaimValue = claim.Value });
+
+            var users = new List<ApplicationUser>();
+            foreach (var userId in userIds)
+            {
+                var user = await FindByIdAsync(userId, cancellationToken);
+                if (user != null)
+                {
+                    users.Add(user);
+                }
+            }
+
+            return users;
+        }
+        #endregion
+
+        #region IUserLoginStore Implementation
+        public async Task AddLoginAsync(ApplicationUser user, UserLoginInfo login, CancellationToken cancellationToken)
+        {
+            await _connection.ExecuteAsync(
+                @"INSERT INTO AspNetUserLogins (LoginProvider, ProviderKey, ProviderDisplayName, UserId)
+                VALUES (@LoginProvider, @ProviderKey, @ProviderDisplayName, @UserId)",
+                new
+                {
+                    LoginProvider = login.LoginProvider,
+                    ProviderKey = login.ProviderKey,
+                    ProviderDisplayName = login.ProviderDisplayName,
+                    UserId = user.Id
+                });
+        }
+
+        public async Task RemoveLoginAsync(ApplicationUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
+        {
+            await _connection.ExecuteAsync(
+                @"DELETE FROM AspNetUserLogins
+                WHERE UserId = @UserId AND LoginProvider = @LoginProvider AND ProviderKey = @ProviderKey",
+                new
+                {
+                    UserId = user.Id,
+                    LoginProvider = loginProvider,
+                    ProviderKey = providerKey
+                });
+        }
+
+        public async Task<IList<UserLoginInfo>> GetLoginsAsync(ApplicationUser user, CancellationToken cancellationToken)
+        {
+            var logins = await _connection.QueryAsync<UserLoginInfo>(
+                @"SELECT LoginProvider, ProviderKey, ProviderDisplayName
+                FROM AspNetUserLogins WHERE UserId = @UserId",
+                new { UserId = user.Id });
+
+            return logins.ToList();
+        }
+
+        public async Task<ApplicationUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
+        {
+            
+            var userId = await _connection.QuerySingleOrDefaultAsync<string>(
+                @"SELECT UserId FROM AspNetUserLogins
+                WHERE LoginProvider = @LoginProvider AND ProviderKey = @ProviderKey",
+                new { LoginProvider = loginProvider, ProviderKey = providerKey });
+
+            if (userId == null)
+                return null;
+
+            return await FindByIdAsync(userId, cancellationToken);
+        }
+        #endregion
+
+        #region IUserTokenStore Implementation
+        public async Task SetTokenAsync(ApplicationUser user, string loginProvider, string name, string value, CancellationToken cancellationToken)
+        {
+            // Primeiro tenta atualizar o token se ele já existir
+            var updated = await _connection.ExecuteAsync(
+                @"UPDATE AspNetUserTokens
+            SET Value = @Value
+            WHERE UserId = @UserId AND LoginProvider = @LoginProvider AND Name = @Name",
+                new
+                {
+                    UserId = user.Id,
+                    LoginProvider = loginProvider,
+                    Name = name,
+                    Value = value
+                });
+            //await _connection.ExecuteAsync();
+
+            // Se não existe, insere um novo
+            if (updated == 0)
+            {
+                await _connection.ExecuteAsync(
+                    @"INSERT INTO AspNetUserTokens (UserId, LoginProvider, Name, Value)
+                    VALUES (@UserId, @LoginProvider, @Name, @Value)",
+                    new
+                    {
+                        UserId = user.Id,
+                        LoginProvider = loginProvider,
+                        Name = name,
+                        Value = value
+                    });
+            }
+        }
+
+        public async Task RemoveTokenAsync(ApplicationUser user, string loginProvider, string name, CancellationToken cancellationToken)
+        {
+            await _connection.ExecuteAsync(
+                @"DELETE FROM AspNetUserTokens
+                WHERE UserId = @UserId AND LoginProvider = @LoginProvider AND Name = @Name",
+                new
+                {
+                    UserId = user.Id,
+                    LoginProvider = loginProvider,
+                    Name = name
+                });
+        }
+
+        public async Task<string> GetTokenAsync(ApplicationUser user, string loginProvider, string name, CancellationToken cancellationToken)
+        {
+            return await _connection.QuerySingleOrDefaultAsync<string>(
+                @"SELECT Value FROM AspNetUserTokens
+            WHERE UserId = @UserId AND LoginProvider = @LoginProvider AND Name = @Name",
+                new
+                {
+                    UserId = user.Id,
+                    LoginProvider = loginProvider,
+                    Name = name
+                });
+        }
+        #endregion
 
     }
 }

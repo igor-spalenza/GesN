@@ -6,7 +6,20 @@
     ViewData["App"] = "Ferramenta de Vendas";
 }
 
+
+    <div class="container-fluid abas-barra">
+        <!-- Abas Dinâmicas -->
+        <ul class="nav nav-tabs" id="pedidosTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="tab-lista-pedidos" data-bs-toggle="tab" href="#conteudo-lista-pedidos" role="tab">
+                    <img class="vendas-principal" id="btnHomeVendas" src="~/img/inicio-icon.png" alt="Ícone de redirecionamento para a tela inicial" />
+                    @* Principal *@
+                </a>
+            </li>
+        </ul>
+    </div>
 <div class="venda-main">
+
     <div class="container-fluid venda-lateral-fixa">
         <h1>Vendas</h1><br />
 
@@ -19,15 +32,7 @@
     </div>
 
     <div class="venda-conteudo-dinamico">
-        <!-- Abas Dinâmicas -->
-        <ul class="nav nav-tabs" id="pedidosTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <a class="nav-link active" id="tab-lista-pedidos" data-bs-toggle="tab" href="#conteudo-lista-pedidos" role="tab">
-                    <img class="vendas-principal" id="btnHomeVendas" src="~/img/inicio-icon.png" alt="Ícone de redirecionamento para a tela inicial" />
-                    @* Principal *@
-                </a>
-            </li>
-        </ul>
+
 
         <div class="modal fade" id="pedidoModal" tabindex="-1">
             <div class="modal-dialog modal-lg">
@@ -53,7 +58,9 @@
                 </div>
             </div>
         </div>
+
     </div>
+
 </div>
 
 @section Scripts {

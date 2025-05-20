@@ -1,0 +1,22 @@
+@page
+@model GesN.Web.Areas.Identity.Pages.Account.Manage.GenerateRecoveryCodesModel
+@{
+    ViewData["Title"] = "Gerar códigos de recuperação";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+<h4>@ViewData["Title"]</h4>
+<div class="alert alert-warning" role="alert">
+    <p>
+        <strong>Gerar novos códigos de recuperação substituirá os códigos atuais.</strong>
+    </p>
+    <p>
+        Se você perder seu dispositivo e não tiver os códigos de recuperação, perderá o acesso à sua conta.
+    </p>
+</div>
+<div>
+    <form method="post">
+        <button class="btn btn-danger" type="submit">Gerar códigos</button>
+    </form>
+</div> 

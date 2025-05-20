@@ -1,0 +1,30 @@
+@page
+@model GesN.Web.Areas.Identity.Pages.Account.Manage.ShowRecoveryCodesModel
+@{
+    ViewData["Title"] = "Códigos de recuperação";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+<h4>@ViewData["Title"]</h4>
+<div class="alert alert-warning" role="alert">
+    <p>
+        <strong>Guarde esses códigos em um lugar seguro.</strong>
+    </p>
+    <p>
+        Se você perder seu dispositivo e não tiver os códigos de recuperação, perderá o acesso à sua conta.
+    </p>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        @for (var row = 0; row < Model.RecoveryCodes.Length; row += 2)
+        {
+            <code class="recovery-code">@Model.RecoveryCodes[row]</code><text>&nbsp;</text>
+            @if (row + 1 < Model.RecoveryCodes.Length)
+            {
+                <code class="recovery-code">@Model.RecoveryCodes[row + 1]</code>
+            }
+            <br />
+        }
+    </div>
+</div> 
