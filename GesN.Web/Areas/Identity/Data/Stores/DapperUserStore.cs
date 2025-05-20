@@ -20,11 +20,12 @@ namespace GesN.Web.Areas.Identity.Data.Stores
                                    IUserRoleStore<ApplicationUser>,
                                    IUserClaimStore<ApplicationUser>,
                                    IUserLoginStore<ApplicationUser>,
-                                   IUserAuthenticationTokenStore<ApplicationUser>
-                                   /*IUserTwoFactorStore<ApplicationUser>,
+                                   IUserAuthenticationTokenStore<ApplicationUser>,
+                                   IUserPhoneNumberStore<ApplicationUser>,
+                                   IUserTwoFactorStore<ApplicationUser>,
                                    IUserLockoutStore<ApplicationUser>,
-                                   IUserPhoneNumberStore<ApplicationUser>
-        UserStoreBase<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>, IdentityUserRole<string>, IdentityUserLogin<string>, IdentityUserToken<string>, IdentityRoleClaim<string>>,*/
+                                   IUserAuthenticatorKeyStore<ApplicationUser>,
+                                   IUserTwoFactorRecoveryCodeStore<ApplicationUser>
     {
         private readonly IDbConnection _connection;
 
@@ -41,6 +42,36 @@ namespace GesN.Web.Areas.Identity.Data.Stores
             user.Id = user.Id ?? Guid.NewGuid().ToString();
             user.ConcurrencyStamp = Guid.NewGuid().ToString();
             user.SecurityStamp = Guid.NewGuid().ToString();
+            user.LockoutEnabled = false;
+            user.EmailConfirmed = false;
+            user.PhoneNumberConfirmed = false;
+            user.TwoFactorEnabled = false;
+            user.AccessFailedCount = 0;
+            user.LockoutEnd = null;
+            user.PhoneNumber = user.PhoneNumber ?? "";
+            
+            // Inicializa os valores normalizados se estiverem vazios
+            user.NormalizedUserName = user.NormalizedUserName ?? user.UserName?.ToUpper();
+            user.NormalizedEmail = user.NormalizedEmail ?? user.Email?.ToUpper();
+
+            var parameters = new
+            {
+                user.Id,
+                user.UserName,
+                user.NormalizedUserName,
+                user.Email,
+                user.NormalizedEmail,
+                user.EmailConfirmed,
+                user.PasswordHash,
+                user.SecurityStamp,
+                user.ConcurrencyStamp,
+                user.PhoneNumber,
+                user.PhoneNumberConfirmed,
+                user.TwoFactorEnabled,
+                user.LockoutEnd,
+                user.LockoutEnabled,
+                user.AccessFailedCount
+            };
 
             var query = @"
             INSERT INTO AspNetUsers (
@@ -57,7 +88,7 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
             try
             {
-                await _connection.ExecuteAsync(query, user);
+                await _connection.ExecuteAsync(query, parameters);
                 return IdentityResult.Success;
             }
             catch (Exception ex)
@@ -124,6 +155,29 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
         public async Task<IdentityResult> UpdateAsync(ApplicationUser user, CancellationToken cancellationToken)
         {
+            // Garantir que os valores normalizados estejam presentes
+            user.NormalizedUserName = user.NormalizedUserName ?? user.UserName?.ToUpper();
+            user.NormalizedEmail = user.NormalizedEmail ?? user.Email?.ToUpper();
+            
+            var parameters = new
+            {
+                user.Id,
+                user.UserName,
+                user.NormalizedUserName,
+                user.Email,
+                user.NormalizedEmail,
+                user.EmailConfirmed,
+                user.PasswordHash,
+                user.SecurityStamp,
+                user.ConcurrencyStamp,
+                user.PhoneNumber,
+                user.PhoneNumberConfirmed,
+                user.TwoFactorEnabled,
+                user.LockoutEnd,
+                user.LockoutEnabled,
+                user.AccessFailedCount
+            };
+            
             var query = @"
                 UPDATE AspNetUsers SET 
                     UserName = @UserName,
@@ -144,7 +198,7 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
             try
             {
-                await _connection.ExecuteAsync(query, user);
+                await _connection.ExecuteAsync(query, parameters);
                 return IdentityResult.Success;
             }
             catch (Exception ex)
@@ -498,5 +552,138 @@ namespace GesN.Web.Areas.Identity.Data.Stores
         }
         #endregion
 
+        #region IUserPhoneNumberStore Implementation
+        public Task<string> GetPhoneNumberAsync(ApplicationUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.PhoneNumber);
+        }
+
+        public Task<bool> GetPhoneNumberConfirmedAsync(ApplicationUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.PhoneNumberConfirmed);
+        }
+
+        public Task SetPhoneNumberAsync(ApplicationUser user, string phoneNumber, CancellationToken cancellationToken)
+        {
+            user.PhoneNumber = phoneNumber;
+            return Task.CompletedTask;
+        }
+
+        public Task SetPhoneNumberConfirmedAsync(ApplicationUser user, bool confirmed, CancellationToken cancellationToken)
+        {
+            user.PhoneNumberConfirmed = confirmed;
+            return Task.CompletedTask;
+        }
+        #endregion
+
+        #region IUserTwoFactorStore Implementation
+        public Task<bool> GetTwoFactorEnabledAsync(ApplicationUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.TwoFactorEnabled);
+        }
+
+        public Task SetTwoFactorEnabledAsync(ApplicationUser user, bool enabled, CancellationToken cancellationToken)
+        {
+            user.TwoFactorEnabled = enabled;
+            return Task.CompletedTask;
+        }
+        #endregion
+
+        #region IUserLockoutStore Implementation
+        public Task<DateTimeOffset?> GetLockoutEndDateAsync(ApplicationUser user, CancellationToken cancellationToken)
+        {
+            // Se LockoutEnd é nulo, retorna nulo
+            if (string.IsNullOrEmpty(user.LockoutEnd?.ToString()))
+            {
+                return Task.FromResult<DateTimeOffset?>(null);
+            }
+            
+            // Tenta converter a string para DateTimeOffset
+            if (DateTimeOffset.TryParse(user.LockoutEnd.ToString(), out DateTimeOffset result))
+            {
+                return Task.FromResult<DateTimeOffset?>(result);
+            }
+            
+            return Task.FromResult<DateTimeOffset?>(null);
+        }
+
+        public Task<bool> GetLockoutEnabledAsync(ApplicationUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.LockoutEnabled);
+        }
+
+        public Task<int> GetAccessFailedCountAsync(ApplicationUser user, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(user.AccessFailedCount);
+        }
+
+        public Task<int> IncrementAccessFailedCountAsync(ApplicationUser user, CancellationToken cancellationToken)
+        {
+            user.AccessFailedCount++;
+            return Task.FromResult(user.AccessFailedCount);
+        }
+
+        public Task ResetAccessFailedCountAsync(ApplicationUser user, CancellationToken cancellationToken)
+        {
+            user.AccessFailedCount = 0;
+            return Task.CompletedTask;
+        }
+
+        public Task SetLockoutEndDateAsync(ApplicationUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
+        {
+            // Armazena o DateTimeOffset como uma string ISO8601
+            user.LockoutEnd = lockoutEnd?.ToString("o");
+            return Task.CompletedTask;
+        }
+
+        public Task SetLockoutEnabledAsync(ApplicationUser user, bool enabled, CancellationToken cancellationToken)
+        {
+            user.LockoutEnabled = enabled;
+            return Task.CompletedTask;
+        }
+        #endregion
+
+        #region IUserAuthenticatorKeyStore Implementation
+        public async Task<string> GetAuthenticatorKeyAsync(ApplicationUser user, CancellationToken cancellationToken)
+        {
+            return await GetTokenAsync(user, "AuthenticatorKey", "AuthenticatorKey", cancellationToken);
+        }
+
+        public async Task SetAuthenticatorKeyAsync(ApplicationUser user, string key, CancellationToken cancellationToken)
+        {
+            await SetTokenAsync(user, "AuthenticatorKey", "AuthenticatorKey", key, cancellationToken);
+        }
+        #endregion
+
+        #region IUserTwoFactorRecoveryCodeStore Implementation
+        public async Task<int> CountCodesAsync(ApplicationUser user, CancellationToken cancellationToken)
+        {
+            var recoveryCodes = await GetTokenAsync(user, "RecoveryCodes", "RecoveryCodes", cancellationToken);
+            if (string.IsNullOrEmpty(recoveryCodes))
+                return 0;
+
+            return recoveryCodes.Split(';').Length;
+        }
+
+        public async Task<bool> RedeemCodeAsync(ApplicationUser user, string code, CancellationToken cancellationToken)
+        {
+            var recoveryCodes = await GetTokenAsync(user, "RecoveryCodes", "RecoveryCodes", cancellationToken);
+            if (string.IsNullOrEmpty(recoveryCodes))
+                return false;
+
+            var codes = recoveryCodes.Split(';').ToList();
+            if (!codes.Contains(code))
+                return false;
+
+            codes.Remove(code);
+            await SetTokenAsync(user, "RecoveryCodes", "RecoveryCodes", string.Join(";", codes), cancellationToken);
+            return true;
+        }
+
+        public async Task ReplaceCodesAsync(ApplicationUser user, IEnumerable<string> recoveryCodes, CancellationToken cancellationToken)
+        {
+            await SetTokenAsync(user, "RecoveryCodes", "RecoveryCodes", string.Join(";", recoveryCodes), cancellationToken);
+        }
+        #endregion
     }
 }

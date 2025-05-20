@@ -4,6 +4,6 @@ namespace GesN.Web.Areas.Identity.Data.Models
 {
     public class ApplicationRole : IdentityRole
     {
-        public string ConcurrencyStamp { get; set; }
+        // ConcurrencyStamp já existe na classe base IdentityRole
     }
 }

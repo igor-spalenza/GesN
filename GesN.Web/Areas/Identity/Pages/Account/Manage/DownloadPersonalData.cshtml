@@ -1,0 +1,16 @@
+@page
+@model GesN.Web.Areas.Identity.Pages.Account.Manage.DownloadPersonalDataModel
+@{
+    ViewData["Title"] = "Download dos Dados Pessoais";
+    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+}
+
+<h4>@ViewData["Title"]</h4>
+
+<div class="alert alert-primary" role="alert">
+    Por favor, clique no botão abaixo para baixar seus dados pessoais.
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+} 

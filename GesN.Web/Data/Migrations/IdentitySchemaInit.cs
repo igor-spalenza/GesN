@@ -5,10 +5,12 @@ namespace GesN.Web.Data.Migrations
     public class IdentitySchemaInit
     {
         private readonly string _connectionString;
+        private readonly bool _resetDatabase;
 
-        public IdentitySchemaInit(string connectionString)
+        public IdentitySchemaInit(string connectionString, bool resetDatabase = false)
         {
             _connectionString = connectionString;
+            _resetDatabase = resetDatabase;
         }
 
         public void Initialize()
@@ -39,7 +41,7 @@ namespace GesN.Web.Data.Migrations
                     PhoneNumber TEXT,
                     PhoneNumberConfirmed BOOLEAN,
                     TwoFactorEnabled BOOLEAN,
-                    LockoutEnd DATETIME,
+                    LockoutEnd TEXT,
                     LockoutEnabled BOOLEAN,
                     AccessFailedCount INTEGER
                 );";
@@ -117,6 +119,29 @@ namespace GesN.Web.Data.Migrations
                     command.ExecuteNonQuery();
                 }
                 using (var command = new SqliteCommand(createUserTokensTable, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private void ResetIdentityTables(SqliteConnection connection)
+        {
+            var tables = new[]
+            {
+                "AspNetUserTokens",
+                "AspNetUserRoles",
+                "AspNetUserLogins",
+                "AspNetUserClaims",
+                "AspNetRoleClaims",
+                "AspNetUsers",
+                "AspNetRoles"
+            };
+
+            foreach (var table in tables)
+            {
+                var dropQuery = $"DROP TABLE IF EXISTS {table}";
+                using (var command = new SqliteCommand(dropQuery, connection))
                 {
                     command.ExecuteNonQuery();
                 }

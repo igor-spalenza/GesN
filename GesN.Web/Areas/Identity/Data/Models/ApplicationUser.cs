@@ -4,10 +4,9 @@ namespace GesN.Web.Areas.Identity.Data.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        public string SecurityStamp { get; set; }
-        public string ConcurrencyStamp { get; set; }
-        public DateTime? LockoutEnd { get; set; }
-        public bool LockoutEnabled { get; set; }
-        public int AccessFailedCount { get; set; }
+        // Removendo propriedades duplicadas que já existem em IdentityUser
+        // Estas propriedades podem causar problemas porque ocultam as da classe base
+        // SecurityStamp, ConcurrencyStamp, LockoutEnd, LockoutEnabled e AccessFailedCount já existem na classe base
+        public new string LockoutEnd { get; set; }
     }
 }

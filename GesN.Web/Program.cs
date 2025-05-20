@@ -24,6 +24,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 SQLitePCL.Batteries.Init();
 string dbPath = Path.Combine(AppContext.BaseDirectory, "/GesN.Web/Data/Database/gesn.db");
 
+// Define se o banco de dados de identidade deve ser resetado
+bool resetIdentityDatabase = true; // Ativado para recriar as tabelas com o novo esquema
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
@@ -35,10 +37,9 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 6;
 })
-.AddDefaultTokenProviders()
 .AddUserStore<DapperUserStore>()
 .AddRoleStore<DapperRoleStore>()
-.AddDefaultUI();
+.AddDefaultTokenProviders();
 
 // Add services directly instead of separately registering them
 builder.Services.AddTransient<IUserClaimsPrincipalFactory<ApplicationUser>, UserClaimsPrincipalFactory<ApplicationUser, ApplicationRole>>();
@@ -46,19 +47,19 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Logout";
-    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromHours(8);
     options.SlidingExpiration = true;
 });
 
-builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddControllersWithViews();
 
 builder.Services.AddInfrastructureServices(connectionString);
 
-builder.Services.AddScoped<IdentitySchemaInit>(provider => new IdentitySchemaInit(connectionString));
+builder.Services.AddScoped<IdentitySchemaInit>(provider => new IdentitySchemaInit(connectionString, resetIdentityDatabase));
 
 builder.Services.AddScoped<DbInit>(provider => new DbInit(connectionString));
 
