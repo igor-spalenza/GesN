@@ -39,6 +39,11 @@ body {
     width: 80%;
 }
 
+logo-gesn {
+    margin-right: 0px;
+    width: 100%;
+}
+
 .logo-cliente {
     margin-top: 50px;
     margin-left: 30px;
