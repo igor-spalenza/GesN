@@ -42,8 +42,13 @@ namespace GesN.Web.Areas.Identity.Pages.Account
 
             [DataType(DataType.Password)]
             [Display(Name = "Confirme a senha")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Compare("Password", ErrorMessage = "As senhas não correspondem.")]
             public string ConfirmPassword { get; set; }
+        }
+        
+        public void OnGet(string returnUrl = null)
+        {
+            ReturnUrl = returnUrl;
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
@@ -51,20 +56,41 @@ namespace GesN.Web.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email };
-                var result = await _userManager.CreateAsync(user, Input.Password);
-                if (result.Succeeded)
+                try 
                 {
-                    _logger.LogInformation("User created a new account with password.");
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect(returnUrl);
+                    var user = new ApplicationUser 
+                    { 
+                        UserName = Input.Email, 
+                        Email = Input.Email 
+                    };
+                    
+                    _logger.LogInformation("Tentando criar um novo usuário: {Email}", Input.Email);
+                    
+                    var result = await _userManager.CreateAsync(user, Input.Password);
+                    
+                    if (result.Succeeded)
+                    {
+                        _logger.LogInformation("Usuário criado com sucesso.");
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return LocalRedirect(returnUrl);
+                    }
+                    
+                    _logger.LogWarning("Falha ao criar usuário. Erros: {Errors}", 
+                        string.Join(", ", result.Errors.Select(e => e.Description)));
+                    
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
-                foreach (var error in result.Errors)
+                catch (Exception ex)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    _logger.LogError(ex, "Erro ao registrar usuário: {Message}", ex.Message);
+                    ModelState.AddModelError(string.Empty, $"Erro ao criar usuário: {ex.Message}");
                 }
             }
 
+            // Se chegamos até aqui, algo falhou, redisplay form
             return Page();
         }
     }

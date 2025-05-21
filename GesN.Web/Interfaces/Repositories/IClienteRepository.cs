@@ -9,5 +9,6 @@ namespace GesN.Web.Interfaces.Repositories
         Task AddAsync(Cliente cliente);
         Task UpdateAsync(Cliente cliente);
         Task DeleteAsync(int id);
+        Task<IEnumerable<Cliente>> BuscarPorNomeOuTelefoneAsync(string termo);
     }
 }

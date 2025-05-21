@@ -1,0 +1,24 @@
+@page
+@model GesN.Web.Areas.Identity.Pages.Account.Manage.ResetAuthenticatorModel
+@{
+    ViewData["Title"] = "Resetar chave do autenticador";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+<h4>@ViewData["Title"]</h4>
+<div class="alert alert-warning" role="alert">
+    <p>
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        <strong>Se você resetar sua chave do autenticador, seu aplicativo autenticador não funcionará até que você o reconfigure.</strong>
+    </p>
+    <p>
+        Este processo desativa 2FA até que você verifique seu aplicativo autenticador.
+        Se você não completar a configuração do seu aplicativo autenticador, você pode perder o acesso à sua conta.
+    </p>
+</div>
+<div>
+    <form id="reset-authenticator-form" method="post">
+        <button id="reset-authenticator-button" class="btn btn-danger" type="submit">Resetar chave do autenticador</button>
+    </form>
+</div> 

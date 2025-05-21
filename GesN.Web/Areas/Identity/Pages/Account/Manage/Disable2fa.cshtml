@@ -1,0 +1,25 @@
+@page
+@model GesN.Web.Areas.Identity.Pages.Account.Manage.Disable2faModel
+@{
+    ViewData["Title"] = "Desabilitar autenticação de dois fatores (2FA)";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+<h2>@ViewData["Title"]</h2>
+
+<div class="alert alert-warning" role="alert">
+    <p>
+        <strong>Esta ação apenas desativa 2FA.</strong>
+    </p>
+    <p>
+        Desabilitar 2FA não altera as chaves usadas nos aplicativos autenticadores. Se você quiser mudar a chave
+        usada em um aplicativo autenticador, você deve <a asp-page="./ResetAuthenticator">redefinir suas chaves do autenticador.</a>
+    </p>
+</div>
+
+<div>
+    <form method="post">
+        <button class="btn btn-danger" type="submit">Desabilitar 2FA</button>
+    </form>
+</div> 

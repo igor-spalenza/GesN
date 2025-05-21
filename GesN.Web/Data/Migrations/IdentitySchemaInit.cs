@@ -39,7 +39,7 @@ namespace GesN.Web.Data.Migrations
                     PhoneNumber TEXT,
                     PhoneNumberConfirmed BOOLEAN,
                     TwoFactorEnabled BOOLEAN,
-                    LockoutEnd DATETIME,
+                    LockoutEnd TEXT,
                     LockoutEnabled BOOLEAN,
                     AccessFailedCount INTEGER
                 );";
@@ -122,5 +122,6 @@ namespace GesN.Web.Data.Migrations
                 }
             }
         }
+
     }
 }

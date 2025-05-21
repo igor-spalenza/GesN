@@ -16,8 +16,10 @@ namespace GesN.Web.Areas.Infrastructure
         public static void AddInfrastructureServices(this IServiceCollection services, string connectionString)
         {
             // Configuração do contexto de dados
-
             services.AddSingleton<IDbConnection>(db => new SqliteConnection(connectionString));
+
+            // Registro do ProjectDataContext
+            services.AddScoped<ProjectDataContext>(provider => new ProjectDataContext(connectionString));
 
             // Registro dos repositórios do Domínio da aplicação
             services.AddScoped<IClienteService, ClienteService>();
@@ -25,8 +27,6 @@ namespace GesN.Web.Areas.Infrastructure
 
             services.AddScoped<IPedidoService, PedidoService>();
             services.AddScoped<IPedidoRepository, PedidoRepository>();
-
-            services.AddScoped<ProjectDataContext>(provider => { return new ProjectDataContext(connectionString); });
         }
     }
 }

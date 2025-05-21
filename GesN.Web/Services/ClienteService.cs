@@ -42,6 +42,20 @@ namespace GesN.Web.Services
             });
         }
 
+        public async Task<IEnumerable<Cliente>> BuscarPorNomeOuTelefoneAsync(string termo)
+        {
+            var clientes = await _clienteRepository.BuscarPorNomeOuTelefoneAsync(termo);
+            return clientes.Select(c => new Cliente
+            {
+                ClienteId = c.ClienteId,
+                Nome = c.Nome,
+                Sobrenome = c.Sobrenome,
+                Cpf = c.Cpf,
+                TelefonePrincipal = c.TelefonePrincipal,
+                DataCadastro = c.DataCadastro
+            });
+        }
+
         public async Task AddAsync(ClienteCreateDto clienteDto)
         {
             var dataAtual = DateTime.Now;

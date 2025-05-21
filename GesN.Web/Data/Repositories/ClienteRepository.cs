@@ -26,6 +26,16 @@ namespace GesN.Web.Data.Repositories
             return await _dbConnection.QueryAsync<Cliente>(sql);
         }
 
+        public async Task<IEnumerable<Cliente>> BuscarPorNomeOuTelefoneAsync(string termo)
+        {
+            var sql = @"
+                SELECT * FROM Cliente 
+                WHERE Nome LIKE @Termo 
+                    OR TelefonePrincipal LIKE @Termo";
+
+            return await _dbConnection.QueryAsync<Cliente>(sql, new { Termo = $"%{termo}%" });
+        }
+
         public async Task AddAsync(Cliente cliente)
         {
             var sql = @"

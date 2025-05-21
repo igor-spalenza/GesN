@@ -41,7 +41,7 @@ namespace GesN.Web.Controllers
             return View("_Details", pedido);
         }
         
-        public async Task<ActionResult> DetailsPartialView(int id)
+        public async Task<IActionResult> DetailsPartialView(int id)
         {
             var pedido = await _pedidoService.GetByIdAsync(id);
             return PartialView("_Details", pedido);
@@ -136,7 +136,23 @@ namespace GesN.Web.Controllers
             return PartialView("_Edit", pedido);
         }
 
-        // POST: VendaController/Edit/5
+        [HttpGet]
+        public async Task<IActionResult> BuscarClienteNomeTel(string termo)
+        {
+            if (string.IsNullOrWhiteSpace(termo))
+                return Json(new List<object>());
+
+            var clientes = await _clienteService.BuscarPorNomeOuTelefoneAsync(termo);
+
+            var resultado = clientes.Select(c => new {
+                id = c.ClienteId,
+                nome = c.Nome + " " + c.Sobrenome,
+                telefonePrincipal = c.TelefonePrincipal
+            });
+
+            return Json(resultado);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, IFormCollection collection)
@@ -179,8 +195,6 @@ namespace GesN.Web.Controllers
             if (pedido == null)
                 return NotFound();
 
-            var clientes = await _clienteService.GetAllAsync();
-            ViewBag.Clientes = clientes;
             return PartialView("_Edit", pedido);
         }
 
@@ -194,15 +208,27 @@ namespace GesN.Web.Controllers
                 
             if (!ModelState.IsValid)
             {
-                var clientes = await _clienteService.GetAllAsync();
-                ViewBag.Clientes = clientes;
                 return PartialView("_Edit", pedido);
             }
 
             try
             {
                 await _pedidoService.UpdateAsync(pedido);
-                return Json(new { success = true, message = "Pedido atualizado com sucesso!" });
+                var pedidoAtualizado = await _pedidoService.GetByIdAsync(id);
+                return Json(new
+                {
+                    success = true,
+                    message = "Pedido atualizado com sucesso",
+                    pedido = new
+                    {
+                        pedidoId = pedidoAtualizado.PedidoId,
+                        clienteId = pedidoAtualizado.ClienteId,
+                        colaboradorId = pedidoAtualizado.ColaboradorId,
+                        dataPedido = pedidoAtualizado.DataPedido,
+                        dataCadastro = pedidoAtualizado.DataCadastro,
+                        dataModificacao = pedidoAtualizado.DataModificacao
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -217,11 +243,10 @@ namespace GesN.Web.Controllers
             ModelState.Remove("PedidoId");
             ModelState.Remove("DataCadastro");
             ModelState.Remove("DataModificacao");
-            
+            ModelState.Remove("NomeCliente");
+
             if (!ModelState.IsValid)
             {
-                var clientes = await _clienteService.GetAllAsync();
-                ViewBag.Clientes = clientes;
                 return PartialView("_Create", pedido);
             }
 
