@@ -20,22 +20,6 @@
 
 <br />
 
-<div class="row mt-4">
-    <div class="col-md-4 offset-md-4">
-        <div class="card text-center">
-            <div class="card-header bg-warning">
-                <h5 class="card-title mb-0">Utilitário de Diagnóstico</h5>
-            </div>
-            <div class="card-body">
-                <p class="card-text">Use esta ferramenta para diagnosticar e corrigir problemas com roles.</p>
-                <a asp-area="Admin" asp-controller="RolesDebug" asp-action="Index" class="btn btn-warning">Diagnóstico de Roles</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<br />
-
 @if (SignInManager.IsSignedIn(User))
 {
     <div class="text-center">

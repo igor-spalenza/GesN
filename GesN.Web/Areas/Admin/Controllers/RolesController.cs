@@ -42,45 +42,119 @@ namespace GesN.Web.Areas.Admin.Controllers
             return View();
         }
 
+        // Nova action para criar roles de forma simples
+        public IActionResult CreateSimple()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateSimple(string roleName)
+        {
+            try
+            {
+                // Verificar se o nome foi fornecido
+                if (string.IsNullOrEmpty(roleName))
+                {
+                    ViewBag.ErrorMessage = "O nome da role é obrigatório.";
+                    return View();
+                }
+
+                // Verificar se a role já existe
+                var existingRole = await _dbConnection.QueryFirstOrDefaultAsync<ApplicationRole>(
+                    "SELECT * FROM AspNetRoles WHERE NormalizedName = @NormalizedName",
+                    new { NormalizedName = roleName.ToUpper() });
+
+                if (existingRole != null)
+                {
+                    ViewBag.ErrorMessage = $"Role '{roleName}' já existe.";
+                    return View();
+                }
+
+                // Criar a role
+                var roleId = Guid.NewGuid().ToString();
+                var query = @"
+                    INSERT INTO AspNetRoles (Id, Name, NormalizedName, ConcurrencyStamp)
+                    VALUES (@Id, @Name, @NormalizedName, @ConcurrencyStamp)";
+
+                await _dbConnection.ExecuteAsync(query, new
+                {
+                    Id = roleId,
+                    Name = roleName,
+                    NormalizedName = roleName.ToUpper(),
+                    ConcurrencyStamp = Guid.NewGuid().ToString()
+                });
+
+                ViewBag.SuccessMessage = $"Role '{roleName}' criada com sucesso.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = $"Erro ao criar role: {ex.Message}";
+                return View();
+            }
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(RoleViewModel model)
         {
-            if (ModelState.IsValid)
+            // Verificar o estado do ModelState para diagnóstico
+            if (!ModelState.IsValid)
             {
-                try
+                // Adicionar diagnóstico ao ViewBag para entender o que está falhando
+                var errors = new List<string>();
+                foreach (var state in ModelState)
                 {
-                    // Verificar se a role já existe
-                    var existingRole = await _dbConnection.QueryFirstOrDefaultAsync<ApplicationRole>(
-                        "SELECT * FROM AspNetRoles WHERE NormalizedName = @NormalizedName",
-                        new { NormalizedName = model.Name.ToUpper() });
-
-                    if (existingRole != null)
+                    foreach (var error in state.Value.Errors)
                     {
-                        ModelState.AddModelError(string.Empty, $"Role '{model.Name}' já existe.");
-                        return View(model);
+                        errors.Add($"{state.Key}: {error.ErrorMessage}");
                     }
-
-                    // Criar a role
-                    var roleId = Guid.NewGuid().ToString();
-                    var query = @"
-                        INSERT INTO AspNetRoles (Id, Name, NormalizedName, ConcurrencyStamp)
-                        VALUES (@Id, @Name, @NormalizedName, @ConcurrencyStamp)";
-
-                    await _dbConnection.ExecuteAsync(query, new
-                    {
-                        Id = roleId,
-                        Name = model.Name,
-                        NormalizedName = model.Name.ToUpper(),
-                        ConcurrencyStamp = Guid.NewGuid().ToString()
-                    });
-
-                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
+                ViewBag.ValidationErrors = errors;
+            }
+
+            // Continuar mesmo se ModelState for inválido (para diagnóstico)
+            try
+            {
+                // Verificar se o nome foi fornecido
+                if (string.IsNullOrEmpty(model.Name))
                 {
-                    ModelState.AddModelError(string.Empty, $"Erro ao criar role: {ex.Message}");
+                    ModelState.AddModelError("Name", "O nome da role é obrigatório");
+                    return View(model);
                 }
+
+                // Verificar se a role já existe
+                var existingRole = await _dbConnection.QueryFirstOrDefaultAsync<ApplicationRole>(
+                    "SELECT * FROM AspNetRoles WHERE NormalizedName = @NormalizedName",
+                    new { NormalizedName = model.Name.ToUpper() });
+
+                if (existingRole != null)
+                {
+                    ModelState.AddModelError(string.Empty, $"Role '{model.Name}' já existe.");
+                    return View(model);
+                }
+
+                // Criar a role
+                var roleId = Guid.NewGuid().ToString();
+                var query = @"
+                    INSERT INTO AspNetRoles (Id, Name, NormalizedName, ConcurrencyStamp)
+                    VALUES (@Id, @Name, @NormalizedName, @ConcurrencyStamp)";
+
+                await _dbConnection.ExecuteAsync(query, new
+                {
+                    Id = roleId,
+                    Name = model.Name,
+                    NormalizedName = model.Name.ToUpper(),
+                    ConcurrencyStamp = Guid.NewGuid().ToString()
+                });
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Erro ao criar role: {ex.Message}");
             }
 
             return View(model);
