@@ -1,25 +1,24 @@
 ﻿using Dapper;
 using GesN.Web.Areas.Identity.Data.Models;
+using GesN.Web.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
+using System.Data;
 
 namespace GesN.Web.Areas.Identity.Data.Stores
 {
     public class DapperRoleStore : IRoleStore<ApplicationRole>
     {
-        private readonly string _connectionString;
+        private readonly IDbConnection _dbConnection;
 
-        public DapperRoleStore(IConfiguration configuration)
+        public DapperRoleStore(ProjectDataContext context)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _dbConnection = context.Connection;
         }
 
         public async Task<IdentityResult> CreateAsync(ApplicationRole role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
 
             role.Id = role.Id ?? Guid.NewGuid().ToString();
             role.ConcurrencyStamp = Guid.NewGuid().ToString();
@@ -31,7 +30,7 @@ namespace GesN.Web.Areas.Identity.Data.Stores
 
             try
             {
-                await connection.ExecuteAsync(query, role);
+                await _dbConnection.ExecuteAsync(query, role);
                 return IdentityResult.Success;
             }
             catch (Exception ex)
@@ -44,12 +43,9 @@ namespace GesN.Web.Areas.Identity.Data.Stores
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
             try
             {
-                await connection.ExecuteAsync(
+                await _dbConnection.ExecuteAsync(
                     "DELETE FROM AspNetRoles WHERE Id = @Id",
                     new { role.Id }
                 );
@@ -65,10 +61,7 @@ namespace GesN.Web.Areas.Identity.Data.Stores
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
-            return await connection.QuerySingleOrDefaultAsync<ApplicationRole>(
+            return await _dbConnection.QuerySingleOrDefaultAsync<ApplicationRole>(
                 "SELECT * FROM AspNetRoles WHERE Id = @Id",
                 new { Id = roleId }
             );
@@ -78,10 +71,7 @@ namespace GesN.Web.Areas.Identity.Data.Stores
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
-            return await connection.QuerySingleOrDefaultAsync<ApplicationRole>(
+            return await _dbConnection.QuerySingleOrDefaultAsync<ApplicationRole>(
                 "SELECT * FROM AspNetRoles WHERE NormalizedName = @NormalizedName",
                 new { NormalizedName = normalizedRoleName }
             );
@@ -118,12 +108,9 @@ namespace GesN.Web.Areas.Identity.Data.Stores
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-
             try
             {
-                await connection.ExecuteAsync(@"
+                await _dbConnection.ExecuteAsync(@"
                 UPDATE AspNetRoles 
                 SET Name = @Name,
                     NormalizedName = @NormalizedName,

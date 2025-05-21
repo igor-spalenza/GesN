@@ -1,3 +1,4 @@
+using GesN.Web;
 using GesN.Web.Areas.Identity.Data.Models;
 using GesN.Web.Areas.Identity.Data.Stores;
 using GesN.Web.Areas.Infrastructure;
@@ -23,9 +24,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 SQLitePCL.Batteries.Init();
 string dbPath = Path.Combine(AppContext.BaseDirectory, "/GesN.Web/Data/Database/gesn.db");
-
-// Define se o banco de dados de identidade deve ser resetado
-bool resetIdentityDatabase = true; // Ativado para recriar as tabelas com o novo esquema
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
@@ -59,7 +57,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddInfrastructureServices(connectionString);
 
-builder.Services.AddScoped<IdentitySchemaInit>(provider => new IdentitySchemaInit(connectionString, resetIdentityDatabase));
+builder.Services.AddScoped<IdentitySchemaInit>(provider => new IdentitySchemaInit(connectionString));
 
 builder.Services.AddScoped<DbInit>(provider => new DbInit(connectionString));
 
@@ -69,6 +67,17 @@ using (var scope = builder.Services.BuildServiceProvider().CreateScope())
     dbIdentityInit.Initialize();
     var dbInit = scope.ServiceProvider.GetRequiredService<DbInit>();
     dbInit.Initialize();
+    
+    // Inicializar a role Admin e atribuir ao usuário
+    try
+    {
+        await CreateAdminRole.Initialize(scope.ServiceProvider);
+        Console.WriteLine("Role Admin inicializada com sucesso!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Erro ao inicializar a role Admin: {ex.Message}");
+    }
 }
 
 var app = builder.Build();
@@ -93,6 +102,12 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Mapear a rota da área Admin primeiro
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+// Depois a rota padrão
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

@@ -5,12 +5,10 @@ namespace GesN.Web.Data.Migrations
     public class IdentitySchemaInit
     {
         private readonly string _connectionString;
-        private readonly bool _resetDatabase;
 
-        public IdentitySchemaInit(string connectionString, bool resetDatabase = false)
+        public IdentitySchemaInit(string connectionString)
         {
             _connectionString = connectionString;
-            _resetDatabase = resetDatabase;
         }
 
         public void Initialize()
@@ -125,27 +123,5 @@ namespace GesN.Web.Data.Migrations
             }
         }
 
-        private void ResetIdentityTables(SqliteConnection connection)
-        {
-            var tables = new[]
-            {
-                "AspNetUserTokens",
-                "AspNetUserRoles",
-                "AspNetUserLogins",
-                "AspNetUserClaims",
-                "AspNetRoleClaims",
-                "AspNetUsers",
-                "AspNetRoles"
-            };
-
-            foreach (var table in tables)
-            {
-                var dropQuery = $"DROP TABLE IF EXISTS {table}";
-                using (var command = new SqliteCommand(dropQuery, connection))
-                {
-                    command.ExecuteNonQuery();
-                }
-            }
-        }
     }
 }

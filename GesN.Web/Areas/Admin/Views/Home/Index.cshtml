@@ -1,0 +1,34 @@
+@{
+    ViewData["Title"] = "Administração";
+}
+
+<div class="container">
+    <h1 class="display-4">Painel de Administração</h1>
+    <p class="lead">Bem-vindo à área administrativa do sistema GesN.</p>
+
+    <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Usuários</h5>
+                </div>
+                <div class="card-body">
+                    <p>Gerencie os usuários do sistema, edite informações e atribua roles.</p>
+                    <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-outline-primary">Gerenciar Usuários</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Roles</h5>
+                </div>
+                <div class="card-body">
+                    <p>Crie e gerencie as roles (papéis) disponíveis no sistema.</p>
+                    <a asp-area="Admin" asp-controller="Roles" asp-action="Index" class="btn btn-outline-success">Gerenciar Roles</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

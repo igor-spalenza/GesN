@@ -31,6 +31,16 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Pedido" asp-action="Index">Pedido</a>
                             </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Administração
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Roles" asp-action="Index">Gerenciar Roles</a></li>
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="RolesDebug" asp-action="Index">Diagnóstico de Roles</a></li>
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Users" asp-action="Index">Gerenciar Usuários</a></li>
+                                </ul>
+                            </li>
                         </ul>
                         <partial name="_LoginPartial" />
                     </div>
