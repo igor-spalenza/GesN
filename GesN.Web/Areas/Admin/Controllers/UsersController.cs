@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,13 +15,16 @@ using System.Threading.Tasks;
 namespace GesN.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class UsersController : Controller
     {
         private readonly IDbConnection _dbConnection;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public UsersController(ProjectDataContext context)
+        public UsersController(ProjectDataContext context, UserManager<ApplicationUser> userManager)
         {
             _dbConnection = context.Connection;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
@@ -37,6 +41,8 @@ namespace GesN.Web.Areas.Admin.Controllers
                     Id = user.Id,
                     Email = user.Email,
                     UserName = user.UserName,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
                     PhoneNumber = user.PhoneNumber,
                     Roles = string.Join(", ", roles)
                 });
@@ -83,6 +89,8 @@ namespace GesN.Web.Areas.Admin.Controllers
                 Id = user.Id,
                 Email = user.Email,
                 UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 PhoneNumber = user.PhoneNumber,
                 Roles = string.Join(", ", roles)
             };
@@ -116,6 +124,8 @@ namespace GesN.Web.Areas.Admin.Controllers
                 Id = user.Id,
                 Email = user.Email,
                 UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 PhoneNumber = user.PhoneNumber
             };
 
@@ -148,7 +158,9 @@ namespace GesN.Web.Areas.Admin.Controllers
                             NormalizedUserName = @NormalizedUserName,
                             Email = @Email,
                             NormalizedEmail = @NormalizedEmail,
-                            PhoneNumber = @PhoneNumber
+                            PhoneNumber = @PhoneNumber,
+                            FirstName = @FirstName,
+                            LastName = @LastName
                         WHERE Id = @Id";
 
                     await _dbConnection.ExecuteAsync(query, new
@@ -158,7 +170,9 @@ namespace GesN.Web.Areas.Admin.Controllers
                         NormalizedUserName = model.UserName.ToUpper(),
                         Email = model.Email,
                         NormalizedEmail = model.Email.ToUpper(),
-                        PhoneNumber = model.PhoneNumber
+                        PhoneNumber = model.PhoneNumber,
+                        FirstName = model.FirstName,
+                        LastName = model.LastName
                     });
 
                     return RedirectToAction(nameof(Index));
@@ -191,6 +205,8 @@ namespace GesN.Web.Areas.Admin.Controllers
                 Id = user.Id,
                 Email = user.Email,
                 UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 PhoneNumber = user.PhoneNumber,
                 Roles = string.Join(", ", roles)
             };
@@ -248,12 +264,61 @@ namespace GesN.Web.Areas.Admin.Controllers
                     Id = user.Id,
                     Email = user.Email,
                     UserName = user.UserName,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
                     PhoneNumber = user.PhoneNumber,
                     Roles = string.Join(", ", roles)
                 };
-
+                
                 return View(viewModel);
             }
+        }
+
+        // GET: Admin/Users/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Admin/Users/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreateUserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var user = new ApplicationUser
+                    {
+                        UserName = model.UserName,
+                        Email = model.Email,
+                        FirstName = model.FirstName,
+                        LastName = model.LastName,
+                        PhoneNumber = model.PhoneNumber,
+                        EmailConfirmed = true,
+                        PhoneNumberConfirmed = true
+                    };
+
+                    var result = await _userManager.CreateAsync(user, model.Password);
+
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(string.Empty, $"Erro ao criar usuário: {ex.Message}");
+                }
+            }
+
+            return View(model);
         }
     }
 
@@ -262,6 +327,8 @@ namespace GesN.Web.Areas.Admin.Controllers
         public string Id { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string PhoneNumber { get; set; }
         public string Roles { get; set; }
     }
@@ -271,6 +338,43 @@ namespace GesN.Web.Areas.Admin.Controllers
         public string Id { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string PhoneNumber { get; set; }
+    }
+
+    public class CreateUserViewModel
+    {
+        [Required(ErrorMessage = "O nome de usuário é obrigatório")]
+        [Display(Name = "Nome de Usuário")]
+        public string UserName { get; set; }
+
+        [Required(ErrorMessage = "O email é obrigatório")]
+        [EmailAddress(ErrorMessage = "Email inválido")]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "O nome é obrigatório")]
+        [Display(Name = "Nome")]
+        public string FirstName { get; set; }
+
+        [Required(ErrorMessage = "O sobrenome é obrigatório")]
+        [Display(Name = "Sobrenome")]
+        public string LastName { get; set; }
+
+        [Phone(ErrorMessage = "Telefone inválido")]
+        [Display(Name = "Telefone")]
+        public string PhoneNumber { get; set; }
+
+        [Required(ErrorMessage = "A senha é obrigatória")]
+        [StringLength(100, ErrorMessage = "A {0} deve ter pelo menos {2} e no máximo {1} caracteres.", MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        [Display(Name = "Senha")]
+        public string Password { get; set; }
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirmar senha")]
+        [Compare("Password", ErrorMessage = "A senha e a confirmação não correspondem.")]
+        public string ConfirmPassword { get; set; }
     }
 } 

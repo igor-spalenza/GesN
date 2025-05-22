@@ -29,6 +29,16 @@ namespace GesN.Web.Areas.Identity.Pages.Account
 
         public class InputModel
         {
+            [Required(ErrorMessage = "O nome é obrigatório")]
+            [StringLength(100, ErrorMessage = "O {0} deve ter pelo menos {2} e no máximo {1} caracteres.", MinimumLength = 2)]
+            [Display(Name = "Nome")]
+            public string FirstName { get; set; }
+
+            [Required(ErrorMessage = "O sobrenome é obrigatório")]
+            [StringLength(100, ErrorMessage = "O {0} deve ter pelo menos {2} e no máximo {1} caracteres.", MinimumLength = 2)]
+            [Display(Name = "Sobrenome")]
+            public string LastName { get; set; }
+
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
@@ -61,7 +71,9 @@ namespace GesN.Web.Areas.Identity.Pages.Account
                     var user = new ApplicationUser 
                     { 
                         UserName = Input.Email, 
-                        Email = Input.Email 
+                        Email = Input.Email,
+                        FirstName = Input.FirstName,
+                        LastName = Input.LastName
                     };
                     
                     _logger.LogInformation("Tentando criar um novo usuário: {Email}", Input.Email);

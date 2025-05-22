@@ -12,7 +12,7 @@
             <form id="account" method="post">
                 <h2>Use sua conta para fazer login.</h2>
                 <hr />
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div asp-validation-summary="All" class="text-danger"></div>
                 <div class="form-floating mb-3">
                     <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
                     <label asp-for="Input.Email" class="form-label"></label>
@@ -43,6 +43,19 @@
             </form>
         </section>
     </div>
+    @if (!string.IsNullOrEmpty(Model.DebugInfo))
+    {
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Informações de Depuração</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">@Model.DebugInfo</p>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @section Scripts {

@@ -8,6 +8,7 @@ using GesN.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using System.Data;
+using GesN.Web.Areas.Identity.Data.Models;
 
 namespace GesN.Web.Areas.Infrastructure
 {
@@ -20,6 +21,11 @@ namespace GesN.Web.Areas.Infrastructure
 
             // Registro do ProjectDataContext
             services.AddScoped<ProjectDataContext>(provider => new ProjectDataContext(connectionString));
+
+            // Registro dos Stores do Identity
+            services.AddScoped<DapperRoleClaimStore>();
+            services.AddScoped<IRoleClaimStore<ApplicationRole>>(provider => 
+                provider.GetRequiredService<DapperRoleClaimStore>());
 
             // Registro dos repositórios do Domínio da aplicação
             services.AddScoped<IClienteService, ClienteService>();

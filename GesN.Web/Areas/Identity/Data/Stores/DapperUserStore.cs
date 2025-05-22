@@ -177,24 +177,24 @@ namespace GesN.Web.Areas.Identity.Data.Stores
                 user.LockoutEnabled,
                 user.AccessFailedCount
             };
-            
+
             var query = @"
-                UPDATE AspNetUsers SET 
-                    UserName = @UserName,
-                    NormalizedUserName = @NormalizedUserName,
-                    Email = @Email,
-                    NormalizedEmail = @NormalizedEmail,
-                    EmailConfirmed = @EmailConfirmed,
-                    PasswordHash = @PasswordHash,
-                    SecurityStamp = @SecurityStamp,
-                    ConcurrencyStamp = @ConcurrencyStamp,
-                    PhoneNumber = @PhoneNumber,
-                    PhoneNumberConfirmed = @PhoneNumberConfirmed,
-                    TwoFactorEnabled = @TwoFactorEnabled,
-                    LockoutEnd = @LockoutEnd,
-                    LockoutEnabled = @LockoutEnabled,
-                    AccessFailedCount = @AccessFailedCount
-                WHERE Id = @Id";
+            UPDATE AspNetUsers SET 
+                UserName = @UserName,
+                NormalizedUserName = @NormalizedUserName,
+                Email = @Email,
+                NormalizedEmail = @NormalizedEmail,
+                EmailConfirmed = @EmailConfirmed,
+                PasswordHash = @PasswordHash,
+                SecurityStamp = @SecurityStamp,
+                ConcurrencyStamp = @ConcurrencyStamp,
+                PhoneNumber = @PhoneNumber,
+                PhoneNumberConfirmed = @PhoneNumberConfirmed,
+                TwoFactorEnabled = @TwoFactorEnabled,
+                LockoutEnd = @LockoutEnd,
+                LockoutEnabled = @LockoutEnabled,
+                AccessFailedCount = @AccessFailedCount
+            WHERE Id = @Id";
 
             try
             {

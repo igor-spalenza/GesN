@@ -27,17 +27,53 @@ string dbPath = Path.Combine(AppContext.BaseDirectory, "/GesN.Web/Data/Database/
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
+    // Configurações de conta
     options.SignIn.RequireConfirmedAccount = false;
     options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedPhoneNumber = false;
+    
+    // Configurações de senha
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 6;
+    
+    // Configurações de usuário
+    options.User.RequireUniqueEmail = true;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    
+    // Configurações de bloqueio
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+    
+    // Configuração de tokens
+    options.Tokens.EmailConfirmationTokenProvider = "EmailTokenProvider";
+    options.Tokens.PasswordResetTokenProvider = "EmailTokenProvider";
 })
 .AddUserStore<DapperUserStore>()
-.AddRoleStore<DapperRoleStore>()
-.AddDefaultTokenProviders();
+.AddRoleStore<DapperRoleClaimStore>()
+.AddDefaultTokenProviders()
+.AddTokenProvider<EmailTokenProvider<ApplicationUser>>("EmailTokenProvider");
+
+// Configuração de tokens
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(3); // Token padrão dura 3 horas
+});
+
+// Configuração do provedor de token de email
+builder.Services.Configure<DataProtectionTokenProviderOptions>("EmailTokenProvider", options =>
+{
+    options.TokenLifespan = TimeSpan.FromDays(1); // Tokens de email duram 1 dia
+});
+
+// Adicionar o RoleManager
+builder.Services.AddScoped<RoleManager<ApplicationRole>>();
+
+// Adicionar serviço de seed de dados
+builder.Services.AddScoped<SeedData>();
 
 // Add services directly instead of separately registering them
 builder.Services.AddTransient<IUserClaimsPrincipalFactory<ApplicationUser>, UserClaimsPrincipalFactory<ApplicationUser, ApplicationRole>>();
@@ -45,11 +81,44 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
+    // Configuração de caminhos
     options.LoginPath = "/Identity/Account/Login";
     options.LogoutPath = "/Identity/Account/Logout";
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    
+    // Configuração de cookies
     options.ExpireTimeSpan = TimeSpan.FromHours(8);
     options.SlidingExpiration = true;
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Em produção, use 'Always'
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    
+    // Manipuladores de eventos
+    options.Events.OnRedirectToLogin = context =>
+    {
+        // Para requisições AJAX, retornar 401 em vez de redirecionar
+        if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            context.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        }
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+});
+
+// Adicionar autorização baseada em políticas
+builder.Services.AddAuthorization(options =>
+{
+    // Exemplo de política que requer uma claim específica
+    options.AddPolicy("GerenciarUsuarios", policy =>
+        policy.RequireClaim("permissao", "usuarios:gerenciar"));
+        
+    options.AddPolicy("GerenciarClientes", policy =>
+        policy.RequireClaim("permissao", "clientes:gerenciar"));
+        
+    options.AddPolicy("GerenciarPedidos", policy =>
+        policy.RequireClaim("permissao", "pedidos:gerenciar"));
 });
 
 builder.Services.AddRazorPages();
@@ -68,15 +137,16 @@ using (var scope = builder.Services.BuildServiceProvider().CreateScope())
     var dbInit = scope.ServiceProvider.GetRequiredService<DbInit>();
     dbInit.Initialize();
     
-    // Inicializar a role Admin e atribuir ao usuário
+    // Inicializar dados padrão (roles, usuários e permissões)
     try
     {
-        await CreateAdminRole.Initialize(scope.ServiceProvider);
-        Console.WriteLine("Role Admin inicializada com sucesso!");
+        var seedData = scope.ServiceProvider.GetRequiredService<SeedData>();
+        await seedData.Initialize();
+        Console.WriteLine("Dados iniciais criados com sucesso!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Erro ao inicializar a role Admin: {ex.Message}");
+        Console.WriteLine($"Erro ao inicializar dados: {ex.Message}");
     }
 }
 

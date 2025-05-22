@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using GesN.Web.Interfaces.Repositories;
 using GesN.Web.Models;
+using Microsoft.Data.Sqlite;
 using System.Data;
 
 namespace GesN.Web.Data.Repositories
@@ -39,16 +40,44 @@ namespace GesN.Web.Data.Repositories
             return await _dbConnection.QuerySingleAsync<int>(sql, pedido);
         }
 
-        public async Task UpdateAsync(Pedido pedido)
+        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Pedido pedido)
         {
-            var sql = @"
-                UPDATE Pedido 
-                SET ClienteId = @ClienteId, 
-                    ColaboradorId = @ColaboradorId,
-                    DataPedido = @DataPedido,
-                    DataModificacao = @DataModificacao
-                WHERE PedidoId = @PedidoId";
-            await _dbConnection.ExecuteAsync(sql, pedido);
+            try
+            {
+                var sql = @"
+                    UPDATE Pedido 
+                    SET ClienteId = @ClienteId, 
+                        ColaboradorId = @ColaboradorId,
+                        DataPedido = @DataPedido,
+                        DataModificacao = @DataModificacao
+                    WHERE PedidoId = @PedidoId";
+                
+                int rowsAffected = await _dbConnection.ExecuteAsync(sql, pedido);
+                
+                if (rowsAffected > 0)
+                {
+                    return (true, null);
+                }
+                else
+                {
+                    return (false, "Nenhum registro foi atualizado. Verifique se o pedido existe.");
+                }
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == 19 && ex.Message.Contains("FOREIGN KEY constraint failed"))
+            {
+                // Erro específico de FK constraint
+                return (false, "Erro de restrição de chave estrangeira. Verifique se o Cliente e o Colaborador existem no sistema.");
+            }
+            catch (SqliteException ex)
+            {
+                // Outros erros do SQLite
+                return (false, $"Erro do banco de dados: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                // Qualquer outro erro
+                return (false, $"Erro inesperado: {ex.Message}");
+            }
         }
 
         public async Task DeleteAsync(int id)

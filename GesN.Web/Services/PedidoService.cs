@@ -62,17 +62,26 @@ namespace GesN.Web.Services
             });
         }
 
-        public async Task UpdateAsync(Pedido pedidoDto)
+        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Pedido pedidoDto)
         {
-            var pedido = new Pedido
+            try
             {
-                PedidoId = pedidoDto.PedidoId,
-                ClienteId = pedidoDto.ClienteId,
-                ColaboradorId = pedidoDto.ColaboradorId,
-                DataPedido = pedidoDto.DataPedido,
-                DataModificacao = DateTime.Parse(DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss"))
-            };
-            await _pedidoRepository.UpdateAsync(pedido);
+                var pedido = new Pedido
+                {
+                    PedidoId = pedidoDto.PedidoId,
+                    ClienteId = pedidoDto.ClienteId,
+                    ColaboradorId = pedidoDto.ColaboradorId,
+                    DataPedido = pedidoDto.DataPedido,
+                    DataModificacao = DateTime.Parse(DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss"))
+                };
+                
+                return await _pedidoRepository.UpdateAsync(pedido);
+            }
+            catch (Exception ex)
+            {
+                // Capturar quaisquer exceções inesperadas no nível de serviço
+                return (false, $"Erro no serviço: {ex.Message}");
+            }
         }
     }
 }
