@@ -91,8 +91,7 @@ namespace GesN.Web.Data.Migrations
                     Value TEXT,
                     PRIMARY KEY (UserId, LoginProvider, Name),
                     FOREIGN KEY (UserId) REFERENCES AspNetUsers(Id) ON DELETE CASCADE
-                );"
-                ;
+                );";
 
                 using (var command = new SqliteCommand(createRolesTable, connection))
                 {

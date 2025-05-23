@@ -69,7 +69,8 @@ ScaffoldingReadMe.txt
 # StyleCop
 StyleCopReport.xml
 
-# Database files
+# Database files and diretories
+GesN.Web/Data/Database/
 *.db
 *.db-journal
 

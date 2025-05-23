@@ -36,14 +36,22 @@
                 <label asp-for="Input.Email" class="form-label"></label>
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" />
+            <div class="form-floating mb-3 position-relative">
+                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" id="registerPassword" />
                 <label asp-for="Input.Password" class="form-label"></label>
+                <button type="button" class="btn position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent pe-3"
+                        onclick="togglePasswordVisibility('registerPassword', 'registerPasswordIcon')">
+                    <i id="registerPasswordIcon" class="bi bi-eye"></i>
+                </button>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
+            <div class="form-floating mb-3 position-relative">
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" id="registerConfirmPassword" />
                 <label asp-for="Input.ConfirmPassword" class="form-label"></label>
+                <button type="button" class="btn position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent pe-3"
+                        onclick="togglePasswordVisibility('registerConfirmPassword', 'registerConfirmPasswordIcon')">
+                    <i id="registerConfirmPasswordIcon" class="bi bi-eye"></i>
+                </button>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Registrar</button>
@@ -53,4 +61,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/password-visibility.js"></script>
 }

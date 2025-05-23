@@ -53,16 +53,24 @@
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <div class="form-group">
+                            <div class="form-group position-relative">
                                 <label asp-for="Password" class="control-label">Senha</label>
-                                <input asp-for="Password" class="form-control" type="password" />
+                                <input asp-for="Password" class="form-control" type="password" id="adminPassword" />
+                                <button type="button" class="btn position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent pe-3"
+                                        onclick="togglePasswordVisibility('adminPassword', 'adminPasswordIcon')">
+                                    <i id="adminPasswordIcon" class="bi bi-eye"></i>
+                                </button>
                                 <span asp-validation-for="Password" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
+                            <div class="form-group position-relative">
                                 <label asp-for="ConfirmPassword" class="control-label">Confirmar Senha</label>
-                                <input asp-for="ConfirmPassword" class="form-control" type="password" />
+                                <input asp-for="ConfirmPassword" class="form-control" type="password" id="adminConfirmPassword" />
+                                <button type="button" class="btn position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent pe-3"
+                                        onclick="togglePasswordVisibility('adminConfirmPassword', 'adminConfirmPasswordIcon')">
+                                    <i id="adminConfirmPasswordIcon" class="bi bi-eye"></i>
+                                </button>
                                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                             </div>
                         </div>
@@ -80,4 +88,5 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/password-visibility.js"></script>
 } 
