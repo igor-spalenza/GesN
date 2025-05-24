@@ -1,0 +1,256 @@
+@model IEnumerable<GesN.Web.Areas.Admin.Models.UserViewModel>
+
+<!-- Cards View (Default) -->
+<div id="cardsView" class="cards-container">
+    <div class="row g-3">
+        @foreach (var user in Model)
+        {
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3 user-item" 
+                 data-search="@(user.FirstName?.ToLower()) @(user.LastName?.ToLower()) @(user.Email?.ToLower()) @(user.UserName?.ToLower())"
+                 data-roles="@(user.Roles?.ToLower())"
+                 data-status="active">
+                <div class="card user-card h-100">
+                    <div class="card-body p-3">
+                        <!-- Header com Avatar e Nome -->
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="user-avatar me-3" style="background: linear-gradient(135deg, @GetUserColor(user.FirstName?[0] ?? 'A'));">
+                                @GetUserInitials(user.FirstName, user.LastName)
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <h6 class="card-title mb-1 text-truncate">@user.FirstName @user.LastName</h6>
+                                <p class="card-text text-muted small mb-0 text-truncate">@user.UserName</p>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="usersManager.visualizarUserModal('@user.Id')">
+                                        <i class="bi bi-eye me-2"></i>Visualizar
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="usersManager.editarUserModal('@user.Id')">
+                                        <i class="bi bi-pencil me-2"></i>Editar
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="usersManager.excluirUserModal('@user.Id')">
+                                        <i class="bi bi-trash me-2"></i>Excluir
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Informações de Contato -->
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bi bi-envelope text-muted me-2"></i>
+                                <small class="text-truncate">@user.Email</small>
+                            </div>
+                            @if (!string.IsNullOrEmpty(user.PhoneNumber))
+                            {
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-telephone text-muted me-2"></i>
+                                    <small>@user.PhoneNumber</small>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Roles -->
+                        <div class="mb-3">
+                            @if (!string.IsNullOrEmpty(user.Roles))
+                            {
+                                @foreach (var role in user.Roles.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    <span class="badge bg-primary role-badge">@role.Trim()</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary role-badge">Sem função</span>
+                            }
+                        </div>
+
+                        <!-- Claims Summary -->
+                        @if (user.Claims != null && user.Claims.Any())
+                        {
+                            <div class="border-top pt-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-shield-check me-1"></i>
+                                    @user.Claims.Count claim@(user.Claims.Count == 1 ? "" : "s")
+                                </small>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Quick Actions (Mobile-friendly) -->
+                    <div class="card-footer bg-light border-0 p-2 d-sm-none">
+                        <div class="btn-group w-100" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-info" onclick="usersManager.visualizarUserModal('@user.Id')" title="Visualizar">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="usersManager.editarUserModal('@user.Id')" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="usersManager.excluirUserModal('@user.Id')" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+            <h5 class="mt-3 text-muted">Nenhum usuário cadastrado</h5>
+            <p class="text-muted">Clique em "Novo Usuário" para começar.</p>
+        </div>
+    }
+</div>
+
+<!-- Table View (Hidden by default) -->
+<div id="tableView" class="table-container d-none">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person me-2"></i>
+                            Usuário
+                        </div>
+                    </th>
+                    <th class="d-none d-md-table-cell">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-envelope me-2"></i>
+                            Email
+                        </div>
+                    </th>
+                    <th class="d-none d-lg-table-cell">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-telephone me-2"></i>
+                            Telefone
+                        </div>
+                    </th>
+                    <th>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-badge me-2"></i>
+                            Funções
+                        </div>
+                    </th>
+                    <th class="d-none d-xl-table-cell">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-shield-check me-2"></i>
+                            Claims
+                        </div>
+                    </th>
+                    <th width="120">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr class="user-item" 
+                        data-search="@(user.FirstName?.ToLower()) @(user.LastName?.ToLower()) @(user.Email?.ToLower()) @(user.UserName?.ToLower())"
+                        data-roles="@(user.Roles?.ToLower())"
+                        data-status="active">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar me-3" style="background: linear-gradient(135deg, @GetUserColor(user.FirstName?[0] ?? 'A')); width: 40px; height: 40px; font-size: 14px;">
+                                    @GetUserInitials(user.FirstName, user.LastName)
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="fw-semibold text-truncate">@user.FirstName @user.LastName</div>
+                                    <div class="text-muted small text-truncate">@user.UserName</div>
+                                    <div class="text-muted small d-md-none text-truncate">@user.Email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="d-none d-md-table-cell">
+                            <div class="text-truncate">@user.Email</div>
+                        </td>
+                        <td class="d-none d-lg-table-cell">
+                            @user.PhoneNumber
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(user.Roles))
+                            {
+                                @foreach (var role in user.Roles.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    <span class="badge bg-primary role-badge">@role.Trim()</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary role-badge">Sem função</span>
+                            }
+                        </td>
+                        <td class="d-none d-xl-table-cell">
+                            @if (user.Claims != null && user.Claims.Any())
+                            {
+                                <span class="badge bg-info">@user.Claims.Count</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-info" onclick="usersManager.visualizarUserModal('@user.Id')" title="Visualizar">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="usersManager.editarUserModal('@user.Id')" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="usersManager.excluirUserModal('@user.Id')" title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-table text-muted" style="font-size: 3rem;"></i>
+            <h5 class="mt-3 text-muted">Nenhum usuário cadastrado</h5>
+            <p class="text-muted">Clique em "Novo Usuário" para começar.</p>
+        </div>
+    }
+</div>
+
+@functions {
+    private string GetUserInitials(string? firstName, string? lastName)
+    {
+        var first = !string.IsNullOrEmpty(firstName) ? firstName[0].ToString().ToUpper() : "";
+        var last = !string.IsNullOrEmpty(lastName) ? lastName[0].ToString().ToUpper() : "";
+        return first + last;
+    }
+
+    private string GetUserColor(char firstLetter)
+    {
+        var colors = new Dictionary<char, string>
+        {
+            {'A', "#e3f2fd, #1976d2"}, {'B', "#f3e5f5, #7b1fa2"}, {'C', "#e8f5e8, #388e3c"},
+            {'D', "#fff3e0, #f57c00"}, {'E', "#fce4ec, #c2185b"}, {'F', "#e0f2f1, #00695c"},
+            {'G', "#f1f8e9, #689f38"}, {'H', "#e8eaf6, #3f51b5"}, {'I', "#fff8e1, #ffa000"},
+            {'J', "#faf2ff, #9c27b0"}, {'K', "#e1f5fe, #0288d1"}, {'L', "#f9fbe7, #827717"},
+            {'M', "#ffe0e0, #d32f2f"}, {'N', "#e0f7fa, #00838f"}, {'O', "#fff2e1, #ef6c00"},
+            {'P', "#f8bbd9, #ad1457"}, {'Q', "#e6e6fa, #512da8"}, {'R', "#ffe4e1, #d84315"},
+            {'S', "#e8f6f3, #00695c"}, {'T', "#fff0f5, #8e24aa"}, {'U', "#e3f2fd, #1565c0"},
+            {'V', "#f1f8e9, #558b2f"}, {'W', "#fdf2e9, #e65100"}, {'X', "#f3e5f5, #6a1b9a"},
+            {'Y', "#fffde7, #f9a825"}, {'Z', "#ffebee, #c62828"}
+        };
+        
+        return colors.ContainsKey(char.ToUpper(firstLetter)) 
+            ? colors[char.ToUpper(firstLetter)] 
+            : "#e3f2fd, #1976d2";
+    }
+} 

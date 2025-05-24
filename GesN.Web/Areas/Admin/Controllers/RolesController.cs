@@ -1,249 +1,230 @@
 using Dapper;
 using GesN.Web.Areas.Identity.Data.Models;
-using GesN.Web.Data;
+using GesN.Web.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data;
-using System.Threading.Tasks;
+using System.Security.Claims;
+using GesN.Web.Areas.Admin.Models;
 
 namespace GesN.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class RolesController : Controller
     {
-        private readonly IDbConnection _dbConnection;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public RolesController(ProjectDataContext context)
+        public RolesController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
-            _dbConnection = context.Connection;
+            _unitOfWork = unitOfWork;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         public async Task<IActionResult> Index()
         {
-            // Obter todas as roles diretamente do banco de dados em vez de usar _roleManager.Roles
             var roles = await GetAllRolesAsync();
-            return View(roles);
+            var roleViewModels = new List<RoleViewModel>();
+
+            foreach (var role in roles)
+            {
+                var users = await GetRoleUsersAsync(role.Id);
+                var roleClaims = await _roleManager.GetClaimsAsync(role);
+                
+                roleViewModels.Add(new RoleViewModel
+                {
+                    Id = role.Id,
+                    Name = role.Name,
+                    NormalizedName = role.NormalizedName,
+                    Users = string.Join(", ", users.Select(u => u.UserName)),
+                    UserCount = users.Count,
+                    Claims = roleClaims.Select(c => new ClaimViewModel { Type = c.Type, Value = c.Value }).ToList()
+                });
+            }
+
+            return View(roleViewModels);
         }
 
         private async Task<List<ApplicationRole>> GetAllRolesAsync()
         {
-            var query = "SELECT * FROM AspNetRoles";
-            var roles = await _dbConnection.QueryAsync<ApplicationRole>(query);
+            const string query = "SELECT * FROM AspNetRoles";
+            var roles = await _unitOfWork.Connection.QueryAsync<ApplicationRole>(query, transaction: _unitOfWork.Transaction);
             return roles.ToList();
         }
 
-        public IActionResult Create()
+        private async Task<List<ApplicationUser>> GetRoleUsersAsync(string roleId)
         {
-            return View();
+            const string query = @"
+                SELECT u.*
+                FROM AspNetUsers u
+                INNER JOIN AspNetUserRoles ur ON u.Id = ur.UserId
+                WHERE ur.RoleId = @RoleId";
+
+            var users = await _unitOfWork.Connection.QueryAsync<ApplicationUser>(
+                query,
+                new { RoleId = roleId },
+                _unitOfWork.Transaction);
+            return users.ToList();
         }
 
-        // Nova action para criar roles de forma simples
-        public IActionResult CreateSimple()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateSimple(string roleName)
-        {
-            try
-            {
-                // Verificar se o nome foi fornecido
-                if (string.IsNullOrEmpty(roleName))
-                {
-                    ViewBag.ErrorMessage = "O nome da role é obrigatório.";
-                    return View();
-                }
-
-                // Verificar se a role já existe
-                var existingRole = await _dbConnection.QueryFirstOrDefaultAsync<ApplicationRole>(
-                    "SELECT * FROM AspNetRoles WHERE NormalizedName = @NormalizedName",
-                    new { NormalizedName = roleName.ToUpper() });
-
-                if (existingRole != null)
-                {
-                    ViewBag.ErrorMessage = $"Role '{roleName}' já existe.";
-                    return View();
-                }
-
-                // Criar a role
-                var roleId = Guid.NewGuid().ToString();
-                var query = @"
-                    INSERT INTO AspNetRoles (Id, Name, NormalizedName, ConcurrencyStamp)
-                    VALUES (@Id, @Name, @NormalizedName, @ConcurrencyStamp)";
-
-                await _dbConnection.ExecuteAsync(query, new
-                {
-                    Id = roleId,
-                    Name = roleName,
-                    NormalizedName = roleName.ToUpper(),
-                    ConcurrencyStamp = Guid.NewGuid().ToString()
-                });
-
-                ViewBag.SuccessMessage = $"Role '{roleName}' criada com sucesso.";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                ViewBag.ErrorMessage = $"Erro ao criar role: {ex.Message}";
-                return View();
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(RoleViewModel model)
-        {
-            // Verificar o estado do ModelState para diagnóstico
-            if (!ModelState.IsValid)
-            {
-                // Adicionar diagnóstico ao ViewBag para entender o que está falhando
-                var errors = new List<string>();
-                foreach (var state in ModelState)
-                {
-                    foreach (var error in state.Value.Errors)
-                    {
-                        errors.Add($"{state.Key}: {error.ErrorMessage}");
-                    }
-                }
-                ViewBag.ValidationErrors = errors;
-            }
-
-            // Continuar mesmo se ModelState for inválido (para diagnóstico)
-            try
-            {
-                // Verificar se o nome foi fornecido
-                if (string.IsNullOrEmpty(model.Name))
-                {
-                    ModelState.AddModelError("Name", "O nome da role é obrigatório");
-                    return View(model);
-                }
-
-                // Verificar se a role já existe
-                var existingRole = await _dbConnection.QueryFirstOrDefaultAsync<ApplicationRole>(
-                    "SELECT * FROM AspNetRoles WHERE NormalizedName = @NormalizedName",
-                    new { NormalizedName = model.Name.ToUpper() });
-
-                if (existingRole != null)
-                {
-                    ModelState.AddModelError(string.Empty, $"Role '{model.Name}' já existe.");
-                    return View(model);
-                }
-
-                // Criar a role
-                var roleId = Guid.NewGuid().ToString();
-                var query = @"
-                    INSERT INTO AspNetRoles (Id, Name, NormalizedName, ConcurrencyStamp)
-                    VALUES (@Id, @Name, @NormalizedName, @ConcurrencyStamp)";
-
-                await _dbConnection.ExecuteAsync(query, new
-                {
-                    Id = roleId,
-                    Name = model.Name,
-                    NormalizedName = model.Name.ToUpper(),
-                    ConcurrencyStamp = Guid.NewGuid().ToString()
-                });
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(string.Empty, $"Erro ao criar role: {ex.Message}");
-            }
-
-            return View(model);
-        }
-
-        public async Task<IActionResult> Edit(string id)
+        public async Task<IActionResult> Details(string id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var role = await _dbConnection.QueryFirstOrDefaultAsync<ApplicationRole>(
-                "SELECT * FROM AspNetRoles WHERE Id = @Id",
-                new { Id = id });
-
+            var role = await GetRoleByIdAsync(id);
             if (role == null)
             {
                 return NotFound();
             }
 
-            var model = new RoleViewModel { Id = role.Id, Name = role.Name };
-            return View(model);
+            var users = await GetRoleUsersAsync(id);
+            var roleClaims = await _roleManager.GetClaimsAsync(role);
+            
+            var viewModel = new RoleViewModel
+            {
+                Id = role.Id,
+                Name = role.Name,
+                NormalizedName = role.NormalizedName,
+                Users = string.Join(", ", users.Select(u => u.UserName)),
+                UserCount = users.Count,
+                Claims = roleClaims.Select(c => new ClaimViewModel { Type = c.Type, Value = c.Value }).ToList()
+            };
+
+            return View(viewModel);
+        }
+
+        private async Task<ApplicationRole> GetRoleByIdAsync(string id)
+        {
+            const string query = "SELECT * FROM AspNetRoles WHERE Id = @Id";
+            return await _unitOfWork.Connection.QueryFirstOrDefaultAsync<ApplicationRole>(
+                query,
+                new { Id = id },
+                _unitOfWork.Transaction);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return NotFound();
+
+            var role = await _roleManager.FindByIdAsync(id);
+            if (role == null)
+                return NotFound();
+
+            var roleClaims = await _roleManager.GetClaimsAsync(role);
+            var associatedUsers = await GetRoleUsersAsync(id);
+
+            var model = new EditRoleViewModel
+            {
+                Id = role.Id,
+                Name = role.Name,
+                NormalizedName = role.NormalizedName,
+                Claims = roleClaims.Select(c => new ClaimViewModel { Type = c.Type, Value = c.Value }).ToList(),
+                AssociatedUsers = associatedUsers.Select(u => new UserSelectionViewModel 
+                { 
+                    Id = u.Id, 
+                    UserName = u.UserName, 
+                    Email = u.Email, 
+                    IsSelected = true 
+                }).ToList()
+            };
+
+            return PartialView("_Edit", model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, RoleViewModel model)
+        public async Task<IActionResult> Edit(EditRoleViewModel model)
         {
-            if (id != model.Id)
+            try
             {
-                return NotFound();
-            }
+                System.Diagnostics.Debug.WriteLine($"Edit POST chamado - Id: {model?.Id}, Name: {model?.Name}");
+                
+                if (!ModelState.IsValid)
+                {
+                    System.Diagnostics.Debug.WriteLine("ModelState inválido na edição");
+                    // Recarregar dados necessários em caso de erro
+                    model.Claims ??= new List<ClaimViewModel>();
+                    model.AssociatedUsers ??= new List<UserSelectionViewModel>();
+                    return PartialView("_Edit", model);
+                }
 
-            if (ModelState.IsValid)
+                System.Diagnostics.Debug.WriteLine("ModelState válido, buscando role");
+
+                var role = await _roleManager.FindByIdAsync(model.Id);
+                if (role == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Role não encontrada");
+                    ModelState.AddModelError("", "Role não encontrada.");
+                    return PartialView("_Edit", model);
+                }
+
+                System.Diagnostics.Debug.WriteLine("Role encontrada, atualizando dados");
+
+                role.Name = model.Name;
+                role.NormalizedName = model.Name.ToUpper();
+
+                var result = await _roleManager.UpdateAsync(role);
+                if (!result.Succeeded)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Erro ao atualizar role: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                    return PartialView("_Edit", model);
+                }
+
+                System.Diagnostics.Debug.WriteLine("Role atualizada, gerenciando claims");
+
+                // Atualizar claims
+                var currentClaims = await _roleManager.GetClaimsAsync(role);
+                var claimsToRemove = currentClaims.Where(c => !model.Claims.Any(mc => mc.Type == c.Type && mc.Value == c.Value));
+                var claimsToAdd = model.Claims.Where(mc => !currentClaims.Any(c => c.Type == mc.Type && c.Value == mc.Value))
+                                             .Select(c => new Claim(c.Type, c.Value));
+
+                foreach (var claim in claimsToRemove)
+                {
+                    result = await _roleManager.RemoveClaimAsync(role, claim);
+                    if (!result.Succeeded)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Erro ao remover claim: {claim.Type}={claim.Value}");
+                        ModelState.AddModelError("", "Erro ao remover claims.");
+                        return PartialView("_Edit", model);
+                    }
+                }
+
+                foreach (var claim in claimsToAdd)
+                {
+                    result = await _roleManager.AddClaimAsync(role, claim);
+                    if (!result.Succeeded)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Erro ao adicionar claim: {claim.Type}={claim.Value}");
+                        ModelState.AddModelError("", "Erro ao adicionar claims.");
+                        return PartialView("_Edit", model);
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine("Edição completa com sucesso");
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
             {
-                try
-                {
-                    // Verificar se a role existe
-                    var existingRole = await _dbConnection.QueryFirstOrDefaultAsync<ApplicationRole>(
-                        "SELECT * FROM AspNetRoles WHERE Id = @Id",
-                        new { Id = id });
-
-                    if (existingRole == null)
-                    {
-                        return NotFound();
-                    }
-
-                    // Verificar se o novo nome já está em uso
-                    if (existingRole.Name != model.Name)
-                    {
-                        var nameExists = await _dbConnection.QueryFirstOrDefaultAsync<ApplicationRole>(
-                            "SELECT * FROM AspNetRoles WHERE NormalizedName = @NormalizedName AND Id != @Id",
-                            new { NormalizedName = model.Name.ToUpper(), Id = id });
-
-                        if (nameExists != null)
-                        {
-                            ModelState.AddModelError(string.Empty, $"Role '{model.Name}' já existe.");
-                            return View(model);
-                        }
-                    }
-
-                    // Atualizar a role
-                    var query = @"
-                        UPDATE AspNetRoles 
-                        SET Name = @Name,
-                            NormalizedName = @NormalizedName,
-                            ConcurrencyStamp = @ConcurrencyStamp
-                        WHERE Id = @Id";
-
-                    await _dbConnection.ExecuteAsync(query, new
-                    {
-                        Id = id,
-                        Name = model.Name,
-                        NormalizedName = model.Name.ToUpper(),
-                        ConcurrencyStamp = Guid.NewGuid().ToString()
-                    });
-
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError(string.Empty, $"Erro ao atualizar role: {ex.Message}");
-                }
+                System.Diagnostics.Debug.WriteLine($"Exceção no Edit: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                ModelState.AddModelError("", "Ocorreu um erro ao salvar as alterações: " + ex.Message);
+                return PartialView("_Edit", model);
             }
-
-            return View(model);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -251,65 +232,228 @@ namespace GesN.Web.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var role = await _dbConnection.QueryFirstOrDefaultAsync<ApplicationRole>(
-                "SELECT * FROM AspNetRoles WHERE Id = @Id",
-                new { Id = id });
-
+            var role = await GetRoleByIdAsync(id);
             if (role == null)
             {
                 return NotFound();
             }
 
-            return View(role);
+            var users = await GetRoleUsersAsync(id);
+            var viewModel = new RoleViewModel
+            {
+                Id = role.Id,
+                Name = role.Name,
+                NormalizedName = role.NormalizedName,
+                Users = string.Join(", ", users.Select(u => u.UserName)),
+                UserCount = users.Count
+            };
+
+            return PartialView("_Delete", viewModel);
         }
 
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             try
             {
-                // Verificar se a role existe
-                var role = await _dbConnection.QueryFirstOrDefaultAsync<ApplicationRole>(
-                    "SELECT * FROM AspNetRoles WHERE Id = @Id",
-                    new { Id = id });
+                System.Diagnostics.Debug.WriteLine($"DeleteConfirmed chamado - Id: {id}");
 
+                var role = await _roleManager.FindByIdAsync(id);
                 if (role == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("Role não encontrada para exclusão");
                     return NotFound();
                 }
 
-                // Primeiro remover todas as atribuições de usuários a esta role
-                await _dbConnection.ExecuteAsync(
-                    "DELETE FROM AspNetUserRoles WHERE RoleId = @RoleId",
-                    new { RoleId = id });
+                System.Diagnostics.Debug.WriteLine("Role encontrada, verificando usuários associados");
 
-                // Depois remover a role
-                await _dbConnection.ExecuteAsync(
-                    "DELETE FROM AspNetRoles WHERE Id = @Id",
-                    new { Id = id });
+                // Verificar se a role possui usuários associados
+                var users = await GetRoleUsersAsync(id);
+                if (users.Any())
+                {
+                    System.Diagnostics.Debug.WriteLine($"Role possui {users.Count} usuários associados");
+                    return Json(new { success = false, message = "Não é possível excluir uma role que possui usuários associados. Remova todos os usuários desta role antes de excluí-la." });
+                }
 
-                return RedirectToAction(nameof(Index));
+                System.Diagnostics.Debug.WriteLine("Nenhum usuário associado, excluindo role");
+
+                var result = await _roleManager.DeleteAsync(role);
+                if (!result.Succeeded)
+                {
+                    var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+                    System.Diagnostics.Debug.WriteLine($"Erro ao excluir role: {errorMessage}");
+                    throw new InvalidOperationException($"Erro ao excluir role: {errorMessage}");
+                }
+
+                System.Diagnostics.Debug.WriteLine("Role excluída com sucesso");
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, $"Erro ao excluir role: {ex.Message}");
-                
-                var role = await _dbConnection.QueryFirstOrDefaultAsync<ApplicationRole>(
-                    "SELECT * FROM AspNetRoles WHERE Id = @Id",
-                    new { Id = id });
-                
-                return View(role);
+                System.Diagnostics.Debug.WriteLine($"Exceção no DeleteConfirmed: {ex.Message}");
+                return Json(new { success = false, message = ex.Message });
             }
         }
-    }
 
-    public class RoleViewModel
-    {
-        public string Id { get; set; }
+        [HttpGet]
+        public async Task<IActionResult> DetailsPartial(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-        [Required(ErrorMessage = "O nome da role é obrigatório")]
-        [Display(Name = "Nome da Role")]
-        public string Name { get; set; }
+            var role = await _roleManager.FindByIdAsync(id);
+            if (role == null)
+            {
+                return NotFound();
+            }
+
+            var users = await GetRoleUsersAsync(id);
+            var roleClaims = await _roleManager.GetClaimsAsync(role);
+
+            var viewModel = new RoleViewModel
+            {
+                Id = role.Id,
+                Name = role.Name,
+                NormalizedName = role.NormalizedName,
+                Users = string.Join(", ", users.Select(u => u.UserName)),
+                UserCount = users.Count,
+                Claims = roleClaims.Select(c => new ClaimViewModel { Type = c.Type, Value = c.Value }).ToList()
+            };
+
+            return PartialView("_Details", viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreatePartial()
+        {
+            var model = new CreateRoleViewModel
+            {
+                Claims = new List<ClaimViewModel>()
+            };
+
+            return PartialView("_Create", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreatePartial([FromForm] CreateRoleViewModel model)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"CreatePartial POST chamado - Name: {model?.Name}");
+                
+                if (!ModelState.IsValid)
+                {
+                    System.Diagnostics.Debug.WriteLine("ModelState inválido");
+                    // Garantir que Claims não seja null
+                    model.Claims ??= new List<ClaimViewModel>();
+                    return PartialView("_Create", model);
+                }
+
+                System.Diagnostics.Debug.WriteLine("ModelState válido, verificando se role já existe");
+
+                // Verificar se a role já existe
+                var existingRole = await _roleManager.FindByNameAsync(model.Name);
+                if (existingRole != null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Role já existe");
+                    return Json(new { success = false, message = "Uma role com este nome já existe." });
+                }
+
+                System.Diagnostics.Debug.WriteLine("Criando nova role");
+
+                var role = new ApplicationRole
+                {
+                    Name = model.Name,
+                    NormalizedName = model.Name.ToUpper()
+                };
+
+                var result = await _roleManager.CreateAsync(role);
+                if (!result.Succeeded)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Erro ao criar role: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    var errors = result.Errors.Select(e => e.Description).ToList();
+                    return Json(new { success = false, message = "Erro ao criar role", errors = errors });
+                }
+
+                System.Diagnostics.Debug.WriteLine("Role criada com sucesso");
+
+                // Adicionar claims
+                if (model.Claims?.Any() == true)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Adicionando {model.Claims.Count} claims");
+                    var claims = model.Claims
+                        .Where(c => !string.IsNullOrEmpty(c.Type) && !string.IsNullOrEmpty(c.Value))
+                        .Select(c => new Claim(c.Type, c.Value));
+
+                    foreach (var claim in claims)
+                    {
+                        result = await _roleManager.AddClaimAsync(role, claim);
+                        if (!result.Succeeded)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Erro ao adicionar claim: {claim.Type}={claim.Value}");
+                            await _roleManager.DeleteAsync(role);
+                            var errors = result.Errors.Select(e => e.Description).ToList();
+                            return Json(new { success = false, message = "Erro ao adicionar claims", errors = errors });
+                        }
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine("Operação completa com sucesso");
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exceção no CreatePartial: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                return Json(new { success = false, message = "Erro ao criar role: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GridPartial()
+        {
+            try
+            {
+                var roles = _roleManager.Roles.ToList();
+                var roleViewModels = new List<RoleViewModel>();
+
+                foreach (var role in roles)
+                {
+                    try
+                    {
+                        var users = await GetRoleUsersAsync(role.Id);
+                        var roleClaims = await _roleManager.GetClaimsAsync(role);
+                        
+                        roleViewModels.Add(new RoleViewModel
+                        {
+                            Id = role.Id,
+                            Name = role.Name ?? "",
+                            NormalizedName = role.NormalizedName ?? "",
+                            Users = string.Join(", ", users.Select(u => u.UserName)),
+                            UserCount = users.Count,
+                            Claims = roleClaims?.Select(c => new ClaimViewModel { Type = c.Type, Value = c.Value }).ToList() ?? new List<ClaimViewModel>()
+                        });
+                    }
+                    catch (Exception roleEx)
+                    {
+                        // Se houver erro com uma role específica, pular para a próxima
+                        System.Diagnostics.Debug.WriteLine($"Erro ao processar role {role.Id}: {roleEx.Message}");
+                        continue;
+                    }
+                }
+
+                return PartialView("_Grid", roleViewModels);
+            }
+            catch (Exception ex)
+            {
+                // Log do erro para debug
+                System.Diagnostics.Debug.WriteLine($"Erro no GridPartial: {ex.Message}");
+                return StatusCode(500, $"Erro ao carregar grid de roles: {ex.Message}");
+            }
+        }
     }
 } 

@@ -242,7 +242,6 @@ namespace GesN.Web.Controllers
                     {
                         pedidoId = pedidoAtualizado.PedidoId,
                         clienteId = pedidoAtualizado.ClienteId,
-                        colaboradorId = pedidoAtualizado.ColaboradorId,
                         dataPedido = pedidoAtualizado.DataPedido,
                         dataCadastro = pedidoAtualizado.DataCadastro,
                         dataModificacao = pedidoAtualizado.DataModificacao

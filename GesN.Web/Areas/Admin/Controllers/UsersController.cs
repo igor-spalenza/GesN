@@ -1,16 +1,11 @@
 using Dapper;
 using GesN.Web.Areas.Identity.Data.Models;
-using GesN.Web.Data;
+using GesN.Web.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Claims;
+using GesN.Web.Areas.Admin.Models;
 
 namespace GesN.Web.Areas.Admin.Controllers
 {
@@ -18,24 +13,27 @@ namespace GesN.Web.Areas.Admin.Controllers
     [Authorize(Roles = "Admin")]
     public class UsersController : Controller
     {
-        private readonly IDbConnection _dbConnection;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public UsersController(ProjectDataContext context, UserManager<ApplicationUser> userManager)
+        public UsersController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
-            _dbConnection = context.Connection;
+            _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         public async Task<IActionResult> Index()
         {
-            // Obter todos os usuários diretamente do banco de dados
             var users = await GetAllUsersAsync();
             var userViewModels = new List<UserViewModel>();
 
             foreach (var user in users)
             {
                 var roles = await GetUserRolesAsync(user.Id);
+                var userClaims = await _userManager.GetClaimsAsync(user);
+                
                 userViewModels.Add(new UserViewModel
                 {
                     Id = user.Id,
@@ -44,7 +42,8 @@ namespace GesN.Web.Areas.Admin.Controllers
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     PhoneNumber = user.PhoneNumber,
-                    Roles = string.Join(", ", roles)
+                    Roles = string.Join(", ", roles),
+                    Claims = userClaims.Select(c => new ClaimViewModel { Type = c.Type, Value = c.Value }).ToList()
                 });
             }
 
@@ -53,20 +52,23 @@ namespace GesN.Web.Areas.Admin.Controllers
 
         private async Task<List<ApplicationUser>> GetAllUsersAsync()
         {
-            var query = "SELECT * FROM AspNetUsers";
-            var users = await _dbConnection.QueryAsync<ApplicationUser>(query);
+            const string query = "SELECT * FROM AspNetUsers";
+            var users = await _unitOfWork.Connection.QueryAsync<ApplicationUser>(query, transaction: _unitOfWork.Transaction);
             return users.ToList();
         }
 
         private async Task<List<string>> GetUserRolesAsync(string userId)
         {
-            var query = @"
+            const string query = @"
                 SELECT r.Name
                 FROM AspNetRoles r
                 INNER JOIN AspNetUserRoles ur ON r.Id = ur.RoleId
                 WHERE ur.UserId = @UserId";
 
-            var roles = await _dbConnection.QueryAsync<string>(query, new { UserId = userId });
+            var roles = await _unitOfWork.Connection.QueryAsync<string>(
+                query,
+                new { UserId = userId },
+                _unitOfWork.Transaction);
             return roles.ToList();
         }
 
@@ -100,92 +102,159 @@ namespace GesN.Web.Areas.Admin.Controllers
 
         private async Task<ApplicationUser> GetUserByIdAsync(string id)
         {
-            return await _dbConnection.QueryFirstOrDefaultAsync<ApplicationUser>(
-                "SELECT * FROM AspNetUsers WHERE Id = @Id",
-                new { Id = id }
-            );
+            const string query = "SELECT * FROM AspNetUsers WHERE Id = @Id";
+            return await _unitOfWork.Connection.QueryFirstOrDefaultAsync<ApplicationUser>(
+                query,
+                new { Id = id },
+                _unitOfWork.Transaction);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
-            {
+            if (string.IsNullOrEmpty(id))
                 return NotFound();
-            }
 
-            var user = await GetUserByIdAsync(id);
+            var user = await _userManager.FindByIdAsync(id);
             if (user == null)
-            {
                 return NotFound();
-            }
 
-            var viewModel = new EditUserViewModel
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var allRoles = _roleManager.Roles.Select(r => r.Name).ToList();
+            var userClaims = await _userManager.GetClaimsAsync(user);
+
+            var model = new EditUserViewModel
             {
                 Id = user.Id,
-                Email = user.Email,
                 UserName = user.UserName,
+                Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                PhoneNumber = user.PhoneNumber
+                PhoneNumber = user.PhoneNumber,
+                SelectedRoles = userRoles.ToList(),
+                AvailableRoles = allRoles,
+                Claims = userClaims.Select(c => new ClaimViewModel { Type = c.Type, Value = c.Value }).ToList()
             };
 
-            return View(viewModel);
+            return PartialView("_Edit", model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, EditUserViewModel model)
+        public async Task<IActionResult> Edit(EditUserViewModel model)
         {
-            if (id != model.Id)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                // Recarregar dados necessários em caso de erro
+                var allRoles = _roleManager.Roles.Select(r => r.Name).ToList();
+                model.AvailableRoles = allRoles;
+                model.Claims ??= new List<ClaimViewModel>();
+                return PartialView("_Edit", model);
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
+                System.Diagnostics.Debug.WriteLine($"Edit Users POST chamado - Id: {model?.Id}, UserName: {model?.UserName}");
+
+                var user = await _userManager.FindByIdAsync(model.Id);
+                if (user == null)
                 {
-                    var user = await GetUserByIdAsync(id);
-                    if (user == null)
+                    System.Diagnostics.Debug.WriteLine("Usuário não encontrado");
+                    ModelState.AddModelError("", "Usuário não encontrado.");
+                    return PartialView("_Edit", model);
+                }
+
+                System.Diagnostics.Debug.WriteLine("Usuário encontrado, atualizando dados");
+
+                user.UserName = model.UserName;
+                user.Email = model.Email;
+                user.FirstName = model.FirstName;
+                user.LastName = model.LastName;
+                user.PhoneNumber = model.PhoneNumber;
+
+                var result = await _userManager.UpdateAsync(user);
+                if (!result.Succeeded)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Erro ao atualizar usuário: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    foreach (var error in result.Errors)
                     {
-                        return NotFound();
+                        ModelState.AddModelError("", error.Description);
                     }
-
-                    // Atualizar o usuário diretamente no banco de dados
-                    var query = @"
-                        UPDATE AspNetUsers SET 
-                            UserName = @UserName,
-                            NormalizedUserName = @NormalizedUserName,
-                            Email = @Email,
-                            NormalizedEmail = @NormalizedEmail,
-                            PhoneNumber = @PhoneNumber,
-                            FirstName = @FirstName,
-                            LastName = @LastName
-                        WHERE Id = @Id";
-
-                    await _dbConnection.ExecuteAsync(query, new
-                    {
-                        Id = id,
-                        UserName = model.UserName,
-                        NormalizedUserName = model.UserName.ToUpper(),
-                        Email = model.Email,
-                        NormalizedEmail = model.Email.ToUpper(),
-                        PhoneNumber = model.PhoneNumber,
-                        FirstName = model.FirstName,
-                        LastName = model.LastName
-                    });
-
-                    return RedirectToAction(nameof(Index));
+                    return PartialView("_Edit", model);
                 }
-                catch (Exception ex)
+
+                System.Diagnostics.Debug.WriteLine("Usuário atualizado, gerenciando roles");
+
+                // Atualizar roles
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                var rolesToRemove = currentRoles.Except(model.SelectedRoles ?? new List<string>());
+                var rolesToAdd = (model.SelectedRoles ?? new List<string>()).Except(currentRoles);
+
+                if (rolesToRemove.Any())
                 {
-                    ModelState.AddModelError(string.Empty, $"Erro ao atualizar usuário: {ex.Message}");
+                    result = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+                    if (!result.Succeeded)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Erro ao remover roles do usuário");
+                        ModelState.AddModelError("", "Erro ao remover roles.");
+                        return PartialView("_Edit", model);
+                    }
                 }
-            }
 
-            return View(model);
+                if (rolesToAdd.Any())
+                {
+                    result = await _userManager.AddToRolesAsync(user, rolesToAdd);
+                    if (!result.Succeeded)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Erro ao adicionar roles ao usuário");
+                        ModelState.AddModelError("", "Erro ao adicionar roles.");
+                        return PartialView("_Edit", model);
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine("Roles atualizadas, gerenciando claims");
+
+                // Atualizar claims
+                var currentClaims = await _userManager.GetClaimsAsync(user);
+                var claimsToRemove = currentClaims.Where(c => !model.Claims.Any(mc => mc.Type == c.Type && mc.Value == c.Value));
+                var claimsToAdd = model.Claims.Where(mc => !currentClaims.Any(c => c.Type == mc.Type && c.Value == mc.Value))
+                                             .Select(c => new Claim(c.Type, c.Value));
+
+                foreach (var claim in claimsToRemove)
+                {
+                    result = await _userManager.RemoveClaimAsync(user, claim);
+                    if (!result.Succeeded)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Erro ao remover claim do usuário: {claim.Type}={claim.Value}");
+                        ModelState.AddModelError("", "Erro ao remover claims.");
+                        return PartialView("_Edit", model);
+                    }
+                }
+
+                foreach (var claim in claimsToAdd)
+                {
+                    result = await _userManager.AddClaimAsync(user, claim);
+                    if (!result.Succeeded)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Erro ao adicionar claim ao usuário: {claim.Type}={claim.Value}");
+                        ModelState.AddModelError("", "Erro ao adicionar claims.");
+                        return PartialView("_Edit", model);
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine("Edição de usuário completa com sucesso");
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exceção no Edit Users: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                ModelState.AddModelError("", "Ocorreu um erro ao salvar as alterações: " + ex.Message);
+                return PartialView("_Edit", model);
+            }
         }
 
+        [HttpGet]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -211,170 +280,235 @@ namespace GesN.Web.Areas.Admin.Controllers
                 Roles = string.Join(", ", roles)
             };
 
-            return View(viewModel);
+            return PartialView("_Delete", viewModel);
         }
 
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             try
             {
-                var user = await GetUserByIdAsync(id);
+                System.Diagnostics.Debug.WriteLine($"DeleteConfirmed Users chamado - Id: {id}");
+
+                var user = await _userManager.FindByIdAsync(id);
                 if (user == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("Usuário não encontrado para exclusão");
                     return NotFound();
                 }
 
-                // Primeiro remover todas as relações com roles
-                await _dbConnection.ExecuteAsync(
-                    "DELETE FROM AspNetUserRoles WHERE UserId = @UserId",
-                    new { UserId = id });
+                System.Diagnostics.Debug.WriteLine("Usuário encontrado, excluindo");
 
-                // Remover tokens
-                await _dbConnection.ExecuteAsync(
-                    "DELETE FROM AspNetUserTokens WHERE UserId = @UserId",
-                    new { UserId = id });
+                var result = await _userManager.DeleteAsync(user);
+                if (!result.Succeeded)
+                {
+                    var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+                    System.Diagnostics.Debug.WriteLine($"Erro ao excluir usuário: {errorMessage}");
+                    throw new InvalidOperationException($"Erro ao excluir usuário: {errorMessage}");
+                }
 
-                // Remover logins
-                await _dbConnection.ExecuteAsync(
-                    "DELETE FROM AspNetUserLogins WHERE UserId = @UserId",
-                    new { UserId = id });
-
-                // Remover claims
-                await _dbConnection.ExecuteAsync(
-                    "DELETE FROM AspNetUserClaims WHERE UserId = @UserId",
-                    new { UserId = id });
-
-                // Finalmente remover o usuário
-                await _dbConnection.ExecuteAsync(
-                    "DELETE FROM AspNetUsers WHERE Id = @Id",
-                    new { Id = id });
-
-                return RedirectToAction(nameof(Index));
+                System.Diagnostics.Debug.WriteLine("Usuário excluído com sucesso");
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, $"Erro ao excluir usuário: {ex.Message}");
-                
-                var user = await GetUserByIdAsync(id);
-                var roles = await GetUserRolesAsync(id);
-                var viewModel = new UserViewModel
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    UserName = user.UserName,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    PhoneNumber = user.PhoneNumber,
-                    Roles = string.Join(", ", roles)
-                };
-                
-                return View(viewModel);
+                System.Diagnostics.Debug.WriteLine($"Exceção no DeleteConfirmed Users: {ex.Message}");
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
-        // GET: Admin/Users/Create
-        public IActionResult Create()
+        [HttpGet]
+        public async Task<IActionResult> DetailsPartial(string id)
         {
-            return View();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var roles = await GetUserRolesAsync(id);
+            var userClaims = await _userManager.GetClaimsAsync(user);
+
+            var viewModel = new UserViewModel
+            {
+                Id = user.Id,
+                Email = user.Email,
+                UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                Roles = string.Join(", ", roles),
+                Claims = userClaims.Select(c => new ClaimViewModel { Type = c.Type, Value = c.Value }).ToList()
+            };
+
+            return PartialView("_Details", viewModel);
         }
 
-        // POST: Admin/Users/Create
+        [HttpGet]
+        public async Task<IActionResult> CreatePartial()
+        {
+            var roles = _roleManager.Roles.ToList();
+            var model = new CreateUserViewModel
+            {
+                AvailableRoles = roles.Select(r => new RoleSelectionViewModel
+                {
+                    Id = r.Id,
+                    Name = r.Name,
+                    IsSelected = false
+                }).ToList(),
+                Claims = new List<ClaimViewModel>()
+            };
+
+            return PartialView("_Create", model);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateUserViewModel model)
+        public async Task<IActionResult> CreatePartial([FromForm] CreateUserViewModel model)
         {
-            if (ModelState.IsValid)
+            try
             {
-                try
+                System.Diagnostics.Debug.WriteLine($"CreatePartial Users POST chamado - UserName: {model?.UserName}");
+                
+                if (!ModelState.IsValid)
                 {
-                    var user = new ApplicationUser
+                    System.Diagnostics.Debug.WriteLine("ModelState inválido na criação de usuário");
+                    // Recarregar as roles disponíveis em caso de erro
+                    const string query = "SELECT * FROM AspNetRoles";
+                    var roles = await _unitOfWork.Connection.QueryAsync<ApplicationRole>(query, transaction: _unitOfWork.Transaction);
+                
+                    model.AvailableRoles = roles.Select(r => new RoleSelectionViewModel
                     {
-                        UserName = model.UserName,
-                        Email = model.Email,
-                        FirstName = model.FirstName,
-                        LastName = model.LastName,
-                        PhoneNumber = model.PhoneNumber,
-                        EmailConfirmed = true,
-                        PhoneNumberConfirmed = true
-                    };
+                        Id = r.Id,
+                        Name = r.Name,
+                        IsSelected = model.SelectedRoles?.Contains(r.Name) ?? false
+                    }).ToList();
 
-                    var result = await _userManager.CreateAsync(user, model.Password);
+                    // Garantir que Claims não seja null
+                    model.Claims ??= new List<ClaimViewModel>();
 
-                    if (result.Succeeded)
+                    return PartialView("_Create", model);
+                }
+
+                System.Diagnostics.Debug.WriteLine("ModelState válido, criando usuário");
+
+                var user = new ApplicationUser
+                {
+                    UserName = model.UserName,
+                    Email = model.Email,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    PhoneNumber = model.PhoneNumber,
+                    EmailConfirmed = true
+                };
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Erro ao criar usuário: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    var errors = result.Errors.Select(e => e.Description).ToList();
+                    return Json(new { success = false, message = "Erro ao criar usuário", errors = errors });
+                }
+
+                System.Diagnostics.Debug.WriteLine("Usuário criado, adicionando roles");
+
+                // Adicionar roles selecionadas
+                var selectedRoles = model.AvailableRoles.Where(r => r.IsSelected).Select(r => r.Name).ToList();
+                if (selectedRoles.Any())
+                {
+                    result = await _userManager.AddToRolesAsync(user, selectedRoles);
+                    if (!result.Succeeded)
                     {
-                        return RedirectToAction(nameof(Index));
-                    }
-
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
+                        System.Diagnostics.Debug.WriteLine("Erro ao adicionar roles ao usuário");
+                        await _userManager.DeleteAsync(user);
+                        var errors = result.Errors.Select(e => e.Description).ToList();
+                        return Json(new { success = false, message = "Erro ao adicionar roles", errors = errors });
                     }
                 }
-                catch (Exception ex)
+
+                System.Diagnostics.Debug.WriteLine("Roles adicionadas, adicionando claims");
+
+                // Adicionar claims
+                if (model.Claims?.Any() == true)
                 {
-                    ModelState.AddModelError(string.Empty, $"Erro ao criar usuário: {ex.Message}");
+                    var claims = model.Claims
+                        .Where(c => !string.IsNullOrEmpty(c.Type) && !string.IsNullOrEmpty(c.Value))
+                        .Select(c => new Claim(c.Type, c.Value));
+
+                    foreach (var claim in claims)
+                    {
+                        result = await _userManager.AddClaimAsync(user, claim);
+                        if (!result.Succeeded)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Erro ao adicionar claim ao usuário: {claim.Type}={claim.Value}");
+                            await _userManager.DeleteAsync(user);
+                            var errors = result.Errors.Select(e => e.Description).ToList();
+                            return Json(new { success = false, message = "Erro ao adicionar claims", errors = errors });
+                        }
+                    }
                 }
+
+                System.Diagnostics.Debug.WriteLine("Criação de usuário completa com sucesso");
+                return Json(new { success = true });
             }
-
-            return View(model);
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exceção no CreatePartial Users: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                return Json(new { success = false, message = "Erro ao criar usuário: " + ex.Message });
+            }
         }
-    }
 
-    public class UserViewModel
-    {
-        public string Id { get; set; }
-        public string UserName { get; set; }
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Roles { get; set; }
-    }
+        [HttpGet]
+        public async Task<IActionResult> GridPartial()
+        {
+            try
+            {
+                // Usar apenas UserManager para evitar problemas com transações
+                var users = _userManager.Users.ToList();
+                var userViewModels = new List<UserViewModel>();
 
-    public class EditUserViewModel
-    {
-        public string Id { get; set; }
-        public string UserName { get; set; }
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string PhoneNumber { get; set; }
-    }
+                foreach (var user in users)
+                {
+                    try
+                    {
+                        var roles = await _userManager.GetRolesAsync(user);
+                        var userClaims = await _userManager.GetClaimsAsync(user);
+                        
+                        userViewModels.Add(new UserViewModel
+                        {
+                            Id = user.Id,
+                            Email = user.Email ?? "",
+                            UserName = user.UserName ?? "",
+                            FirstName = user.FirstName ?? "",
+                            LastName = user.LastName ?? "",
+                            PhoneNumber = user.PhoneNumber ?? "",
+                            Roles = string.Join(", ", roles),
+                            Claims = userClaims?.Select(c => new ClaimViewModel { Type = c.Type, Value = c.Value }).ToList() ?? new List<ClaimViewModel>()
+                        });
+                    }
+                    catch (Exception userEx)
+                    {
+                        // Se houver erro com um usuário específico, pular para o próximo
+                        System.Diagnostics.Debug.WriteLine($"Erro ao processar usuário {user.Id}: {userEx.Message}");
+                        continue;
+                    }
+                }
 
-    public class CreateUserViewModel
-    {
-        [Required(ErrorMessage = "O nome de usuário é obrigatório")]
-        [Display(Name = "Nome de Usuário")]
-        public string UserName { get; set; }
-
-        [Required(ErrorMessage = "O email é obrigatório")]
-        [EmailAddress(ErrorMessage = "Email inválido")]
-        [Display(Name = "Email")]
-        public string Email { get; set; }
-
-        [Required(ErrorMessage = "O nome é obrigatório")]
-        [Display(Name = "Nome")]
-        public string FirstName { get; set; }
-
-        [Required(ErrorMessage = "O sobrenome é obrigatório")]
-        [Display(Name = "Sobrenome")]
-        public string LastName { get; set; }
-
-        [Phone(ErrorMessage = "Telefone inválido")]
-        [Display(Name = "Telefone")]
-        public string PhoneNumber { get; set; }
-
-        [Required(ErrorMessage = "A senha é obrigatória")]
-        [StringLength(100, ErrorMessage = "A {0} deve ter pelo menos {2} e no máximo {1} caracteres.", MinimumLength = 6)]
-        [DataType(DataType.Password)]
-        [Display(Name = "Senha")]
-        public string Password { get; set; }
-
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirmar senha")]
-        [Compare("Password", ErrorMessage = "A senha e a confirmação não correspondem.")]
-        public string ConfirmPassword { get; set; }
+                return PartialView("_Grid", userViewModels);
+            }
+            catch (Exception ex)
+            {
+                // Log do erro para debug
+                System.Diagnostics.Debug.WriteLine($"Erro no GridPartial: {ex.Message}");
+                return StatusCode(500, $"Erro ao carregar grid de usuários: {ex.Message}");
+            }
+        }
     }
 } 

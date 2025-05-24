@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "Usuários";
+}
+
+<div class="container-fluid">
+    <h1>Gerenciamento de Usuários</h1>
+
+    <div class="mb-3">
+        <button type="button" class="btn btn-primary" onclick="usersManager.novoUserModal()">
+            <i class="fas fa-plus"></i> Novo Usuário
+        </button>
+    </div>
+
+    <div id="gridContainer">
+        @await Html.PartialAsync("_GridPartial")
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/Users.js" asp-append-version="true"></script>
+} 

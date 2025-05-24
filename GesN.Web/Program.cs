@@ -1,7 +1,7 @@
 using GesN.Web;
 using GesN.Web.Areas.Identity.Data.Models;
 using GesN.Web.Areas.Identity.Data.Stores;
-using GesN.Web.Areas.Infrastructure;
+using GesN.Web.Infrastructure.Configuration;
 using GesN.Web.Data;
 using GesN.Web.Data.Migrations;
 using GesN.Web.Data.Repositories;
@@ -9,9 +9,12 @@ using GesN.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using GesN.Web.Infrastructure.Data.Repositories;
+using GesN.Web.Infrastructure.Data;
+using GesN.Web.Interfaces;
+using GesN.Web.Infrastructure.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 /*builder.WebHost.ConfigureKestrel(options =>
 {
@@ -53,7 +56,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     options.Tokens.PasswordResetTokenProvider = "EmailTokenProvider";
 })
 .AddUserStore<DapperUserStore>()
-.AddRoleStore<DapperRoleClaimStore>()
+.AddRoleStore<DapperRoleStore>()
 .AddDefaultTokenProviders()
 .AddTokenProvider<EmailTokenProvider<ApplicationUser>>("EmailTokenProvider");
 
@@ -130,6 +133,38 @@ builder.Services.AddScoped<IdentitySchemaInit>(provider => new IdentitySchemaIni
 
 builder.Services.AddScoped<DbInit>(provider => new DbInit(connectionString));
 
+// Registrar UnitOfWork e Repositories
+builder.Services.AddScoped<IUnitOfWork>(provider =>
+{
+    var context = provider.GetRequiredService<ProjectDataContext>();
+    return new UnitOfWork(context.Connection);
+});
+
+builder.Services.AddScoped<UserRepository>();
+
+builder.Services.AddMemoryCache();
+
+// Add Identity configuration
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Password settings
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequiredUniqueChars = 1;
+
+    // Lockout settings
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+
+    // User settings
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    options.User.RequireUniqueEmail = true;
+});
+
 using (var scope = builder.Services.BuildServiceProvider().CreateScope())
 {
     var dbIdentityInit = scope.ServiceProvider.GetRequiredService<IdentitySchemaInit>();
@@ -141,8 +176,21 @@ using (var scope = builder.Services.BuildServiceProvider().CreateScope())
     try
     {
         var seedData = scope.ServiceProvider.GetRequiredService<SeedData>();
-        await seedData.Initialize();
-        Console.WriteLine("Dados iniciais criados com sucesso!");
+        
+        // Verificar se o banco está vazio antes de fazer seed
+        if (dbIdentityInit.IsDatabaseEmpty())
+        {
+            Console.WriteLine("Banco vazio detectado. Iniciando processo de seed...");
+            await seedData.Initialize();
+            Console.WriteLine("Dados iniciais criados com sucesso!");
+            Console.WriteLine("Usuário admin criado:");
+            Console.WriteLine("Email: igor.gesn@gmail.com");
+            Console.WriteLine("Senha: Admin@123");
+        }
+        else
+        {
+            Console.WriteLine("Banco já contém dados. Seed não será executado.");
+        }
     }
     catch (Exception ex)
     {
@@ -170,6 +218,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
+app.UseLoginRateLimiting();
 app.UseAuthorization();
 
 // Mapear a rota da área Admin primeiro

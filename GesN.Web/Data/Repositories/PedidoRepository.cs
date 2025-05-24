@@ -34,8 +34,8 @@ namespace GesN.Web.Data.Repositories
         public async Task<int> AddAsync(Pedido pedido)
         {
             var sql = @"
-                INSERT INTO Pedido (ClienteId, ColaboradorId, DataPedido, DataCadastro, DataModificacao)
-                VALUES (@ClienteId, @ColaboradorId, @DataPedido, @DataCadastro, @DataModificacao);
+                INSERT INTO Pedido (ClienteId, DataPedido, DataCadastro, DataModificacao)
+                VALUES (@ClienteId, @DataPedido, @DataCadastro, @DataModificacao);
                 SELECT last_insert_rowid();";
             return await _dbConnection.QuerySingleAsync<int>(sql, pedido);
         }
@@ -47,7 +47,6 @@ namespace GesN.Web.Data.Repositories
                 var sql = @"
                     UPDATE Pedido 
                     SET ClienteId = @ClienteId, 
-                        ColaboradorId = @ColaboradorId,
                         DataPedido = @DataPedido,
                         DataModificacao = @DataModificacao
                     WHERE PedidoId = @PedidoId";
@@ -66,7 +65,7 @@ namespace GesN.Web.Data.Repositories
             catch (SqliteException ex) when (ex.SqliteErrorCode == 19 && ex.Message.Contains("FOREIGN KEY constraint failed"))
             {
                 // Erro específico de FK constraint
-                return (false, "Erro de restrição de chave estrangeira. Verifique se o Cliente e o Colaborador existem no sistema.");
+                return (false, "Erro de restrição de chave estrangeira. Verifique se o Cliente existe no sistema.");
             }
             catch (SqliteException ex)
             {

@@ -9,7 +9,15 @@
         <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/GesN.Web.styles.css" asp-append-version="true" />
         <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-        <link rel="stylesheet" href="~/lib/toastr.js/toastr.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+        
+        @* Include Admin.css for Admin area pages *@
+        @if (ViewContext.RouteData.Values["area"]?.ToString() == "Admin")
+        {
+            <link rel="stylesheet" href="~/css/Admin.css" asp-append-version="true" />
+        }
+        
+        @await RenderSectionAsync("Styles", required: false)
     </head>
     <body>
         <header>
@@ -53,7 +61,17 @@
         <script src="~/lib/jqueryui/jquery-ui.min.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
-        <script src="~/lib/toastr.js/toastr.min.js"></script>
+        <script src="~/js/Users.js" asp-append-version="true"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+        <!-- Modal Container -->
+        <div class="modal fade" id="modalContainer" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                </div>
+            </div>
+        </div>
+
         @await RenderSectionAsync("Scripts", required: false)
     </body>
 </html>

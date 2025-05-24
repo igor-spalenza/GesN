@@ -1,3 +1,4 @@
+@model GesN.Web.Areas.Admin.Models.AdminHomeViewModel
 @{
     ViewData["Title"] = "Administração";
 }
@@ -10,11 +11,13 @@
         <div class="col-md-4 mb-3">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Usuários</h5>
+                    <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Usuários</h5>
                 </div>
                 <div class="card-body">
                     <p>Gerencie os usuários do sistema, edite informações e atribua roles.</p>
-                    <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-outline-primary">Gerenciar Usuários</a>
+                    <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-outline-primary">
+                        <i class="bi bi-gear me-2"></i>Gerenciar Usuários
+                    </a>
                 </div>
             </div>
         </div>
@@ -22,37 +25,256 @@
         <div class="col-md-4 mb-3">
             <div class="card">
                 <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Roles</h5>
+                    <h5 class="mb-0"><i class="bi bi-person-badge-fill me-2"></i>Roles</h5>
                 </div>
                 <div class="card-body">
                     <p>Crie e gerencie as roles (papéis) disponíveis no sistema.</p>
-                    <a asp-area="Admin" asp-controller="Roles" asp-action="Index" class="btn btn-outline-success">Gerenciar Roles</a>
+                    <a asp-area="Admin" asp-controller="Roles" asp-action="Index" class="btn btn-outline-success">
+                        <i class="bi bi-gear me-2"></i>Gerenciar Roles
+                    </a>
                 </div>
             </div>
         </div>
         
         <div class="col-md-4 mb-3">
             <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Permissões</h5>
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-key-fill me-2"></i>Claims</h5>
                 </div>
                 <div class="card-body">
-                    <p>Gerencie as permissões (claims) para cada role do sistema.</p>
-                    <a asp-area="Admin" asp-controller="RoleClaims" asp-action="Index" class="btn btn-outline-info">Gerenciar Permissões</a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4 mb-3">
-            <div class="card">
-                <div class="card-header bg-warning">
-                    <h5 class="mb-0 text-dark">Utilitário de Diagnóstico</h5>
-                </div>
-                <div class="card-body">
-                    <p>Use esta ferramenta para diagnosticar e corrigir problemas com roles.</p>
-                    <a asp-area="Admin" asp-controller="RolesDebug" asp-action="Index" class="btn btn-outline-warning">Diagnóstico de Roles</a>
+                    <p>Gerencie as claims (permissões) e associações com usuários e roles.</p>
+                    <a asp-area="Admin" asp-controller="Claims" asp-action="Index" class="btn btn-outline-warning">
+                        <i class="bi bi-gear me-2"></i>Gerenciar Claims
+                    </a>
                 </div>
             </div>
         </div>
     </div>
-</div> 
+    
+    <!-- Seção de estatísticas rápidas -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-3">
+                <i class="bi bi-graph-up me-2"></i>Estatísticas Rápidas
+                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="location.reload()" title="Atualizar estatísticas">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </h3>
+        </div>
+        
+        <!-- Linha principal de estatísticas -->
+        <div class="col-md-3 mb-3">
+            <div class="card border-primary h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-people text-primary" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2 text-primary fw-bold">@Model.TotalUsers.ToString("N0")</h3>
+                    <p class="text-muted mb-0">Total de Usuários</p>
+                    @if (Model.UsersToday > 0)
+                    {
+                        <small class="text-success">
+                            <i class="bi bi-plus-circle me-1"></i>@Model.UsersToday hoje
+                        </small>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-success h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-badge text-success" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2 text-success fw-bold">@Model.TotalRoles.ToString("N0")</h3>
+                    <p class="text-muted mb-0">Total de Roles</p>
+                    @if (Model.RolesWithClaims > 0)
+                    {
+                        <small class="text-info">
+                            <i class="bi bi-key me-1"></i>@Model.RolesWithClaims com claims
+                        </small>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-warning h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-key text-warning" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2 text-warning fw-bold">@Model.UniqueClaims.ToString("N0")</h3>
+                    <p class="text-muted mb-0">Claims Únicas</p>
+                    @if (Model.TotalClaims != Model.UniqueClaims)
+                    {
+                        <small class="text-muted">
+                            <i class="bi bi-diagram-3 me-1"></i>@Model.TotalClaims total
+                        </small>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-info h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-shield-check text-info" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2 text-info fw-bold">@Model.ActiveAdmins.ToString("N0")</h3>
+                    <p class="text-muted mb-0">Admins Ativos</p>
+                    <small class="text-muted">
+                        <i class="bi bi-person-check me-1"></i>Com role Admin
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de estatísticas adicionais -->
+    @if (Model.RecentUsers.Any() || Model.RoleDistribution.Any() || Model.TopClaims.Any())
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <h4 class="mb-3">
+                    <i class="bi bi-bar-chart me-2"></i>Detalhes do Sistema
+                </h4>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Usuários Recentes -->
+            @if (Model.RecentUsers.Any())
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">
+                                <i class="bi bi-clock-history me-2"></i>Usuários Recentes
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            @foreach (var user in Model.RecentUsers.Take(5))
+                            {
+                                <div class="d-flex align-items-center mb-2 @(user != Model.RecentUsers.Last() ? "border-bottom pb-2" : "")">
+                                    <div class="avatar-circle bg-primary text-white me-2">
+                                        <i class="bi bi-person"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-medium">@user.UserName</div>
+                                        <small class="text-muted">@user.CreatedDate.ToString("dd/MM/yyyy")</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="d-flex gap-1">
+                                            @if (user.RoleCount > 0)
+                                            {
+                                                <span class="badge bg-success" title="Roles">@user.RoleCount</span>
+                                            }
+                                            @if (user.ClaimCount > 0)
+                                            {
+                                                <span class="badge bg-warning" title="Claims">@user.ClaimCount</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Distribuição de Roles -->
+            @if (Model.RoleDistribution.Any())
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">
+                                <i class="bi bi-pie-chart me-2"></i>Distribuição de Roles
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            @foreach (var role in Model.RoleDistribution.Take(5))
+                            {
+                                <div class="d-flex align-items-center justify-content-between mb-2 @(role != Model.RoleDistribution.Last() ? "border-bottom pb-2" : "")">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle bg-success text-white me-2" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                            <i class="bi bi-person-badge"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-medium">@role.RoleName</div>
+                                            <small class="text-muted">@role.ClaimCount claim(s)</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-info">@role.UserCount</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Top Claims -->
+            @if (Model.TopClaims.Any())
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">
+                                <i class="bi bi-award me-2"></i>Claims Mais Usadas
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            @foreach (var claim in Model.TopClaims.Take(5))
+                            {
+                                <div class="mb-2 @(claim != Model.TopClaims.Last() ? "border-bottom pb-2" : "")">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-medium text-truncate" title="@claim.Type">@claim.Type</div>
+                                            <small class="text-muted text-truncate d-block" title="@claim.Value">@claim.Value</small>
+                                        </div>
+                                        <div class="text-end ms-2">
+                                            <div class="d-flex gap-1">
+                                                @if (claim.UserCount > 0)
+                                                {
+                                                    <span class="badge bg-primary" title="Usuários">@claim.UserCount</span>
+                                                }
+                                                @if (claim.RoleCount > 0)
+                                                {
+                                                    <span class="badge bg-success" title="Roles">@claim.RoleCount</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+.avatar-circle {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.text-truncate {
+    max-width: 150px;
+}
+
+.badge {
+    font-size: 0.7rem;
+}
+</style> 

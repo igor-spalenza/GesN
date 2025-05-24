@@ -1,0 +1,54 @@
+@using GesN.Web.Areas.Admin.Constants
+@model List<GesN.Web.Areas.Admin.Models.ClaimViewModel>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Claims do Usuário</h5>
+    </div>
+    <div class="card-body">
+        <div id="claimsContainer">
+            @for (var i = 0; i < Model.Count; i++)
+            {
+                <div class="claim-row row mb-2">
+                    <div class="col-5">
+                        <select name="Claims[@i].Type" class="form-select claim-type" required>
+                            <option value="">Selecione o tipo</option>
+                            <option value="@SystemClaims.Types.Permission" selected="@(Model[i].Type == SystemClaims.Types.Permission)">Permissão</option>
+                            <option value="@SystemClaims.Types.Department" selected="@(Model[i].Type == SystemClaims.Types.Department)">Departamento</option>
+                            <option value="@SystemClaims.Types.AccessLevel" selected="@(Model[i].Type == SystemClaims.Types.AccessLevel)">Nível de Acesso</option>
+                        </select>
+                    </div>
+                    <div class="col-5">
+                        <select name="Claims[@i].Value" class="form-select claim-value" required>
+                            <option value="">Selecione o valor</option>
+                            @if (!string.IsNullOrEmpty(Model[i].Type) && SystemClaims.GetAvailableClaimValues().ContainsKey(Model[i].Type))
+                            {
+                                foreach (var value in SystemClaims.GetAvailableClaimValues()[Model[i].Type])
+                                {
+                                    <option value="@value" selected="@(Model[i].Value == value)">@value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="usersManager.removeClaim(this)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="mt-3">
+            <button type="button" class="btn btn-success btn-sm" onclick="usersManager.addClaim()">
+                <i class="bi bi-plus-circle"></i> Adicionar Claim
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Disponibilizar os valores das claims globalmente
+        window.availableClaimValues = @Html.Raw(Json.Serialize(SystemClaims.GetAvailableClaimValues()));
+    </script>
+} 

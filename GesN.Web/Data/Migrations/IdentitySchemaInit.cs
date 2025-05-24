@@ -11,18 +11,85 @@ namespace GesN.Web.Data.Migrations
             _connectionString = connectionString;
         }
 
+        /// <summary>
+        /// Método utilitário para reset manual do banco (usar com cuidado)
+        /// </summary>
+        public void ResetDatabase()
+        {
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                
+                // Desabilitar foreign keys temporariamente
+                var disableFKCommand = connection.CreateCommand();
+                disableFKCommand.CommandText = "PRAGMA foreign_keys = OFF;";
+                disableFKCommand.ExecuteNonQuery();
+
+                // Limpar tabelas na ordem correta
+                var tables = new[]
+                {
+                    "AspNetUserTokens",
+                    "AspNetUserRoles", 
+                    "AspNetUserLogins",
+                    "AspNetUserClaims",
+                    "AspNetRoleClaims",
+                    "AspNetUsers",
+                    "AspNetRoles"
+                };
+
+                foreach (var table in tables)
+                {
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"DELETE FROM {table};";
+                    command.ExecuteNonQuery();
+                }
+
+                // Reabilitar foreign keys
+                var enableFKCommand = connection.CreateCommand();
+                enableFKCommand.CommandText = "PRAGMA foreign_keys = ON;";
+                enableFKCommand.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// Verifica se as tabelas do Identity estão vazias
+        /// </summary>
+        public bool IsDatabaseEmpty()
+        {
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                
+                var checkQuery = @"
+                    SELECT 
+                        (SELECT COUNT(*) FROM AspNetUsers) + 
+                        (SELECT COUNT(*) FROM AspNetRoles) + 
+                        (SELECT COUNT(*) FROM AspNetUserClaims) + 
+                        (SELECT COUNT(*) FROM AspNetRoleClaims) + 
+                        (SELECT COUNT(*) FROM AspNetUserRoles) AS TotalRecords";
+                
+                using (var command = new SqliteCommand(checkQuery, connection))
+                {
+                    var totalRecords = Convert.ToInt32(command.ExecuteScalar());
+                    return totalRecords == 0;
+                }
+            }
+        }
+
         public void Initialize()
         {
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
+                Console.WriteLine("Iniciando criação/verificação das tabelas do Identity...");
 
                 var createRolesTable = @"
                 CREATE TABLE IF NOT EXISTS AspNetRoles (
                     Id TEXT PRIMARY KEY,
                     Name TEXT,
                     NormalizedName TEXT,
-                    ConcurrencyStamp TEXT
+                    ConcurrencyStamp TEXT,
+                    CreatedDate TEXT DEFAULT (datetime('now'))
                 );";
 
                 var createUsersTable = @"
@@ -43,7 +110,8 @@ namespace GesN.Web.Data.Migrations
                     LockoutEnabled BOOLEAN,
                     AccessFailedCount INTEGER,
                     FirstName TEXT,
-                    LastName TEXT
+                    LastName TEXT,
+                    CreatedDate TEXT DEFAULT (datetime('now'))
                 );";
 
                 var createRoleClaimsTable = @"
@@ -107,7 +175,16 @@ namespace GesN.Web.Data.Migrations
                 }
                 using (var command = new SqliteCommand(createUserClaimsTable, connection))
                 {
-                    command.ExecuteNonQuery();
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                        Console.WriteLine("Tabela AspNetUserClaims verificada/criada com sucesso.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Erro ao criar/verificar tabela AspNetUserClaims: {ex.Message}");
+                        throw;
+                    }
                 }
                 using (var command = new SqliteCommand(createUserLoginsTable, connection))
                 {
@@ -122,7 +199,7 @@ namespace GesN.Web.Data.Migrations
                     command.ExecuteNonQuery();
                 }
 
-                // Adicionar colunas FirstName e LastName se elas não existirem
+                // Adicionar colunas FirstName, LastName e CreatedDate se elas não existirem
                 try
                 {
                     var checkColumnQuery = @"
@@ -131,6 +208,7 @@ namespace GesN.Web.Data.Migrations
 
                     bool hasFirstName = false;
                     bool hasLastName = false;
+                    bool hasCreatedDate = false;
 
                     using (var command = new SqliteCommand(checkColumnQuery, connection))
                     {
@@ -143,6 +221,8 @@ namespace GesN.Web.Data.Migrations
                                     hasFirstName = true;
                                 else if (columnName == "LastName")
                                     hasLastName = true;
+                                else if (columnName == "CreatedDate")
+                                    hasCreatedDate = true;
                             }
                         }
                     }
@@ -170,10 +250,57 @@ namespace GesN.Web.Data.Migrations
                             Console.WriteLine("Coluna LastName adicionada à tabela AspNetUsers.");
                         }
                     }
+
+                    if (!hasCreatedDate)
+                    {
+                        var addCreatedDateQuery = @"
+                        ALTER TABLE AspNetUsers ADD COLUMN CreatedDate TEXT DEFAULT (datetime('now'));
+                        ";
+                        using (var command = new SqliteCommand(addCreatedDateQuery, connection))
+                        {
+                            command.ExecuteNonQuery();
+                            Console.WriteLine("Coluna CreatedDate adicionada à tabela AspNetUsers.");
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Erro ao verificar/adicionar colunas: {ex.Message}");
+                }
+
+                // Verificar/adicionar CreatedDate em AspNetRoles
+                try
+                {
+                    var checkRolesColumnQuery = @"PRAGMA table_info(AspNetRoles);";
+                    bool roleHasCreatedDate = false;
+                    using (var command = new SqliteCommand(checkRolesColumnQuery, connection))
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            if (reader.GetString(1) == "CreatedDate")
+                            {
+                                roleHasCreatedDate = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!roleHasCreatedDate)
+                    {
+                        var addRoleCreatedQuery = @"
+                        ALTER TABLE AspNetRoles ADD COLUMN CreatedDate TEXT DEFAULT (datetime('now'));
+                        ";
+                        using (var command = new SqliteCommand(addRoleCreatedQuery, connection))
+                        {
+                            command.ExecuteNonQuery();
+                            Console.WriteLine("Coluna CreatedDate adicionada à tabela AspNetRoles.");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erro ao verificar/adicionar coluna CreatedDate em AspNetRoles: {ex.Message}");
                 }
             }
         }
