@@ -1,0 +1,51 @@
+@model List<GesN.Web.Areas.Admin.Controllers.RoleClaimsViewModel>
+
+@{
+    ViewData["Title"] = "Gerenciamento de Permissões";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Roles e Permissões</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Gerencie as permissões (claims) para cada role do sistema.
+                </p>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Role</th>
+                                <th>Total de Permissões</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.Role.Name</td>
+                                    <td>@item.Claims.Count</td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@item.Role.Id" class="btn btn-info btn-sm">Detalhes</a>
+                                        <a asp-action="Edit" asp-route-id="@item.Role.Id" class="btn btn-primary btn-sm">Editar Permissões</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-area="Admin" asp-controller="Roles" asp-action="Index" class="btn btn-secondary">Voltar para Gerenciamento de Roles</a>
+</div> 

@@ -41,7 +41,9 @@ namespace GesN.Web.Data.Migrations
                     TwoFactorEnabled BOOLEAN,
                     LockoutEnd TEXT,
                     LockoutEnabled BOOLEAN,
-                    AccessFailedCount INTEGER
+                    AccessFailedCount INTEGER,
+                    FirstName TEXT,
+                    LastName TEXT
                 );";
 
                 var createRoleClaimsTable = @"
@@ -89,8 +91,7 @@ namespace GesN.Web.Data.Migrations
                     Value TEXT,
                     PRIMARY KEY (UserId, LoginProvider, Name),
                     FOREIGN KEY (UserId) REFERENCES AspNetUsers(Id) ON DELETE CASCADE
-                );"
-                ;
+                );";
 
                 using (var command = new SqliteCommand(createRolesTable, connection))
                 {
@@ -120,8 +121,61 @@ namespace GesN.Web.Data.Migrations
                 {
                     command.ExecuteNonQuery();
                 }
+
+                // Adicionar colunas FirstName e LastName se elas não existirem
+                try
+                {
+                    var checkColumnQuery = @"
+                    PRAGMA table_info(AspNetUsers);
+                    ";
+
+                    bool hasFirstName = false;
+                    bool hasLastName = false;
+
+                    using (var command = new SqliteCommand(checkColumnQuery, connection))
+                    {
+                        using (var reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                string columnName = reader.GetString(1); // O índice 1 contém o nome da coluna
+                                if (columnName == "FirstName")
+                                    hasFirstName = true;
+                                else if (columnName == "LastName")
+                                    hasLastName = true;
+                            }
+                        }
+                    }
+
+                    if (!hasFirstName)
+                    {
+                        var addFirstNameQuery = @"
+                        ALTER TABLE AspNetUsers ADD COLUMN FirstName TEXT;
+                        ";
+                        using (var command = new SqliteCommand(addFirstNameQuery, connection))
+                        {
+                            command.ExecuteNonQuery();
+                            Console.WriteLine("Coluna FirstName adicionada à tabela AspNetUsers.");
+                        }
+                    }
+
+                    if (!hasLastName)
+                    {
+                        var addLastNameQuery = @"
+                        ALTER TABLE AspNetUsers ADD COLUMN LastName TEXT;
+                        ";
+                        using (var command = new SqliteCommand(addLastNameQuery, connection))
+                        {
+                            command.ExecuteNonQuery();
+                            Console.WriteLine("Coluna LastName adicionada à tabela AspNetUsers.");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erro ao verificar/adicionar colunas: {ex.Message}");
+                }
             }
         }
-
     }
 }

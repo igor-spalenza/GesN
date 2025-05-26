@@ -32,6 +32,16 @@ namespace GesN.Web.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
+            [Required(ErrorMessage = "O nome é obrigatório")]
+            [StringLength(100, ErrorMessage = "O {0} deve ter pelo menos {2} e no máximo {1} caracteres.", MinimumLength = 2)]
+            [Display(Name = "Nome")]
+            public string FirstName { get; set; }
+
+            [Required(ErrorMessage = "O sobrenome é obrigatório")]
+            [StringLength(100, ErrorMessage = "O {0} deve ter pelo menos {2} e no máximo {1} caracteres.", MinimumLength = 2)]
+            [Display(Name = "Sobrenome")]
+            public string LastName { get; set; }
+
             [Phone(ErrorMessage = "O campo {0} não é um número de telefone válido")]
             [Display(Name = "Número de telefone")]
             public string PhoneNumber { get; set; }
@@ -46,6 +56,8 @@ namespace GesN.Web.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 PhoneNumber = phoneNumber
             };
         }
@@ -76,6 +88,17 @@ namespace GesN.Web.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
+            // Atualizar FirstName e LastName
+            if (Input.FirstName != user.FirstName)
+            {
+                user.FirstName = Input.FirstName;
+            }
+
+            if (Input.LastName != user.LastName)
+            {
+                user.LastName = Input.LastName;
+            }
+
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             if (Input.PhoneNumber != phoneNumber)
             {
@@ -86,6 +109,9 @@ namespace GesN.Web.Areas.Identity.Pages.Account.Manage
                     return RedirectToPage();
                 }
             }
+
+            // Salvar as alterações no usuário
+            await _userManager.UpdateAsync(user);
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Seu perfil foi atualizado";

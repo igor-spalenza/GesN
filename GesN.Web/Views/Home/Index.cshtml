@@ -23,11 +23,15 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <div class="text-center">
-        <a class="btn btn-sales btn-lg-home" asp-area="" asp-controller="Pedido" asp-action="Index">Área de Vendas</a>
+        <a class="btn btn-sales btn-lg-home" asp-area="" asp-controller="Pedido" asp-action="Index">Ferramenta de Vendas</a>
+        <a class="btn btn-sales btn-lg-home" asp-area="" asp-controller="Producao" asp-action="Index">Controle de Produção</a>
         
         @if (User.IsInRole("Admin"))
         {
-            <a class="btn btn-primary btn-lg-home ms-2" asp-area="Admin" asp-controller="Home" asp-action="Index">Área de Administração</a>
+            <br />
+            <br />
+            <br />
+            <a class="btn btn-primary btn-lg-home ms-2" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin</a>
         }
     </div>
 }

@@ -4,16 +4,27 @@ using GesN.Web.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using System.Data;
+using System.Linq;
+using System.Security.Claims;
 
 namespace GesN.Web.Areas.Identity.Data.Stores
 {
-    public class DapperRoleStore : IRoleStore<ApplicationRole>
+    public class DapperRoleStore : IRoleStore<ApplicationRole>, IRoleClaimStore<ApplicationRole>, IQueryableRoleStore<ApplicationRole>
     {
         private readonly IDbConnection _dbConnection;
 
         public DapperRoleStore(ProjectDataContext context)
         {
             _dbConnection = context.Connection;
+        }
+
+        public IQueryable<ApplicationRole> Roles
+        {
+            get
+            {
+                var roles = _dbConnection.Query<ApplicationRole>("SELECT * FROM AspNetRoles").AsQueryable();
+                return roles;
+            }
         }
 
         public async Task<IdentityResult> CreateAsync(ApplicationRole role, CancellationToken cancellationToken)
@@ -125,6 +136,75 @@ namespace GesN.Web.Areas.Identity.Data.Stores
                 return IdentityResult.Failed(new IdentityError { Description = ex.Message });
             }
         }
+
+        #region IRoleClaimStore Implementation
+
+        public async Task<IList<Claim>> GetClaimsAsync(ApplicationRole role, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            
+            try
+            {
+                var roleClaims = await _dbConnection.QueryAsync<Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>>(
+                    "SELECT * FROM AspNetRoleClaims WHERE RoleId = @RoleId",
+                    new { RoleId = role.Id }
+                );
+                
+                return roleClaims.Select(rc => new Claim(rc.ClaimType, rc.ClaimValue)).ToList();
+            }
+            catch (Exception ex)
+            {
+                // Log ou trate a exceção conforme necessário
+                throw new Exception($"Erro ao recuperar claims da role: {ex.Message}", ex);
+            }
+        }
+
+        public async Task AddClaimAsync(ApplicationRole role, Claim claim, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            
+            try
+            {
+                var query = @"
+                INSERT INTO AspNetRoleClaims (RoleId, ClaimType, ClaimValue)
+                VALUES (@RoleId, @ClaimType, @ClaimValue)";
+                
+                await _dbConnection.ExecuteAsync(query, new 
+                { 
+                    RoleId = role.Id,
+                    ClaimType = claim.Type,
+                    ClaimValue = claim.Value
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao adicionar claim à role: {ex.Message}", ex);
+            }
+        }
+
+        public async Task RemoveClaimAsync(ApplicationRole role, Claim claim, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            
+            try
+            {
+                await _dbConnection.ExecuteAsync(@"
+                DELETE FROM AspNetRoleClaims 
+                WHERE RoleId = @RoleId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue",
+                new 
+                { 
+                    RoleId = role.Id,
+                    ClaimType = claim.Type,
+                    ClaimValue = claim.Value
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao remover claim da role: {ex.Message}", ex);
+            }
+        }
+
+        #endregion
 
         public void Dispose()
         {

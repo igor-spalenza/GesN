@@ -208,12 +208,31 @@ namespace GesN.Web.Controllers
                 
             if (!ModelState.IsValid)
             {
-                return PartialView("_Edit", pedido);
+                // Retorna os erros de validação do modelo
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return Json(new { 
+                    success = false, 
+                    message = "Erro de validação", 
+                    errors = errors 
+                });
             }
 
             try
             {
-                await _pedidoService.UpdateAsync(pedido);
+                var (success, errorMessage) = await _pedidoService.UpdateAsync(pedido);
+                
+                if (!success)
+                {
+                    return Json(new { 
+                        success = false, 
+                        message = errorMessage ?? "Erro ao atualizar o pedido"
+                    });
+                }
+                
                 var pedidoAtualizado = await _pedidoService.GetByIdAsync(id);
                 return Json(new
                 {
@@ -232,7 +251,10 @@ namespace GesN.Web.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Erro ao atualizar pedido: " + ex.Message });
+                return Json(new { 
+                    success = false, 
+                    message = "Erro ao atualizar pedido: " + ex.Message 
+                });
             }
         }
 
