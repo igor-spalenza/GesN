@@ -20,7 +20,6 @@ namespace GesN.Web.Infrastructure.Configuration
     {
         public static void AddInfrastructureServices(this IServiceCollection services, string connectionString)
         {
-            // Usar Scoped - uma instância por request
             services.AddScoped<IDbConnectionFactory>(provider => new ProjectDataContext(connectionString));
 
             services.AddHttpContextAccessor();
@@ -31,8 +30,6 @@ namespace GesN.Web.Infrastructure.Configuration
             services.AddScoped<IPedidoService, PedidoService>();
             services.AddScoped<IPedidoRepository, PedidoRepository>();
 
-            //services.AddScoped<SeedData>();
-
             services.AddMemoryCache();
         }
 
@@ -40,7 +37,6 @@ namespace GesN.Web.Infrastructure.Configuration
         {
             services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {
-                // Simplificar configurações para evitar problemas
                 options.SignIn.RequireConfirmedAccount = false;
                 options.SignIn.RequireConfirmedEmail = false;
                 options.SignIn.RequireConfirmedPhoneNumber = false;
@@ -64,9 +60,8 @@ namespace GesN.Web.Infrastructure.Configuration
             .AddRoleStore<DapperRoleStore>()
             .AddDefaultTokenProviders();
 
-            // ✅ CORREÇÃO: Usar Scoped em vez de Transient para evitar múltiplas instâncias simultâneas
-            //services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, UserClaimsPrincipalFactory<ApplicationUser, ApplicationRole>>();
-            //services.AddTransient<IEmailSender, EmailSender>();
+            services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, UserClaimsPrincipalFactory<ApplicationUser, ApplicationRole>>();
+            services.AddTransient<IEmailSender, EmailSender>();
         }
 
         public static void AddAuthenticationServices(this IServiceCollection services)
