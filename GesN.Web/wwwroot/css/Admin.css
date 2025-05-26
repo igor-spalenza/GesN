@@ -3,6 +3,29 @@
    ================================================================= */
 
 /* ===================================================================
+   LAYOUT BASE E NAVEGAÇÃO
+   ================================================================= */
+
+.sidebar {
+    background: linear-gradient(145deg, #1a1a2e, #16213e);
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* ===================================================================
    USER MANAGEMENT - CARDS E GRID
    ================================================================= */
 
@@ -35,6 +58,17 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+/* Avatar Circle - Geral */
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
 /* Role Badges */
 .role-badge {
     font-size: 0.75em;
@@ -53,6 +87,11 @@
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     border: 1px solid #dee2e6;
+}
+
+/* Action Buttons */
+.action-buttons .btn {
+    margin-right: 5px;
 }
 
 /* View Toggle */
@@ -98,6 +137,8 @@
     border-bottom: 2px solid #dee2e6;
     font-weight: 600;
     background-color: #f8f9fa;
+    border-top: none;
+    color: #495057;
 }
 
 .table tbody tr {
@@ -109,12 +150,249 @@
 }
 
 /* ===================================================================
+   MODAL CUSTOMIZATIONS
+   ================================================================= */
+
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-header.bg-warning {
+    border-bottom: 1px solid #ffc107;
+}
+
+.modal-header.bg-danger {
+    border-bottom: 1px solid #dc3545;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+    border-radius: 0 0 12px 12px;
+}
+
+/* ===================================================================
+   SELECT2 CUSTOMIZATIONS FOR MODALS
+   ================================================================= */
+
+/* Apenas o essencial para funcionar em modais */
+.modal .select2-container {
+    z-index: 1050;
+}
+
+.modal .select2-dropdown {
+    z-index: 1060;
+}
+
+/* Correção do alinhamento dos componentes internos do Select2 */
+.select2-container--bootstrap-5 .select2-selection--multiple {
+    display: flex;
+    align-items: center;
+    min-height: calc(1.5em + 0.75rem + 2px);
+}
+
+.select2-container--bootstrap-5 .select2-selection__rendered {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.select2-container--bootstrap-5 .select2-search--inline {
+    display: inline-block;
+}
+
+.select2-container--bootstrap-5 .select2-search__field {
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-width: 150px;
+    width: auto !important;
+}
+
+/* ===================================================================
+   PASSWORD VISIBILITY TOGGLE
+   ================================================================= */
+
+.password-toggle {
+    border-left: none;
+    transition: all 0.2s ease;
+}
+
+.password-toggle:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+.password-toggle:focus {
+    box-shadow: none;
+    border-color: #86b7fe;
+    background-color: #e7f3ff;
+}
+
+.password-toggle i {
+    transition: all 0.2s ease;
+}
+
+.input-group .password-field:focus + .password-toggle {
+    border-color: #86b7fe;
+}
+
+.input-group .password-field:focus {
+    border-right: none;
+    box-shadow: none;
+}
+
+.input-group:focus-within .password-toggle {
+    border-color: #86b7fe;
+}
+
+/* ===================================================================
+   ALERTS CUSTOMIZATIONS
+   ================================================================= */
+
+.alert {
+    border: 1px solid;
+    border-radius: 8px;
+}
+
+.alert-danger {
+    border-color: #f5c2c7;
+}
+
+.alert-warning {
+    border-color: #ffecb5;
+}
+
+.alert-info {
+    border-color: #b6effb;
+}
+
+.alert-success {
+    border-color: #badbcc;
+}
+
+/* ===================================================================
    LOADING AND EMPTY STATES
    ================================================================= */
 
 .spinner-border {
     width: 2rem;
     height: 2rem;
+}
+
+/* ===================================================================
+   BUTTON CUSTOMIZATIONS
+   ================================================================= */
+
+.btn-outline-warning:hover {
+    color: #000;
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-outline-info:hover {
+    color: #fff;
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
+/* ===================================================================
+   FORM CONTROLS
+   ================================================================= */
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* ===================================================================
+   BADGE STYLES
+   ================================================================= */
+
+.badge {
+    font-weight: 500;
+    font-size: 0.7rem;
+}
+
+/* ===================================================================
+   UTILITY CLASSES
+   ================================================================= */
+
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.text-truncate {
+    max-width: 150px;
+}
+
+.bg-soft-primary {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+    color: #0d6efd !important;
+}
+
+.bg-soft-success {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+    color: #198754 !important;
+}
+
+.bg-soft-warning {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+    color: #ffc107 !important;
+}
+
+.bg-soft-danger {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    color: #dc3545 !important;
+}
+
+.bg-soft-info {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+    color: #0dcaf0 !important;
+}
+
+.bg-opacity-10 {
+    background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+}
+
+.border-start.border-4 {
+    border-left-width: 4px !important;
+}
+
+.fs-3 {
+    font-size: 1.75rem !important;
+}
+
+.fs-4 {
+    font-size: 1.5rem !important;
+}
+
+.fs-6 {
+    font-size: 1rem !important;
 }
 
 /* ===================================================================
@@ -148,6 +426,132 @@
     }
 }
 
+@keyframes checkmark {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ===================================================================
+   SELECTABLE CARDS SYSTEM
+   ================================================================= */
+
+/* Cards selecionáveis */
+.selectable-card {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #fff;
+    position: relative;
+}
+
+.selectable-card:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
+    transform: translateY(-1px);
+}
+
+.selectable-card.selected {
+    border-color: #198754;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(25, 135, 84, 0.2);
+}
+
+.selectable-card .form-check {
+    margin-bottom: 0;
+}
+
+.selectable-card .form-check-input {
+    margin-top: 0;
+    margin-right: 8px;
+}
+
+.selectable-card .form-check-label {
+    cursor: pointer;
+    margin-bottom: 0;
+    padding: 4px 0;
+}
+
+.selection-indicator {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.selectable-card.selected .selection-indicator {
+    opacity: 1;
+}
+
+/* User specific selections */
+.user-selection-card.selected {
+    border-color: #0dcaf0;
+}
+
+.user-selection-card.selected .selection-indicator i {
+    color: #0dcaf0 !important;
+}
+
+.user-selection-card .form-check-input:checked {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
+/* Role specific selections */
+.role-selection-card.selected {
+    border-color: #6c757d;
+}
+
+.role-selection-card.selected .selection-indicator i {
+    color: #6c757d !important;
+}
+
+.role-selection-card .form-check-input:checked {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+/* Edit mode variations */
+.user-selection-card.selected.edit-mode {
+    border-color: #fd7e14;
+}
+
+.user-selection-card.selected.edit-mode .selection-indicator i {
+    color: #fd7e14 !important;
+}
+
+.user-selection-card.edit-mode .form-check-input:checked {
+    background-color: #fd7e14;
+    border-color: #fd7e14;
+}
+
+.role-selection-card.selected.edit-mode {
+    border-color: #0d6efd;
+}
+
+.role-selection-card.selected.edit-mode .selection-indicator i {
+    color: #0d6efd !important;
+}
+
+.role-selection-card.edit-mode .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* Animation for selected cards */
+.selectable-card.selected .selection-indicator i {
+    animation: checkmark 0.3s ease;
+}
+
 /* ===================================================================
    DROPDOWN IMPROVEMENTS
    ================================================================= */
@@ -156,6 +560,11 @@
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     border: 1px solid #e9ecef;
+}
+
+/* Ajuste específico para dropdown dos cards de Roles */
+.role-item .card-header .dropdown-menu {
+    transform: translate(-128px, 33px) !important;
 }
 
 .dropdown-item {
@@ -168,436 +577,7 @@
 }
 
 /* ===================================================================
-   RESPONSIVE DESIGN
-   ================================================================= */
-
-/* Tablet - Medium devices (768px and down) */
-@media (max-width: 768px) {
-    .search-controls {
-        padding: 1rem;
-    }
-    
-    .search-controls .row {
-        gap: 0.75rem;
-    }
-    
-    .user-card {
-        margin-bottom: 1rem;
-    }
-    
-    .user-avatar {
-        width: 45px;
-        height: 45px;
-        font-size: 16px;
-    }
-    
-    h1 {
-        font-size: 1.5rem;
-    }
-    
-    /* Claims responsive adjustments */
-    .claims-grid {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-    }
-    
-    .claim-row {
-        margin: 0.5rem 0;
-    }
-    
-    .claim-row .col-5 {
-        margin-bottom: 0.5rem;
-    }
-    
-    .claims-container .card-body {
-        padding: 1rem;
-    }
-}
-
-/* Mobile - Small devices (576px and down) */
-@media (max-width: 576px) {
-    .search-controls {
-        padding: 0.75rem;
-    }
-    
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        font-size: 14px;
-    }
-    
-    .btn-group .btn {
-        font-size: 0.875rem;
-        padding: 0.375rem 0.5rem;
-    }
-    
-    /* Claims responsive adjustments */
-    .claims-container .card-header {
-        padding: 0.75rem 1rem;
-    }
-    
-    .claims-container .card-body {
-        padding: 0.75rem;
-    }
-    
-    .claim-row .btn-danger {
-        width: 100%;
-        margin-top: 0.5rem;
-    }
-    
-    .btn-add-claim {
-        width: 100%;
-        margin-top: 1rem;
-    }
-}
-
-/* ===================================================================
-   CLAIMS MANAGEMENT
-   ================================================================= */
-
-/* Claims Container */
-.claims-container {
-    margin-top: 1rem;
-}
-
-.claims-container .card {
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    border: 1px solid #e9ecef;
-}
-
-.claims-container .card-header {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-bottom: 1px solid #dee2e6;
-    border-radius: 10px 10px 0 0 !important;
-    padding: 1rem 1.5rem;
-}
-
-.claims-container .card-body {
-    padding: 1.5rem;
-}
-
-/* Claims Form Rows */
-.claim-row {
-    transition: all 0.2s ease;
-    border-radius: 6px;
-    padding: 0.25rem;
-    margin: 0.25rem 0;
-    animation: slideInUp 0.3s ease-out;
-}
-
-.claim-row:hover {
-    background-color: #f8f9fa;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.claim-row .form-select {
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.claim-row .form-select:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
-}
-
-/* Claims Type Select */
-.claim-type {
-    background-color: #fff;
-}
-
-.claim-type:focus {
-    background-color: #fff;
-}
-
-/* Claims Value Select */
-.claim-value {
-    background-color: #fff;
-}
-
-.claim-value:focus {
-    background-color: #fff;
-}
-
-/* Remove Claim Button */
-.claim-row .btn-danger {
-    border-radius: 6px;
-    padding: 0.5rem 0.75rem;
-    transition: all 0.2s ease;
-}
-
-.claim-row .btn-danger:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(220, 53, 69, 0.3);
-}
-
-/* Add Claim Button */
-.btn-add-claim {
-    border-radius: 8px;
-    padding: 0.75rem 1.25rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    border: none;
-    color: white;
-}
-
-.btn-add-claim:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-    color: white;
-}
-
-/* Claims Display (Details View) */
-.claims-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-/* Claims Category Cards */
-.claims-category {
-    background: white;
-    border-radius: 8px;
-    padding: 1rem;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    animation: slideInUp 0.3s ease-out;
-}
-
-.claims-category:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.claims-category h6 {
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-}
-
-.claims-category h6 i {
-    margin-right: 0.5rem;
-    font-size: 1.1em;
-}
-
-.claims-category .list-group {
-    border: none;
-}
-
-.claims-category .list-group-item {
-    border: none;
-    padding: 0.375rem 0;
-    background: transparent;
-    display: flex;
-    align-items: center;
-}
-
-.claims-category .list-group-item i {
-    margin-right: 0.5rem;
-    font-size: 0.9em;
-}
-
-/* Permission Claims */
-.claims-permissions {
-    border-left: 4px solid #0d6efd;
-}
-
-.claims-permissions h6 {
-    color: #0d6efd;
-}
-
-.claims-permissions .list-group-item i {
-    color: #28a745;
-}
-
-/* Department Claims */
-.claims-department {
-    border-left: 4px solid #17a2b8;
-}
-
-.claims-department h6 {
-    color: #17a2b8;
-}
-
-.claims-department .list-group-item i {
-    color: #17a2b8;
-}
-
-/* Access Level Claims */
-.claims-access-level {
-    border-left: 4px solid #ffc107;
-}
-
-.claims-access-level h6 {
-    color: #ffc107;
-}
-
-.claims-access-level .list-group-item i {
-    color: #ffc107;
-}
-
-/* Claims Empty States */
-.claims-empty-state {
-    text-align: center;
-    padding: 2rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border: 2px dashed #dee2e6;
-    margin: 1rem 0;
-}
-
-.claims-empty-state i {
-    font-size: 2.5rem;
-    color: #6c757d;
-    margin-bottom: 1rem;
-}
-
-.claims-empty-state h6 {
-    color: #6c757d;
-    font-weight: 500;
-}
-
-.claims-empty-state p {
-    color: #6c757d;
-    margin-bottom: 0;
-    font-size: 0.9em;
-}
-
-/* Claims Animation Delays */
-.claims-category:nth-child(1) { animation-delay: 0.1s; }
-.claims-category:nth-child(2) { animation-delay: 0.2s; }
-.claims-category:nth-child(3) { animation-delay: 0.3s; }
-
-/* ===================================================================
-   MODAL IMPROVEMENTS
-   ================================================================= */
-
-.modal-content {
-    border-radius: 12px;
-    border: none;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-
-.modal-header {
-    border-bottom: 1px solid #e9ecef;
-    padding: 1.5rem;
-}
-
-.modal-body {
-    padding: 1.5rem;
-}
-
-.modal-footer {
-    border-top: 1px solid #e9ecef;
-    padding: 1.5rem;
-}
-
-/* ===================================================================
-   FORM IMPROVEMENTS
-   ================================================================= */
-
-.form-control:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
-}
-
-.form-select:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
-}
-
-/* ===================================================================
-   UTILITY CLASSES
-   ================================================================= */
-
-.text-truncate-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.bg-soft-primary {
-    background-color: rgba(13, 110, 253, 0.1);
-    color: #0d6efd;
-}
-
-.bg-soft-success {
-    background-color: rgba(25, 135, 84, 0.1);
-    color: #198754;
-}
-
-.bg-soft-warning {
-    background-color: rgba(255, 193, 7, 0.1);
-    color: #ffc107;
-}
-
-.bg-soft-danger {
-    background-color: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-}
-
-.bg-soft-info {
-    background-color: rgba(13, 202, 240, 0.1);
-    color: #0dcaf0;
-}
-
-/* ===================================================================
-   BUTTON IMPROVEMENTS
-   ================================================================= */
-
-.btn {
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-}
-
-.btn-sm {
-    border-radius: 4px;
-}
-
-.btn-lg {
-    border-radius: 8px;
-}
-
-/* ===================================================================
-   CARD IMPROVEMENTS
-   ================================================================= */
-
-.card {
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
-    font-weight: 600;
-}
-
-/* ===================================================================
-   BADGE IMPROVEMENTS
-   ================================================================= */
-
-.badge {
-    border-radius: 4px;
-    font-weight: 500;
-    font-size: 0.75em;
-}
-
-/* ===================================================================
-   NAVIGATION IMPROVEMENTS
+   BREADCRUMB IMPROVEMENTS
    ================================================================= */
 
 .breadcrumb {
@@ -607,21 +587,9 @@
 }
 
 .breadcrumb-item + .breadcrumb-item::before {
+    content: var(--bs-breadcrumb-divider, "/");
     color: #6c757d;
-}
-
-/* ===================================================================
-   ALERTS AND NOTIFICATIONS
-   ================================================================= */
-
-.alert {
-    border-radius: 8px;
-    border: none;
-    font-weight: 500;
-}
-
-.alert-dismissible .btn-close {
-    padding: 0.5rem 0.75rem;
+    margin: 0 0.5rem;
 }
 
 /* ===================================================================
@@ -649,4 +617,309 @@
 .list-group-item:last-child {
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
+}
+
+/* ===================================================================
+   CLAIMS MANAGEMENT SPECIFIC
+   ================================================================= */
+
+.claims-container {
+    border-radius: 8px;
+}
+
+.claims-container .card {
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.claims-container .card-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+}
+
+.claims-container .card-body {
+    padding: 1.25rem;
+}
+
+.claim-row {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.claim-row:hover {
+    background-color: #f8f9fa;
+    border-color: #ced4da;
+    transform: translateY(-1px);
+}
+
+.claim-row .form-select {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.claim-row .form-select:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.claim-type {
+    background-color: #f8f9fa;
+}
+
+.claim-type:focus {
+    background-color: white;
+    border-color: #0d6efd;
+}
+
+.claim-value {
+    background-color: white;
+}
+
+.claim-value:focus {
+    border-color: #0d6efd;
+}
+
+.claim-row .btn-danger {
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.claim-row .btn-danger:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.btn-add-claim {
+    background: linear-gradient(135deg, #198754, #20c997);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-add-claim:hover {
+    background: linear-gradient(135deg, #157347, #1aa179);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+    color: white;
+}
+
+.claims-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.claims-category {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+    animation: slideInUp 0.5s ease-out;
+}
+
+.claims-category:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.claims-category h6 {
+    margin-bottom: 1rem;
+    color: #495057;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.claims-category h6 i {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.claims-category .list-group {
+    border: none;
+}
+
+.claims-category .list-group-item {
+    background-color: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 0.25rem;
+    padding: 0.75rem;
+}
+
+.claims-category .list-group-item i {
+    margin-right: 0.5rem;
+    opacity: 0.7;
+}
+
+.claims-permissions {
+    border-left: 4px solid #0d6efd;
+}
+
+.claims-permissions h6 {
+    color: #0d6efd;
+}
+
+.claims-permissions .list-group-item i {
+    color: #0d6efd;
+}
+
+.claims-department {
+    border-left: 4px solid #198754;
+}
+
+.claims-department h6 {
+    color: #198754;
+}
+
+.claims-department .list-group-item i {
+    color: #198754;
+}
+
+.claims-access-level {
+    border-left: 4px solid #ffc107;
+}
+
+.claims-access-level h6 {
+    color: #e0a800;
+}
+
+.claims-access-level .list-group-item i {
+    color: #e0a800;
+}
+
+.claims-empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 12px;
+    border: 2px dashed #ced4da;
+    margin: 2rem 0;
+}
+
+.claims-empty-state i {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.claims-empty-state h6 {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.claims-empty-state p {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+/* Animation delays for claims categories */
+.claims-category:nth-child(1) { animation-delay: 0.1s; }
+.claims-category:nth-child(2) { animation-delay: 0.2s; }
+.claims-category:nth-child(3) { animation-delay: 0.3s; }
+
+/* ===================================================================
+   RESPONSIVE DESIGN
+   ================================================================= */
+
+/* Tablet - Medium devices (768px and down) */
+@media (max-width: 768px) {
+    .search-controls {
+        padding: 1rem;
+    }
+    
+    .search-controls .row {
+        gap: 0.75rem;
+    }
+    
+    .user-card {
+        margin-bottom: 1rem;
+    }
+    
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
+    }
+    
+    .avatar-circle {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    /* Claims responsive adjustments */
+    .claims-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .claim-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .claim-row .col-5 {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .claims-container .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Mobile - Small devices (576px and down) */
+@media (max-width: 576px) {
+    .search-controls {
+        padding: 0.75rem;
+    }
+    
+    .user-avatar, .avatar-circle {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Claims mobile adjustments */
+    .claims-container .card-header {
+        padding: 0.75rem;
+    }
+    
+    .claims-container .card-body {
+        padding: 0.75rem;
+    }
+    
+    .claim-row .btn-danger {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+    
+    /* Button adjustments */
+    .btn-add-claim {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
 } 

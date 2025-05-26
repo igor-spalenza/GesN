@@ -8,25 +8,16 @@ var claimsManager = {
         $(document).on('shown.bs.modal', '#modalContainer', function () {
             console.log('ClaimsManager: Modal container mostrado');
             claimsManager.initializeForm();
-            
-            // Inicializar select múltiplo com Select2
-            $('.form-select[multiple]').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                placeholder: 'Selecione as opções'
-            });
-
-            // Aguardar um pouco para garantir que tudo foi carregado
-            setTimeout(function() {
-                // Focar no primeiro campo
-                if ($('#claimTypeSelect').length) {
-                    $('#claimTypeSelect').focus();
-                }
-            }, 200);
         });
 
         $(document).on('hidden.bs.modal', '#modalContainer', function () {
             console.log('ClaimsManager: Modal container escondido');
+            // Destruir instâncias do Select2 antes de limpar o modal
+            $('.form-select[multiple]').each(function() {
+                if ($(this).hasClass('select2-hidden-accessible')) {
+                    $(this).select2('destroy');
+                }
+            });
             $(this).find('.modal-content').html('');
         });
 
@@ -40,6 +31,9 @@ var claimsManager = {
 
         // Inicializar funcionalidades da grid
         claimsManager.initializeGrid();
+        
+        // Inicializar observer para detectar novos selects múltiplos
+        claimsManager.initializeDOMObserver();
         
         console.log('ClaimsManager: Inicialização completa');
     },
@@ -339,6 +333,19 @@ var claimsManager = {
             return false;
         }
 
+        // Regra: precisa ter pelo menos um usuário OU uma role selecionada
+        const selectedUsers = $('select[name="SelectedUsers"]').val() || [];
+        const selectedRoles = $('select[name="SelectedRoles"]').val() || [];
+        
+        // Garantir que são arrays
+        const usersArray = Array.isArray(selectedUsers) ? selectedUsers : [];
+        const rolesArray = Array.isArray(selectedRoles) ? selectedRoles : [];
+        
+        if (usersArray.length === 0 && rolesArray.length === 0) {
+            toastr.warning('Selecione pelo menos um usuário ou uma role para atribuir a claim.');
+            return false;
+        }
+
         const $form = $(form);
         const submitButton = $form.find('button[type="submit"]');
         const loadingSpinner = $form.find('.spinner-border');
@@ -415,6 +422,19 @@ var claimsManager = {
             console.log('Erros de validação:', $(form).find('.field-validation-error').map(function() {
                 return $(this).text();
             }).get());
+            return false;
+        }
+
+        // Regra: precisa ter pelo menos um usuário OU uma role selecionada
+        const selectedUsers = $('select[name="SelectedUserIds"]').val() || [];
+        const selectedRoles = $('select[name="SelectedRoleIds"]').val() || [];
+        
+        // Garantir que são arrays
+        const usersArray = Array.isArray(selectedUsers) ? selectedUsers : [];
+        const rolesArray = Array.isArray(selectedRoles) ? selectedRoles : [];
+        
+        if (usersArray.length === 0 && rolesArray.length === 0) {
+            toastr.warning('Selecione pelo menos um usuário ou uma role para atribuir a claim.');
             return false;
         }
 
@@ -541,47 +561,119 @@ var claimsManager = {
     },
 
     setClaimType: function(claimType) {
-        console.log('ClaimsManager: setClaimType chamado com:', claimType);
-        $('#claimTypeSelect').val(claimType);
-        
-        // Sugerir valor baseado no tipo
-        const valueField = $('#Value');
-        if (claimType.startsWith('permission.')) {
-            console.log('ClaimsManager: Definindo valor padrão para permission');
-            valueField.val('true');
-        } else {
-            console.log('ClaimsManager: Limpando valor para claim personalizada');
-            valueField.val('');
-            valueField.focus();
+        const $claimTypeSelect = $('#claimTypeSelect');
+        if ($claimTypeSelect.length > 0) {
+            $claimTypeSelect.val(claimType).trigger('change');
+            console.log('ClaimsManager: Tipo de claim definido:', claimType);
         }
     },
 
     initializeForm: function() {
-        console.log('ClaimsManager: initializeForm chamado');
-        
-        if ($('#editClaimForm').length) {
-            console.log('ClaimsManager: Inicializando validação para formulário de edição');
-            $.validator.unobtrusive.parse('#editClaimForm');
-        }
-        if ($('#createClaimForm').length) {
-            console.log('ClaimsManager: Inicializando validação para formulário de criação');
-            $.validator.unobtrusive.parse('#createClaimForm');
-        }
+        console.log('ClaimsManager: Inicializando formulário do modal...');
         
         // Aguardar um pouco para garantir que o DOM foi carregado
         setTimeout(function() {
-            console.log('ClaimsManager: Inicializando Select2 para multi-select');
-            // Inicializar Select2 para multi-select
-            $('#userSelect, #roleSelect').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                placeholder: function() {
-                    return $(this).attr('id') === 'userSelect' ? 'Selecione os usuários' : 'Selecione as roles';
-                },
-                allowClear: true
+            // Validação unobtrusive
+            if ($('#editClaimForm').length) {
+                $.validator.unobtrusive.parse('#editClaimForm');
+            }
+            if ($('#createClaimForm').length) {
+                $.validator.unobtrusive.parse('#createClaimForm');
+            }
+            
+            // Inicializar Select2
+            claimsManager.initializeSelect2();
+            
+            console.log('ClaimsManager: Formulário inicializado');
+        }, 150);
+    },
+
+    // Método para reinicializar Select2 quando conteúdo é carregado dinamicamente
+    reinitializeSelect2: function() {
+        claimsManager.initializeSelect2();
+    },
+
+    // Observer para detectar automaticamente novos selects múltiplos
+    initializeDOMObserver: function() {
+        // Usar MutationObserver para detectar mudanças no DOM
+        if (typeof MutationObserver !== 'undefined') {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                        // Verificar se foram adicionados novos selects múltiplos
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1) { // Element node
+                                const $node = $(node);
+                                // Verificar se o próprio node é um select múltiplo ou contém um
+                                const $newSelects = $node.is('select[multiple]') ? 
+                                    $node : $node.find('select[multiple]');
+                                
+                                if ($newSelects.length > 0) {
+                                    setTimeout(function() {
+                                        claimsManager.initializeSelect2();
+                                    }, 100);
+                                }
+                            }
+                        });
+                    }
+                });
             });
-            console.log('ClaimsManager: Select2 inicializado');
-        }, 100);
+
+            // Observar mudanças no container do modal
+            const modalContainer = document.getElementById('modalContainer');
+            if (modalContainer) {
+                observer.observe(modalContainer, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+        }
+    },
+
+    initializeSelect2: function() {
+        try {
+            // Verificar se existe algum select múltiplo que ainda não foi inicializado
+            const $selects = $('.form-select[multiple]').not('.select2-hidden-accessible');
+            
+            if ($selects.length > 0) {
+                $selects.select2({
+                    theme: 'bootstrap-5',
+                    language: 'pt-BR',
+                    width: '100%',
+                    placeholder: function() {
+                        const id = $(this).attr('id');
+                        if (id === 'SelectedUsers') {
+                            return 'Selecione os usuários';
+                        } else if (id === 'SelectedRoles') {
+                            return 'Selecione as roles';
+                        }
+                        return 'Selecione as opções';
+                    },
+                    dropdownParent: $('#modalContainer'),
+                    allowClear: true,
+                    closeOnSelect: false
+                });
+                
+                console.log('ClaimsManager: Select2 inicializado para', $selects.length, 'elementos');
+            }
+            
+            // Inicializar Select2 para selects simples (tipo de claim)
+            const $singleSelects = $('.form-select').not('[multiple]').not('.select2-hidden-accessible');
+            if ($singleSelects.length > 0) {
+                $singleSelects.select2({
+                    theme: 'bootstrap-5',
+                    language: 'pt-BR',
+                    width: '100%',
+                    placeholder: 'Selecione uma opção',
+                    dropdownParent: $('#modalContainer'),
+                    allowClear: true
+                });
+                
+                console.log('ClaimsManager: Select2 inicializado para', $singleSelects.length, 'selects simples');
+            }
+        } catch (error) {
+            console.log('ClaimsManager: Erro ao inicializar Select2:', error);
+        }
     }
 };
 

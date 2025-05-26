@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Dapper;
 using GesN.Web.Areas.Identity.Data.Models;
 using GesN.Web.Areas.Admin.Models;
-using GesN.Web.Interfaces;
+using System.Data;
+using GesN.Web.Data;
+using GesN.Web.Infrastructure.Data;
 
 namespace GesN.Web.Areas.Admin.Controllers
 {
@@ -12,15 +14,11 @@ namespace GesN.Web.Areas.Admin.Controllers
     [Authorize(Roles = "Admin")]
     public class HomeController : Controller
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly IDbConnectionFactory _connectionFactory;
 
-        public HomeController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+        public HomeController(IDbConnectionFactory connectionFactory)
         {
-            _unitOfWork = unitOfWork;
-            _userManager = userManager;
-            _roleManager = roleManager;
+            _connectionFactory = connectionFactory;
         }
 
         public async Task<IActionResult> Index()
@@ -28,35 +26,13 @@ namespace GesN.Web.Areas.Admin.Controllers
             try
             {
                 var model = new AdminHomeViewModel();
-
-                // Total de usuários
                 model.TotalUsers = await GetTotalUsersAsync();
-
-                // Total de roles
                 model.TotalRoles = await GetTotalRolesAsync();
-
-                // Total de claims distintas
                 model.TotalClaims = await GetTotalClaimsAsync();
-
-                // Admins ativos
                 model.ActiveAdmins = await GetActiveAdminsAsync();
-
-                // Usuários ativos (últimos 30 dias) - baseado em LastLoginDate se existir
                 model.ActiveUsers = await GetActiveUsersAsync();
-
-                // Usuários cadastrados hoje
-                model.UsersToday = await GetUsersTodayAsync();
-
-                // Claims únicas (distintas por tipo + valor)
                 model.UniqueClaims = await GetUniqueClaimsAsync();
-
-                // Roles que possuem claims
                 model.RolesWithClaims = await GetRolesWithClaimsAsync();
-
-                // Dados adicionais para futuras expansões
-                model.RecentUsers = await GetRecentUsersAsync();
-                model.RoleDistribution = await GetRoleDistributionAsync();
-                model.TopClaims = await GetTopClaimsAsync();
 
                 return View(model);
             }
@@ -72,116 +48,118 @@ namespace GesN.Web.Areas.Admin.Controllers
 
         private async Task<int> GetTotalUsersAsync()
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             const string query = "SELECT COUNT(*) FROM AspNetUsers";
-            return await _unitOfWork.Connection.QuerySingleAsync<int>(query, transaction: _unitOfWork.Transaction);
+            return await connection.QuerySingleAsync<int>(query);
         }
 
         private async Task<int> GetTotalRolesAsync()
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             const string query = "SELECT COUNT(*) FROM AspNetRoles";
-            return await _unitOfWork.Connection.QuerySingleAsync<int>(query, transaction: _unitOfWork.Transaction);
+            return await connection.QuerySingleAsync<int>(query);
         }
 
         private async Task<int> GetTotalClaimsAsync()
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             const string query = @"
-                SELECT COUNT(*) FROM (
-                    SELECT DISTINCT ClaimType, ClaimValue FROM AspNetUserClaims
-                    UNION
-                    SELECT DISTINCT ClaimType, ClaimValue FROM AspNetRoleClaims
-                ) AS DistinctClaims";
-            return await _unitOfWork.Connection.QuerySingleAsync<int>(query, transaction: _unitOfWork.Transaction);
+                SELECT 
+                    (SELECT COUNT(*) FROM AspNetUserClaims) + 
+                    (SELECT COUNT(*) FROM AspNetRoleClaims) AS TotalClaims";
+            return await connection.QuerySingleAsync<int>(query);
         }
 
         private async Task<int> GetActiveAdminsAsync()
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             const string query = @"
                 SELECT COUNT(DISTINCT u.Id)
                 FROM AspNetUsers u
                 INNER JOIN AspNetUserRoles ur ON u.Id = ur.UserId
                 INNER JOIN AspNetRoles r ON ur.RoleId = r.Id
                 WHERE r.Name = 'Admin'";
-            return await _unitOfWork.Connection.QuerySingleAsync<int>(query, transaction: _unitOfWork.Transaction);
+            return await connection.QuerySingleAsync<int>(query);
         }
 
         private async Task<int> GetActiveUsersAsync()
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             // Por enquanto, consideramos todos os usuários como ativos
             // No futuro, pode ser implementado baseado em LastLoginDate
             const string query = "SELECT COUNT(*) FROM AspNetUsers";
-            return await _unitOfWork.Connection.QuerySingleAsync<int>(query, transaction: _unitOfWork.Transaction);
-        }
-
-        private async Task<int> GetUsersTodayAsync()
-        {
-            const string query = @"
-                SELECT COUNT(*) 
-                FROM AspNetUsers 
-                WHERE DATE(CreatedDate) = DATE('now')";
-            return await _unitOfWork.Connection.QuerySingleAsync<int>(query, transaction: _unitOfWork.Transaction);
+            return await connection.QuerySingleAsync<int>(query);
         }
 
         private async Task<int> GetUniqueClaimsAsync()
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             const string query = @"
                 SELECT COUNT(*) FROM (
                     SELECT DISTINCT ClaimType, ClaimValue FROM AspNetUserClaims
                     UNION
                     SELECT DISTINCT ClaimType, ClaimValue FROM AspNetRoleClaims
                 ) AS DistinctClaims";
-            return await _unitOfWork.Connection.QuerySingleAsync<int>(query, transaction: _unitOfWork.Transaction);
+            return await connection.QuerySingleAsync<int>(query);
         }
 
         private async Task<int> GetRolesWithClaimsAsync()
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             const string query = @"
                 SELECT COUNT(DISTINCT RoleId) 
                 FROM AspNetRoleClaims";
-            return await _unitOfWork.Connection.QuerySingleAsync<int>(query, transaction: _unitOfWork.Transaction);
+            return await connection.QuerySingleAsync<int>(query);
         }
 
+        // Métodos auxiliares para estatísticas futuras (não utilizados atualmente)
+        
+        /*
         private async Task<List<UserStatsViewModel>> GetRecentUsersAsync()
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             const string query = @"
-                SELECT  
+                SELECT 
                     u.Id as UserId,
                     u.UserName,
                     u.Email,
-                    u.CreatedDate,
+                    datetime('now') as CreatedDate,
                     COUNT(DISTINCT ur.RoleId) as RoleCount,
                     COUNT(DISTINCT uc.Id) as ClaimCount
                 FROM AspNetUsers u
                 LEFT JOIN AspNetUserRoles ur ON u.Id = ur.UserId
                 LEFT JOIN AspNetUserClaims uc ON u.Id = uc.UserId
-                GROUP BY u.Id, u.UserName, u.Email, u.CreatedDate
-                ORDER BY u.CreatedDate DESC
+                GROUP BY u.Id, u.UserName, u.Email
+                ORDER BY u.UserName
                 LIMIT 5";
 
-            var result = await _unitOfWork.Connection.QueryAsync<UserStatsViewModel>(query, transaction: _unitOfWork.Transaction);
+            var result = await connection.QueryAsync<UserStatsViewModel>(query);
             return result.ToList();
         }
 
         private async Task<List<RoleStatsViewModel>> GetRoleDistributionAsync()
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             const string query = @"
                 SELECT 
                     r.Id as RoleId,
                     r.Name as RoleName,
                     COUNT(DISTINCT ur.UserId) as UserCount,
                     COUNT(DISTINCT rc.Id) as ClaimCount,
-                    r.CreatedDate
+                    datetime('now') as CreatedDate
                 FROM AspNetRoles r
                 LEFT JOIN AspNetUserRoles ur ON r.Id = ur.RoleId
                 LEFT JOIN AspNetRoleClaims rc ON r.Id = rc.RoleId
-                GROUP BY r.Id, r.Name, r.CreatedDate
+                GROUP BY r.Id, r.Name
                 ORDER BY UserCount DESC";
 
-            var result = await _unitOfWork.Connection.QueryAsync<RoleStatsViewModel>(query, transaction: _unitOfWork.Transaction);
+            var result = await connection.QueryAsync<RoleStatsViewModel>(query);
             return result.ToList();
         }
 
         private async Task<List<ClaimStatsViewModel>> GetTopClaimsAsync()
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             const string query = @"
                 SELECT 
                     ClaimType as Type,
@@ -204,8 +182,9 @@ namespace GesN.Web.Areas.Admin.Controllers
                 ORDER BY (UserCount + RoleCount) DESC
                 LIMIT 5";
 
-            var result = await _unitOfWork.Connection.QueryAsync<ClaimStatsViewModel>(query, transaction: _unitOfWork.Transaction);
+            var result = await connection.QueryAsync<ClaimStatsViewModel>(query);
             return result.ToList();
         }
+        */
     }
 } 

@@ -1,7 +1,7 @@
 using GesN.Web.Areas.Identity.Data.Models;
-using GesN.Web.Areas.Identity.Data.Stores;
 using GesN.Web.Data.Seeds.IdentitySeeds;
-using Microsoft.AspNetCore.Identity;
+using GesN.Web.Infrastructure.Data;
+using System.Data;
 
 namespace GesN.Web.Data
 {
@@ -9,11 +9,9 @@ namespace GesN.Web.Data
     {
         private readonly IdentitySeeder _identitySeeder;
 
-        public SeedData(
-            UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager)
+        public SeedData(IDbConnectionFactory connectionFactory)
         {
-            _identitySeeder = new IdentitySeeder(userManager, roleManager);
+            _identitySeeder = new IdentitySeeder(connectionFactory);
         }
 
         public async Task Initialize()

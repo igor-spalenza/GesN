@@ -6,7 +6,7 @@
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body">
-    <form id="editUserForm" asp-action="Edit" asp-controller="Users" asp-area="Admin" onsubmit="return usersManager.salvarEdicao(this);">
+    <form id="editUserForm" asp-action="EditPartial" asp-controller="Users" asp-area="Admin" onsubmit="return usersManager.salvarEdicao(this);">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input type="hidden" asp-for="Id" />
@@ -59,14 +59,14 @@
             <div class="col-md-6">
                 <h5>@Html.DisplayNameFor(model => model.SelectedRoles)</h5>
                 <div class="form-group">
-                    <select asp-for="SelectedRoles" class="form-select" multiple size="6">
+                    <select asp-for="SelectedRoles" class="form-select" multiple>
                         @foreach (var role in Model.AvailableRoles)
                         {
                             <option value="@role" selected="@Model.SelectedRoles.Contains(role)">@role</option>
                         }
                     </select>
                     <span asp-validation-for="SelectedRoles" class="text-danger"></span>
-                    <small class="form-text text-muted">Use Ctrl+Click para selecionar múltiplas funções</small>
+                    <small class="form-text text-muted">Selecione uma ou mais funções para o usuário</small>
                 </div>
             </div>
             <div class="col-md-6">
@@ -110,27 +110,17 @@
                 </button>
             </div>
         </div>
-
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">
-                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                Salvar
-            </button>
-        </div>
     </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+    <button type="submit" form="editUserForm" class="btn btn-primary">
+        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        Salvar
+    </button>
 </div>
 
 <script>
     // Disponibilizar os valores das claims globalmente
     window.availableClaimValues = @Html.Raw(Json.Serialize(SystemClaims.GetAvailableClaimValues()));
-    
-    // Chamar inicialização após carregar
-    $(document).ready(function() {
-        setTimeout(function() {
-            if (typeof usersManager !== 'undefined') {
-                usersManager.initializeForm();
-            }
-        }, 100);
-    });
 </script> 

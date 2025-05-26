@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GesN.Web.Areas.Admin.Models
 {
@@ -32,7 +33,7 @@ namespace GesN.Web.Areas.Admin.Models
         public List<RoleSelectionClaimViewModel> RolesWithClaim { get; set; } = new();
     }
 
-    public class CreateClaimViewModel
+    public class CreateClaimViewModel : IValidatableObject
     {
         [Required(ErrorMessage = "O tipo da claim é obrigatório")]
         [StringLength(256, ErrorMessage = "O tipo da claim deve ter no máximo {1} caracteres")]
@@ -45,13 +46,13 @@ namespace GesN.Web.Areas.Admin.Models
         public string Value { get; set; } = string.Empty;
 
         [Display(Name = "Usuários Selecionados")]
-        public List<string> SelectedUsers { get; set; } = new();
+        public List<string>? SelectedUsers { get; set; }
 
         [Display(Name = "Usuários Disponíveis")]
         public List<UserSelectionViewModel> AvailableUsers { get; set; } = new();
 
         [Display(Name = "Roles Selecionadas")]
-        public List<string> SelectedRoles { get; set; } = new();
+        public List<string>? SelectedRoles { get; set; }
 
         [Display(Name = "Roles Disponíveis")]
         public List<RoleSelectionClaimViewModel> AvailableRoles { get; set; } = new();
@@ -76,6 +77,19 @@ namespace GesN.Web.Areas.Admin.Models
 
         [Display(Name = "Tipos Disponíveis de Claims")]
         public List<string> AvailableClaimTypes => CommonClaimTypes;
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var hasUsers = SelectedUsers?.Any() == true;
+            var hasRoles = SelectedRoles?.Any() == true;
+            
+            if (!hasUsers && !hasRoles)
+            {
+                yield return new ValidationResult(
+                    "Selecione pelo menos um usuário ou uma role para atribuir a claim.",
+                    new[] { nameof(SelectedUsers), nameof(SelectedRoles) });
+            }
+        }
     }
 
     public class EditClaimViewModel
@@ -106,10 +120,10 @@ namespace GesN.Web.Areas.Admin.Models
         public List<RoleSelectionClaimViewModel> AvailableRoles { get; set; } = new();
 
         [Display(Name = "IDs de Usuários Selecionados")]
-        public List<string> SelectedUserIds { get; set; } = new();
+        public List<string>? SelectedUserIds { get; set; }
 
         [Display(Name = "IDs de Roles Selecionadas")]
-        public List<string> SelectedRoleIds { get; set; } = new();
+        public List<string>? SelectedRoleIds { get; set; }
 
         [Display(Name = "Tipos Comuns de Claims")]
         public List<string> CommonClaimTypes { get; set; } = new()

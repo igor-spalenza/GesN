@@ -81,9 +81,13 @@
                                     <div class="col-5">
                                         <select asp-for="Claims[i].Type" class="form-select claim-type">
                                             <option value="">Selecione o tipo</option>
-                                            @foreach (var claimType in Model.AvailableClaimTypes)
+                                            @if (!string.IsNullOrEmpty(Model.Claims[i].Type))
                                             {
-                                                <option value="@claimType" selected="@(Model.Claims[i].Type == claimType)">@claimType</option>
+                                                <option value="@Model.Claims[i].Type" selected>@Model.Claims[i].Type</option>
+                                            }
+                                            @foreach (var claimType in Model.AvailableClaimTypes.Where(ct => ct != Model.Claims[i].Type))
+                                            {
+                                                <option value="@claimType">@claimType</option>
                                             }
                                         </select>
                                         <span asp-validation-for="Claims[i].Type" class="text-danger"></span>
@@ -113,45 +117,48 @@
             </div>
 
             <!-- Tipos Comuns de Claims (Sugestões) -->
-            <div class="col-12">
-                <div class="card border-success">
-                    <div class="card-header bg-success text-white">
-                        <h6 class="mb-0">
-                            <i class="bi bi-lightbulb me-2"></i>Sugestões de Claims Comuns
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-2">
-                            @foreach (var suggestion in Model.AvailableClaimTypes.Take(6))
+            @if (Model.AvailableClaimTypes.Any())
+            {
+                <div class="col-12">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-lightbulb me-2"></i>Sugestões de Claims Comuns
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                @foreach (var suggestion in Model.AvailableClaimTypes.Take(6))
+                                {
+                                    <div class="col-6 col-md-4">
+                                        <button type="button" class="btn btn-outline-success btn-sm w-100" onclick="rolesManager.addClaimFromSuggestion('@suggestion')">
+                                            <small>@suggestion</small>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                            @if (Model.AvailableClaimTypes.Count > 6)
                             {
-                                <div class="col-6 col-md-4">
-                                    <button type="button" class="btn btn-outline-success btn-sm w-100" onclick="rolesManager.addClaimFromSuggestion('@suggestion')">
-                                        <small>@suggestion</small>
-                                    </button>
+                                <button type="button" class="btn btn-link btn-sm mt-2" data-bs-toggle="collapse" data-bs-target="#moreSuggestions">
+                                    Ver mais sugestões...
+                                </button>
+                                <div class="collapse mt-2" id="moreSuggestions">
+                                    <div class="row g-2">
+                                        @foreach (var suggestion in Model.AvailableClaimTypes.Skip(6))
+                                        {
+                                            <div class="col-6 col-md-4">
+                                                <button type="button" class="btn btn-outline-success btn-sm w-100" onclick="rolesManager.addClaimFromSuggestion('@suggestion')">
+                                                    <small>@suggestion</small>
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                             }
                         </div>
-                        @if (Model.AvailableClaimTypes.Count > 6)
-                        {
-                            <button type="button" class="btn btn-link btn-sm mt-2" data-bs-toggle="collapse" data-bs-target="#moreSuggestions">
-                                Ver mais sugestões...
-                            </button>
-                            <div class="collapse mt-2" id="moreSuggestions">
-                                <div class="row g-2">
-                                    @foreach (var suggestion in Model.AvailableClaimTypes.Skip(6))
-                                    {
-                                        <div class="col-6 col-md-4">
-                                            <button type="button" class="btn btn-outline-success btn-sm w-100" onclick="rolesManager.addClaimFromSuggestion('@suggestion')">
-                                                <small>@suggestion</small>
-                                            </button>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        }
                     </div>
                 </div>
-            </div>
+            }
         </div>
     </div>
 
@@ -165,48 +172,6 @@
         </button>
     </div>
 </form>
-
-<style>
-.claim-row {
-    border: 1px solid #e9ecef;
-    border-radius: 0.375rem;
-    padding: 0.75rem;
-    background-color: #f8f9fa;
-    margin-bottom: 0.5rem;
-}
-
-.claim-row:hover {
-    background-color: #e9ecef;
-}
-
-.avatar-circle {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-}
-
-#claimsContainer:empty + #emptyClaimsMessage {
-    display: block !important;
-}
-
-.card {
-    border: 1px solid #e9ecef;
-}
-
-.card-header {
-    border-bottom: 1px solid #e9ecef;
-}
-
-.btn-outline-success:hover {
-    color: #fff;
-    background-color: #198754;
-    border-color: #198754;
-}
-</style>
 
 <script>
 // Garantir que as validações sejam aplicadas quando o modal for carregado

@@ -5,24 +5,15 @@ var usersManager = {
         // Inicializar eventos dos modais
         $(document).on('shown.bs.modal', '#modalContainer', function () {
             usersManager.initializeForm();
-            
-            // Inicializar select múltiplo com Select2
-            $('.form-select[multiple]').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                placeholder: 'Selecione as funções'
-            });
-
-            // Aguardar um pouco para garantir que tudo foi carregado
-            setTimeout(function() {
-                // Inicializar os selects de claims existentes
-                $('.claim-type').each(function() {
-                    usersManager.updateClaimValues(this);
-                });
-            }, 200);
         });
 
         $(document).on('hidden.bs.modal', '#modalContainer', function () {
+            // Destruir instâncias do Select2 antes de limpar o modal
+            $('.form-select[multiple]').each(function() {
+                if ($(this).hasClass('select2-hidden-accessible')) {
+                    $(this).select2('destroy');
+                }
+            });
             $(this).find('.modal-content').html('');
         });
 
@@ -41,6 +32,9 @@ var usersManager = {
 
         // Inicializar funcionalidades da grid
         usersManager.initializeGrid();
+        
+        // Inicializar observer para detectar novos selects múltiplos
+        usersManager.initializeDOMObserver();
     },
 
     initializeGrid: function() {
@@ -206,7 +200,7 @@ var usersManager = {
         $modal.modal('show');
         
         $.ajax({
-            url: '/Admin/Users/Edit/' + userId,
+            url: '/Admin/Users/EditPartial/' + userId,
             type: 'GET',
             success: function(data) {
                 $modal.find('.modal-content').html(data);
@@ -224,7 +218,7 @@ var usersManager = {
         $modal.modal('show');
         
         $.ajax({
-            url: '/Admin/Users/Delete/' + userId,
+            url: '/Admin/Users/DeletePartial/' + userId,
             type: 'GET',
             success: function(data) {
                 $modal.find('.modal-content').html(data);
@@ -410,20 +404,115 @@ var usersManager = {
     },
 
     initializeForm: function() {
-        if ($('#editUserForm').length) {
-            $.validator.unobtrusive.parse('#editUserForm');
-        }
-        if ($('#createUserForm').length) {
-            $.validator.unobtrusive.parse('#createUserForm');
-        }
-        
         // Aguardar um pouco para garantir que o DOM foi carregado
         setTimeout(function() {
+            // Validação unobtrusive
+            if ($('#editUserForm').length) {
+                $.validator.unobtrusive.parse('#editUserForm');
+            }
+            if ($('#createUserForm').length) {
+                $.validator.unobtrusive.parse('#createUserForm');
+            }
+            
+            // Inicializar Select2 para roles
+            usersManager.initializeSelect2();
+            
+            // Inicializar password visibility toggles
+            usersManager.initializePasswordToggles();
+            
             // Inicializar claims existentes após carregar o form
             $('.claim-type').each(function() {
                 usersManager.updateClaimValues(this);
             });
-        }, 100);
+        }, 150);
+    },
+
+    // Método para reinicializar Select2 quando conteúdo é carregado dinamicamente
+    reinitializeSelect2: function() {
+        usersManager.initializeSelect2();
+    },
+
+    // Observer para detectar automaticamente novos selects múltiplos
+    initializeDOMObserver: function() {
+        // Usar MutationObserver para detectar mudanças no DOM
+        if (typeof MutationObserver !== 'undefined') {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                        // Verificar se foram adicionados novos selects múltiplos
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1) { // Element node
+                                const $node = $(node);
+                                // Verificar se o próprio node é um select múltiplo ou contém um
+                                const $newSelects = $node.is('select[multiple]') ? 
+                                    $node : $node.find('select[multiple]');
+                                
+                                if ($newSelects.length > 0) {
+                                    setTimeout(function() {
+                                        usersManager.initializeSelect2();
+                                    }, 100);
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Observar mudanças no container do modal
+            const modalContainer = document.getElementById('modalContainer');
+            if (modalContainer) {
+                observer.observe(modalContainer, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+        }
+    },
+
+    initializeSelect2: function() {
+        try {
+            // Verificar se existe algum select múltiplo que ainda não foi inicializado
+            const $selects = $('.form-select[multiple]').not('.select2-hidden-accessible');
+            
+            if ($selects.length > 0) {
+                $selects.select2({
+                    theme: 'bootstrap-5',
+                    language: 'pt-BR',
+                    width: '100%',
+                    placeholder: 'Selecione as funções',
+                    dropdownParent: $('#modalContainer'),
+                    allowClear: true,
+                    closeOnSelect: false
+                });
+            }
+        } catch (error) {
+            console.log('Erro ao inicializar Select2:', error);
+        }
+    },
+
+    initializePasswordToggles: function() {
+        // Remover event listeners existentes para evitar duplicação
+        $(document).off('click', '.password-toggle');
+        
+        // Adicionar event listener para botões de toggle de senha
+        $(document).on('click', '.password-toggle', function() {
+            const button = $(this);
+            const targetField = button.data('target');
+            const passwordInput = $(`input[name="${targetField}"]`);
+            const icon = button.find('i');
+            
+            if (passwordInput.attr('type') === 'password') {
+                // Mostrar senha
+                passwordInput.attr('type', 'text');
+                icon.removeClass('bi-eye').addClass('bi-eye-slash');
+                button.attr('title', 'Ocultar senha');
+            } else {
+                // Ocultar senha
+                passwordInput.attr('type', 'password');
+                icon.removeClass('bi-eye-slash').addClass('bi-eye');
+                button.attr('title', 'Mostrar senha');
+            }
+        });
     }
 };
 

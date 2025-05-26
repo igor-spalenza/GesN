@@ -1,5 +1,11 @@
 @model GesN.Web.Areas.Admin.Models.CreateClaimViewModel
 
+@section Styles {
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/lib/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="~/css/Admin.css" rel="stylesheet" />
+}
+
 <div class="modal-header">
     <h5 class="modal-title">
         <i class="bi bi-key-fill me-2"></i>Nova Claim
@@ -10,6 +16,11 @@
 <form id="createClaimForm" asp-action="CreatePartial" method="post" onsubmit="return claimsManager.salvarNovo(this);">
     <div class="modal-body">
         <div class="row g-3">
+            <!-- Mensagem de validação global -->
+            <div class="col-12">
+                <div asp-validation-summary="All" class="text-danger"></div>
+            </div>
+
             <!-- Tipo da Claim -->
             <div class="col-md-6">
                 <label asp-for="Type" class="form-label fw-bold">
@@ -43,7 +54,10 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <select asp-for="SelectedUsers" class="form-select" multiple id="userSelect">
+                        <label for="SelectedUsers" class="form-label">
+                            <i class="bi bi-person-check me-1"></i>Selecionar Usuários
+                        </label>
+                        <select name="SelectedUsers" id="SelectedUsers" class="form-select" multiple>
                             @foreach (var user in Model.AvailableUsers)
                             {
                                 <option value="@user.Id">@user.UserName (@user.Email)</option>
@@ -65,7 +79,10 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <select asp-for="SelectedRoles" class="form-select" multiple id="roleSelect">
+                        <label for="SelectedRoles" class="form-label">
+                            <i class="bi bi-person-badge-fill me-1"></i>Selecionar Roles
+                        </label>
+                        <select name="SelectedRoles" id="SelectedRoles" class="form-select" multiple>
                             @foreach (var role in Model.AvailableRoles)
                             {
                                 <option value="@role.Id">@role.Name</option>
@@ -152,69 +169,4 @@
             <i class="bi bi-check-lg me-1"></i>Criar Claim
         </button>
     </div>
-</form>
-
-<style>
-.card {
-    border: 1px solid #e9ecef;
-}
-
-.card-header {
-    border-bottom: 1px solid #e9ecef;
-}
-
-.btn-outline-warning:hover {
-    color: #000;
-    background-color: #ffc107;
-    border-color: #ffc107;
-}
-
-.btn-outline-info:hover {
-    color: #fff;
-    background-color: #0dcaf0;
-    border-color: #0dcaf0;
-}
-
-#userSelect option:checked,
-#roleSelect option:checked {
-    background-color: #0d6efd;
-    color: white;
-}
-
-.form-select[multiple] {
-    min-height: 120px;
-}
-</style>
-
-<script>
-// Garantir que as validações sejam aplicadas quando o modal for carregado
-$(document).ready(function() {
-    if (typeof $.validator !== 'undefined') {
-        $.validator.unobtrusive.parse('#createClaimForm');
-    }
-    
-    // Debug - verificar se o claimsManager existe
-    console.log('claimsManager existe:', typeof claimsManager !== 'undefined');
-    console.log('claimsManager.salvarNovo existe:', typeof claimsManager?.salvarNovo === 'function');
-    
-    // Inicializar Select2 para multi-select
-    $('#userSelect, #roleSelect').select2({
-        theme: 'bootstrap-5',
-        width: '100%',
-        placeholder: function() {
-            return $(this).attr('id') === 'userSelect' ? 'Selecione os usuários' : 'Selecione as roles';
-        },
-        allowClear: true
-    });
-    
-    // Debug do formulário ao enviar
-    $('#createClaimForm').on('submit', function(e) {
-        console.log('Formulário de criação de claim sendo enviado');
-        console.log('Type:', $('#claimTypeSelect').val());
-        console.log('Value:', $('#createClaimForm input[name="Value"]').val());
-        console.log('SelectedUsers:', $('#userSelect').val());
-        console.log('SelectedRoles:', $('#roleSelect').val());
-        console.log('Form data:', $(this).serialize());
-    });
-});
-</script> 
+</form> 

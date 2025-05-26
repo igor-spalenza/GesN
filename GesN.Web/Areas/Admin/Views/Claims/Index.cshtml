@@ -2,7 +2,7 @@
 @using System.Text.Json
 
 @{
-    ViewData["Title"] = "Gerenciamento de Claims";
+    ViewData["Title"] = "Gestão de Claims";
     var availableClaimTypes = new List<string>
     {
         "permission.users.read", "permission.users.create", "permission.users.update", "permission.users.delete",
@@ -15,8 +15,9 @@
 }
 
 @section Styles {
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/lib/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="~/css/Admin.css" rel="stylesheet" />
 }
 
 <div class="container-fluid">
@@ -132,11 +133,9 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script>
-        var availableClaimTypes = @Html.Raw(JsonSerializer.Serialize(availableClaimTypes));
-    </script>
-    <script src="~/js/Claims.js" asp-append-version="true"></script>
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script src="~/lib/select2/js/i18n/pt-br.min.js"></script>
+    <script src="~/js/Claims.js"></script>
     <script>
         $(document).ready(function() {
             claimsManager.init();

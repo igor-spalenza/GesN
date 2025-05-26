@@ -5,7 +5,7 @@
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body">
-    <form id="deleteUserForm" asp-action="DeleteConfirmed" asp-controller="Users" asp-area="Admin" onsubmit="return usersManager.confirmarExclusao(this);">
+    <form id="deleteUserForm" asp-action="DeletePartialConfirmed" asp-controller="Users" asp-area="Admin" onsubmit="return usersManager.confirmarExclusao(this);">
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="Id" />
 
@@ -29,13 +29,12 @@
             <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Roles)</dt>
             <dd class="col-sm-9">@Html.DisplayFor(model => model.Roles)</dd>
         </dl>
-
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-danger">
-                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                Excluir
-            </button>
-        </div>
     </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+    <button type="submit" form="deleteUserForm" class="btn btn-danger">
+        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        Excluir
+    </button>
 </div> 

@@ -1,25 +1,25 @@
 using GesN.Web.Areas.Identity.Data.Models;
+using GesN.Web.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
+using Dapper;
+using System.Security.Claims;
+using BCrypt.Net;
 
 namespace GesN.Web.Areas.Identity.Pages.Account
 {
     public class LoginModel : PageModel
     {
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IDbConnectionFactory _connectionFactory;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(
-            SignInManager<ApplicationUser> signInManager, 
-            UserManager<ApplicationUser> userManager,
-            ILogger<LoginModel> logger)
+        public LoginModel(IDbConnectionFactory connectionFactory, ILogger<LoginModel> logger)
         {
-            _signInManager = signInManager;
-            _userManager = userManager;
+            _connectionFactory = connectionFactory;
             _logger = logger;
         }
 
@@ -68,82 +68,110 @@ namespace GesN.Web.Areas.Identity.Pages.Account
             {
                 try
                 {
-                    // Tentar encontrar o usuário pelo email ou nome de usuário
-                    ApplicationUser user = null;
+                    using var connection = await _connectionFactory.CreateConnectionAsync();
                     
-                    // Primeiro tenta encontrar por email
-                    if (Input.Email.Contains('@'))
-                    {
-                        user = await _userManager.FindByEmailAsync(Input.Email);
-                    }
-                    
-                    // Se não encontrou por email, tenta pelo nome de usuário
+                    // Buscar usuário por email ou username
+                    var user = await connection.QuerySingleOrDefaultAsync<ApplicationUser>(@"
+                        SELECT * FROM AspNetUsers 
+                        WHERE NormalizedEmail = @Email OR NormalizedUserName = @Email",
+                        new { Email = Input.Email.ToUpper() });
+
                     if (user == null)
                     {
-                        user = await _userManager.FindByNameAsync(Input.Email);
-                    }
-                    
-                    // Se ainda não encontrou, retorna erro
-                    if (user == null)
-                    {
-                        _logger.LogWarning($"Usuário não encontrado: {Input.Email}");
-                        ModelState.AddModelError(string.Empty, "Nome de usuário/Email ou senha inválidos.");
+                        _logger.LogWarning("Usuário não encontrado: {Email}", Input.Email);
+                        ModelState.AddModelError(string.Empty, "Email ou senha inválidos.");
                         return Page();
                     }
 
-                    // Verificar mais informações para debugging
-                    string debug = $"Usuário encontrado: Id={user.Id}, UserName={user.UserName}, Email={user.Email}, " +
-                                $"EmailConfirmed={user.EmailConfirmed}, LockoutEnabled={user.LockoutEnabled}, " +
-                                $"LockoutEnd={user.LockoutEnd}, AccessFailedCount={user.AccessFailedCount}";
-                    _logger.LogInformation(debug);
-                    DebugInfo = debug;
-
-                    // Importante: Usar o UserName para login
-                    var result = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-                    
-                    // Log detalhado do resultado da tentativa de login
-                    _logger.LogInformation($"Resultado do login: Succeeded={result.Succeeded}, RequiresTwoFactor={result.RequiresTwoFactor}, " +
-                                        $"IsLockedOut={result.IsLockedOut}, IsNotAllowed={result.IsNotAllowed}");
-                    
-                    if (result.Succeeded)
+                    // Verificar senha usando BCrypt
+                    if (!BCrypt.Net.BCrypt.Verify(Input.Password, user.PasswordHash))
                     {
-                        _logger.LogInformation("User logged in.");
-                        return LocalRedirect(returnUrl);
-                    }
-                    if (result.RequiresTwoFactor)
-                    {
-                        return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                    }
-                    if (result.IsLockedOut)
-                    {
-                        _logger.LogWarning("User account locked out.");
-                        return RedirectToPage("./Lockout");
-                    }
-                    if (result.IsNotAllowed)
-                    {
-                        _logger.LogWarning("Login não permitido. Verifique se o e-mail foi confirmado.");
-                        ModelState.AddModelError(string.Empty, "Login não permitido. Verifique se o e-mail foi confirmado.");
+                        _logger.LogWarning("Senha incorreta para usuário: {Email}", Input.Email);
+                        ModelState.AddModelError(string.Empty, "Email ou senha inválidos.");
                         return Page();
                     }
-                    
-                    // Verificar se a senha está correta
-                    var passwordCorrect = await _userManager.CheckPasswordAsync(user, Input.Password);
-                    if (!passwordCorrect)
+
+                    // Verificar se a conta está bloqueada
+                    if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow)
                     {
-                        _logger.LogWarning("Senha incorreta fornecida.");
-                        ModelState.AddModelError(string.Empty, "Nome de usuário/Email ou senha inválidos.");
+                        _logger.LogWarning("Conta bloqueada para usuário: {Email}", Input.Email);
+                        ModelState.AddModelError(string.Empty, "Conta temporariamente bloqueada.");
+                        return Page();
                     }
-                    else
+
+                    // Debug info
+                    DebugInfo = $"Login bem-sucedido: {user.Email} (ID: {user.Id})";
+                    _logger.LogInformation("Login bem-sucedido para usuário: {Email}", Input.Email);
+
+                    // Buscar roles do usuário
+                    var roles = await connection.QueryAsync<string>(@"
+                        SELECT r.Name
+                        FROM AspNetRoles r
+                        INNER JOIN AspNetUserRoles ur ON r.Id = ur.RoleId
+                        WHERE ur.UserId = @UserId",
+                        new { UserId = user.Id });
+
+                    // Buscar claims do usuário
+                    var userClaims = await connection.QueryAsync(@"
+                        SELECT ClaimType, ClaimValue
+                        FROM AspNetUserClaims
+                        WHERE UserId = @UserId",
+                        new { UserId = user.Id });
+
+                    // Buscar claims das roles
+                    var roleClaims = await connection.QueryAsync(@"
+                        SELECT rc.ClaimType, rc.ClaimValue
+                        FROM AspNetRoleClaims rc
+                        INNER JOIN AspNetUserRoles ur ON rc.RoleId = ur.RoleId
+                        WHERE ur.UserId = @UserId",
+                        new { UserId = user.Id });
+
+                    // Criar claims para autenticação
+                    var claims = new List<Claim>
                     {
-                        _logger.LogWarning("Senha correta, mas login falhou por outro motivo.");
-                        ModelState.AddModelError(string.Empty, "Tentativa de login inválida. Contate o administrador.");
+                        new Claim(ClaimTypes.NameIdentifier, user.Id),
+                        new Claim(ClaimTypes.Name, user.UserName ?? user.Email),
+                        new Claim(ClaimTypes.Email, user.Email),
+                        new Claim("FirstName", user.FirstName ?? ""),
+                        new Claim("LastName", user.LastName ?? "")
+                    };
+
+                    // Adicionar roles
+                    foreach (var role in roles)
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, role));
                     }
-                    
-                    return Page();
+
+                    // Adicionar claims do usuário
+                    foreach (var claim in userClaims)
+                    {
+                        claims.Add(new Claim((string)claim.ClaimType, (string)claim.ClaimValue));
+                    }
+
+                    // Adicionar claims das roles
+                    foreach (var claim in roleClaims)
+                    {
+                        claims.Add(new Claim((string)claim.ClaimType, (string)claim.ClaimValue));
+                    }
+
+                    // Fazer login
+                    var claimsIdentity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
+                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                    await HttpContext.SignInAsync(
+                        IdentityConstants.ApplicationScheme,
+                        claimsPrincipal,
+                        new AuthenticationProperties
+                        {
+                            IsPersistent = Input.RememberMe,
+                            ExpiresUtc = Input.RememberMe ? DateTimeOffset.UtcNow.AddDays(30) : DateTimeOffset.UtcNow.AddHours(8)
+                        });
+
+                    return LocalRedirect(returnUrl);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Erro no login: {ex.Message}");
+                    _logger.LogError(ex, "Erro no login: {Message}", ex.Message);
                     ModelState.AddModelError(string.Empty, $"Erro no login: {ex.Message}");
                     return Page();
                 }

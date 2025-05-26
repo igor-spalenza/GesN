@@ -1,11 +1,10 @@
 using Dapper;
-using GesN.Web.Areas.Identity.Data.Models;
-using GesN.Web.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using GesN.Web.Areas.Admin.Models;
+using System.Data;
+using GesN.Web.Infrastructure.Data;
 
 namespace GesN.Web.Areas.Admin.Controllers
 {
@@ -13,82 +12,86 @@ namespace GesN.Web.Areas.Admin.Controllers
     [Authorize(Roles = "Admin")]
     public class ClaimsController : Controller
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly IDbConnectionFactory _connectionFactory;
 
-        public ClaimsController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+        public ClaimsController(IDbConnectionFactory connectionFactory)
         {
-            _unitOfWork = unitOfWork;
-            _userManager = userManager;
-            _roleManager = roleManager;
+            _connectionFactory = connectionFactory;
         }
 
         public async Task<IActionResult> Index()
         {
-            var allClaims = await GetAllDistinctClaimsAsync();
-            var claimViewModels = new List<ClaimViewModel>();
-
-            foreach (var claim in allClaims)
+            try
             {
-                var usersWithClaim = await GetUsersWithClaimAsync(claim.Type, claim.Value);
-                var rolesWithClaim = await GetRolesWithClaimAsync(claim.Type, claim.Value);
+                using var connection = await _connectionFactory.CreateConnectionAsync();
                 
-                claimViewModels.Add(new ClaimViewModel
+                // Obter todas as claims únicas (tanto de usuários quanto de roles)
+                var allClaims = await connection.QueryAsync(@"
+                    SELECT DISTINCT ClaimType, ClaimValue 
+                    FROM (
+                        SELECT ClaimType, ClaimValue FROM AspNetUserClaims
+                        UNION
+                        SELECT ClaimType, ClaimValue FROM AspNetRoleClaims
+                    ) AS AllClaims
+                    ORDER BY ClaimType, ClaimValue");
+
+                var claimViewModels = new List<ClaimViewModel>();
+
+                foreach (var claim in allClaims)
                 {
-                    Type = claim.Type,
-                    Value = claim.Value,
-                    Users = string.Join(", ", usersWithClaim.Select(u => u.UserName)),
-                    Roles = string.Join(", ", rolesWithClaim.Select(r => r.Name)),
-                    UserCount = usersWithClaim.Count,
-                    RoleCount = rolesWithClaim.Count
-                });
+                    var claimType = (string)claim.ClaimType;
+                    var claimValue = (string)claim.ClaimValue;
+                    
+                    // Obter usuários com esta claim
+                    var usersWithClaim = await connection.QueryAsync(@"
+                        SELECT u.Id, u.UserName, u.Email 
+                        FROM AspNetUsers u
+                        INNER JOIN AspNetUserClaims uc ON u.Id = uc.UserId
+                        WHERE uc.ClaimType = @ClaimType AND uc.ClaimValue = @ClaimValue", 
+                        new { ClaimType = claimType, ClaimValue = claimValue });
+                    
+                    // Obter roles com esta claim
+                    var rolesWithClaim = await connection.QueryAsync(@"
+                        SELECT r.Id, r.Name 
+                        FROM AspNetRoles r
+                        INNER JOIN AspNetRoleClaims rc ON r.Id = rc.RoleId
+                        WHERE rc.ClaimType = @ClaimType AND rc.ClaimValue = @ClaimValue", 
+                        new { ClaimType = claimType, ClaimValue = claimValue });
+                
+                    var usersList = usersWithClaim.ToList();
+                    var rolesList = rolesWithClaim.ToList();
+                    
+                    var userNames = new List<string>();
+                    foreach (var user in usersList)
+                    {
+                        userNames.Add((string)user.UserName);
+                    }
+                    
+                    var roleNames = new List<string>();
+                    foreach (var role in rolesList)
+                    {
+                        roleNames.Add((string)role.Name);
+                    }
+                    
+                    claimViewModels.Add(new ClaimViewModel
+                    {
+                        Type = claimType,
+                        Value = claimValue,
+                        Users = string.Join(", ", userNames),
+                        Roles = string.Join(", ", roleNames),
+                        UserCount = usersList.Count,
+                        RoleCount = rolesList.Count
+                    });
+                }
+
+                return View(claimViewModels);
             }
-
-            return View(claimViewModels);
-        }
-
-        private async Task<List<(string Type, string Value)>> GetAllDistinctClaimsAsync()
-        {
-            const string query = @"
-                SELECT DISTINCT ClaimType as Type, ClaimValue as Value
-                FROM AspNetUserClaims
-                UNION
-                SELECT DISTINCT ClaimType as Type, ClaimValue as Value
-                FROM AspNetRoleClaims";
-
-            var claims = await _unitOfWork.Connection.QueryAsync<(string Type, string Value)>(query, transaction: _unitOfWork.Transaction);
-            return claims.ToList();
-        }
-
-        private async Task<List<ApplicationUser>> GetUsersWithClaimAsync(string type, string value)
-        {
-            const string query = @"
-                SELECT u.*
-                FROM AspNetUsers u
-                INNER JOIN AspNetUserClaims uc ON u.Id = uc.UserId
-                WHERE uc.ClaimType = @Type AND uc.ClaimValue = @Value";
-
-            var users = await _unitOfWork.Connection.QueryAsync<ApplicationUser>(
-                query,
-                new { Type = type, Value = value },
-                _unitOfWork.Transaction);
-            return users.ToList();
-        }
-
-        private async Task<List<ApplicationRole>> GetRolesWithClaimAsync(string type, string value)
-        {
-            const string query = @"
-                SELECT r.*
-                FROM AspNetRoles r
-                INNER JOIN AspNetRoleClaims rc ON r.Id = rc.RoleId
-                WHERE rc.ClaimType = @Type AND rc.ClaimValue = @Value";
-
-            var roles = await _unitOfWork.Connection.QueryAsync<ApplicationRole>(
-                query,
-                new { Type = type, Value = value },
-                _unitOfWork.Transaction);
-            return roles.ToList();
+            catch (Exception ex)
+            {
+                // Log do erro para debug
+                System.Diagnostics.Debug.WriteLine($"Erro no Index: {ex.Message}");
+                return StatusCode(500, $"Erro ao carregar claims: {ex.Message}");
+            }
         }
 
         public async Task<IActionResult> Details(string type, string value)
@@ -98,31 +101,69 @@ namespace GesN.Web.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var usersWithClaim = await GetUsersWithClaimAsync(type, value);
-            var rolesWithClaim = await GetRolesWithClaimAsync(type, value);
-            
-            var viewModel = new ClaimDetailViewModel
+            try
             {
-                Type = type,
-                Value = value,
-                UsersWithClaim = usersWithClaim.Select(u => new UserSelectionViewModel 
-                { 
-                    Id = u.Id, 
-                    UserName = u.UserName, 
-                    Email = u.Email, 
-                    IsSelected = true 
-                }).ToList(),
-                RolesWithClaim = rolesWithClaim.Select(r => new RoleSelectionClaimViewModel 
-                { 
-                    Id = r.Id, 
-                    Name = r.Name, 
-                    IsSelected = true 
-                }).ToList(),
-                TotalUsers = usersWithClaim.Count,
-                TotalRoles = rolesWithClaim.Count
-            };
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
+                // Obter usuários com esta claim
+                var usersWithClaim = await connection.QueryAsync(@"
+                    SELECT u.Id, u.UserName, u.Email 
+                    FROM AspNetUsers u
+                    INNER JOIN AspNetUserClaims uc ON u.Id = uc.UserId
+                    WHERE uc.ClaimType = @ClaimType AND uc.ClaimValue = @ClaimValue", 
+                    new { ClaimType = type, ClaimValue = value });
+                
+                // Obter roles com esta claim
+                var rolesWithClaim = await connection.QueryAsync(@"
+                    SELECT r.Id, r.Name 
+                    FROM AspNetRoles r
+                    INNER JOIN AspNetRoleClaims rc ON r.Id = rc.RoleId
+                    WHERE rc.ClaimType = @ClaimType AND rc.ClaimValue = @ClaimValue", 
+                    new { ClaimType = type, ClaimValue = value });
+            
+                var usersList = usersWithClaim.ToList();
+                var rolesList = rolesWithClaim.ToList();
+                
+                var usersViewModels = new List<UserSelectionViewModel>();
+                foreach (var user in usersList)
+                {
+                    usersViewModels.Add(new UserSelectionViewModel 
+                    { 
+                        Id = (string)user.Id, 
+                        UserName = (string)user.UserName, 
+                        Email = (string)user.Email, 
+                        IsSelected = true 
+                    });
+                }
+                
+                var rolesViewModels = new List<RoleSelectionClaimViewModel>();
+                foreach (var role in rolesList)
+                {
+                    rolesViewModels.Add(new RoleSelectionClaimViewModel 
+                    { 
+                        Id = (string)role.Id, 
+                        Name = (string)role.Name, 
+                        IsSelected = true 
+                    });
+                }
+                
+                var viewModel = new ClaimDetailViewModel
+                {
+                    Type = type,
+                    Value = value,
+                    UsersWithClaim = usersViewModels,
+                    RolesWithClaim = rolesViewModels,
+                    TotalUsers = usersList.Count,
+                    TotalRoles = rolesList.Count
+                };
 
-            return View(viewModel);
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro no Details: {ex.Message}");
+                return StatusCode(500, $"Erro ao carregar detalhes da claim: {ex.Message}");
+            }
         }
 
         [HttpGet]
@@ -131,29 +172,114 @@ namespace GesN.Web.Areas.Admin.Controllers
             if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(value))
                 return NotFound();
 
-            var usersWithClaim = await GetUsersWithClaimAsync(type, value);
-            var rolesWithClaim = await GetRolesWithClaimAsync(type, value);
-
-            var model = new EditClaimViewModel
+            try
             {
-                Type = type,
-                Value = value,
-                AssociatedUsers = usersWithClaim.Select(u => new UserSelectionViewModel 
-                { 
-                    Id = u.Id, 
-                    UserName = u.UserName, 
-                    Email = u.Email, 
-                    IsSelected = true 
-                }).ToList(),
-                AssociatedRoles = rolesWithClaim.Select(r => new RoleSelectionClaimViewModel 
-                { 
-                    Id = r.Id, 
-                    Name = r.Name, 
-                    IsSelected = true 
-                }).ToList()
-            };
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
+                // Obter todos os usuários e roles do sistema
+                var allUsers = await connection.QueryAsync(@"
+                    SELECT Id, UserName, Email FROM AspNetUsers ORDER BY UserName");
+                var allRoles = await connection.QueryAsync(@"
+                    SELECT Id, Name FROM AspNetRoles ORDER BY Name");
+                
+                // Obter usuários que já possuem esta claim
+                var usersWithClaim = await connection.QueryAsync(@"
+                    SELECT u.Id, u.UserName, u.Email 
+                    FROM AspNetUsers u
+                    INNER JOIN AspNetUserClaims uc ON u.Id = uc.UserId
+                    WHERE uc.ClaimType = @ClaimType AND uc.ClaimValue = @ClaimValue", 
+                    new { ClaimType = type, ClaimValue = value });
+                
+                // Obter roles que já possuem esta claim
+                var rolesWithClaim = await connection.QueryAsync(@"
+                    SELECT r.Id, r.Name 
+                    FROM AspNetRoles r
+                    INNER JOIN AspNetRoleClaims rc ON r.Id = rc.RoleId
+                    WHERE rc.ClaimType = @ClaimType AND rc.ClaimValue = @ClaimValue", 
+                    new { ClaimType = type, ClaimValue = value });
+            
+            var usersList = usersWithClaim.ToList();
+            var rolesList = rolesWithClaim.ToList();
+            
+            var userIdsWithClaim = new List<string>();
+            foreach (var user in usersList)
+            {
+                userIdsWithClaim.Add((string)user.Id);
+            }
+            var userIdsWithClaimSet = userIdsWithClaim.ToHashSet();
+            
+            var roleIdsWithClaim = new List<string>();
+            foreach (var role in rolesList)
+            {
+                roleIdsWithClaim.Add((string)role.Id);
+            }
+            var roleIdsWithClaimSet = roleIdsWithClaim.ToHashSet();
 
-            return PartialView("_Edit", model);
+            var availableUsers = new List<UserSelectionViewModel>();
+            foreach (var user in allUsers)
+            {
+                availableUsers.Add(new UserSelectionViewModel
+                { 
+                    Id = (string)user.Id, 
+                    UserName = (string)user.UserName, 
+                    Email = (string)user.Email, 
+                    IsSelected = userIdsWithClaimSet.Contains((string)user.Id)
+                });
+            }
+            
+            var availableRoles = new List<RoleSelectionClaimViewModel>();
+            foreach (var role in allRoles)
+            {
+                availableRoles.Add(new RoleSelectionClaimViewModel
+                { 
+                    Id = (string)role.Id, 
+                    Name = (string)role.Name, 
+                    IsSelected = roleIdsWithClaimSet.Contains((string)role.Id)
+                });
+            }
+            
+            var associatedUsers = new List<UserSelectionViewModel>();
+            foreach (var user in usersList)
+            {
+                associatedUsers.Add(new UserSelectionViewModel 
+                { 
+                    Id = (string)user.Id, 
+                    UserName = (string)user.UserName, 
+                    Email = (string)user.Email, 
+                    IsSelected = true 
+                });
+            }
+            
+            var associatedRoles = new List<RoleSelectionClaimViewModel>();
+            foreach (var role in rolesList)
+            {
+                associatedRoles.Add(new RoleSelectionClaimViewModel 
+                { 
+                    Id = (string)role.Id, 
+                    Name = (string)role.Name, 
+                    IsSelected = true 
+                });
+            }
+
+                var model = new EditClaimViewModel
+                {
+                    Type = type,
+                    Value = value,
+                    AvailableUsers = availableUsers,
+                    AvailableRoles = availableRoles,
+                    SelectedUserIds = userIdsWithClaim,
+                    SelectedRoleIds = roleIdsWithClaim,
+                    AssociatedUsers = associatedUsers,
+                    AssociatedRoles = associatedRoles
+                };
+
+                return PartialView("_Edit", model);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro no Edit GET: {ex.Message}");
+                return StatusCode(500, $"Erro ao carregar dados para edição: {ex.Message}");
+            }
         }
 
         [HttpPost]
@@ -162,90 +288,123 @@ namespace GesN.Web.Areas.Admin.Controllers
         {
             try
             {
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
                 System.Diagnostics.Debug.WriteLine($"Edit Claims POST chamado - Type: {model?.Type}, Value: {model?.Value}");
+                
+                // Inicializar listas se forem null
+                model.SelectedUserIds ??= new List<string>();
+                model.SelectedRoleIds ??= new List<string>();
                 
                 if (!ModelState.IsValid)
                 {
                     System.Diagnostics.Debug.WriteLine("ModelState inválido na edição de claims");
-                    // Recarregar dados necessários em caso de erro
-                    model.AssociatedUsers ??= new List<UserSelectionViewModel>();
-                    model.AssociatedRoles ??= new List<RoleSelectionClaimViewModel>();
+                    
+                    // Recarregar todos os dados em caso de erro
+                    var allUsers = await connection.QueryAsync(@"
+                        SELECT Id, UserName, Email FROM AspNetUsers ORDER BY UserName");
+                    var allRoles = await connection.QueryAsync(@"
+                        SELECT Id, Name FROM AspNetRoles ORDER BY Name");
+                    
+                    model.AvailableUsers = allUsers.Select(u => new UserSelectionViewModel
+                    {
+                        Id = (string)u.Id,
+                        UserName = (string)u.UserName,
+                        Email = (string)u.Email,
+                        IsSelected = model.SelectedUserIds?.Contains((string)u.Id) ?? false
+                    }).ToList();
+
+                    model.AvailableRoles = allRoles.Select(r => new RoleSelectionClaimViewModel
+                    {
+                        Id = (string)r.Id,
+                        Name = (string)r.Name,
+                        IsSelected = model.SelectedRoleIds?.Contains((string)r.Id) ?? false
+                    }).ToList();
+                    
                     return PartialView("_Edit", model);
                 }
 
                 System.Diagnostics.Debug.WriteLine("ModelState válido, atualizando claims para usuários");
 
                 // Atualizar claims para usuários
-                var currentUsersWithClaim = await GetUsersWithClaimAsync(model.Type, model.Value);
-                var selectedUserIds = model.AssociatedUsers.Where(u => u.IsSelected).Select(u => u.Id).ToList();
-                var usersToRemove = currentUsersWithClaim.Where(u => !selectedUserIds.Contains(u.Id));
+                var currentUsersWithClaim = await connection.QueryAsync(@"
+                    SELECT u.Id, u.UserName, u.Email 
+                    FROM AspNetUsers u
+                    INNER JOIN AspNetUserClaims uc ON u.Id = uc.UserId
+                    WHERE uc.ClaimType = @ClaimType AND uc.ClaimValue = @ClaimValue", 
+                    new { ClaimType = model.Type, ClaimValue = model.Value });
+                
+                var selectedUserIds = model.SelectedUserIds;
+                var usersToRemove = currentUsersWithClaim.Where(u => !selectedUserIds.Contains((string)u.Id));
                 var userIdsToAdd = selectedUserIds.Where(id => !currentUsersWithClaim.Any(u => u.Id == id));
 
                 foreach (var user in usersToRemove)
                 {
-                    var userEntity = await _userManager.FindByIdAsync(user.Id);
-                    if (userEntity != null)
+                    var result = await connection.ExecuteAsync(@"
+                        DELETE FROM AspNetUserClaims 
+                        WHERE UserId = @UserId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue", 
+                        new { UserId = user.Id, ClaimType = model.Type, ClaimValue = model.Value });
+                    if (result == 0)
                     {
-                        var result = await _userManager.RemoveClaimAsync(userEntity, new Claim(model.Type, model.Value));
-                        if (!result.Succeeded)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Erro ao remover claim do usuário {user.Id}");
-                            ModelState.AddModelError("", "Erro ao remover claim do usuário.");
-                            return PartialView("_Edit", model);
-                        }
+                        System.Diagnostics.Debug.WriteLine($"Erro ao remover claim do usuário {(string)user.Id}");
+                        ModelState.AddModelError("", "Erro ao remover claim do usuário.");
+                        return PartialView("_Edit", model);
                     }
                 }
 
                 foreach (var userId in userIdsToAdd)
                 {
-                    var userEntity = await _userManager.FindByIdAsync(userId);
-                    if (userEntity != null)
+                    var result = await connection.ExecuteAsync(@"
+                        INSERT INTO AspNetUserClaims (UserId, ClaimType, ClaimValue) 
+                        VALUES (@UserId, @ClaimType, @ClaimValue)", 
+                        new { UserId = userId, ClaimType = model.Type, ClaimValue = model.Value });
+                    if (result == 0)
                     {
-                        var result = await _userManager.AddClaimAsync(userEntity, new Claim(model.Type, model.Value));
-                        if (!result.Succeeded)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Erro ao adicionar claim ao usuário {userId}");
-                            ModelState.AddModelError("", "Erro ao adicionar claim ao usuário.");
-                            return PartialView("_Edit", model);
-                        }
+                        System.Diagnostics.Debug.WriteLine($"Erro ao adicionar claim ao usuário {(string)userId}");
+                        ModelState.AddModelError("", "Erro ao adicionar claim ao usuário.");
+                        return PartialView("_Edit", model);
                     }
                 }
 
                 System.Diagnostics.Debug.WriteLine("Claims de usuários atualizadas, atualizando claims para roles");
 
                 // Atualizar claims para roles
-                var currentRolesWithClaim = await GetRolesWithClaimAsync(model.Type, model.Value);
-                var selectedRoleIds = model.AssociatedRoles.Where(r => r.IsSelected).Select(r => r.Id).ToList();
-                var rolesToRemove = currentRolesWithClaim.Where(r => !selectedRoleIds.Contains(r.Id));
+                var currentRolesWithClaim = await connection.QueryAsync(@"
+                    SELECT r.Id, r.Name 
+                    FROM AspNetRoles r
+                    INNER JOIN AspNetRoleClaims rc ON r.Id = rc.RoleId
+                    WHERE rc.ClaimType = @ClaimType AND rc.ClaimValue = @ClaimValue", 
+                    new { ClaimType = model.Type, ClaimValue = model.Value });
+                
+                var selectedRoleIds = model.SelectedRoleIds;
+                var rolesToRemove = currentRolesWithClaim.Where(r => !selectedRoleIds.Contains((string)r.Id));
                 var roleIdsToAdd = selectedRoleIds.Where(id => !currentRolesWithClaim.Any(r => r.Id == id));
 
                 foreach (var role in rolesToRemove)
                 {
-                    var roleEntity = await _roleManager.FindByIdAsync(role.Id);
-                    if (roleEntity != null)
+                    var result = await connection.ExecuteAsync(@"
+                        DELETE FROM AspNetRoleClaims 
+                        WHERE RoleId = @RoleId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue", 
+                        new { RoleId = role.Id, ClaimType = model.Type, ClaimValue = model.Value });
+                    if (result == 0)
                     {
-                        var result = await _roleManager.RemoveClaimAsync(roleEntity, new Claim(model.Type, model.Value));
-                        if (!result.Succeeded)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Erro ao remover claim da role {role.Id}");
-                            ModelState.AddModelError("", "Erro ao remover claim da role.");
-                            return PartialView("_Edit", model);
-                        }
+                        System.Diagnostics.Debug.WriteLine($"Erro ao remover claim da role {(string)role.Id}");
+                        ModelState.AddModelError("", "Erro ao remover claim da role.");
+                        return PartialView("_Edit", model);
                     }
                 }
 
                 foreach (var roleId in roleIdsToAdd)
                 {
-                    var roleEntity = await _roleManager.FindByIdAsync(roleId);
-                    if (roleEntity != null)
+                    var result = await connection.ExecuteAsync(@"
+                        INSERT INTO AspNetRoleClaims (RoleId, ClaimType, ClaimValue) 
+                        VALUES (@RoleId, @ClaimType, @ClaimValue)", 
+                        new { RoleId = roleId, ClaimType = model.Type, ClaimValue = model.Value });
+                    if (result == 0)
                     {
-                        var result = await _roleManager.AddClaimAsync(roleEntity, new Claim(model.Type, model.Value));
-                        if (!result.Succeeded)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Erro ao adicionar claim à role {roleId}");
-                            ModelState.AddModelError("", "Erro ao adicionar claim à role.");
-                            return PartialView("_Edit", model);
-                        }
+                        System.Diagnostics.Debug.WriteLine($"Erro ao adicionar claim à role {(string)roleId}");
+                        ModelState.AddModelError("", "Erro ao adicionar claim à role.");
+                        return PartialView("_Edit", model);
                     }
                 }
 
@@ -269,20 +428,58 @@ namespace GesN.Web.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var usersWithClaim = await GetUsersWithClaimAsync(type, value);
-            var rolesWithClaim = await GetRolesWithClaimAsync(type, value);
-            
-            var viewModel = new ClaimViewModel
+            try
             {
-                Type = type,
-                Value = value,
-                Users = string.Join(", ", usersWithClaim.Select(u => u.UserName)),
-                Roles = string.Join(", ", rolesWithClaim.Select(r => r.Name)),
-                UserCount = usersWithClaim.Count,
-                RoleCount = rolesWithClaim.Count
-            };
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
+                // Obter usuários com esta claim
+                var usersWithClaim = await connection.QueryAsync(@"
+                    SELECT u.Id, u.UserName, u.Email 
+                    FROM AspNetUsers u
+                    INNER JOIN AspNetUserClaims uc ON u.Id = uc.UserId
+                    WHERE uc.ClaimType = @ClaimType AND uc.ClaimValue = @ClaimValue", 
+                    new { ClaimType = type, ClaimValue = value });
+                
+                // Obter roles com esta claim
+                var rolesWithClaim = await connection.QueryAsync(@"
+                    SELECT r.Id, r.Name 
+                    FROM AspNetRoles r
+                    INNER JOIN AspNetRoleClaims rc ON r.Id = rc.RoleId
+                    WHERE rc.ClaimType = @ClaimType AND rc.ClaimValue = @ClaimValue", 
+                    new { ClaimType = type, ClaimValue = value });
+            
+                var usersList = usersWithClaim.ToList();
+                var rolesList = rolesWithClaim.ToList();
+                
+                var userNames = new List<string>();
+                foreach (var user in usersList)
+                {
+                    userNames.Add((string)user.UserName);
+                }
+                
+                var roleNames = new List<string>();
+                foreach (var role in rolesList)
+                {
+                    roleNames.Add((string)role.Name);
+                }
+                
+                var viewModel = new ClaimViewModel
+                {
+                    Type = type,
+                    Value = value,
+                    Users = string.Join(", ", userNames),
+                    Roles = string.Join(", ", roleNames),
+                    UserCount = usersList.Count,
+                    RoleCount = rolesList.Count
+                };
 
-            return PartialView("_Delete", viewModel);
+                return PartialView("_Delete", viewModel);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro no Delete GET: {ex.Message}");
+                return StatusCode(500, $"Erro ao carregar dados para exclusão: {ex.Message}");
+            }
         }
 
         [HttpPost]
@@ -291,43 +488,57 @@ namespace GesN.Web.Areas.Admin.Controllers
         {
             try
             {
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
                 System.Diagnostics.Debug.WriteLine($"DeleteConfirmed Claims chamado - Type: {type}, Value: {value}");
 
                 // Remover claim de todos os usuários
-                var usersWithClaim = await GetUsersWithClaimAsync(type, value);
-                System.Diagnostics.Debug.WriteLine($"Removendo claim de {usersWithClaim.Count} usuários");
+                var usersWithClaim = await connection.QueryAsync(@"
+                    SELECT u.Id, u.UserName, u.Email 
+                    FROM AspNetUsers u
+                    INNER JOIN AspNetUserClaims uc ON u.Id = uc.UserId
+                    WHERE uc.ClaimType = @ClaimType AND uc.ClaimValue = @ClaimValue", 
+                    new { ClaimType = type, ClaimValue = value });
                 
-                foreach (var user in usersWithClaim)
+                var usersList = usersWithClaim.ToList();
+                System.Diagnostics.Debug.WriteLine($"Removendo claim de {usersList.Count} usuários");
+                
+                foreach (var user in usersList)
                 {
-                    var userEntity = await _userManager.FindByIdAsync(user.Id);
-                    if (userEntity != null)
+                    var result = await connection.ExecuteAsync(@"
+                        DELETE FROM AspNetUserClaims 
+                        WHERE UserId = @UserId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue", 
+                        new { UserId = user.Id, ClaimType = type, ClaimValue = value });
+                    if (result == 0)
                     {
-                        var result = await _userManager.RemoveClaimAsync(userEntity, new Claim(type, value));
-                        if (!result.Succeeded)
-                        {
-                            var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
-                            System.Diagnostics.Debug.WriteLine($"Erro ao remover claim do usuário {user.Id}: {errorMessage}");
-                            throw new InvalidOperationException($"Erro ao remover claim do usuário: {errorMessage}");
-                        }
+                        var errorMessage = string.Join(", ", ModelState.Values.Select(v => v.Errors.Select(e => e.ErrorMessage)));
+                        System.Diagnostics.Debug.WriteLine($"Erro ao remover claim do usuário {(string)user.Id}: {errorMessage}");
+                        throw new InvalidOperationException($"Erro ao remover claim do usuário: {errorMessage}");
                     }
                 }
 
                 // Remover claim de todas as roles
-                var rolesWithClaim = await GetRolesWithClaimAsync(type, value);
-                System.Diagnostics.Debug.WriteLine($"Removendo claim de {rolesWithClaim.Count} roles");
+                var rolesWithClaim = await connection.QueryAsync(@"
+                    SELECT r.Id, r.Name 
+                    FROM AspNetRoles r
+                    INNER JOIN AspNetRoleClaims rc ON r.Id = rc.RoleId
+                    WHERE rc.ClaimType = @ClaimType AND rc.ClaimValue = @ClaimValue", 
+                    new { ClaimType = type, ClaimValue = value });
                 
-                foreach (var role in rolesWithClaim)
+                var rolesList = rolesWithClaim.ToList();
+                System.Diagnostics.Debug.WriteLine($"Removendo claim de {rolesList.Count} roles");
+                
+                foreach (var role in rolesList)
                 {
-                    var roleEntity = await _roleManager.FindByIdAsync(role.Id);
-                    if (roleEntity != null)
+                    var result = await connection.ExecuteAsync(@"
+                        DELETE FROM AspNetRoleClaims 
+                        WHERE RoleId = @RoleId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue", 
+                        new { RoleId = role.Id, ClaimType = type, ClaimValue = value });
+                    if (result == 0)
                     {
-                        var result = await _roleManager.RemoveClaimAsync(roleEntity, new Claim(type, value));
-                        if (!result.Succeeded)
-                        {
-                            var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
-                            System.Diagnostics.Debug.WriteLine($"Erro ao remover claim da role {role.Id}: {errorMessage}");
-                            throw new InvalidOperationException($"Erro ao remover claim da role: {errorMessage}");
-                        }
+                        var errorMessage = string.Join(", ", ModelState.Values.Select(v => v.Errors.Select(e => e.ErrorMessage)));
+                        System.Diagnostics.Debug.WriteLine($"Erro ao remover claim da role {(string)role.Id}: {errorMessage}");
+                        throw new InvalidOperationException($"Erro ao remover claim da role: {errorMessage}");
                     }
                 }
 
@@ -349,57 +560,95 @@ namespace GesN.Web.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var usersWithClaim = await GetUsersWithClaimAsync(type, value);
-            var rolesWithClaim = await GetRolesWithClaimAsync(type, value);
-
-            var viewModel = new ClaimDetailViewModel
+            try
             {
-                Type = type,
-                Value = value,
-                UsersWithClaim = usersWithClaim.Select(u => new UserSelectionViewModel 
-                { 
-                    Id = u.Id, 
-                    UserName = u.UserName, 
-                    Email = u.Email, 
-                    IsSelected = true 
-                }).ToList(),
-                RolesWithClaim = rolesWithClaim.Select(r => new RoleSelectionClaimViewModel 
-                { 
-                    Id = r.Id, 
-                    Name = r.Name, 
-                    IsSelected = true 
-                }).ToList(),
-                TotalUsers = usersWithClaim.Count,
-                TotalRoles = rolesWithClaim.Count
-            };
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
+                // Obter usuários com esta claim
+                var usersWithClaim = await connection.QueryAsync(@"
+                    SELECT u.Id, u.UserName, u.Email 
+                    FROM AspNetUsers u
+                    INNER JOIN AspNetUserClaims uc ON u.Id = uc.UserId
+                    WHERE uc.ClaimType = @ClaimType AND uc.ClaimValue = @ClaimValue", 
+                    new { ClaimType = type, ClaimValue = value });
+                
+                // Obter roles com esta claim
+                var rolesWithClaim = await connection.QueryAsync(@"
+                    SELECT r.Id, r.Name 
+                    FROM AspNetRoles r
+                    INNER JOIN AspNetRoleClaims rc ON r.Id = rc.RoleId
+                    WHERE rc.ClaimType = @ClaimType AND rc.ClaimValue = @ClaimValue", 
+                    new { ClaimType = type, ClaimValue = value });
+            
+                var usersList = usersWithClaim.ToList();
+                var rolesList = rolesWithClaim.ToList();
 
-            return PartialView("_Details", viewModel);
+                var viewModel = new ClaimDetailViewModel
+                {
+                    Type = type,
+                    Value = value,
+                    UsersWithClaim = usersList.Select(u => new UserSelectionViewModel 
+                    { 
+                        Id = (string)u.Id, 
+                        UserName = (string)u.UserName, 
+                        Email = (string)u.Email, 
+                        IsSelected = true 
+                    }).ToList(),
+                    RolesWithClaim = rolesList.Select(r => new RoleSelectionClaimViewModel 
+                    { 
+                        Id = (string)r.Id, 
+                        Name = (string)r.Name, 
+                        IsSelected = true 
+                    }).ToList(),
+                    TotalUsers = usersList.Count,
+                    TotalRoles = rolesList.Count
+                };
+
+                return PartialView("_Details", viewModel);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro no DetailsPartial: {ex.Message}");
+                return StatusCode(500, $"Erro ao carregar detalhes da claim: {ex.Message}");
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> CreatePartial()
         {
-            var allUsers = _userManager.Users.ToList();
-            var allRoles = _roleManager.Roles.ToList();
-
-            var model = new CreateClaimViewModel
+            try
             {
-                AvailableUsers = allUsers.Select(u => new UserSelectionViewModel
-                {
-                    Id = u.Id,
-                    UserName = u.UserName,
-                    Email = u.Email,
-                    IsSelected = false
-                }).ToList(),
-                AvailableRoles = allRoles.Select(r => new RoleSelectionClaimViewModel
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    IsSelected = false
-                }).ToList()
-            };
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
+                var allUsers = await connection.QueryAsync(@"
+                    SELECT Id, UserName, Email FROM AspNetUsers ORDER BY UserName");
+                var allRoles = await connection.QueryAsync(@"
+                    SELECT Id, Name FROM AspNetRoles ORDER BY Name");
 
-            return PartialView("_Create", model);
+                var model = new CreateClaimViewModel
+                {
+                    AvailableUsers = allUsers.Select(u => new UserSelectionViewModel
+                    {
+                        Id = (string)u.Id,
+                        UserName = (string)u.UserName,
+                        Email = (string)u.Email,
+                        IsSelected = false
+                    }).ToList(),
+                    AvailableRoles = allRoles.Select(r => new RoleSelectionClaimViewModel
+                    {
+                        Id = (string)r.Id,
+                        Name = (string)r.Name,
+                        IsSelected = false
+                    }).ToList()
+                };
+
+                return PartialView("_Create", model);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro no CreatePartial GET: {ex.Message}");
+                return StatusCode(500, $"Erro ao carregar dados para criação: {ex.Message}");
+            }
         }
 
         [HttpPost]
@@ -408,28 +657,41 @@ namespace GesN.Web.Areas.Admin.Controllers
         {
             try
             {
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
                 System.Diagnostics.Debug.WriteLine($"CreatePartial Claims POST chamado - Type: {model?.Type}, Value: {model?.Value}");
                 
+                // Inicializar listas se forem null
+                model.SelectedUsers ??= new List<string>();
+                model.SelectedRoles ??= new List<string>();
+                
+                if (!model.SelectedUsers.Any() && !model.SelectedRoles.Any())
+                {
+                    ModelState.AddModelError("", "Selecione pelo menos um usuário ou uma role para atribuir a claim.");
+                }
+
                 if (!ModelState.IsValid)
                 {
                     System.Diagnostics.Debug.WriteLine("ModelState inválido na criação de claims");
                     // Recarregar dados necessários em caso de erro
-                    var allUsers = _userManager.Users.ToList();
-                    var allRoles = _roleManager.Roles.ToList();
+                    var allUsers = await connection.QueryAsync(@"
+                        SELECT Id, UserName, Email FROM AspNetUsers ORDER BY UserName");
+                    var allRoles = await connection.QueryAsync(@"
+                        SELECT Id, Name FROM AspNetRoles ORDER BY Name");
 
                     model.AvailableUsers = allUsers.Select(u => new UserSelectionViewModel
                     {
-                        Id = u.Id,
-                        UserName = u.UserName,
-                        Email = u.Email,
-                        IsSelected = model.SelectedUsers?.Contains(u.Id) ?? false
+                        Id = (string)u.Id,
+                        UserName = (string)u.UserName,
+                        Email = (string)u.Email,
+                        IsSelected = model.SelectedUsers.Contains((string)u.Id)
                     }).ToList();
 
                     model.AvailableRoles = allRoles.Select(r => new RoleSelectionClaimViewModel
                     {
-                        Id = r.Id,
-                        Name = r.Name,
-                        IsSelected = model.SelectedRoles?.Contains(r.Id) ?? false
+                        Id = (string)r.Id,
+                        Name = (string)r.Name,
+                        IsSelected = model.SelectedRoles.Contains((string)r.Id)
                     }).ToList();
 
                     return PartialView("_Create", model);
@@ -440,50 +702,52 @@ namespace GesN.Web.Areas.Admin.Controllers
                 var claim = new Claim(model.Type, model.Value);
 
                 // Adicionar claim aos usuários selecionados
-                if (model.SelectedUsers?.Any() == true)
+                foreach (var userId in model.SelectedUsers)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Adicionando claim a {model.SelectedUsers.Count} usuários");
-                    foreach (var userId in model.SelectedUsers)
+                    // Verificar se a claim já existe para evitar duplicatas
+                    var existingUserClaim = await connection.QuerySingleOrDefaultAsync(@"
+                        SELECT Id FROM AspNetUserClaims 
+                        WHERE UserId = @UserId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue",
+                        new { UserId = userId, ClaimType = model.Type, ClaimValue = model.Value });
+
+                    if (existingUserClaim == null)
                     {
-                        var user = await _userManager.FindByIdAsync(userId);
-                        if (user != null)
+                        var result = await connection.ExecuteAsync(@"
+                            INSERT INTO AspNetUserClaims (UserId, ClaimType, ClaimValue) 
+                            VALUES (@UserId, @ClaimType, @ClaimValue)", 
+                            new { UserId = userId, ClaimType = model.Type, ClaimValue = model.Value });
+                        if (result == 0)
                         {
-                            var existingUserClaims = await _userManager.GetClaimsAsync(user);
-                            if (!existingUserClaims.Any(c => c.Type == model.Type && c.Value == model.Value))
-                            {
-                                var result = await _userManager.AddClaimAsync(user, claim);
-                                if (!result.Succeeded)
-                                {
-                                    System.Diagnostics.Debug.WriteLine($"Erro ao adicionar claim ao usuário {userId}");
-                                    var errors = result.Errors.Select(e => e.Description).ToList();
-                                    return Json(new { success = false, message = "Erro ao adicionar claim ao usuário", errors = errors });
-                                }
-                            }
+                            System.Diagnostics.Debug.WriteLine($"Erro ao adicionar claim ao usuário {(string)userId}");
+                            ModelState.AddModelError("", $"Erro ao adicionar claim ao usuário {(string)userId}.");
+                            return PartialView("_Create", model);
                         }
+                        System.Diagnostics.Debug.WriteLine($"Claim adicionada ao usuário: {(string)userId}");
                     }
                 }
 
                 // Adicionar claim às roles selecionadas
-                if (model.SelectedRoles?.Any() == true)
+                foreach (var roleId in model.SelectedRoles)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Adicionando claim a {model.SelectedRoles.Count} roles");
-                    foreach (var roleId in model.SelectedRoles)
+                    // Verificar se a claim já existe para evitar duplicatas
+                    var existingRoleClaim = await connection.QuerySingleOrDefaultAsync(@"
+                        SELECT Id FROM AspNetRoleClaims 
+                        WHERE RoleId = @RoleId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue",
+                        new { RoleId = roleId, ClaimType = model.Type, ClaimValue = model.Value });
+
+                    if (existingRoleClaim == null)
                     {
-                        var role = await _roleManager.FindByIdAsync(roleId);
-                        if (role != null)
+                        var result = await connection.ExecuteAsync(@"
+                            INSERT INTO AspNetRoleClaims (RoleId, ClaimType, ClaimValue) 
+                            VALUES (@RoleId, @ClaimType, @ClaimValue)", 
+                            new { RoleId = roleId, ClaimType = model.Type, ClaimValue = model.Value });
+                        if (result == 0)
                         {
-                            var existingRoleClaims = await _roleManager.GetClaimsAsync(role);
-                            if (!existingRoleClaims.Any(c => c.Type == model.Type && c.Value == model.Value))
-                            {
-                                var result = await _roleManager.AddClaimAsync(role, claim);
-                                if (!result.Succeeded)
-                                {
-                                    System.Diagnostics.Debug.WriteLine($"Erro ao adicionar claim à role {roleId}");
-                                    var errors = result.Errors.Select(e => e.Description).ToList();
-                                    return Json(new { success = false, message = "Erro ao adicionar claim à role", errors = errors });
-                                }
-                            }
+                            System.Diagnostics.Debug.WriteLine($"Erro ao adicionar claim à role {(string)roleId}");
+                            ModelState.AddModelError("", $"Erro ao adicionar claim à role {(string)roleId}.");
+                            return PartialView("_Create", model);
                         }
+                        System.Diagnostics.Debug.WriteLine($"Claim adicionada à role: {(string)roleId}");
                     }
                 }
 
@@ -493,8 +757,8 @@ namespace GesN.Web.Areas.Admin.Controllers
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Exceção no CreatePartial Claims: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-                return Json(new { success = false, message = "Erro ao criar claim: " + ex.Message });
+                ModelState.AddModelError("", "Erro ao criar claim: " + ex.Message);
+                return PartialView("_Create", model);
             }
         }
 
@@ -503,30 +767,72 @@ namespace GesN.Web.Areas.Admin.Controllers
         {
             try
             {
-                var allClaims = await GetAllDistinctClaimsAsync();
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
+                // Obter todas as claims únicas (tanto de usuários quanto de roles)
+                var allClaims = await connection.QueryAsync(@"
+                    SELECT DISTINCT ClaimType, ClaimValue 
+                    FROM (
+                        SELECT ClaimType, ClaimValue FROM AspNetUserClaims
+                        UNION
+                        SELECT ClaimType, ClaimValue FROM AspNetRoleClaims
+                    ) AS AllClaims
+                    ORDER BY ClaimType, ClaimValue");
+
                 var claimViewModels = new List<ClaimViewModel>();
 
                 foreach (var claim in allClaims)
                 {
                     try
                     {
-                        var usersWithClaim = await GetUsersWithClaimAsync(claim.Type, claim.Value);
-                        var rolesWithClaim = await GetRolesWithClaimAsync(claim.Type, claim.Value);
+                        var claimType = (string)claim.ClaimType;
+                        var claimValue = (string)claim.ClaimValue;
+                        
+                        // Obter usuários com esta claim
+                        var usersWithClaim = await connection.QueryAsync(@"
+                            SELECT u.Id, u.UserName, u.Email 
+                            FROM AspNetUsers u
+                            INNER JOIN AspNetUserClaims uc ON u.Id = uc.UserId
+                            WHERE uc.ClaimType = @ClaimType AND uc.ClaimValue = @ClaimValue", 
+                            new { ClaimType = claimType, ClaimValue = claimValue });
+                        
+                        // Obter roles com esta claim
+                        var rolesWithClaim = await connection.QueryAsync(@"
+                            SELECT r.Id, r.Name 
+                            FROM AspNetRoles r
+                            INNER JOIN AspNetRoleClaims rc ON r.Id = rc.RoleId
+                            WHERE rc.ClaimType = @ClaimType AND rc.ClaimValue = @ClaimValue", 
+                            new { ClaimType = claimType, ClaimValue = claimValue });
+                        
+                        var usersList = usersWithClaim.ToList();
+                        var rolesList = rolesWithClaim.ToList();
+                        
+                        var userNames = new List<string>();
+                        foreach (var user in usersList)
+                        {
+                            userNames.Add((string)user.UserName);
+                        }
+                        
+                        var roleNames = new List<string>();
+                        foreach (var role in rolesList)
+                        {
+                            roleNames.Add((string)role.Name);
+                        }
                         
                         claimViewModels.Add(new ClaimViewModel
                         {
-                            Type = claim.Type ?? "",
-                            Value = claim.Value ?? "",
-                            Users = string.Join(", ", usersWithClaim.Select(u => u.UserName)),
-                            Roles = string.Join(", ", rolesWithClaim.Select(r => r.Name)),
-                            UserCount = usersWithClaim.Count,
-                            RoleCount = rolesWithClaim.Count
+                            Type = claimType ?? "",
+                            Value = claimValue ?? "",
+                            Users = string.Join(", ", userNames),
+                            Roles = string.Join(", ", roleNames),
+                            UserCount = usersList.Count,
+                            RoleCount = rolesList.Count
                         });
                     }
                     catch (Exception claimEx)
                     {
                         // Se houver erro com uma claim específica, pular para a próxima
-                        System.Diagnostics.Debug.WriteLine($"Erro ao processar claim {claim.Type}:{claim.Value}: {claimEx.Message}");
+                        System.Diagnostics.Debug.WriteLine($"Erro ao processar claim {(string)claim.ClaimType}:{(string)claim.ClaimValue}: {claimEx.Message}");
                         continue;
                     }
                 }

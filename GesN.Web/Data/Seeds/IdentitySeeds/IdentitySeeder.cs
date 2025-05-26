@@ -1,14 +1,13 @@
 using GesN.Web.Areas.Identity.Data.Models;
-using Microsoft.AspNetCore.Identity;
+using GesN.Web.Infrastructure.Data;
+using System.Data;
 
 namespace GesN.Web.Data.Seeds.IdentitySeeds
 {
     public class IdentitySeeder : BaseIdentitySeeder
     {
-        public IdentitySeeder(
-            UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager) 
-            : base(userManager, roleManager)
+        public IdentitySeeder(IDbConnectionFactory connectionFactory) 
+            : base(connectionFactory)
         {
         }
 
@@ -18,9 +17,9 @@ namespace GesN.Web.Data.Seeds.IdentitySeeds
             foreach (var roleName in IdentityConfiguration.Roles.GetAllRoles())
             {
                 var result = await CreateRoleIfNotExists(roleName);
-                if (!result.Succeeded)
+                if (!result)
                 {
-                    throw new InvalidOperationException($"Failed to create role '{roleName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    throw new InvalidOperationException($"Failed to create role '{roleName}'");
                 }
             }
 
@@ -29,9 +28,9 @@ namespace GesN.Web.Data.Seeds.IdentitySeeds
             foreach (var roleName in roleClaimsMap.Keys)
             {
                 var result = await AddClaimsToRole(roleName, roleClaimsMap[roleName]);
-                if (!result.Succeeded)
+                if (!result)
                 {
-                    throw new InvalidOperationException($"Failed to add claims to role '{roleName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    throw new InvalidOperationException($"Failed to add claims to role '{roleName}'");
                 }
             }
 
@@ -40,9 +39,9 @@ namespace GesN.Web.Data.Seeds.IdentitySeeds
                 IdentityConfiguration.AdminUser.Email,
                 IdentityConfiguration.AdminUser.Password);
 
-            if (!createUserResult.Succeeded)
+            if (!createUserResult)
             {
-                throw new InvalidOperationException($"Failed to create admin user: {string.Join(", ", createUserResult.Errors.Select(e => e.Description))}");
+                throw new InvalidOperationException("Failed to create admin user");
             }
 
             // 4. Adicionar todas as roles ao usuário admin
@@ -50,9 +49,9 @@ namespace GesN.Web.Data.Seeds.IdentitySeeds
                 IdentityConfiguration.AdminUser.Email,
                 IdentityConfiguration.Roles.GetAllRoles());
 
-            if (!addRolesResult.Succeeded)
+            if (!addRolesResult)
             {
-                throw new InvalidOperationException($"Failed to add roles to admin user: {string.Join(", ", addRolesResult.Errors.Select(e => e.Description))}");
+                throw new InvalidOperationException("Failed to add roles to admin user");
             }
 
             // 5. Adicionar todas as claims ao usuário admin
@@ -60,9 +59,9 @@ namespace GesN.Web.Data.Seeds.IdentitySeeds
                 IdentityConfiguration.AdminUser.Email,
                 IdentityConfiguration.Claims.GetAdminClaims());
 
-            if (!addClaimsResult.Succeeded)
+            if (!addClaimsResult)
             {
-                throw new InvalidOperationException($"Failed to add claims to admin user: {string.Join(", ", addClaimsResult.Errors.Select(e => e.Description))}");
+                throw new InvalidOperationException("Failed to add claims to admin user");
             }
         }
     }

@@ -1,5 +1,11 @@
 @model GesN.Web.Areas.Admin.Models.EditClaimViewModel
 
+@section Styles {
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/lib/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="~/css/Admin.css" rel="stylesheet" />
+}
+
 <div class="modal-header">
     <h5 class="modal-title">
         <i class="bi bi-pencil-square me-2"></i>Editar Claim: @Model.Type
@@ -21,7 +27,14 @@
                     <option value="">Selecione o tipo da claim</option>
                     @foreach (var claimType in Model.AvailableClaimTypes)
                     {
-                        <option value="@claimType" selected="@(Model.Type == claimType)">@claimType</option>
+                        @if (Model.Type == claimType)
+                        {
+                            <option value="@claimType" selected>@claimType</option>
+                        }
+                        else
+                        {
+                            <option value="@claimType">@claimType</option>
+                        }
                     }
                 </select>
                 <span asp-validation-for="Type" class="text-danger"></span>
@@ -108,12 +121,20 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <select asp-for="SelectedUserIds" class="form-select" multiple id="userSelect">
+                        <label for="SelectedUserIds" class="form-label">
+                            <i class="bi bi-person-check me-1"></i>Selecionar Usuários
+                        </label>
+                        <select name="SelectedUserIds" id="SelectedUserIds" class="form-select" multiple>
                             @foreach (var user in Model.AvailableUsers)
                             {
-                                <option value="@user.Id" selected="@Model.SelectedUserIds.Contains(user.Id)">
-                                    @user.UserName (@user.Email)
-                                </option>
+                                @if (Model.SelectedUserIds?.Contains(user.Id) == true)
+                                {
+                                    <option value="@user.Id" selected>@user.UserName (@user.Email)</option>
+                                }
+                                else
+                                {
+                                    <option value="@user.Id">@user.UserName (@user.Email)</option>
+                                }
                             }
                         </select>
                         <small class="form-text text-muted mt-2">
@@ -132,12 +153,20 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <select asp-for="SelectedRoleIds" class="form-select" multiple id="roleSelect">
+                        <label for="SelectedRoleIds" class="form-label">
+                            <i class="bi bi-person-badge-fill me-1"></i>Selecionar Roles
+                        </label>
+                        <select name="SelectedRoleIds" id="SelectedRoleIds" class="form-select" multiple>
                             @foreach (var role in Model.AvailableRoles)
                             {
-                                <option value="@role.Id" selected="@Model.SelectedRoleIds.Contains(role.Id)">
-                                    @role.Name
-                                </option>
+                                @if (Model.SelectedRoleIds?.Contains(role.Id) == true)
+                                {
+                                    <option value="@role.Id" selected>@role.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@role.Id">@role.Name</option>
+                                }
                             }
                         </select>
                         <small class="form-text text-muted mt-2">
@@ -202,65 +231,4 @@
             <i class="bi bi-check-lg me-1"></i>Salvar Alterações
         </button>
     </div>
-</form>
-
-<style>
-.avatar-circle {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-}
-
-.card {
-    border: 1px solid #e9ecef;
-}
-
-.card-header {
-    border-bottom: 1px solid #e9ecef;
-}
-
-.btn-outline-primary:hover {
-    color: #fff;
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
-.btn-outline-success:hover {
-    color: #fff;
-    background-color: #198754;
-    border-color: #198754;
-}
-
-#userSelect option:checked,
-#roleSelect option:checked {
-    background-color: #0d6efd;
-    color: white;
-}
-
-.form-select[multiple] {
-    min-height: 120px;
-}
-</style>
-
-<script>
-// Garantir que as validações sejam aplicadas quando o modal for carregado
-$(document).ready(function() {
-    if (typeof $.validator !== 'undefined') {
-        $.validator.unobtrusive.parse('#editClaimForm');
-    }
-    
-    // Inicializar Select2 para multi-select
-    $('#userSelect, #roleSelect').select2({
-        theme: 'bootstrap-5',
-        width: '100%',
-        placeholder: function() {
-            return $(this).attr('id') === 'userSelect' ? 'Selecione os usuários' : 'Selecione as roles';
-        },
-        allowClear: true
-    });
-});
-</script> 
+</form> 

@@ -1,0 +1,180 @@
+@model GesN.Web.Areas.Admin.Models.RoleViewModel
+@using GesN.Web.Areas.Admin.Constants
+
+<div class="modal-header">
+    <h5 class="modal-title">
+        <i class="bi bi-person-badge me-2"></i>
+        Detalhes da Role
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    <div class="row">
+        <div class="col-md-6">
+            <h6 class="text-primary mb-3">
+                <i class="bi bi-info-circle me-2"></i>
+                Informações Básicas
+            </h6>
+            <dl class="row">
+                <dt class="col-sm-4">Nome:</dt>
+                <dd class="col-sm-8">
+                    <span class="badge bg-primary fs-6">@Model.Name</span>
+                </dd>
+
+                <dt class="col-sm-4">ID:</dt>
+                <dd class="col-sm-8">
+                    <small class="text-muted font-monospace">@Model.Id</small>
+                </dd>
+
+                <dt class="col-sm-4">Nome Normalizado:</dt>
+                <dd class="col-sm-8">
+                    <small class="text-muted">@Model.NormalizedName</small>
+                </dd>
+            </dl>
+        </div>
+        
+        <div class="col-md-6">
+            <h6 class="text-success mb-3">
+                <i class="bi bi-people me-2"></i>
+                Usuários Associados (@Model.UserCount)
+            </h6>
+            @if (Model.UserCount > 0)
+            {
+                <div class="border rounded p-3 bg-light">
+                    @foreach (var userName in Model.Users.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        <span class="badge bg-success me-1 mb-1">@userName.Trim()</span>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center text-muted py-3">
+                    <i class="bi bi-person-x" style="font-size: 2rem;"></i>
+                    <p class="mb-0 mt-2">Nenhum usuário associado</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <h6 class="text-info mb-3">
+                <i class="bi bi-shield-check me-2"></i>
+                Claims da Role (@Model.Claims.Count)
+            </h6>
+            
+            @if (Model.Claims != null && Model.Claims.Any())
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            @{
+                                var permissionClaims = Model.Claims.Where(c => c.Type == SystemClaims.Types.Permission).ToList();
+                                var departmentClaims = Model.Claims.Where(c => c.Type == SystemClaims.Types.Department).ToList();
+                                var accessLevelClaims = Model.Claims.Where(c => c.Type == SystemClaims.Types.AccessLevel).ToList();
+                                var otherClaims = Model.Claims.Where(c => 
+                                    c.Type != SystemClaims.Types.Permission && 
+                                    c.Type != SystemClaims.Types.Department && 
+                                    c.Type != SystemClaims.Types.AccessLevel).ToList();
+                            }
+                            
+                            @if (permissionClaims.Any())
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-primary">
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        Permissões
+                                    </h6>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var claim in permissionClaims)
+                                        {
+                                            <li class="list-group-item border-0 px-0 py-1">
+                                                <span class="badge bg-primary">@claim.Value</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            
+                            @if (departmentClaims.Any())
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-info">
+                                        <i class="bi bi-building me-2"></i>
+                                        Departamento
+                                    </h6>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var claim in departmentClaims)
+                                        {
+                                            <li class="list-group-item border-0 px-0 py-1">
+                                                <span class="badge bg-info">@claim.Value</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            
+                            @if (accessLevelClaims.Any())
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-warning">
+                                        <i class="bi bi-shield-check me-2"></i>
+                                        Nível de Acesso
+                                    </h6>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var claim in accessLevelClaims)
+                                        {
+                                            <li class="list-group-item border-0 px-0 py-1">
+                                                <span class="badge bg-warning text-dark">@claim.Value</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            
+                            @if (otherClaims.Any())
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-secondary">
+                                        <i class="bi bi-gear me-2"></i>
+                                        Outras Claims
+                                    </h6>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var claim in otherClaims)
+                                        {
+                                            <li class="list-group-item border-0 px-0 py-1">
+                                                <small class="text-muted">@claim.Type:</small>
+                                                <span class="badge bg-secondary ms-1">@claim.Value</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card">
+                    <div class="card-body text-center text-muted py-4">
+                        <i class="bi bi-shield-x" style="font-size: 3rem;"></i>
+                        <h6 class="mt-3">Nenhuma claim atribuída</h6>
+                        <p class="mb-0">Esta role não possui claims específicas</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <i class="bi bi-x-circle me-2"></i>Fechar
+    </button>
+    <button type="button" class="btn btn-primary" onclick="rolesManager.editarRoleModal('@Model.Id')">
+        <i class="bi bi-pencil me-2"></i>Editar
+    </button>
+</div> 

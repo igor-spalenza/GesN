@@ -1,118 +1,258 @@
 using GesN.Web.Areas.Identity.Data.Models;
-using Microsoft.AspNetCore.Identity;
+using GesN.Web.Data;
 using System.Security.Claims;
+using BCrypt.Net;
+using System.Data;
+using Dapper;
+using GesN.Web.Infrastructure.Data;
 
 namespace GesN.Web.Data.Seeds.IdentitySeeds
 {
     public abstract class BaseIdentitySeeder
     {
-        protected readonly UserManager<ApplicationUser> UserManager;
-        protected readonly RoleManager<ApplicationRole> RoleManager;
+        protected readonly IDbConnectionFactory _connectionFactory;
 
-        protected BaseIdentitySeeder(
-            UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager)
+        protected BaseIdentitySeeder(IDbConnectionFactory connectionFactory)
         {
-            UserManager = userManager;
-            RoleManager = roleManager;
+            _connectionFactory = connectionFactory;
         }
 
-        protected async Task<IdentityResult> CreateRoleIfNotExists(string roleName)
+        protected async Task<bool> CreateRoleIfNotExists(string roleName)
         {
-            if (!await RoleManager.RoleExistsAsync(roleName))
+            try
             {
-                var role = new ApplicationRole
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
+                var existingRole = await connection.QuerySingleOrDefaultAsync(
+                    "SELECT Id FROM AspNetRoles WHERE NormalizedName = @NormalizedName",
+                    new { NormalizedName = roleName.ToUpper() });
+
+                if (existingRole == null)
                 {
-                    Name = roleName,
-                    NormalizedName = roleName.ToUpper()
-                };
-                return await RoleManager.CreateAsync(role);
+                    var roleId = Guid.NewGuid().ToString();
+                    await connection.ExecuteAsync(@"
+                        INSERT INTO AspNetRoles (Id, Name, NormalizedName, ConcurrencyStamp)
+                        VALUES (@Id, @Name, @NormalizedName, @ConcurrencyStamp)",
+                        new
+                        {
+                            Id = roleId,
+                            Name = roleName,
+                            NormalizedName = roleName.ToUpper(),
+                            ConcurrencyStamp = Guid.NewGuid().ToString()
+                        });
+                }
+                return true;
             }
-            return IdentityResult.Success;
+            catch
+            {
+                return false;
+            }
         }
 
-        protected async Task<IdentityResult> AddClaimsToRole(string roleName, Dictionary<string, List<string>> claims)
+        protected async Task<bool> AddClaimsToRole(string roleName, Dictionary<string, List<string>> claims)
         {
-            var role = await RoleManager.FindByNameAsync(roleName);
-            if (role == null)
+            try
             {
-                throw new InvalidOperationException($"Role '{roleName}' not found.");
-            }
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
+                var role = await connection.QuerySingleOrDefaultAsync(
+                    "SELECT Id FROM AspNetRoles WHERE NormalizedName = @NormalizedName",
+                    new { NormalizedName = roleName.ToUpper() });
 
-            foreach (var claimType in claims.Keys)
-            {
-                foreach (var claimValue in claims[claimType])
+                if (role == null)
                 {
-                    var claim = new Claim(claimType, claimValue);
-                    var result = await RoleManager.AddClaimAsync(role, claim);
-                    if (!result.Succeeded)
+                    throw new InvalidOperationException($"Role '{roleName}' not found.");
+                }
+
+                var roleId = (string)role.Id;
+
+                foreach (var claimType in claims.Keys)
+                {
+                    foreach (var claimValue in claims[claimType])
                     {
-                        return result;
+                        // Verificar se a claim já existe
+                        var existingClaim = await connection.QuerySingleOrDefaultAsync(
+                            "SELECT Id FROM AspNetRoleClaims WHERE RoleId = @RoleId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue",
+                            new { RoleId = roleId, ClaimType = claimType, ClaimValue = claimValue });
+
+                        if (existingClaim == null)
+                        {
+                            var result = await connection.ExecuteAsync(@"
+                                INSERT INTO AspNetRoleClaims (RoleId, ClaimType, ClaimValue)
+                                VALUES (@RoleId, @ClaimType, @ClaimValue)",
+                                new { RoleId = roleId, ClaimType = claimType, ClaimValue = claimValue });
+
+                            if (result == 0)
+                            {
+                                return false;
+                            }
+                        }
                     }
                 }
-            }
 
-            return IdentityResult.Success;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        protected async Task<IdentityResult> CreateUserIfNotExists(string email, string password)
+        protected async Task<bool> CreateUserIfNotExists(string email, string password)
         {
-            var user = await UserManager.FindByEmailAsync(email);
-            if (user == null)
+            try
             {
-                user = new ApplicationUser
-                {
-                    UserName = email,
-                    Email = email,
-                    EmailConfirmed = true
-                };
-                return await UserManager.CreateAsync(user, password);
-            }
-            return IdentityResult.Success;
-        }
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
+                var existingUser = await connection.QuerySingleOrDefaultAsync(
+                    "SELECT Id FROM AspNetUsers WHERE NormalizedEmail = @NormalizedEmail",
+                    new { NormalizedEmail = email.ToUpper() });
 
-        protected async Task<IdentityResult> AddRolesToUser(string email, IEnumerable<string> roles)
-        {
-            var user = await UserManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                throw new InvalidOperationException($"User with email '{email}' not found.");
-            }
-
-            foreach (var role in roles)
-            {
-                var result = await UserManager.AddToRoleAsync(user, role);
-                if (!result.Succeeded)
+                if (existingUser == null)
                 {
-                    return result;
+                    var userId = Guid.NewGuid().ToString();
+                    var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+                    
+                    await connection.ExecuteAsync(@"
+                        INSERT INTO AspNetUsers (
+                            Id, UserName, NormalizedUserName, Email, NormalizedEmail,
+                            EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp,
+                            PhoneNumber, PhoneNumberConfirmed, TwoFactorEnabled,
+                            LockoutEnd, LockoutEnabled, AccessFailedCount,
+                            FirstName, LastName
+                        ) VALUES (
+                            @Id, @UserName, @NormalizedUserName, @Email, @NormalizedEmail,
+                            @EmailConfirmed, @PasswordHash, @SecurityStamp, @ConcurrencyStamp,
+                            @PhoneNumber, @PhoneNumberConfirmed, @TwoFactorEnabled,
+                            @LockoutEnd, @LockoutEnabled, @AccessFailedCount,
+                            @FirstName, @LastName
+                        )",
+                        new
+                        {
+                            Id = userId,
+                            UserName = email,
+                            NormalizedUserName = email.ToUpper(),
+                            Email = email,
+                            NormalizedEmail = email.ToUpper(),
+                            EmailConfirmed = true,
+                            PasswordHash = hashedPassword,
+                            SecurityStamp = Guid.NewGuid().ToString(),
+                            ConcurrencyStamp = Guid.NewGuid().ToString(),
+                            PhoneNumber = "",
+                            PhoneNumberConfirmed = false,
+                            TwoFactorEnabled = false,
+                            LockoutEnd = (DateTimeOffset?)null,
+                            LockoutEnabled = true,
+                            AccessFailedCount = 0,
+                            FirstName = "Admin",
+                            LastName = "User"
+                        });
                 }
+                return true;
             }
-
-            return IdentityResult.Success;
+            catch
+            {
+                return false;
+            }
         }
 
-        protected async Task<IdentityResult> AddClaimsToUser(string email, Dictionary<string, List<string>> claims)
+        protected async Task<bool> AddRolesToUser(string email, IEnumerable<string> roles)
         {
-            var user = await UserManager.FindByEmailAsync(email);
-            if (user == null)
+            try
             {
-                throw new InvalidOperationException($"User with email '{email}' not found.");
-            }
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
+                var user = await connection.QuerySingleOrDefaultAsync(
+                    "SELECT Id FROM AspNetUsers WHERE NormalizedEmail = @NormalizedEmail",
+                    new { NormalizedEmail = email.ToUpper() });
 
-            foreach (var claimType in claims.Keys)
-            {
-                foreach (var claimValue in claims[claimType])
+                if (user == null)
                 {
-                    var claim = new Claim(claimType, claimValue);
-                    var result = await UserManager.AddClaimAsync(user, claim);
-                    if (!result.Succeeded)
+                    throw new InvalidOperationException($"User with email '{email}' not found.");
+                }
+
+                var userId = (string)user.Id;
+
+                foreach (var roleName in roles)
+                {
+                    var role = await connection.QuerySingleOrDefaultAsync(
+                        "SELECT Id FROM AspNetRoles WHERE NormalizedName = @NormalizedName",
+                        new { NormalizedName = roleName.ToUpper() });
+
+                    if (role != null)
                     {
-                        return result;
+                        var roleId = (string)role.Id;
+                        
+                        // Verificar se a associação já existe
+                        var existingUserRole = await connection.QuerySingleOrDefaultAsync(
+                            "SELECT UserId FROM AspNetUserRoles WHERE UserId = @UserId AND RoleId = @RoleId",
+                            new { UserId = userId, RoleId = roleId });
+
+                        if (existingUserRole == null)
+                        {
+                            await connection.ExecuteAsync(@"
+                                INSERT INTO AspNetUserRoles (UserId, RoleId)
+                                VALUES (@UserId, @RoleId)",
+                                new { UserId = userId, RoleId = roleId });
+                        }
                     }
                 }
-            }
 
-            return IdentityResult.Success;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        protected async Task<bool> AddClaimsToUser(string email, Dictionary<string, List<string>> claims)
+        {
+            try
+            {
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
+                var user = await connection.QuerySingleOrDefaultAsync(
+                    "SELECT Id FROM AspNetUsers WHERE NormalizedEmail = @NormalizedEmail",
+                    new { NormalizedEmail = email.ToUpper() });
+
+                if (user == null)
+                {
+                    throw new InvalidOperationException($"User with email '{email}' not found.");
+                }
+
+                var userId = (string)user.Id;
+
+                foreach (var claimType in claims.Keys)
+                {
+                    foreach (var claimValue in claims[claimType])
+                    {
+                        // Verificar se a claim já existe
+                        var existingClaim = await connection.QuerySingleOrDefaultAsync(
+                            "SELECT Id FROM AspNetUserClaims WHERE UserId = @UserId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue",
+                            new { UserId = userId, ClaimType = claimType, ClaimValue = claimValue });
+
+                        if (existingClaim == null)
+                        {
+                            var result = await connection.ExecuteAsync(@"
+                                INSERT INTO AspNetUserClaims (UserId, ClaimType, ClaimValue)
+                                VALUES (@UserId, @ClaimType, @ClaimValue)",
+                                new { UserId = userId, ClaimType = claimType, ClaimValue = claimValue });
+
+                            if (result == 0)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 } 

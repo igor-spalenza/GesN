@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GesN.Web.Areas.Admin.Models
 {
@@ -24,7 +25,7 @@ namespace GesN.Web.Areas.Admin.Models
         public int UserCount { get; set; }
     }
 
-    public class CreateRoleViewModel
+    public class CreateRoleViewModel : IValidatableObject
     {
         [Required(ErrorMessage = "O nome da role é obrigatório")]
         [StringLength(256, ErrorMessage = "O nome da role deve ter no máximo {1} caracteres")]
@@ -35,13 +36,20 @@ namespace GesN.Web.Areas.Admin.Models
         public List<ClaimViewModel> Claims { get; set; } = new();
 
         [Display(Name = "Claims Disponíveis")]
-        public List<string> AvailableClaimTypes { get; set; } = new()
+        public List<string> AvailableClaimTypes { get; set; } = new();
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            "permission.users.read", "permission.users.create", "permission.users.update", "permission.users.delete",
-            "permission.roles.read", "permission.roles.create", "permission.roles.update", "permission.roles.delete",
-            "permission.claims.read", "permission.claims.create", "permission.claims.update", "permission.claims.delete",
-            "permission.admin.access", "permission.reports.read", "permission.settings.manage"
-        };
+            // Regra de negócio: uma role deve ter pelo menos 1 claim
+            var validClaims = Claims?.Where(c => !string.IsNullOrWhiteSpace(c.Type) && !string.IsNullOrWhiteSpace(c.Value)).ToList();
+            
+            if (validClaims == null || !validClaims.Any())
+            {
+                yield return new ValidationResult(
+                    "Uma role deve ter pelo menos uma claim associada. Adicione pelo menos uma claim antes de salvar.",
+                    new[] { nameof(Claims) });
+            }
+        }
     }
 
     public class EditRoleViewModel
@@ -60,13 +68,7 @@ namespace GesN.Web.Areas.Admin.Models
         public List<ClaimViewModel> Claims { get; set; } = new();
 
         [Display(Name = "Claims Disponíveis")]
-        public List<string> AvailableClaimTypes { get; set; } = new()
-        {
-            "permission.users.read", "permission.users.create", "permission.users.update", "permission.users.delete",
-            "permission.roles.read", "permission.roles.create", "permission.roles.update", "permission.roles.delete",
-            "permission.claims.read", "permission.claims.create", "permission.claims.update", "permission.claims.delete",
-            "permission.admin.access", "permission.reports.read", "permission.settings.manage"
-        };
+        public List<string> AvailableClaimTypes { get; set; } = new();
 
         [Display(Name = "Usuários Associados")]
         public List<UserSelectionViewModel> AssociatedUsers { get; set; } = new();

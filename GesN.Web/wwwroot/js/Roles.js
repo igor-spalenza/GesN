@@ -241,7 +241,7 @@ var rolesManager = {
         $modal.modal('show');
         
         $.ajax({
-            url: '/Admin/Roles/Delete/' + roleId,
+            url: '/Admin/Roles/DeletePartial/' + roleId,
             type: 'GET',
             success: function(data) {
                 $modal.find('.modal-content').html(data);
@@ -254,17 +254,33 @@ var rolesManager = {
     },
 
     salvarNovo: function(form) {
-        console.log('salvarNovo chamado');
+        console.log('RolesManager: salvarNovo chamado');
+        console.log('Form element:', form);
+        console.log('Form jQuery object:', $(form));
         
         // Prevenir múltiplos submits
         if ($(form).data('submitting')) {
-            console.log('Já está enviando, cancelando');
+            console.log('RolesManager: Já está enviando role, cancelando');
             return false;
         }
 
-        // Verificar validação
+        // Remover claims vazias antes da validação
+        rolesManager.removeEmptyClaims();
+
+        // Verificar validação padrão
         if (!$(form).valid()) {
-            console.log('Formulário inválido');
+            console.log('RolesManager: Formulário inválido na criação de role');
+            console.log('Erros de validação:', $(form).find('.field-validation-error').map(function() {
+                return $(this).text();
+            }).get());
+            return false;
+        }
+
+        // Regra de negócio: precisa ter pelo menos 1 claim válida (igual ao Claims)
+        const validClaims = rolesManager.getClaimsData();
+        
+        if (validClaims.length === 0) {
+            toastr.warning('Uma role deve ter pelo menos uma claim associada. Adicione pelo menos uma claim antes de salvar.');
             return false;
         }
 
@@ -272,9 +288,12 @@ var rolesManager = {
         const submitButton = $form.find('button[type="submit"]');
         const loadingSpinner = $form.find('.spinner-border');
         
-        console.log('Iniciando envio...');
+        console.log('RolesManager: Iniciando envio da nova role...');
         console.log('URL:', $form.attr('action'));
-        console.log('Dados:', $form.serialize());
+        console.log('Dados serializados:', $form.serialize());
+        console.log('Claims válidas encontradas:', validClaims);
+        console.log('Submit button encontrado:', submitButton.length);
+        console.log('Loading spinner encontrado:', loadingSpinner.length);
         
         // Marcar como enviando
         $form.data('submitting', true);
@@ -287,27 +306,41 @@ var rolesManager = {
             type: 'POST',
             data: $form.serialize(),
             success: function(response) {
-                console.log('Resposta recebida:', response);
-                if (response.success) {
+                console.log('RolesManager: Resposta da criação de role recebida:', response);
+                console.log('Tipo da resposta:', typeof response);
+                
+                if (response && response.success) {
+                    console.log('RolesManager: Role criada com sucesso, fechando modal e atualizando grid');
                     $('#modalContainer').modal('hide');
                     rolesManager.atualizarGrid();
                     toastr.success('Role criada com sucesso!');
                 } else {
+                    console.log('RolesManager: Resposta indica erro ou formulário com validação');
                     if (typeof response === 'string') {
+                        console.log('RolesManager: Atualizando modal com novo HTML');
                         $('#modalContainer .modal-content').html(response);
                         rolesManager.initializeForm();
                     } else {
-                        toastr.error(response.message || 'Erro ao criar role. Verifique os dados informados.');
+                        console.log('RolesManager: Mostrando mensagem de erro JSON');
+                        const errorMessage = response && response.message ? response.message : 'Erro ao criar role. Verifique os dados informados.';
+                        toastr.error(errorMessage);
+                        if (response.errors && response.errors.length > 0) {
+                            response.errors.forEach(error => {
+                                console.error('Erro específico:', error);
+                            });
+                        }
                     }
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Erro na requisição:', {xhr, status, error});
+                console.error('RolesManager: Erro na requisição de criação de role:', {xhr, status, error});
+                console.error('Status code:', xhr.status);
                 console.error('Response text:', xhr.responseText);
+                console.error('Response headers:', xhr.getAllResponseHeaders());
                 toastr.error(xhr.responseText || 'Erro ao salvar a role.');
             },
             complete: function() {
-                console.log('Requisição completa');
+                console.log('RolesManager: Requisição de criação de role completa');
                 $form.data('submitting', false);
                 submitButton.prop('disabled', false);
                 loadingSpinner.addClass('d-none');
@@ -318,17 +351,22 @@ var rolesManager = {
     },
 
     salvarEdicao: function(form) {
-        console.log('salvarEdicao chamado');
+        console.log('ClaimsManager: salvarEdicao chamado');
+        console.log('Form element:', form);
+        console.log('Form jQuery object:', $(form));
         
         // Prevenir múltiplos submits
         if ($(form).data('submitting')) {
-            console.log('Já está enviando, cancelando');
+            console.log('ClaimsManager: Já está enviando edição de role, cancelando');
             return false;
         }
 
         // Verificar validação
         if (!$(form).valid()) {
-            console.log('Formulário inválido na edição');
+            console.log('ClaimsManager: Formulário inválido na edição de role');
+            console.log('Erros de validação:', $(form).find('.field-validation-error').map(function() {
+                return $(this).text();
+            }).get());
             return false;
         }
 
@@ -336,9 +374,11 @@ var rolesManager = {
         const submitButton = $form.find('button[type="submit"]');
         const loadingSpinner = $form.find('.spinner-border');
         
-        console.log('Iniciando envio da edição...');
+        console.log('ClaimsManager: Iniciando envio da edição de role...');
         console.log('URL:', $form.attr('action'));
-        console.log('Dados:', $form.serialize());
+        console.log('Dados serializados:', $form.serialize());
+        console.log('Submit button encontrado:', submitButton.length);
+        console.log('Loading spinner encontrado:', loadingSpinner.length);
         
         // Marcar como enviando
         $form.data('submitting', true);
@@ -351,27 +391,40 @@ var rolesManager = {
             type: 'POST',
             data: $form.serialize(),
             success: function(response) {
-                console.log('Resposta da edição recebida:', response);
-                if (response.success) {
+                console.log('ClaimsManager: Resposta da edição de role recebida:', response);
+                console.log('Tipo da resposta:', typeof response);
+                console.log('Response.success:', response ? response.success : 'undefined');
+                console.log('É string?', typeof response === 'string');
+                console.log('Conteúdo completo da response:', JSON.stringify(response));
+                
+                if (response && response.success === true) {
+                    console.log('ClaimsManager: Role atualizada com sucesso, fechando modal e atualizando grid');
                     $('#modalContainer').modal('hide');
                     rolesManager.atualizarGrid();
                     toastr.success('Role atualizada com sucesso!');
                 } else {
+                    console.log('ClaimsManager: Resposta indica erro ou formulário com validação');
                     if (typeof response === 'string') {
+                        console.log('ClaimsManager: Atualizando modal com novo HTML');
                         $('#modalContainer .modal-content').html(response);
                         rolesManager.initializeForm();
                     } else {
-                        toastr.error(response.message || 'Erro ao atualizar role. Verifique os dados informados.');
+                        console.log('ClaimsManager: Mostrando mensagem de erro JSON');
+                        const errorMessage = response && response.message ? response.message : 'Erro ao atualizar role. Verifique os dados informados.';
+                        console.log('Mensagem de erro:', errorMessage);
+                        toastr.error(errorMessage);
                     }
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Erro na requisição de edição:', {xhr, status, error});
+                console.error('ClaimsManager: Erro na requisição de edição de role:', {xhr, status, error});
+                console.error('Status code:', xhr.status);
                 console.error('Response text:', xhr.responseText);
+                console.error('Response headers:', xhr.getAllResponseHeaders());
                 toastr.error(xhr.responseText || 'Erro ao atualizar a role.');
             },
             complete: function() {
-                console.log('Requisição de edição completa');
+                console.log('ClaimsManager: Requisição de edição de role completa');
                 $form.data('submitting', false);
                 submitButton.prop('disabled', false);
                 loadingSpinner.addClass('d-none');
@@ -457,10 +510,11 @@ var rolesManager = {
         const $newRow = $(claimHtml);
         $('#claimsContainer').append($newRow);
         
-        // Ocultar mensagem de vazio se houver claims
-        if ($('.claim-row').length > 0) {
-            $('#emptyClaimsMessage').hide();
-        }
+        // Atualizar feedback visual
+        rolesManager.updateClaimsValidationFeedback();
+        
+        // Focar no select de tipo da nova claim
+        $newRow.find('.claim-type').focus();
     },
 
     removeClaim: function(button) {
@@ -472,10 +526,23 @@ var rolesManager = {
             $(this).find('input[name*=".Value"]').attr('name', `Claims[${index}].Value`);
         });
         
-        // Mostrar mensagem de vazio se não houver claims
-        if ($('.claim-row').length === 0) {
-            $('#emptyClaimsMessage').show();
+        // Atualizar feedback visual
+        rolesManager.updateClaimsValidationFeedback();
+    },
+
+    updateClaimsValidationFeedback: function() {
+        const claimCount = $('.claim-row').length;
+        const $emptyMessage = $('#emptyClaimsMessage');
+        
+        if (claimCount === 0) {
+            $emptyMessage.show();
+            $emptyMessage.removeClass('text-muted border-muted')
+                        .addClass('text-warning border-warning');
+        } else {
+            $emptyMessage.hide();
         }
+        
+        console.log(`RolesManager: Claims count atualizada: ${claimCount}`);
     },
 
     addClaimFromSuggestion: function(claimType) {
@@ -529,6 +596,53 @@ var rolesManager = {
                 rolesManager.updateClaimValues(this);
             });
         }, 100);
+    },
+
+    removeEmptyClaims: function() {
+        console.log('Removendo claims vazias...');
+        $('.claim-row').each(function() {
+            const $row = $(this);
+            const type = $row.find('.claim-type').val();
+            const value = $row.find('input[name*="Value"]').val();
+            
+            // Se ambos estão vazios, remover a linha
+            if (!type || !value) {
+                console.log('Removendo claim vazia:', {type, value});
+                $row.remove();
+            }
+        });
+        
+        // Atualizar índices dos campos restantes
+        rolesManager.updateClaimIndexes();
+    },
+
+    getClaimsData: function() {
+        const claims = [];
+        $('.claim-row').each(function() {
+            const $row = $(this);
+            const type = $row.find('.claim-type').val();
+            const value = $row.find('input[name*="Value"]').val();
+            
+            if (type && value) {
+                claims.push({ type: type, value: value });
+            }
+        });
+        return claims;
+    },
+
+    updateClaimIndexes: function() {
+        console.log('Atualizando índices das claims...');
+        $('.claim-row').each(function(index) {
+            const $row = $(this);
+            
+            // Atualizar name attributes
+            $row.find('.claim-type').attr('name', `Claims[${index}].Type`);
+            $row.find('input[name*="Value"]').attr('name', `Claims[${index}].Value`);
+            
+            // Atualizar IDs se necessário
+            $row.find('.claim-type').attr('id', `Claims_${index}__Type`);
+            $row.find('input[name*="Value"]').attr('id', `Claims_${index}__Value`);
+        });
     }
 };
 

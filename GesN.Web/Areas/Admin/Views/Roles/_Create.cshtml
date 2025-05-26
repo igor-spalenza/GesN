@@ -7,9 +7,14 @@
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
 </div>
 
-<form id="createRoleForm" asp-action="CreatePartial" method="post" onsubmit="return debugSalvarRole(this);">
+<form id="createRoleForm" asp-action="CreatePartial" method="post" onsubmit="return rolesManager.salvarNovo(this);">
     <div class="modal-body">
         <div class="row g-3">
+            <!-- Mensagem de validação global -->
+            <div class="col-12">
+                <div asp-validation-summary="All" class="text-danger"></div>
+            </div>
+            
             <!-- Nome da Role -->
             <div class="col-12">
                 <label asp-for="Name" class="form-label fw-bold">
@@ -24,11 +29,12 @@
                 <div class="card">
                     <div class="card-header bg-light">
                         <h6 class="mb-0">
-                            <i class="bi bi-key me-2"></i>Claims (Permissões)
+                            <i class="bi bi-key me-2"></i>Claims (Permissões) <span class="text-danger">*</span>
                             <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="rolesManager.addClaim()">
                                 <i class="bi bi-plus-lg"></i> Adicionar Claim
                             </button>
                         </h6>
+                        <small class="text-muted">Uma role deve ter pelo menos uma claim associada.</small>
                     </div>
                     <div class="card-body">
                         <div id="claimsContainer">
@@ -40,7 +46,14 @@
                                             <option value="">Selecione o tipo</option>
                                             @foreach (var claimType in Model.AvailableClaimTypes)
                                             {
-                                                <option value="@claimType" selected="@(Model.Claims[i].Type == claimType)">@claimType</option>
+                                                @if (Model.Claims[i].Type == claimType)
+                                                {
+                                                    <option value="@claimType" selected>@claimType</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@claimType">@claimType</option>
+                                                }
                                             }
                                         </select>
                                         <span asp-validation-for="Claims[i].Type" class="text-danger"></span>
@@ -59,56 +72,60 @@
                         </div>
                         @if (Model.Claims.Count == 0)
                         {
-                            <div class="text-center text-muted py-3" id="emptyClaimsMessage">
-                                <i class="bi bi-key-fill"></i>
-                                <p class="mb-0">Nenhuma claim adicionada</p>
+                            <div class="text-center text-warning py-3 border border-warning rounded" id="emptyClaimsMessage">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <p class="mb-0 fw-bold">Pelo menos uma claim é obrigatória</p>
                                 <small>Clique em "Adicionar Claim" para começar</small>
                             </div>
                         }
+                        <span asp-validation-for="Claims" class="text-danger"></span>
                     </div>
                 </div>
             </div>
 
             <!-- Tipos Comuns de Claims (Sugestões) -->
-            <div class="col-12">
-                <div class="card border-info">
-                    <div class="card-header bg-info text-white">
-                        <h6 class="mb-0">
-                            <i class="bi bi-lightbulb me-2"></i>Sugestões de Claims Comuns
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-2">
-                            @foreach (var suggestion in Model.AvailableClaimTypes.Take(8))
+            @if (Model.AvailableClaimTypes.Any())
+            {
+                <div class="col-12">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-lightbulb me-2"></i>Sugestões de Claims Comuns
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                @foreach (var suggestion in Model.AvailableClaimTypes.Take(8))
+                                {
+                                    <div class="col-6 col-md-4">
+                                        <button type="button" class="btn btn-outline-info btn-sm w-100" onclick="rolesManager.addClaimFromSuggestion('@suggestion')">
+                                            <small>@suggestion</small>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                            @if (Model.AvailableClaimTypes.Count > 8)
                             {
-                                <div class="col-6 col-md-4">
-                                    <button type="button" class="btn btn-outline-info btn-sm w-100" onclick="rolesManager.addClaimFromSuggestion('@suggestion')">
-                                        <small>@suggestion</small>
-                                    </button>
+                                <button type="button" class="btn btn-link btn-sm mt-2" data-bs-toggle="collapse" data-bs-target="#moreSuggestions">
+                                    Ver mais sugestões...
+                                </button>
+                                <div class="collapse mt-2" id="moreSuggestions">
+                                    <div class="row g-2">
+                                        @foreach (var suggestion in Model.AvailableClaimTypes.Skip(8))
+                                        {
+                                            <div class="col-6 col-md-4">
+                                                <button type="button" class="btn btn-outline-info btn-sm w-100" onclick="rolesManager.addClaimFromSuggestion('@suggestion')">
+                                                    <small>@suggestion</small>
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                             }
                         </div>
-                        @if (Model.AvailableClaimTypes.Count > 8)
-                        {
-                            <button type="button" class="btn btn-link btn-sm mt-2" data-bs-toggle="collapse" data-bs-target="#moreSuggestions">
-                                Ver mais sugestões...
-                            </button>
-                            <div class="collapse mt-2" id="moreSuggestions">
-                                <div class="row g-2">
-                                    @foreach (var suggestion in Model.AvailableClaimTypes.Skip(8))
-                                    {
-                                        <div class="col-6 col-md-4">
-                                            <button type="button" class="btn btn-outline-info btn-sm w-100" onclick="rolesManager.addClaimFromSuggestion('@suggestion')">
-                                                <small>@suggestion</small>
-                                            </button>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        }
                     </div>
                 </div>
-            </div>
+            }
         </div>
     </div>
 
@@ -123,68 +140,11 @@
     </div>
 </form>
 
-<style>
-.claim-row {
-    border: 1px solid #e9ecef;
-    border-radius: 0.375rem;
-    padding: 0.75rem;
-    background-color: #f8f9fa;
-    margin-bottom: 0.5rem;
-}
-
-.claim-row:hover {
-    background-color: #e9ecef;
-}
-
-#claimsContainer:empty + #emptyClaimsMessage {
-    display: block !important;
-}
-
-.card {
-    border: 1px solid #e9ecef;
-}
-
-.card-header {
-    border-bottom: 1px solid #e9ecef;
-}
-
-.btn-outline-info:hover {
-    color: #fff;
-    background-color: #0dcaf0;
-    border-color: #0dcaf0;
-}
-</style>
-
 <script>
 // Garantir que as validações sejam aplicadas quando o modal for carregado
 $(document).ready(function() {
     if (typeof $.validator !== 'undefined') {
         $.validator.unobtrusive.parse('#createRoleForm');
     }
-    
-    // Debug - verificar se o rolesManager existe
-    console.log('rolesManager existe:', typeof rolesManager !== 'undefined');
-    console.log('rolesManager.salvarNovo existe:', typeof rolesManager?.salvarNovo === 'function');
 });
-
-// Função de debug temporária
-window.debugSalvarRole = function(form) {
-    console.log('debugSalvarRole chamado');
-    event.preventDefault();
-    
-    const $form = $(form);
-    console.log('Formulário:', $form);
-    console.log('Action:', $form.attr('action'));
-    console.log('Method:', $form.attr('method'));
-    console.log('Dados:', $form.serialize());
-    
-    // Chamar a função original se existir
-    if (typeof rolesManager !== 'undefined' && typeof rolesManager.salvarNovo === 'function') {
-        return rolesManager.salvarNovo(form);
-    } else {
-        console.error('rolesManager.salvarNovo não encontrado');
-        alert('Erro: Função JavaScript não encontrada');
-        return false;
-    }
-};
 </script> 
