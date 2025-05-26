@@ -1,0 +1,114 @@
+using GesN.Web.Areas.Identity.Data.Stores;
+using GesN.Web.Areas.Identity.Data;
+using GesN.Web.Data;
+using GesN.Web.Data.Repositories;
+using GesN.Web.Infrastructure.Data;
+using GesN.Web.Interfaces.Repositories;
+using GesN.Web.Interfaces.Services;
+using GesN.Web.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
+using System.Data;
+using GesN.Web.Areas.Identity.Data.Models;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using GesN.Web.Data.Migrations;
+using Dapper;
+
+namespace GesN.Web.Infrastructure.Configuration
+{
+    public static class DependencyInjection
+    {
+        public static void AddInfrastructureServices(this IServiceCollection services, string connectionString)
+        {
+            // Usar Scoped - uma instância por request
+            services.AddScoped<IDbConnectionFactory>(provider => new ProjectDataContext(connectionString));
+
+            services.AddHttpContextAccessor();
+
+            services.AddScoped<IClienteService, ClienteService>();
+            services.AddScoped<IClienteRepository, ClienteRepository>();
+
+            services.AddScoped<IPedidoService, PedidoService>();
+            services.AddScoped<IPedidoRepository, PedidoRepository>();
+
+            //services.AddScoped<SeedData>();
+
+            services.AddMemoryCache();
+        }
+
+        public static void AddIdentityServices(this IServiceCollection services)
+        {
+            services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+            {
+                // Simplificar configurações para evitar problemas
+                options.SignIn.RequireConfirmedAccount = false;
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedPhoneNumber = false;
+                
+                // Senhas mais simples para teste
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
+                
+                options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = false; // Desabilitar lockout para teste
+            })
+            .AddUserStore<DapperUserStore>()
+            .AddRoleStore<DapperRoleStore>()
+            .AddDefaultTokenProviders();
+
+            // ✅ CORREÇÃO: Usar Scoped em vez de Transient para evitar múltiplas instâncias simultâneas
+            //services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, UserClaimsPrincipalFactory<ApplicationUser, ApplicationRole>>();
+            //services.AddTransient<IEmailSender, EmailSender>();
+        }
+
+        public static void AddAuthenticationServices(this IServiceCollection services)
+        {
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Identity/Account/Login";
+                options.LogoutPath = "/Identity/Account/Logout";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                
+                options.ExpireTimeSpan = TimeSpan.FromHours(8);
+                options.SlidingExpiration = true;
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        context.Response.StatusCode = 401;
+                        return Task.CompletedTask;
+                    }
+                    context.Response.Redirect(context.RedirectUri);
+                    return Task.CompletedTask;
+                };
+            });
+        }
+
+        public static void AddAuthorizationServices(this IServiceCollection services)
+        {
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("GerenciarUsuarios", policy =>
+                    policy.RequireClaim("permissao", "usuarios:gerenciar"));
+                    
+                options.AddPolicy("GerenciarClientes", policy =>
+                    policy.RequireClaim("permissao", "clientes:gerenciar"));
+                    
+                options.AddPolicy("GerenciarPedidos", policy =>
+                    policy.RequireClaim("permissao", "pedidos:gerenciar"));
+            });
+        }
+    }
+}

@@ -1,4 +1,6 @@
 ﻿using Dapper;
+using GesN.Web.Data;
+using GesN.Web.Infrastructure.Data;
 using GesN.Web.Interfaces.Repositories;
 using GesN.Web.Models;
 using Microsoft.Data.Sqlite;
@@ -8,51 +10,54 @@ namespace GesN.Web.Data.Repositories
 {
     public class PedidoRepository : IPedidoRepository
     {
-        private readonly IDbConnection _dbConnection;
+        private readonly IDbConnectionFactory _connectionFactory;
 
-        public PedidoRepository(ProjectDataContext context)
+        public PedidoRepository(IDbConnectionFactory connectionFactory)
         {
-            _dbConnection = context.Connection;
+            _connectionFactory = connectionFactory;
         }
 
         public async Task<Pedido> GetByIdAsync(int id)
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             var sql = @"
                 SELECT p.*, c.Nome AS NomeCliente
                 FROM Pedido p
                 JOIN Cliente c ON p.ClienteId = c.ClienteId 
                 WHERE p.PedidoId = @Id";
-            return await _dbConnection.QueryFirstOrDefaultAsync<Pedido>(sql, new { Id = id });
+            return await connection.QueryFirstOrDefaultAsync<Pedido>(sql, new { Id = id });
         }
 
         public async Task<IEnumerable<Pedido>> GetAllAsync()
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             var sql = "SELECT * FROM Pedido";
-            return await _dbConnection.QueryAsync<Pedido>(sql);
+            return await connection.QueryAsync<Pedido>(sql);
         }
 
         public async Task<int> AddAsync(Pedido pedido)
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             var sql = @"
-                INSERT INTO Pedido (ClienteId, ColaboradorId, DataPedido, DataCadastro, DataModificacao)
-                VALUES (@ClienteId, @ColaboradorId, @DataPedido, @DataCadastro, @DataModificacao);
+                INSERT INTO Pedido (ClienteId, DataPedido, DataCadastro, DataModificacao)
+                VALUES (@ClienteId, @DataPedido, @DataCadastro, @DataModificacao);
                 SELECT last_insert_rowid();";
-            return await _dbConnection.QuerySingleAsync<int>(sql, pedido);
+            return await connection.QuerySingleAsync<int>(sql, pedido);
         }
 
         public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Pedido pedido)
         {
             try
             {
+                using var connection = await _connectionFactory.CreateConnectionAsync();
                 var sql = @"
                     UPDATE Pedido 
                     SET ClienteId = @ClienteId, 
-                        ColaboradorId = @ColaboradorId,
                         DataPedido = @DataPedido,
                         DataModificacao = @DataModificacao
                     WHERE PedidoId = @PedidoId";
                 
-                int rowsAffected = await _dbConnection.ExecuteAsync(sql, pedido);
+                int rowsAffected = await connection.ExecuteAsync(sql, pedido);
                 
                 if (rowsAffected > 0)
                 {
@@ -66,7 +71,7 @@ namespace GesN.Web.Data.Repositories
             catch (SqliteException ex) when (ex.SqliteErrorCode == 19 && ex.Message.Contains("FOREIGN KEY constraint failed"))
             {
                 // Erro específico de FK constraint
-                return (false, "Erro de restrição de chave estrangeira. Verifique se o Cliente e o Colaborador existem no sistema.");
+                return (false, "Erro de restrição de chave estrangeira. Verifique se o Cliente existe no sistema.");
             }
             catch (SqliteException ex)
             {
@@ -82,8 +87,9 @@ namespace GesN.Web.Data.Repositories
 
         public async Task DeleteAsync(int id)
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
             var sql = "DELETE FROM Pedido WHERE Id = @Id";
-            await _dbConnection.ExecuteAsync(sql, new { Id = id });
+            await connection.ExecuteAsync(sql, new { Id = id });
         }
     }
 }

@@ -1,0 +1,124 @@
+@model GesN.Web.Areas.Admin.Models.UserViewModel
+@using GesN.Web.Areas.Admin.Constants
+
+<div class="modal-header">
+    <h5 class="modal-title">Detalhes do Usuário</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-md-6">
+            <dl class="row">
+                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.FirstName) @Html.DisplayNameFor(model => model.LastName)</dt>
+                <dd class="col-sm-8">@(Model.FirstName + " " + Model.LastName)</dd>
+
+                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.UserName)</dt>
+                <dd class="col-sm-8">@Model.UserName</dd>
+
+                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Email)</dt>
+                <dd class="col-sm-8">@Model.Email</dd>
+
+                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.PhoneNumber)</dt>
+                <dd class="col-sm-8">@Model.PhoneNumber</dd>
+            </dl>
+        </div>
+        <div class="col-md-6">
+            <h6>@Html.DisplayNameFor(model => model.Roles)</h6>
+            <ul class="list-group mb-3">
+                @if (!string.IsNullOrEmpty(Model.Roles))
+                {
+                    @foreach (var role in Model.Roles.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        <li class="list-group-item">@role.Trim()</li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item text-muted">Nenhuma função atribuída</li>
+                }
+            </ul>
+        </div>
+    </div>
+    
+    @if (Model.Claims != null && Model.Claims.Any())
+    {
+        <div class="row mt-3">
+            <div class="col-12">
+                <h6>@Html.DisplayNameFor(model => model.Claims)</h6>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            @{
+                                var permissionClaims = Model.Claims.Where(c => c.Type == SystemClaims.Types.Permission).ToList();
+                                var departmentClaims = Model.Claims.Where(c => c.Type == SystemClaims.Types.Department).ToList();
+                                var accessLevelClaims = Model.Claims.Where(c => c.Type == SystemClaims.Types.AccessLevel).ToList();
+                            }
+                            
+                            @if (permissionClaims.Any())
+                            {
+                                <div class="col-md-4">
+                                    <h6 class="text-primary">Permissões</h6>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var claim in permissionClaims)
+                                        {
+                                            <li class="list-group-item border-0 px-0 py-1">
+                                                <i class="bi bi-check-circle text-success me-2"></i>@claim.Value
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            
+                            @if (departmentClaims.Any())
+                            {
+                                <div class="col-md-4">
+                                    <h6 class="text-info">Departamento</h6>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var claim in departmentClaims)
+                                        {
+                                            <li class="list-group-item border-0 px-0 py-1">
+                                                <i class="bi bi-building text-info me-2"></i>@claim.Value
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            
+                            @if (accessLevelClaims.Any())
+                            {
+                                <div class="col-md-4">
+                                    <h6 class="text-warning">Nível de Acesso</h6>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var claim in accessLevelClaims)
+                                        {
+                                            <li class="list-group-item border-0 px-0 py-1">
+                                                <i class="bi bi-shield-check text-warning me-2"></i>@claim.Value
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row mt-3">
+            <div class="col-12">
+                <h6>@Html.DisplayNameFor(model => model.Claims)</h6>
+                <div class="card">
+                    <div class="card-body text-center text-muted">
+                        <i class="bi bi-info-circle me-2"></i>Este usuário não possui claims atribuídas
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+    <button type="button" class="btn btn-primary" onclick="usersManager.editarUserModal('@Model.Id')">Editar</button>
+</div> 

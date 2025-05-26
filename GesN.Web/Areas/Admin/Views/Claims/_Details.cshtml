@@ -1,0 +1,249 @@
+@model GesN.Web.Areas.Admin.Models.ClaimDetailViewModel
+
+<div class="modal-header bg-warning text-dark">
+    <h5 class="modal-title">
+        <i class="bi bi-eye me-2"></i>Detalhes da Claim: @Model.Type
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+</div>
+
+<div class="modal-body">
+    <div class="row g-4">
+        <!-- Informações Principais -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="bi bi-key-fill me-2"></i>Informações da Claim
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Tipo</small>
+                            <h5 class="fw-bold text-warning">@Model.Type</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Valor</small>
+                            <span class="fs-6">@(Model.Value ?? "N/A")</span>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Usuários com esta Claim</small>
+                            <span class="badge bg-info fs-6 px-3 py-2">
+                                <i class="bi bi-people me-1"></i>@Model.UserCount usuário(s)
+                            </span>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Roles com esta Claim</small>
+                            <span class="badge bg-secondary fs-6 px-3 py-2">
+                                <i class="bi bi-person-badge me-1"></i>@Model.RoleCount role(s)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usuários com esta Claim -->
+        @if (Model.UserCount > 0)
+        {
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-people me-2"></i>Usuários com esta Claim (@Model.UserCount)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            @foreach (var user in Model.UsersWithClaim)
+                            {
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="card h-100 border-start border-4 border-info">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <div class="bg-info bg-opacity-10 rounded-circle p-2">
+                                                        <i class="bi bi-person-circle text-info"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="fw-bold mb-1">@user.UserName</h6>
+                                                    <small class="text-muted">Usuário direto</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="card border-info">
+                    <div class="card-body text-center py-4">
+                        <i class="bi bi-people text-info" style="font-size: 2rem;"></i>
+                        <h6 class="mt-2 mb-1">Nenhum usuário direto</h6>
+                        <p class="text-muted mb-0">Esta claim não foi atribuída diretamente a usuários.</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Roles com esta Claim -->
+        @if (Model.RoleCount > 0)
+        {
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-person-badge me-2"></i>Roles com esta Claim (@Model.RoleCount)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            @foreach (var role in Model.RolesWithClaim)
+                            {
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="card h-100 border-start border-4 border-secondary">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <div class="bg-secondary bg-opacity-10 rounded-circle p-2">
+                                                        <i class="bi bi-person-badge-fill text-secondary"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="fw-bold mb-1">@role.Name</h6>
+                                                    <small class="text-muted">Role</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="card border-secondary">
+                    <div class="card-body text-center py-4">
+                        <i class="bi bi-person-badge text-secondary" style="font-size: 2rem;"></i>
+                        <h6 class="mt-2 mb-1">Nenhuma role associada</h6>
+                        <p class="text-muted mb-0">Esta claim não foi atribuída a nenhuma role.</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Categoria da Claim -->
+        <div class="col-12">
+            <div class="card @(Model.Type.StartsWith("permission.") ? "border-primary" : "border-success")">
+                <div class="card-header @(Model.Type.StartsWith("permission.") ? "bg-primary text-white" : "bg-success text-white")">
+                    <h6 class="mb-0">
+                        <i class="bi @(Model.Type.StartsWith("permission.") ? "bi-shield-check" : "bi-person-vcard") me-2"></i>
+                        Categoria da Claim
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Type.StartsWith("permission."))
+                    {
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                                    <i class="bi bi-shield-check text-primary fs-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-primary">Permissão do Sistema</h6>
+                                <p class="mb-0 text-muted">Esta claim controla acesso a funcionalidades específicas do sistema.</p>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                    <i class="bi bi-person-vcard text-success fs-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-success">Dados Pessoais</h6>
+                                <p class="mb-0 text-muted">Esta claim armazena informações pessoais ou dados específicos do usuário.</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Estatísticas Resumidas -->
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Resumo de Utilização
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-3">
+                            <div class="p-3">
+                                <i class="bi bi-key-fill text-warning fs-3"></i>
+                                <div class="mt-2">
+                                    <div class="fw-bold">1</div>
+                                    <small class="text-muted">Claim</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="p-3">
+                                <i class="bi bi-people text-info fs-3"></i>
+                                <div class="mt-2">
+                                    <div class="fw-bold">@Model.UserCount</div>
+                                    <small class="text-muted">Usuário(s)</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="p-3">
+                                <i class="bi bi-person-badge text-secondary fs-3"></i>
+                                <div class="mt-2">
+                                    <div class="fw-bold">@Model.RoleCount</div>
+                                    <small class="text-muted">Role(s)</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="p-3">
+                                <i class="bi bi-diagram-3 text-primary fs-3"></i>
+                                <div class="mt-2">
+                                    <div class="fw-bold">@(Model.UserCount + Model.RoleCount)</div>
+                                    <small class="text-muted">Total</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <i class="bi bi-x-lg me-1"></i>Fechar
+    </button>
+    <button type="button" class="btn btn-warning" onclick="claimsManager.editarClaimModal('@Model.Type', '@Model.Value')">
+        <i class="bi bi-pencil me-1"></i>Editar Claim
+    </button>
+</div> 

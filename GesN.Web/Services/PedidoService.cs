@@ -21,7 +21,6 @@ namespace GesN.Web.Services
             {
                 PedidoId = pedido.PedidoId,
                 ClienteId = pedido.ClienteId,
-                ColaboradorId = pedido.ColaboradorId,
                 DataCadastro = pedido.DataCadastro,
                 DataPedido = pedido.DataPedido,
                 DataModificacao = pedido.DataModificacao,
@@ -35,7 +34,6 @@ namespace GesN.Web.Services
             var pedido = new Pedido
             {
                 ClienteId = pedidoDto.ClienteId,
-                ColaboradorId = pedidoDto.ColaboradorId,
                 DataPedido = pedidoDto.DataPedido,
                 DataCadastro = dataAtual,
                 DataModificacao = dataAtual
@@ -55,7 +53,6 @@ namespace GesN.Web.Services
             {
                 PedidoId = p.PedidoId,
                 ClienteId = p.ClienteId,
-                ColaboradorId = p.ColaboradorId,
                 DataCadastro = p.DataCadastro,
                 DataPedido = p.DataPedido,
                 DataModificacao = p.DataModificacao
@@ -70,7 +67,6 @@ namespace GesN.Web.Services
                 {
                     PedidoId = pedidoDto.PedidoId,
                     ClienteId = pedidoDto.ClienteId,
-                    ColaboradorId = pedidoDto.ColaboradorId,
                     DataPedido = pedidoDto.DataPedido,
                     DataModificacao = DateTime.Parse(DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss"))
                 };

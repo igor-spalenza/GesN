@@ -1,0 +1,87 @@
+@model GesN.Web.Areas.Admin.Models.RoleViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title text-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Confirmar Exclusão
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+    </div>
+
+    <p class="mb-3">Você tem certeza que deseja excluir a role <strong>"@Model.Name"</strong>?</p>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h6 class="text-muted mb-2">Informações da Role:</h6>
+            <dl class="row">
+                <dt class="col-sm-4">Nome:</dt>
+                <dd class="col-sm-8">@Model.Name</dd>
+                
+                <dt class="col-sm-4">ID:</dt>
+                <dd class="col-sm-8"><small class="text-muted">@Model.Id</small></dd>
+            </dl>
+        </div>
+        
+        <div class="col-md-6">
+            <h6 class="text-muted mb-2">Impacto da Exclusão:</h6>
+            <ul class="list-unstyled">
+                <li class="mb-1">
+                    <i class="bi bi-people text-warning me-2"></i>
+                    <strong>@Model.UserCount</strong> usuário(s) perderão esta role
+                </li>
+                <li class="mb-1">
+                    <i class="bi bi-shield-check text-info me-2"></i>
+                    <strong>@Model.Claims.Count</strong> claim(s) serão removidas
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    @if (Model.UserCount > 0)
+    {
+        <div class="mt-3">
+            <h6 class="text-warning">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                Usuários Afetados:
+            </h6>
+            <div class="border rounded p-2 bg-light">
+                <small class="text-muted">@Model.Users</small>
+            </div>
+        </div>
+    }
+
+    @if (Model.Claims.Any())
+    {
+        <div class="mt-3">
+            <h6 class="text-info">
+                <i class="bi bi-shield-check me-2"></i>
+                Claims que serão removidas:
+            </h6>
+            <div class="border rounded p-2 bg-light">
+                @foreach (var claim in Model.Claims)
+                {
+                    <span class="badge bg-secondary me-1 mb-1">@claim.Type: @claim.Value</span>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<form asp-action="DeletePartialConfirmed" method="post" onsubmit="return rolesManager.confirmarExclusao(this);">
+    <input type="hidden" asp-for="Id" />
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-2"></i>Cancelar
+        </button>
+        <button type="submit" class="btn btn-danger">
+            <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+            <i class="bi bi-trash me-2"></i>Confirmar Exclusão
+        </button>
+    </div>
+</form> 

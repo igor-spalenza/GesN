@@ -35,26 +35,12 @@ namespace GesN.Web.Data.Migrations
                 CREATE TABLE IF NOT EXISTS Pedido (
                     PedidoId INTEGER NOT NULL UNIQUE,
                     ClienteId INTEGER NOT NULL,
-	                ColaboradorId INTEGER NOT NULL,
 	                DataCadastro TEXT NOT NULL,
 	                DataPedido TEXT NOT NULL,
 	                DataModificacao	TEXT NOT NULL,
 	                PRIMARY KEY(PedidoId AUTOINCREMENT)
                 );";
 
-                var createColaboradorTable = @"
-                CREATE TABLE IF NOT EXISTS Colaborador (
-	                ColaboradorId	INTEGER NOT NULL UNIQUE,
-	                UsuarioId	TEXT NOT NULL UNIQUE,
-	                ClienteIdGoogleContacts	TEXT,
-	                DataCadastro	TEXT NOT NULL,
-	                NomeCompleto	TEXT NOT NULL,
-	                DataNascimento	TEXT,
-	                PRIMARY KEY(ColaboradorId AUTOINCREMENT)
-                );";
-
-                // Executar os comandos para criar as tabelas
-                connection.Execute(createColaboradorTable);
                 connection.Execute(createClienteTable);
                 connection.Execute(createPedidoTable);
             }

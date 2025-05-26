@@ -13,12 +13,11 @@
     <table class="table table-striped table-hover">
         <thead class="table-light">
             <tr>
-                <th>Pedido ID</th>
-                <th>ID do Colaborador</th>
-                <th>ID Cliente</th>
-                <th>Data Pedido</th>
-                <th>Data Modificação</th>
-                <th>Data Cadastro</th>
+                <th>ID do Pedido</th>
+                <th>ID do Cliente</th>
+                <th>Data do Pedido</th>
+                <th>Data de Criação</th>
+                <th>Data de Modificação</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -29,11 +28,10 @@
                 {
                     <tr id="pedido-@pedido.PedidoId">
                         <td>@pedido.PedidoId</td>
-                        <td>@pedido.ColaboradorId</td>
                         <td>@pedido.ClienteId</td>
                         <td>@pedido.DataPedido.ToString("dd/MM/yyyy")</td>
-                        <td>@pedido.DataModificacao.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>@pedido.DataCadastro.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@pedido.DataModificacao.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>
                             <div class="btn-group btn-group-sm">
                                 <button type="button" class="btn btn-outline-info"

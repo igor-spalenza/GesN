@@ -1,0 +1,145 @@
+@model IEnumerable<GesN.Web.Areas.Admin.Models.ClaimViewModel>
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Gestão de Claims";
+    var availableClaimTypes = new List<string>
+    {
+        "permission.users.read", "permission.users.create", "permission.users.update", "permission.users.delete",
+        "permission.roles.read", "permission.roles.create", "permission.roles.update", "permission.roles.delete",
+        "permission.claims.read", "permission.claims.create", "permission.claims.update", "permission.claims.delete",
+        "permission.admin.access", "permission.reports.read", "permission.settings.manage",
+        "Nome", "CPF", "RG", "DataNascimento", "Endereco", "Cidade", "Estado", "CEP", 
+        "Departamento", "Cargo", "DataAdmissao", "Matricula", "NivelAcesso"
+    };
+}
+
+@section Styles {
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/lib/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="~/css/Admin.css" rel="stylesheet" />
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">@ViewData["Title"]</h1>
+        <button type="button" class="btn btn-primary" onclick="claimsManager.novoClaimModal()">
+            <i class="bi bi-plus-lg me-2"></i>Nova Claim
+        </button>
+    </div>
+
+    <!-- Controles de Busca e Filtros -->
+    <div class="search-controls">
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <label for="searchInput" class="form-label">
+                    <i class="bi bi-search me-1"></i>Buscar claims
+                </label>
+                <input type="text" class="form-control" id="searchInput" placeholder="Tipo ou valor da claim...">
+            </div>
+            <div class="col-6 col-md-3">
+                <label for="userCountFilter" class="form-label">
+                    <i class="bi bi-people me-1"></i>Usuários
+                </label>
+                <select class="form-select" id="userCountFilter">
+                    <option value="">Todos</option>
+                    <option value="0">Sem usuários</option>
+                    <option value="1-5">1-5 usuários</option>
+                    <option value="6-20">6-20 usuários</option>
+                    <option value="20+">Mais de 20</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <label for="roleCountFilter" class="form-label">
+                    <i class="bi bi-person-badge me-1"></i>Roles
+                </label>
+                <select class="form-select" id="roleCountFilter">
+                    <option value="">Todas</option>
+                    <option value="0">Sem roles</option>
+                    <option value="1-3">1-3 roles</option>
+                    <option value="4-10">4-10 roles</option>
+                    <option value="10+">Mais de 10</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-2">
+                <label class="form-label">
+                    <i class="bi bi-grid me-1"></i>Visualização
+                </label>
+                <div class="btn-group view-toggle w-100" role="group">
+                    <button type="button" class="btn btn-outline-secondary active" id="btnCardView" title="Cards">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                        <span class="d-none d-lg-inline ms-1">Cards</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnTableView" title="Tabela">
+                        <i class="bi bi-table"></i>
+                        <span class="d-none d-lg-inline ms-1">Tabela</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filtros avançados colapsáveis (Mobile) -->
+        <div class="d-md-none mt-3">
+            <button class="btn btn-outline-primary btn-sm w-100" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
+                <i class="bi bi-funnel me-2"></i>Filtros Avançados
+                <i class="bi bi-chevron-down ms-auto"></i>
+            </button>
+            <div class="collapse mt-2" id="advancedFilters">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="claimsManager.clearFilters()">
+                            <i class="bi bi-x-circle me-1"></i>Limpar
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-primary btn-sm w-100" onclick="claimsManager.applyFilters()">
+                            <i class="bi bi-check-circle me-1"></i>Aplicar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container da Grid -->
+    <div class="grid-container">
+        <div id="gridContainer">
+            @await Html.PartialAsync("_Grid", Model)
+        </div>
+        
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-5" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2 text-muted">Carregando claims...</p>
+        </div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-5" style="display: none;">
+            <i class="bi bi-key-fill text-muted" style="font-size: 3rem;"></i>
+            <h5 class="mt-3 text-muted">Nenhuma claim encontrada</h5>
+            <p class="text-muted">Tente ajustar os filtros ou criar uma nova claim.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Container -->
+<div class="modal fade" id="modalContainer" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script src="~/lib/select2/js/i18n/pt-br.min.js"></script>
+    <script src="~/js/Claims.js"></script>
+    <script>
+        $(document).ready(function() {
+            claimsManager.init();
+        });
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

@@ -1,0 +1,176 @@
+@model GesN.Web.Areas.Admin.Models.ClaimViewModel
+
+<div class="modal-header bg-danger text-white">
+    <h5 class="modal-title">
+        <i class="bi bi-exclamation-triangle me-2"></i>Excluir Claim
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+</div>
+
+<form id="deleteClaimForm" asp-action="DeleteConfirmed" asp-route-type="@Model.Type" asp-route-value="@Model.Value" method="post" onsubmit="return claimsManager.confirmarExclusao(this);">
+    <div class="modal-body">
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+            <div>
+                <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+            </div>
+        </div>
+
+        <p class="mb-4">
+            Tem certeza que deseja excluir a claim <strong>"@Model.Type"</strong> com o valor <strong>"@Model.Value"</strong>?
+        </p>
+
+        <!-- Informações da Claim -->
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Informações da Claim
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Tipo</small>
+                        <strong>@Model.Type</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Valor</small>
+                        <span>@(Model.Value ?? "N/A")</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Usuários Associados</small>
+                        <span class="badge bg-info">@Model.UserCount usuário(s)</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Roles Associadas</small>
+                        <span class="badge bg-secondary">@Model.RoleCount role(s)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usuários que perderão a claim -->
+        @if (Model.UserCount > 0)
+        {
+            <div class="alert alert-warning" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Atenção:</strong> Esta claim será removida de <strong>@Model.UserCount usuário(s)</strong>.
+            </div>
+            
+            <div class="card mb-3">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="bi bi-people me-2"></i>Usuários que perderão esta claim (@Model.UserCount)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.Users))
+                    {
+                        <div class="row g-2">
+                            @foreach (var user in Model.Users.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()))
+                            {
+                                <div class="col-12 col-md-6">
+                                    <div class="d-flex align-items-center p-2 border rounded bg-light">
+                                        <i class="bi bi-person-circle text-warning me-2"></i>
+                                        <div>
+                                            <div class="fw-medium">@user</div>
+                                            <small class="text-muted">Claim será removida</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Nenhum usuário será afetado diretamente.</p>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Roles que perderão a claim -->
+        @if (Model.RoleCount > 0)
+        {
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Nota:</strong> Esta claim será removida de <strong>@Model.RoleCount role(s)</strong>, afetando todos os usuários dessas roles.
+            </div>
+            
+            <div class="card mb-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-person-badge me-2"></i>Roles que perderão esta claim (@Model.RoleCount)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.Roles))
+                    {
+                        <div class="row g-2">
+                            @foreach (var role in Model.Roles.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(r => r.Trim()))
+                            {
+                                <div class="col-12 col-md-4">
+                                    <div class="d-flex align-items-center p-2 border rounded bg-light">
+                                        <i class="bi bi-person-badge-fill text-info me-2"></i>
+                                        <div>
+                                            <div class="fw-medium">@role</div>
+                                            <small class="text-muted">Claim será removida</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Nenhuma role será afetada.</p>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Impacto da exclusão -->
+        @if (Model.UserCount > 0 || Model.RoleCount > 0)
+        {
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Impacto da Exclusão
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        @if (Model.UserCount > 0)
+                        {
+                            <li><strong>@Model.UserCount usuário(s)</strong> perderão esta claim diretamente</li>
+                        }
+                        @if (Model.RoleCount > 0)
+                        {
+                            <li><strong>@Model.RoleCount role(s)</strong> perderão esta claim</li>
+                            <li>Todos os usuários das roles afetadas também perderão acesso a esta claim</li>
+                        }
+                        <li>Esta ação pode afetar permissões e funcionalidades do sistema</li>
+                    </ul>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-success" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                <strong>Seguro para exclusão:</strong> Esta claim não está sendo utilizada por nenhum usuário ou role.
+            </div>
+        }
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg me-1"></i>Cancelar
+        </button>
+        
+        <button type="submit" class="btn btn-danger">
+            <span class="spinner-border spinner-border-sm d-none me-2" role="status"></span>
+            <i class="bi bi-trash me-1"></i>Sim, Excluir Claim
+        </button>
+    </div>
+</form> 

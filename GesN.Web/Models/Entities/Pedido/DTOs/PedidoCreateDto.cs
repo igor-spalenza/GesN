@@ -6,7 +6,6 @@ namespace GesN.Web.Models.DTOs
     {
         public int PedidoId { get; set; }
         public int ClienteId { get; set; }
-        public string ColaboradorId { get; set; }
 
         [Display(Name = "Data do Pedido")]
         public DateTime DataPedido { get; set; }

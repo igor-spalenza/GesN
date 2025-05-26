@@ -1,0 +1,159 @@
+@model GesN.Web.Areas.Admin.Models.CreateUserViewModel
+@using GesN.Web.Areas.Admin.Constants
+
+<div class="modal-header">
+    <h5 class="modal-title">Criar Novo Usuário</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <form id="createUserForm" asp-action="CreatePartial" asp-controller="Users" asp-area="Admin" onsubmit="return usersManager.salvarNovo(this);">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="UserName" class="control-label"></label>
+                    <input asp-for="UserName" class="form-control" />
+                    <span asp-validation-for="UserName" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="Email" class="control-label"></label>
+                    <input asp-for="Email" class="form-control" type="email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="FirstName" class="control-label"></label>
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="LastName" class="control-label"></label>
+                    <input asp-for="LastName" class="form-control" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="PhoneNumber" class="control-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="Password" class="control-label"></label>
+                    <div class="input-group">
+                        <input asp-for="Password" class="form-control password-field" type="password" />
+                        <button class="btn btn-outline-secondary password-toggle" type="button" data-target="Password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="ConfirmPassword" class="control-label"></label>
+                    <div class="input-group">
+                        <input asp-for="ConfirmPassword" class="form-control password-field" type="password" />
+                        <button class="btn btn-outline-secondary password-toggle" type="button" data-target="ConfirmPassword">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Funções</label>
+                    <select name="SelectedRoles" class="form-select" multiple>
+                        @if (Model.AvailableRoles != null && Model.AvailableRoles.Any())
+                        {
+                            @foreach (var role in Model.AvailableRoles)
+                            {
+                                <option value="@role.Name" selected="@role.IsSelected">@role.Name</option>
+                            }
+                        }
+                    </select>
+                    <small class="form-text text-muted">Selecione uma ou mais funções para o usuário</small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Claims</label>
+                <div id="claimsContainer">
+                    @if (Model.Claims != null && Model.Claims.Any())
+                    {
+                        @for (var i = 0; i < Model.Claims.Count; i++)
+                        {
+                            <div class="claim-row row mb-2">
+                                <div class="col-5">
+                                    <select name="Claims[@i].Type" class="form-select claim-type" required>
+                                        <option value="">Selecione o tipo</option>
+                                        <option value="@SystemClaims.Types.Permission" selected="@(Model.Claims[i].Type == SystemClaims.Types.Permission)">Permissão</option>
+                                        <option value="@SystemClaims.Types.Department" selected="@(Model.Claims[i].Type == SystemClaims.Types.Department)">Departamento</option>
+                                        <option value="@SystemClaims.Types.AccessLevel" selected="@(Model.Claims[i].Type == SystemClaims.Types.AccessLevel)">Nível de Acesso</option>
+                                    </select>
+                                    <span asp-validation-for="@Model.Claims[i].Type" class="text-danger"></span>
+                                </div>
+                                <div class="col-5">
+                                    <select name="Claims[@i].Value" class="form-select claim-value" required>
+                                        <option value="">Selecione o valor</option>
+                                        @if (!string.IsNullOrEmpty(Model.Claims[i].Type) && SystemClaims.GetAvailableClaimValues().ContainsKey(Model.Claims[i].Type))
+                                        {
+                                            foreach (var value in SystemClaims.GetAvailableClaimValues()[Model.Claims[i].Type])
+                                            {
+                                                <option value="@value" selected="@(Model.Claims[i].Value == value)">@value</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="@Model.Claims[i].Value" class="text-danger"></span>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="usersManager.removeClaim(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+                    <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="usersManager.addClaim()">
+                        <i class="bi bi-plus"></i> Adicionar Claim
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+    <button type="submit" form="createUserForm" class="btn btn-primary">
+        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        Criar
+    </button>
+</div>
+
+<script>
+    // Disponibilizar os valores das claims globalmente
+    window.availableClaimValues = @Html.Raw(Json.Serialize(SystemClaims.GetAvailableClaimValues()));
+</script>

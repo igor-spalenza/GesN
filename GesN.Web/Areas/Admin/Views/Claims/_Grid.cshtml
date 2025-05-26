@@ -1,0 +1,226 @@
+@model IEnumerable<GesN.Web.Areas.Admin.Models.ClaimViewModel>
+
+<!-- Cards View -->
+<div id="cardsView" class="row">
+    @foreach (var claim in Model)
+    {
+         <div class="col-12 col-md-6 col-lg-4 mb-4 claim-item" 
+             data-search="@($"{claim.Type} {claim.Value} {claim.Users} {claim.Roles}".ToLower())"
+             data-user-count="@claim.UserCount"
+             data-role-count="@claim.RoleCount"
+             data-claim-type="@Html.Encode(claim.Type)"
+             data-claim-value="@Html.Encode(claim.Value)">
+            
+            <div class="card h-100 border-start border-4 border-warning">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-bold text-warning">
+                        <i class="bi bi-key-fill me-2"></i>@claim.Type
+                    </h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="javascript:void(0)" onclick="claimsManager.visualizarClaimModal(this.closest('.claim-item').dataset.claimType, this.closest('.claim-item').dataset.claimValue)">
+                                    <i class="bi bi-eye me-2"></i>Visualizar
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="javascript:void(0)" onclick="claimsManager.editarClaimModal(this.closest('.claim-item').dataset.claimType, this.closest('.claim-item').dataset.claimValue)">
+                                    <i class="bi bi-pencil me-2"></i>Editar
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="claimsManager.excluirClaimModal(this.closest('.claim-item').dataset.claimType, this.closest('.claim-item').dataset.claimValue)">
+                                    <i class="bi bi-trash me-2"></i>Excluir
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Valor da Claim -->
+                        <div class="col-12">
+                            <small class="text-muted d-block">Valor</small>
+                            <span class="fw-medium">@(claim.Value ?? "N/A")</span>
+                        </div>
+                        
+                        <!-- Usuários -->
+                        <div class="col-12">
+                            <small class="text-muted d-block">Usuários com esta Claim</small>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-info me-2">@claim.UserCount</span>
+                                @if (claim.UserCount > 0)
+                                {
+                                    <small class="text-truncate">@claim.Users</small>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">Nenhum usuário</small>
+                                }
+                            </div>
+                        </div>
+                        
+                        <!-- Roles -->
+                        <div class="col-12">
+                            <small class="text-muted d-block">Roles com esta Claim</small>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-secondary me-2">@claim.RoleCount</span>
+                                @if (claim.RoleCount > 0 && !string.IsNullOrEmpty(claim.Roles))
+                                {
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var role in claim.Roles.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(3).Select(r => r.Trim()))
+                                        {
+                                            <span class="badge bg-light text-dark border small">@role</span>
+                                        }
+                                        @if (claim.RoleCount > 3)
+                                        {
+                                            <span class="badge bg-light text-dark border small">+@(claim.RoleCount - 3) mais</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">Nenhuma role</small>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-sm btn-outline-warning" onclick="claimsManager.visualizarClaimModal(this.closest('.claim-item').dataset.claimType, this.closest('.claim-item').dataset.claimValue)">
+                            <i class="bi bi-eye me-1"></i>Detalhes
+                        </button>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="claimsManager.editarClaimModal(this.closest('.claim-item').dataset.claimType, this.closest('.claim-item').dataset.claimValue)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="claimsManager.excluirClaimModal(this.closest('.claim-item').dataset.claimType, this.closest('.claim-item').dataset.claimValue)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Table View -->
+<div id="tableView" class="d-none">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>
+                        <i class="bi bi-key-fill me-1"></i>Claim
+                    </th>
+                    <th>
+                        <i class="bi bi-people me-1"></i>Usuários
+                    </th>
+                    <th>
+                        <i class="bi bi-person-badge me-1"></i>Roles
+                    </th>
+                    <th class="text-center">
+                        <i class="bi bi-gear me-1"></i>Ações
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var claim in Model)
+                {
+                    <tr class="claim-item" 
+                        data-search="@($"{claim.Type} {claim.Value} {claim.Users} {claim.Roles}".ToLower())"
+                        data-user-count="@claim.UserCount"
+                        data-role-count="@claim.RoleCount"
+                        data-claim-type="@Html.Encode(claim.Type)"
+                        data-claim-value="@Html.Encode(claim.Value)">
+                        
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-warning text-white me-3">
+                                    <i class="bi bi-key-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">@claim.Type</div>
+                                    <small class="text-muted">@claim.Value</small>
+                                </div>
+                            </div>
+                        </td>
+                        
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-info me-2">@claim.UserCount</span>
+                                @if (claim.UserCount > 0)
+                                {
+                                    <span class="text-truncate" style="max-width: 200px;" title="@claim.Users">
+                                        @claim.Users
+                                    </span>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">Nenhum usuário</small>
+                                }
+                            </div>
+                        </td>
+                        
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-secondary me-2">@claim.RoleCount</span>
+                                @if (claim.RoleCount > 0 && !string.IsNullOrEmpty(claim.Roles))
+                                {
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var role in claim.Roles.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(r => r.Trim()))
+                                        {
+                                            <span class="badge bg-light text-dark border small">@role</span>
+                                        }
+                                        @if (claim.RoleCount > 2)
+                                        {
+                                            <span class="badge bg-light text-dark border small">+@(claim.RoleCount - 2)</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">Nenhuma role</small>
+                                }
+                            </div>
+                        </td>
+                        
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-warning" onclick="claimsManager.visualizarClaimModal(this.closest('.claim-item').dataset.claimType, this.closest('.claim-item').dataset.claimValue)" title="Visualizar">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="claimsManager.editarClaimModal(this.closest('.claim-item').dataset.claimType, this.closest('.claim-item').dataset.claimValue)" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="claimsManager.excluirClaimModal(this.closest('.claim-item').dataset.claimType, this.closest('.claim-item').dataset.claimValue)" title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-key-fill text-muted" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 text-muted">Nenhuma claim cadastrada</h5>
+        <p class="text-muted mb-4">Comece criando sua primeira claim.</p>
+        <button type="button" class="btn btn-warning" onclick="claimsManager.novoClaimModal()">
+            <i class="bi bi-plus-lg me-2"></i>Criar Primeira Claim
+        </button>
+    </div>
+} 

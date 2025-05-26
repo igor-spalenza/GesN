@@ -1,0 +1,234 @@
+@model GesN.Web.Areas.Admin.Models.EditClaimViewModel
+
+@section Styles {
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/lib/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="~/css/Admin.css" rel="stylesheet" />
+}
+
+<div class="modal-header">
+    <h5 class="modal-title">
+        <i class="bi bi-pencil-square me-2"></i>Editar Claim: @Model.Type
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+</div>
+
+<form id="editClaimForm" asp-action="Edit" method="post" onsubmit="return claimsManager.salvarEdicao(this);">
+    <input asp-for="Id" type="hidden" />
+    
+    <div class="modal-body">
+        <div class="row g-3">
+            <!-- Tipo da Claim -->
+            <div class="col-md-6">
+                <label asp-for="Type" class="form-label fw-bold">
+                    <i class="bi bi-tag me-1"></i>@Html.DisplayNameFor(m => m.Type)
+                </label>
+                <select asp-for="Type" class="form-select" id="claimTypeSelect">
+                    <option value="">Selecione o tipo da claim</option>
+                    @foreach (var claimType in Model.AvailableClaimTypes)
+                    {
+                        @if (Model.Type == claimType)
+                        {
+                            <option value="@claimType" selected>@claimType</option>
+                        }
+                        else
+                        {
+                            <option value="@claimType">@claimType</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="Type" class="text-danger"></span>
+            </div>
+
+            <!-- Valor da Claim -->
+            <div class="col-md-6">
+                <label asp-for="Value" class="form-label fw-bold">
+                    <i class="bi bi-key me-1"></i>@Html.DisplayNameFor(m => m.Value)
+                </label>
+                <input asp-for="Value" class="form-control" />
+                <span asp-validation-for="Value" class="text-danger"></span>
+            </div>
+
+            <!-- Usuários Associados Atualmente -->
+            @if (Model.AssociatedUsers.Any())
+            {
+                <div class="col-12">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-people me-2"></i>Usuários com esta Claim (@Model.AssociatedUsers.Count)
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                @foreach (var user in Model.AssociatedUsers)
+                                {
+                                    <div class="col-12 col-md-6">
+                                        <div class="d-flex align-items-center p-2 border rounded">
+                                            <div class="avatar-circle bg-info text-white me-2">
+                                                <i class="bi bi-person"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-medium">@user.UserName</div>
+                                                <small class="text-muted">@user.Email</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Roles Associadas Atualmente -->
+            @if (Model.AssociatedRoles.Any())
+            {
+                <div class="col-12">
+                    <div class="card border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-person-badge me-2"></i>Roles com esta Claim (@Model.AssociatedRoles.Count)
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                @foreach (var role in Model.AssociatedRoles)
+                                {
+                                    <div class="col-12 col-md-4">
+                                        <div class="d-flex align-items-center p-2 border rounded">
+                                            <div class="avatar-circle bg-secondary text-white me-2">
+                                                <i class="bi bi-person-badge"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-medium">@role.Name</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Usuários que devem receber esta claim -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-people me-2"></i>Gerenciar Usuários com esta Claim
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <label for="SelectedUserIds" class="form-label">
+                            <i class="bi bi-person-check me-1"></i>Selecionar Usuários
+                        </label>
+                        <select name="SelectedUserIds" id="SelectedUserIds" class="form-select" multiple>
+                            @foreach (var user in Model.AvailableUsers)
+                            {
+                                @if (Model.SelectedUserIds?.Contains(user.Id) == true)
+                                {
+                                    <option value="@user.Id" selected>@user.UserName (@user.Email)</option>
+                                }
+                                else
+                                {
+                                    <option value="@user.Id">@user.UserName (@user.Email)</option>
+                                }
+                            }
+                        </select>
+                        <small class="form-text text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>Selecione ou desmarque os usuários que devem ter esta claim
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roles que devem receber esta claim -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="bi bi-person-badge me-2"></i>Gerenciar Roles com esta Claim
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <label for="SelectedRoleIds" class="form-label">
+                            <i class="bi bi-person-badge-fill me-1"></i>Selecionar Roles
+                        </label>
+                        <select name="SelectedRoleIds" id="SelectedRoleIds" class="form-select" multiple>
+                            @foreach (var role in Model.AvailableRoles)
+                            {
+                                @if (Model.SelectedRoleIds?.Contains(role.Id) == true)
+                                {
+                                    <option value="@role.Id" selected>@role.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@role.Id">@role.Name</option>
+                                }
+                            }
+                        </select>
+                        <small class="form-text text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>Selecione ou desmarque as roles que devem ter esta claim
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tipos Comuns de Claims (Sugestões) -->
+            <div class="col-12">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-lightbulb me-2"></i>Tipos de Claims Disponíveis
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <!-- Permissões do Sistema -->
+                            <div class="col-12 mb-2">
+                                <small class="fw-bold text-muted">Permissões do Sistema:</small>
+                            </div>
+                            @foreach (var suggestion in Model.AvailableClaimTypes.Where(c => c.StartsWith("permission.")).Take(6))
+                            {
+                                <div class="col-6 col-md-3">
+                                    <button type="button" class="btn btn-outline-primary btn-sm w-100" onclick="claimsManager.setClaimType('@suggestion')">
+                                        <small>@suggestion</small>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                        
+                        <hr class="my-3">
+                        
+                        <div class="row g-2">
+                            <!-- Dados Pessoais -->
+                            <div class="col-12 mb-2">
+                                <small class="fw-bold text-muted">Dados Pessoais:</small>
+                            </div>
+                            @foreach (var suggestion in Model.AvailableClaimTypes.Where(c => !c.StartsWith("permission.")).Take(6))
+                            {
+                                <div class="col-6 col-md-3">
+                                    <button type="button" class="btn btn-outline-success btn-sm w-100" onclick="claimsManager.setClaimType('@suggestion')">
+                                        <small>@suggestion</small>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-lg me-1"></i>Cancelar
+        </button>
+        <button type="submit" class="btn btn-success">
+            <span class="spinner-border spinner-border-sm d-none me-2" role="status"></span>
+            <i class="bi bi-check-lg me-1"></i>Salvar Alterações
+        </button>
+    </div>
+</form> 

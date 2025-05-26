@@ -9,8 +9,6 @@ namespace GesN.Web.Models
 
         public int ClienteId { get; set; }
 
-        public int ColaboradorId { get; set; }
-
         [Display(Name = "Data do Pedido")]
         public DateTime DataPedido { get; set; }
 
