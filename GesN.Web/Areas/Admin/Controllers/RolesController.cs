@@ -6,6 +6,7 @@ using GesN.Web.Areas.Admin.Models;
 using GesN.Web.Infrastructure.Data;
 using System.Data;
 using GesN.Web.Data;
+using System.IO;
 
 namespace GesN.Web.Areas.Admin.Controllers
 {
@@ -561,9 +562,10 @@ namespace GesN.Web.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                
                 try
                 {
-                    using var connection = await _connectionFactory.CreateConnectionAsync();
                     // Verificar se o nome da role já existe
                     var existingRole = await connection.QuerySingleOrDefaultAsync(
                         "SELECT Id FROM AspNetRoles WHERE NormalizedName = @NormalizedName",
@@ -572,7 +574,8 @@ namespace GesN.Web.Areas.Admin.Controllers
                     if (existingRole != null)
                     {
                         ModelState.AddModelError("Name", "Este nome de Role já está em uso.");
-                        model.AvailableClaimTypes = await GetAvailableClaimTypesAsync();
+                        // ✅ CORREÇÃO: Usar mesma conexão para carregar claim types
+                        model.AvailableClaimTypes = await GetAvailableClaimTypesWithConnectionAsync(connection);
                         return PartialView("_Create", model);
                     }
 
@@ -619,7 +622,8 @@ namespace GesN.Web.Areas.Admin.Controllers
                         // Verifica se algum erro foi adicionado ao ModelState durante a adição de claims
                         if (!ModelState.IsValid)
                         {
-                            model.AvailableClaimTypes = await GetAvailableClaimTypesAsync();
+                            // ✅ CORREÇÃO: Usar mesma conexão para carregar claim types
+                            model.AvailableClaimTypes = await GetAvailableClaimTypesWithConnectionAsync(connection);
                             return PartialView("_Create", model);
                         }
 
@@ -639,15 +643,8 @@ namespace GesN.Web.Areas.Admin.Controllers
             // Se ModelState não é válido, retorna a partial view com o modelo e os erros
             if (model.Claims == null) model.Claims = new List<ClaimViewModel>();
             
-            // Recarregar claim types em caso de erro
-            try
-            {
-                model.AvailableClaimTypes = await GetAvailableClaimTypesAsync();
-            }
-            catch
-            {
-                model.AvailableClaimTypes = new List<string> { "Permission", "Department", "AccessLevel" };
-            }
+            // ✅ CORREÇÃO: Evitar criar nova conexão em caso de erro
+            model.AvailableClaimTypes = new List<string> { "Permission", "Department", "AccessLevel", "Module", "Feature" };
             
             return PartialView("_Create", model);
         }
@@ -859,6 +856,20 @@ namespace GesN.Web.Areas.Admin.Controllers
             try
             {
                 using var connection = await _connectionFactory.CreateConnectionAsync();
+                return await GetAvailableClaimTypesWithConnectionAsync(connection);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro ao carregar tipos de claims: {ex.Message}");
+                // Retornar tipos básicos em caso de erro
+                return new List<string> { "Permission", "Department", "AccessLevel", "Module", "Feature" };
+            }
+        }
+
+        private async Task<List<string>> GetAvailableClaimTypesWithConnectionAsync(IDbConnection connection)
+        {
+            try
+            {
                 var claimTypes = await connection.QueryAsync<string>(@"
                     SELECT DISTINCT ClaimType 
                     FROM (
@@ -899,6 +910,218 @@ namespace GesN.Web.Areas.Admin.Controllers
                 System.Diagnostics.Debug.WriteLine($"Erro ao carregar tipos de claims: {ex.Message}");
                 // Retornar tipos básicos em caso de erro
                 return new List<string> { "Permission", "Department", "AccessLevel", "Module", "Feature" };
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> TestConnection()
+        {
+            var diagnostics = new List<string>();
+            
+            try
+            {
+                // Teste 1: Verificar se consegue criar conexão
+                diagnostics.Add("1. Tentando criar conexão...");
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                diagnostics.Add("✅ Conexão criada com sucesso");
+                
+                // Teste 2: Verificar estado da conexão
+                diagnostics.Add($"2. Estado da conexão: {connection.State}");
+                
+                // Teste 3: Query simples de leitura
+                diagnostics.Add("3. Tentando SELECT simples...");
+                var count = await connection.QuerySingleAsync<int>("SELECT COUNT(*) FROM AspNetRoles");
+                diagnostics.Add($"✅ SELECT funcionou. Count: {count}");
+                
+                // Teste 4: Verificar locks ativos
+                diagnostics.Add("4. Verificando locks ativos...");
+                try
+                {
+                    var pragmaResult = await connection.QuerySingleAsync<string>("PRAGMA locking_mode");
+                    diagnostics.Add($"   Locking mode: {pragmaResult}");
+                }
+                catch (Exception ex)
+                {
+                    diagnostics.Add($"   Erro ao verificar locking mode: {ex.Message}");
+                }
+                
+                // Teste 5: Verificar journal mode
+                try
+                {
+                    var journalMode = await connection.QuerySingleAsync<string>("PRAGMA journal_mode");
+                    diagnostics.Add($"   Journal mode: {journalMode}");
+                }
+                catch (Exception ex)
+                {
+                    diagnostics.Add($"   Erro ao verificar journal mode: {ex.Message}");
+                }
+                
+                // Teste 6: Verificar busy timeout
+                try
+                {
+                    var busyTimeout = await connection.QuerySingleAsync<int>("PRAGMA busy_timeout");
+                    diagnostics.Add($"   Busy timeout: {busyTimeout}");
+                }
+                catch (Exception ex)
+                {
+                    diagnostics.Add($"   Erro ao verificar busy timeout: {ex.Message}");
+                }
+                
+                // Teste 7: Tentar INSERT simples
+                diagnostics.Add("5. Tentando INSERT simples...");
+                var testId = Guid.NewGuid().ToString();
+                var testName = "TEST_ROLE_" + DateTime.Now.Ticks;
+                
+                await connection.ExecuteAsync(@"
+                    INSERT INTO AspNetRoles (Id, Name, NormalizedName, ConcurrencyStamp)
+                    VALUES (@Id, @Name, @NormalizedName, @ConcurrencyStamp)",
+                    new
+                    {
+                        Id = testId,
+                        Name = testName,
+                        NormalizedName = testName,
+                        ConcurrencyStamp = Guid.NewGuid().ToString()
+                    });
+                diagnostics.Add("✅ INSERT funcionou");
+                
+                // Teste 8: Tentar DELETE
+                diagnostics.Add("6. Tentando DELETE...");
+                await connection.ExecuteAsync("DELETE FROM AspNetRoles WHERE Id = @Id", new { Id = testId });
+                diagnostics.Add("✅ DELETE funcionou");
+                
+                return Json(new { 
+                    success = true, 
+                    message = "Todos os testes passaram!", 
+                    diagnostics = diagnostics 
+                });
+            }
+            catch (Exception ex)
+            {
+                diagnostics.Add($"❌ ERRO: {ex.Message}");
+                diagnostics.Add($"❌ StackTrace: {ex.StackTrace}");
+                
+                return Json(new { 
+                    success = false, 
+                    message = $"ERRO: {ex.Message}", 
+                    diagnostics = diagnostics,
+                    stackTrace = ex.StackTrace 
+                });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult DiagnosticInfo()
+        {
+            var diagnostics = new List<string>();
+            
+            try
+            {
+                // Informações sobre o arquivo de banco
+                var connectionString = "Data Source=./Data/Database/gesn.db;Cache=Shared;Pooling=true;";
+                var dbPath = connectionString.Replace("Data Source=", "").Split(';')[0];
+                var fullDbPath = Path.GetFullPath(dbPath);
+                
+                diagnostics.Add($"Connection String: {connectionString}");
+                diagnostics.Add($"DB Path: {dbPath}");
+                diagnostics.Add($"Full DB Path: {fullDbPath}");
+                diagnostics.Add($"DB File Exists: {System.IO.File.Exists(fullDbPath)}");
+                
+                if (System.IO.File.Exists(fullDbPath))
+                {
+                    var fileInfo = new FileInfo(fullDbPath);
+                    diagnostics.Add($"DB File Size: {fileInfo.Length} bytes");
+                    diagnostics.Add($"DB Last Modified: {fileInfo.LastWriteTime}");
+                    
+                    // Verificar arquivos relacionados
+                    var walFile = fullDbPath + "-wal";
+                    var shmFile = fullDbPath + "-shm";
+                    var journalFile = fullDbPath + "-journal";
+                    
+                    diagnostics.Add($"WAL File Exists: {System.IO.File.Exists(walFile)}");
+                    diagnostics.Add($"SHM File Exists: {System.IO.File.Exists(shmFile)}");
+                    diagnostics.Add($"Journal File Exists: {System.IO.File.Exists(journalFile)}");
+                    
+                    if (System.IO.File.Exists(walFile))
+                    {
+                        var walInfo = new FileInfo(walFile);
+                        diagnostics.Add($"WAL File Size: {walInfo.Length} bytes");
+                    }
+                }
+                
+                // Informações sobre o processo atual
+                var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+                diagnostics.Add($"Current Process ID: {currentProcess.Id}");
+                diagnostics.Add($"Current Process Name: {currentProcess.ProcessName}");
+                
+                return Json(new { 
+                    success = true, 
+                    diagnostics = diagnostics 
+                });
+            }
+            catch (Exception ex)
+            {
+                diagnostics.Add($"❌ ERRO: {ex.Message}");
+                return Json(new { 
+                    success = false, 
+                    message = ex.Message,
+                    diagnostics = diagnostics 
+                });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> TestDirectDapper()
+        {
+            var diagnostics = new List<string>();
+            
+            try
+            {
+                diagnostics.Add("1. Teste DIRETO com Dapper (sem Identity)");
+                
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+                diagnostics.Add("✅ Conexão criada");
+                
+                // Teste INSERT direto
+                var testId = Guid.NewGuid().ToString();
+                var testName = "DIRECT_TEST_" + DateTime.Now.Ticks;
+                
+                var insertResult = await connection.ExecuteAsync(@"
+                    INSERT INTO AspNetRoles (Id, Name, NormalizedName, ConcurrencyStamp)
+                    VALUES (@Id, @Name, @NormalizedName, @ConcurrencyStamp)",
+                    new
+                    {
+                        Id = testId,
+                        Name = testName,
+                        NormalizedName = testName,
+                        ConcurrencyStamp = Guid.NewGuid().ToString()
+                    });
+                diagnostics.Add($"✅ INSERT direto funcionou: {insertResult} linha(s) afetada(s)");
+                
+                // Teste UPDATE direto
+                var updateResult = await connection.ExecuteAsync(@"
+                    UPDATE AspNetRoles SET Name = @NewName WHERE Id = @Id",
+                    new { NewName = testName + "_UPDATED", Id = testId });
+                diagnostics.Add($"✅ UPDATE direto funcionou: {updateResult} linha(s) afetada(s)");
+                
+                // Teste DELETE direto
+                var deleteResult = await connection.ExecuteAsync(@"
+                    DELETE FROM AspNetRoles WHERE Id = @Id", new { Id = testId });
+                diagnostics.Add($"✅ DELETE direto funcionou: {deleteResult} linha(s) afetada(s)");
+                
+                return Json(new { 
+                    success = true, 
+                    message = "Dapper direto funciona perfeitamente!", 
+                    diagnostics = diagnostics 
+                });
+            }
+            catch (Exception ex)
+            {
+                diagnostics.Add($"❌ ERRO no Dapper direto: {ex.Message}");
+                return Json(new { 
+                    success = false, 
+                    message = ex.Message, 
+                    diagnostics = diagnostics 
+                });
             }
         }
 

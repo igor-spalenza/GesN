@@ -67,33 +67,22 @@ namespace GesN.Web.Areas.Identity.Data.Stores
             try
             {
                 using var connection = await _connectionFactory.CreateConnectionAsync();
-                using var transaction = connection.BeginTransaction();
                 
-                try
-                {
-                    await connection.ExecuteAsync(
-                        "DELETE FROM AspNetRoleClaims WHERE RoleId = @RoleId",
-                        new { RoleId = role.Id }, transaction);
-                    
-                    await connection.ExecuteAsync(
-                        "DELETE FROM AspNetUserRoles WHERE RoleId = @RoleId",
-                        new { RoleId = role.Id }, transaction);
-                    
-                    await connection.ExecuteAsync(
-                        "DELETE FROM AspNetRoles WHERE Id = @Id",
-                        new { role.Id }, transaction);
-                    
-                    transaction.Commit();
-                    
+                // ✅ CORREÇÃO: Remover transação para evitar database locks
+                // Executar operações sequencialmente sem transação
+                await connection.ExecuteAsync(
+                    "DELETE FROM AspNetRoleClaims WHERE RoleId = @RoleId",
+                    new { RoleId = role.Id });
+                
+                await connection.ExecuteAsync(
+                    "DELETE FROM AspNetUserRoles WHERE RoleId = @RoleId",
+                    new { RoleId = role.Id });
+                
+                await connection.ExecuteAsync(
+                    "DELETE FROM AspNetRoles WHERE Id = @Id",
+                    new { role.Id });
 
-                    
-                    return IdentityResult.Success;
-                }
-                catch (Exception)
-                {
-                    transaction.Rollback();
-                    throw;
-                }
+                return IdentityResult.Success;
             }
             catch (Exception ex)
             {

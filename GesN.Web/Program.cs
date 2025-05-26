@@ -5,6 +5,8 @@ using GesN.Web.Data.Migrations;
 using GesN.Web.Data;
 using GesN.Web.Services;
 using GesN.Web.Infrastructure.Middleware;
+using Dapper;
+using GesN.Web.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +22,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 SQLitePCL.Batteries.Init();
 string dbPath = Path.Combine(AppContext.BaseDirectory, "/GesN.Web/Data/Database/gesn.db");
 
-// Configurações organizadas usando DependencyInjection
 builder.Services.AddIdentityServices();
 builder.Services.AddAuthenticationServices();
 builder.Services.AddAuthorizationServices();
@@ -30,7 +31,6 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddInfrastructureServices(connectionString);
 
-// ✅ TESTE: Inicialização mínima para verificar se é a causa da lentidão
 try
 {
     // Verificar se o arquivo do banco existe
@@ -46,7 +46,8 @@ try
             var dbInit = new DbInit(connectionString);
             dbInit.Initialize();
             
-            var seedData = scope.ServiceProvider.GetRequiredService<SeedData>();
+            var connectionFactory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
+            var seedData = new SeedData(connectionFactory);
             await seedData.Initialize();
             Console.WriteLine("Banco criado com sucesso!");
         }

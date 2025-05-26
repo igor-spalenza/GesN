@@ -8,6 +8,7 @@ namespace GesN.Web.Data
     public class ProjectDataContext : IDbConnectionFactory
     {
         private readonly string _connectionString;
+        private static readonly object _lockObject = new object();
 
         public ProjectDataContext(string connectionString)
         {
@@ -19,13 +20,13 @@ namespace GesN.Web.Data
         /// </summary>
         public IDbConnection CreateConnection()
         {
-            var connection = new SqliteConnection(_connectionString);
-            connection.Open();
-            
-            // ✅ TESTE: Remover PRAGMA para verificar se é a causa da lentidão
-            // ConfigureSqliteConnection(connection);
-            
-            return connection;
+            lock (_lockObject)
+            {
+                var connection = new SqliteConnection(_connectionString);
+                connection.Open();
+                ConfigureSqliteConnection(connection);
+                return connection;
+            }
         }
 
         /// <summary>
@@ -33,54 +34,25 @@ namespace GesN.Web.Data
         /// </summary>
         public async Task<IDbConnection> CreateConnectionAsync()
         {
-            var connection = new SqliteConnection(_connectionString);
-            await connection.OpenAsync();
-            
-            // ✅ TESTE: Remover PRAGMA para verificar se é a causa da lentidão
-            // await ConfigureSqliteConnectionAsync(connection);
-            
-            return connection;
+            // Para SQLite, vamos usar a versão síncrona dentro de um lock
+            // pois SQLite não se beneficia muito de async para conexões locais
+            return await Task.Run(() => CreateConnection());
         }
 
         /// <summary>
-        /// Configura a conexão SQLite para melhor performance e concorrência
-        /// ✅ OTIMIZADO: Apenas configurações essenciais para reduzir overhead
+        /// Configura a conexão SQLite com configuração mínima
         /// </summary>
         private void ConfigureSqliteConnection(IDbConnection connection)
         {
             try
             {
-                // ✅ Apenas configurações críticas em uma única execução
-                connection.Execute(@"
-                    PRAGMA journal_mode=WAL;
-                    PRAGMA busy_timeout=30000;
-                    PRAGMA synchronous=NORMAL;");
+                // APENAS o timeout - sem outras configurações que deixam lento
+                connection.Execute("PRAGMA busy_timeout = 5000");
             }
             catch (Exception ex)
             {
                 // Log do erro mas não falha a conexão
-                Console.WriteLine($"Aviso: Não foi possível configurar PRAGMA do SQLite: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Configura a conexão SQLite de forma assíncrona
-        /// ✅ OTIMIZADO: Apenas configurações essenciais para reduzir overhead
-        /// </summary>
-        private async Task ConfigureSqliteConnectionAsync(IDbConnection connection)
-        {
-            try
-            {
-                // ✅ Apenas configurações críticas em uma única execução
-                await connection.ExecuteAsync(@"
-                    PRAGMA journal_mode=WAL;
-                    PRAGMA busy_timeout=30000;
-                    PRAGMA synchronous=NORMAL;");
-            }
-            catch (Exception ex)
-            {
-                // Log do erro mas não falha a conexão
-                Console.WriteLine($"Aviso: Não foi possível configurar PRAGMA do SQLite: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Aviso: Erro ao configurar SQLite PRAGMA: {ex.Message}");
             }
         }
 

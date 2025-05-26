@@ -104,41 +104,30 @@ namespace GesN.Web.Areas.Identity.Data.Stores
             try
             {
                 using var connection = await _connectionFactory.CreateConnectionAsync();
-                using var transaction = connection.BeginTransaction();
                 
-                try
-                {
-                    await connection.ExecuteAsync(
-                        "DELETE FROM AspNetUserRoles WHERE UserId = @Id",
-                        new { user.Id }, transaction);
+                // ✅ CORREÇÃO: Remover transação para evitar database locks
+                // Executar operações sequencialmente sem transação
+                await connection.ExecuteAsync(
+                    "DELETE FROM AspNetUserRoles WHERE UserId = @Id",
+                    new { user.Id });
 
-                    await connection.ExecuteAsync(
-                        "DELETE FROM AspNetUserClaims WHERE UserId = @Id",
-                        new { user.Id }, transaction);
+                await connection.ExecuteAsync(
+                    "DELETE FROM AspNetUserClaims WHERE UserId = @Id",
+                    new { user.Id });
 
-                    await connection.ExecuteAsync(
-                        "DELETE FROM AspNetUserLogins WHERE UserId = @Id",
-                        new { user.Id }, transaction);
+                await connection.ExecuteAsync(
+                    "DELETE FROM AspNetUserLogins WHERE UserId = @Id",
+                    new { user.Id });
 
-                    await connection.ExecuteAsync(
-                        "DELETE FROM AspNetUserTokens WHERE UserId = @Id",
-                        new { user.Id }, transaction);
+                await connection.ExecuteAsync(
+                    "DELETE FROM AspNetUserTokens WHERE UserId = @Id",
+                    new { user.Id });
 
-                    await connection.ExecuteAsync(
-                        "DELETE FROM AspNetUsers WHERE Id = @Id",
-                        new { user.Id }, transaction);
+                await connection.ExecuteAsync(
+                    "DELETE FROM AspNetUsers WHERE Id = @Id",
+                    new { user.Id });
 
-                    transaction.Commit();
-                    
-
-                    
-                    return IdentityResult.Success;
-                }
-                catch (Exception)
-                {
-                    transaction.Rollback();
-                    throw;
-                }
+                return IdentityResult.Success;
             }
             catch (Exception ex)
             {

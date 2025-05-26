@@ -379,7 +379,13 @@ namespace GesN.Web.Areas.Admin.Controllers
         {
             try
             {
+                // ✅ CORREÇÃO: Usar uma única conexão sequencial (sem transação)
                 using var connection = await _connectionFactory.CreateConnectionAsync();
+                
+                // ✅ DIAGNÓSTICO: Verificar configurações SQLite
+                var walMode = await connection.QuerySingleOrDefaultAsync<string>("PRAGMA journal_mode;");
+                var busyTimeout = await connection.QuerySingleOrDefaultAsync<int>("PRAGMA busy_timeout;");
+                System.Diagnostics.Debug.WriteLine($"WAL Mode: {walMode}, Busy Timeout: {busyTimeout}ms");
                 
                 if (!ModelState.IsValid)
                 {
@@ -397,143 +403,132 @@ namespace GesN.Web.Areas.Admin.Controllers
                     return PartialView("_Create", model);
                 }
 
-                // Usar transação para garantir atomicidade e evitar locks
-                using var transaction = connection.BeginTransaction();
-                
-                try
+                var existingUser = await connection.QuerySingleOrDefaultAsync<ApplicationUser>(
+                    "SELECT * FROM AspNetUsers WHERE Email = @Email OR UserName = @UserName",
+                    new { Email = model.Email, UserName = model.Email });
+
+                if (existingUser != null)
                 {
-                    var existingUser = await connection.QuerySingleOrDefaultAsync<ApplicationUser>(
-                        "SELECT * FROM AspNetUsers WHERE Email = @Email OR UserName = @UserName",
-                        new { Email = model.Email, UserName = model.Email }, transaction);
+                    ModelState.AddModelError(string.Empty, "Usuário com este email ou nome de usuário já existe.");
+                    return PartialView("_Create", model);
+                }
 
-                    if (existingUser != null)
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
+                var userId = Guid.NewGuid().ToString();
+
+                var query = @"
+                    INSERT INTO AspNetUsers (
+                        Id, UserName, NormalizedUserName, Email, NormalizedEmail,
+                        EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp,
+                        PhoneNumber, PhoneNumberConfirmed, TwoFactorEnabled,
+                        LockoutEnd, LockoutEnabled, AccessFailedCount,
+                        FirstName, LastName
+                    ) VALUES (
+                        @Id, @UserName, @NormalizedUserName, @Email, @NormalizedEmail,
+                        @EmailConfirmed, @PasswordHash, @SecurityStamp, @ConcurrencyStamp,
+                        @PhoneNumber, @PhoneNumberConfirmed, @TwoFactorEnabled,
+                        @LockoutEnd, @LockoutEnabled, @AccessFailedCount,
+                        @FirstName, @LastName
+                    )";
+
+                // ✅ CORREÇÃO: Retry logic para database locked
+                for (int retry = 0; retry < 3; retry++)
+                {
+                    try
                     {
-                        ModelState.AddModelError(string.Empty, "Usuário com este email ou nome de usuário já existe.");
-                        return PartialView("_Create", model);
-                    }
-
-                    var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
-                    var userId = Guid.NewGuid().ToString();
-
-                    var query = @"
-                        INSERT INTO AspNetUsers (
-                            Id, UserName, NormalizedUserName, Email, NormalizedEmail,
-                            EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp,
-                            PhoneNumber, PhoneNumberConfirmed, TwoFactorEnabled,
-                            LockoutEnd, LockoutEnabled, AccessFailedCount,
-                            FirstName, LastName
-                        ) VALUES (
-                            @Id, @UserName, @NormalizedUserName, @Email, @NormalizedEmail,
-                            @EmailConfirmed, @PasswordHash, @SecurityStamp, @ConcurrencyStamp,
-                            @PhoneNumber, @PhoneNumberConfirmed, @TwoFactorEnabled,
-                            @LockoutEnd, @LockoutEnabled, @AccessFailedCount,
-                            @FirstName, @LastName
-                        )";
-
-                    await connection.QueryAsync(query, new
-                    {
-                        Id = userId,
-                        UserName = model.Email,
-                        NormalizedUserName = model.Email.ToUpper(),
-                        Email = model.Email,
-                        NormalizedEmail = model.Email.ToUpper(),
-                        EmailConfirmed = false,
-                        PasswordHash = hashedPassword,
-                        SecurityStamp = Guid.NewGuid().ToString(),
-                        ConcurrencyStamp = Guid.NewGuid().ToString(),
-                        PhoneNumber = model.PhoneNumber ?? "",
-                        PhoneNumberConfirmed = false,
-                        TwoFactorEnabled = false,
-                        LockoutEnd = (DateTimeOffset?)null,
-                        LockoutEnabled = true,
-                        AccessFailedCount = 0,
-                        FirstName = model.FirstName,
-                        LastName = model.LastName
-                    }, transaction);
-
-                    // Adicionar roles selecionadas ao usuário
-                    if (model.SelectedRoles != null && model.SelectedRoles.Any())
-                    {
-                        foreach (var roleName in model.SelectedRoles)
+                        await connection.ExecuteAsync(query, new
                         {
-                            // Buscar o ID da role pelo nome
-                            var role = await connection.QuerySingleOrDefaultAsync(@"
-                                SELECT Id FROM AspNetRoles WHERE Name = @RoleName", 
-                                new { RoleName = roleName }, transaction);
+                            Id = userId,
+                            UserName = model.Email,
+                            NormalizedUserName = model.Email.ToUpper(),
+                            Email = model.Email,
+                            NormalizedEmail = model.Email.ToUpper(),
+                            EmailConfirmed = false,
+                            PasswordHash = hashedPassword,
+                            SecurityStamp = Guid.NewGuid().ToString(),
+                            ConcurrencyStamp = Guid.NewGuid().ToString(),
+                            PhoneNumber = model.PhoneNumber ?? "",
+                            PhoneNumberConfirmed = false,
+                            TwoFactorEnabled = false,
+                            LockoutEnd = (DateTimeOffset?)null,
+                            LockoutEnabled = true,
+                            AccessFailedCount = 0,
+                            FirstName = model.FirstName,
+                            LastName = model.LastName
+                        });
+                        break; // Sucesso - sair do loop
+                    }
+                    catch (Exception ex) when (ex.Message.Contains("database is locked") && retry < 2)
+                    {
+                        // Aguardar antes de tentar novamente
+                        await Task.Delay(100 * (retry + 1)); // 100ms, 200ms
+                        continue;
+                    }
+                }
 
-                            if (role != null)
+                // ✅ CORREÇÃO: Pequeno delay para evitar conflitos de lock
+                await Task.Delay(10);
+
+                // Adicionar roles selecionadas ao usuário (usando a mesma conexão)
+                if (model.SelectedRoles != null && model.SelectedRoles.Any())
+                {
+                    foreach (var roleName in model.SelectedRoles)
+                    {
+                        // Buscar o ID da role pelo nome
+                        var role = await connection.QuerySingleOrDefaultAsync(@"
+                            SELECT Id FROM AspNetRoles WHERE Name = @RoleName", 
+                            new { RoleName = roleName });
+
+                        if (role != null)
+                        {
+                            // Verificar se a associação já existe
+                            var existingUserRole = await connection.QuerySingleOrDefaultAsync(@"
+                                SELECT UserId FROM AspNetUserRoles 
+                                WHERE UserId = @UserId AND RoleId = @RoleId",
+                                new { UserId = userId, RoleId = role.Id });
+
+                            if (existingUserRole == null)
                             {
-                                // Verificar se a associação já existe
-                                var existingUserRole = await connection.QuerySingleOrDefaultAsync(@"
-                                    SELECT UserId FROM AspNetUserRoles 
-                                    WHERE UserId = @UserId AND RoleId = @RoleId",
-                                    new { UserId = userId, RoleId = role.Id }, transaction);
-
-                                if (existingUserRole == null)
-                                {
-                                    await connection.ExecuteAsync(@"
-                                        INSERT INTO AspNetUserRoles (UserId, RoleId)
-                                        VALUES (@UserId, @RoleId)",
-                                        new { UserId = userId, RoleId = role.Id }, transaction);
-                                }
+                                await connection.ExecuteAsync(@"
+                                    INSERT INTO AspNetUserRoles (UserId, RoleId)
+                                    VALUES (@UserId, @RoleId)",
+                                    new { UserId = userId, RoleId = role.Id });
                             }
                         }
                     }
+                }
 
-                    // Adicionar claims selecionadas ao usuário
-                    if (model.Claims != null && model.Claims.Any())
+                // Adicionar claims selecionadas ao usuário (usando a mesma conexão)
+                if (model.Claims != null && model.Claims.Any())
+                {
+                    foreach (var claim in model.Claims)
                     {
-                        foreach (var claim in model.Claims)
+                        if (!string.IsNullOrEmpty(claim.Type) && !string.IsNullOrEmpty(claim.Value))
                         {
-                            if (!string.IsNullOrEmpty(claim.Type) && !string.IsNullOrEmpty(claim.Value))
-                            {
-                                // Verificar se a claim já existe
-                                var existingClaim = await connection.QuerySingleOrDefaultAsync(@"
-                                    SELECT Id FROM AspNetUserClaims 
-                                    WHERE UserId = @UserId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue",
-                                    new { UserId = userId, ClaimType = claim.Type, ClaimValue = claim.Value }, transaction);
+                            // Verificar se a claim já existe
+                            var existingClaim = await connection.QuerySingleOrDefaultAsync(@"
+                                SELECT Id FROM AspNetUserClaims 
+                                WHERE UserId = @UserId AND ClaimType = @ClaimType AND ClaimValue = @ClaimValue",
+                                new { UserId = userId, ClaimType = claim.Type, ClaimValue = claim.Value });
 
-                                if (existingClaim == null)
-                                {
-                                    await connection.ExecuteAsync(@"
-                                        INSERT INTO AspNetUserClaims (UserId, ClaimType, ClaimValue)
-                                        VALUES (@UserId, @ClaimType, @ClaimValue)",
-                                        new { UserId = userId, ClaimType = claim.Type, ClaimValue = claim.Value }, transaction);
-                                }
+                            if (existingClaim == null)
+                            {
+                                await connection.ExecuteAsync(@"
+                                    INSERT INTO AspNetUserClaims (UserId, ClaimType, ClaimValue)
+                                    VALUES (@UserId, @ClaimType, @ClaimValue)",
+                                    new { UserId = userId, ClaimType = claim.Type, ClaimValue = claim.Value });
                             }
                         }
                     }
+                }
 
-                    // Commit da transação
-                    transaction.Commit();
-                    return Json(new { success = true });
-                }
-                catch
-                {
-                    // Rollback em caso de erro
-                    transaction.Rollback();
-                    throw;
-                }
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                // Recarregar roles disponíveis em caso de erro
-                try
+                // ✅ CORREÇÃO: Não criar nova conexão no catch - usar dados em memória
+                if (model.AvailableRoles == null || !model.AvailableRoles.Any())
                 {
-                    using var errorConnection = await _connectionFactory.CreateConnectionAsync();
-                    var allRoles = await errorConnection.QueryAsync(@"
-                        SELECT Id, Name FROM AspNetRoles ORDER BY Name");
-
-                    model.AvailableRoles = allRoles.Select(r => new RoleSelectionViewModel
-                    {
-                        Id = (string)r.Id,
-                        Name = (string)r.Name,
-                        IsSelected = model.SelectedRoles?.Contains((string)r.Name) ?? false
-                    }).ToList();
-                }
-                catch
-                {
-                    // Se falhar ao carregar roles, deixar lista vazia
                     model.AvailableRoles = new List<RoleSelectionViewModel>();
                 }
 
@@ -698,15 +693,8 @@ namespace GesN.Web.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                // Recarregar dados em caso de erro
-                try
-                {
-                    using var errorConnection = await _connectionFactory.CreateConnectionAsync();
-                    var allRoles = await errorConnection.QueryAsync(@"
-                        SELECT Name FROM AspNetRoles ORDER BY Name");
-                    model.AvailableRoles = allRoles.Select(r => (string)r.Name).ToList();
-                }
-                catch
+                // ✅ CORREÇÃO: Não criar nova conexão no catch - usar dados em memória
+                if (model.AvailableRoles == null || !model.AvailableRoles.Any())
                 {
                     model.AvailableRoles = new List<string>();
                 }

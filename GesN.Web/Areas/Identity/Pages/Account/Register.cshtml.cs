@@ -71,7 +71,7 @@ namespace GesN.Web.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("Iniciando registro para: {Email}", Input.Email);
                     
-                    // ✅ CORREÇÃO: Usar apenas UMA conexão para todas as operações
+                    // ✅ CORREÇÃO: Usar apenas UMA conexão sequencial (sem transação)
                     using var connection = await _connectionFactory.CreateConnectionAsync();
                     
                     // Verificar se o usuário já existe
@@ -88,10 +88,9 @@ namespace GesN.Web.Areas.Identity.Pages.Account
 
                     // Criar hash da senha
                     var passwordHash = BCrypt.Net.BCrypt.HashPassword(Input.Password);
-
-                    // ✅ CORREÇÃO: Usar a MESMA conexão (não criar uma nova)
                     var userId = Guid.NewGuid().ToString();
                     
+                    // Inserir usuário
                     await connection.ExecuteAsync(@"
                         INSERT INTO AspNetUsers (
                             Id, UserName, NormalizedUserName, Email, NormalizedEmail, 
@@ -125,7 +124,7 @@ namespace GesN.Web.Areas.Identity.Pages.Account
                             LastName = Input.LastName
                         });
 
-                    // ✅ CORREÇÃO: Usar a MESMA conexão para buscar role
+                    // Buscar role USER e adicionar ao usuário (usando a mesma conexão)
                     var userRoleId = await connection.QuerySingleOrDefaultAsync<string>(
                         "SELECT Id FROM AspNetRoles WHERE NormalizedName = 'USER'");
 
