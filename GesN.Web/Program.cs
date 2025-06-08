@@ -1,14 +1,21 @@
-using GesN.Web;
-using GesN.Web.Areas.Identity.Data.Models;
 using GesN.Web.Infrastructure.Configuration;
 using GesN.Web.Data.Migrations;
 using GesN.Web.Data;
-using GesN.Web.Services;
 using GesN.Web.Infrastructure.Middleware;
-using Dapper;
 using GesN.Web.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsDevelopment())
+{
+    // DEV: User Secrets (secrets.json)
+    builder.Configuration.AddUserSecrets<Program>();
+}
+else
+{
+    // PROD: Environment Variables
+    builder.Configuration.AddEnvironmentVariables();
+}
 
 /*builder.WebHost.ConfigureKestrel(options =>
 {
@@ -26,10 +33,18 @@ builder.Services.AddIdentityServices();
 builder.Services.AddAuthenticationServices();
 builder.Services.AddAuthorizationServices();
 
+// Configurar antiforgery para aceitar headers (necessário para AJAX com JSON)
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "RequestVerificationToken";
+});
+
 builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddInfrastructureServices(connectionString);
+
+builder.Services.AddGoogleWorkspaceConfiguration(builder.Configuration);
 
 try
 {
@@ -60,13 +75,12 @@ try
 catch (Exception ex)
 {
     Console.WriteLine($"Erro ao inicializar banco: {ex.Message}");
-    // Não fazer throw - deixar a aplicação continuar
 }
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+/*if (app.Environment.IsDevelopment())
 {
     //app.UseMigrationsEndPoint();  Remoção -> EF Core
 }
@@ -75,7 +89,7 @@ else
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     // app.UseHsts();
-}
+}*/
 
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -98,5 +112,5 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
-app.Run();
+ app.Run();
 

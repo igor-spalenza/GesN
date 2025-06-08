@@ -11,6 +11,7 @@
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="Google.Apis.PeopleService.v1" Version="1.68.0.3348" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.0" />
@@ -29,6 +30,10 @@
 
   <ItemGroup>
     <Folder Include="Data\Database\" />
+    <Folder Include="Models\Entities\Financial\" />
+    <Folder Include="Models\Entities\Production\" />
+    <Folder Include="Models\ViewModels\Financial\" />
+    <Folder Include="Models\ViewModels\Production\" />
   </ItemGroup>
 
 </Project>
