@@ -367,3 +367,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /GesN.Web/Data/Database/gesn.db
+/setup-development.ps1
+/SECURITY.md
+/GesN.Web/TokenStore/System.String-oauth_user
