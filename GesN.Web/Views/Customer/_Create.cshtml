@@ -1,0 +1,84 @@
+@using GesN.Web.Models.ViewModels.Sales
+@model CreateCustomerViewModel
+
+<form id="formNovoCliente" enctype="application/x-www-form-urlencoded">
+    @Html.AntiForgeryToken()
+    
+    <!-- Informações Básicas do Cliente -->
+    <div class="card">
+        <div class="card-header">
+            <h6 class="card-title mb-0">
+                <i class="fas fa-user"></i> Dados Básicos do Cliente
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" placeholder="Primeiro nome" required />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-control" placeholder="Sobrenome" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="email@exemplo.com" required />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="DocumentType" class="form-label"></label>
+                        <select asp-for="DocumentType" class="form-select" required>
+                            @foreach (var type in Model.AvailableDocumentTypes)
+                            {
+                                <option value="@type.Value" selected="@type.IsSelected">@type.Text</option>
+                            }
+                        </select>
+                        <span asp-validation-for="DocumentType" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="DocumentNumber" class="form-label"></label>
+                        <input asp-for="DocumentNumber" class="form-control" placeholder="CPF ou CNPJ" required />
+                        <span asp-validation-for="DocumentNumber" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" class="form-control" placeholder="(00) 00000-0000" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informativo sobre Address e FiscalData -->
+    <div class="alert alert-info mt-3">
+        <i class="fas fa-info-circle"></i>
+        <strong>Informação:</strong> Após criar o cliente, você poderá adicionar endereço e dados fiscais através da opção "Editar".
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-primary" onclick="clientesManager.salvarNovoCliente()">
+            <i class="fas fa-save"></i> Criar Cliente
+        </button>
+    </div>
+</form> 

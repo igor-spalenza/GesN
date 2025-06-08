@@ -1,0 +1,141 @@
+@model GesN.Web.Models.ViewModels.Sales.CustomerDetailsViewModel
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Dados Básicos -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        @if (Model.DocumentType == GesN.Web.Models.Enumerators.DocumentType.CNPJ)
+                        {
+                            <i class="fas fa-building"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-user"></i>
+                        }
+                        @Model.FullName
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Nome:</strong></div>
+                        <div class="col-sm-8">@Model.FullName</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Tipo de Documento:</strong></div>
+                        <div class="col-sm-8">
+                            <span class="badge bg-secondary">@Model.DocumentTypeDisplay</span>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.DocumentNumber))
+                    {
+                        <div class="row mb-3">
+                            <div class="col-sm-4"><strong>Documento:</strong></div>
+                            <div class="col-sm-8"><span class="font-monospace">@Model.DocumentNumber</span></div>
+                        </div>
+                    }
+
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Status:</strong></div>
+                        <div class="col-sm-8">
+                            @if (Model.StateCode == GesN.Web.Models.Enumerators.ObjectState.Active)
+                            {
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check"></i> Ativo
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times"></i> Inativo
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contato -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-address-book"></i> Informações de Contato
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.Email))
+                    {
+                        <div class="row mb-3">
+                            <div class="col-sm-3"><strong>Email:</strong></div>
+                            <div class="col-sm-9">
+                                <a href="mailto:@Model.Email" class="text-decoration-none">
+                                    <i class="fas fa-envelope me-1"></i>@Model.Email
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.Phone))
+                    {
+                        <div class="row mb-3">
+                            <div class="col-sm-3"><strong>Telefone:</strong></div>
+                            <div class="col-sm-9">
+                                <a href="tel:@Model.Phone" class="text-decoration-none">
+                                    <i class="fas fa-phone me-1"></i>@Model.Phone
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    @if (string.IsNullOrEmpty(Model.Email) && string.IsNullOrEmpty(Model.Phone))
+                    {
+                        <div class="text-muted text-center py-3">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Nenhuma informação de contato disponível
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações de Sistema -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-light">
+                <div class="card-body">
+                    <small class="text-muted">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <i class="fas fa-plus-circle me-1"></i>
+                                <strong>Criado em:</strong> @Model.FormattedCreatedAt
+                            </div>
+                            <div class="col-md-6">
+                                <i class="fas fa-edit me-1"></i>
+                                <strong>Última modificação:</strong> @Model.FormattedLastModifiedAt
+                            </div>
+                        </div>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="row">
+        <div class="col-12 text-end">
+            <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">
+                <i class="fas fa-times"></i> Fechar
+            </button>
+            <button type="button" class="btn btn-primary" onclick="$('#clienteModal').modal('hide'); clientesManager.editarCliente('@Model.Id');">
+                <i class="fas fa-edit"></i> Editar Cliente
+            </button>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,278 @@
+@model GesN.Web.Areas.Integration.Controllers.GoogleIntegrationViewModel
+@{
+    ViewData["Title"] = "Integração Google Workspace";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">🔗 Integração Google Workspace</h4>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Início</a></li>
+                    <li class="breadcrumb-item"><a href="/Integration">Integrações</a></li>
+                    <li class="breadcrumb-item active">Google</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(TempData["Success"] as string))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(TempData["Error"] as string))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="header-title">Status da Integração</h4>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <div>
+                            @if (Model.IsEnabled)
+                            {
+                                <span class="badge bg-success">🟢 Habilitada</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">⚫ Desabilitada</span>
+                            }
+                        </div>
+                    </div>
+
+                    @if (Model.HasClientCredentials)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Autorização OAuth 2.0</label>
+                            <div>
+                                @if (Model.IsAuthorized)
+                                {
+                                    <span class="badge bg-success">✅ Autorizado</span>
+                                    <small class="text-muted d-block">Você pode acessar a API do Google</small>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">⚠️ Autorização Necessária</span>
+                                    <small class="text-muted d-block">Clique no botão abaixo para autorizar</small>
+                                    <a href="@Url.Action("Authorize")" class="btn btn-primary btn-sm mt-2">
+                                        <i class="mdi mdi-google"></i> Autorizar com Google
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label">Domínio</label>
+                        <div>@(string.IsNullOrEmpty(Model.Domain) ? "Não configurado" : Model.Domain)</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Configurações</label>
+                        <div>
+                            <small class="text-muted">
+                                ✅ Criação automática: @(Model.AutoCreateContacts ? "Sim" : "Não")<br>
+                                ✅ Sincronização automática: @(Model.AutoSync ? "Sim" : "Não")<br>
+                                ✅ Service Account: @(Model.HasServiceAccount ? "Configurado" : "Não configurado")<br>
+                                ✅ Credenciais OAuth: @(Model.HasClientCredentials ? "Configurado" : "Não configurado")
+                            </small>
+                        </div>
+                    </div>
+
+                    @if (Model.IsConfigurationValid)
+                    {
+                        <div class="d-grid gap-2">
+                            <button id="btnValidateCredentials" class="btn btn-outline-primary">
+                                <i class="mdi mdi-check-circle"></i> Validar Credenciais
+                            </button>
+                        </div>
+                    }
+                    else if (Model.IsEnabled && !Model.IsConfigurationValid)
+                    {
+                        <div class="alert alert-warning">
+                            <strong>⚠️ Configuração Incompleta</strong><br>
+                            @if (!Model.HasClientCredentials && !Model.HasServiceAccount)
+                            {
+                                <text>Configure as credenciais OAuth 2.0 ou Service Account no appsettings.json</text>
+                            }
+                            else if (Model.HasClientCredentials && !Model.IsAuthorized)
+                            {
+                                <text>Autorização OAuth 2.0 necessária</text>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="header-title">Estatísticas</h4>
+                    <div id="statsContainer">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.IsConfigurationValid)
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="header-title">Ações de Sincronização</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Sincronizar Cliente Específico</label>
+                                    <div class="input-group">
+                                        <input type="text" id="customerIdInput" class="form-control" placeholder="ID do Cliente">
+                                        <button id="btnSyncCustomer" class="btn btn-primary">Sincronizar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Sincronização em Massa</label>
+                                    <div class="d-grid">
+                                        <button id="btnSyncAllCustomers" class="btn btn-warning">
+                                            <i class="mdi mdi-sync"></i> Sincronizar Todos os Clientes
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            loadStats();
+
+            $('#btnValidateCredentials').click(function() {
+                validateCredentials();
+            });
+
+            $('#btnSyncCustomer').click(function() {
+                var customerId = $('#customerIdInput').val();
+                if (customerId) {
+                    syncCustomer(customerId);
+                } else {
+                    toastr.warning('Por favor, informe o ID do cliente');
+                }
+            });
+
+            $('#btnSyncAllCustomers').click(function() {
+                if (confirm('Tem certeza que deseja sincronizar TODOS os clientes? Esta operação pode demorar.')) {
+                    syncAllCustomers();
+                }
+            });
+        });
+
+        function loadStats() {
+            $.get('/Integration/Google/GetStats')
+                .done(function(data) {
+                    var html = `
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h3 class="text-primary">${data.totalCustomers}</h3>
+                                <p class="text-muted mb-0">Total de Clientes</p>
+                            </div>
+                            <div class="col-6">
+                                <h3 class="text-success">${data.syncedCustomers}</h3>
+                                <p class="text-muted mb-0">Sincronizados</p>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: ${data.syncPercentage}%"></div>
+                            </div>
+                            <small class="text-muted">${data.syncPercentage}% dos clientes sincronizados</small>
+                        </div>
+                    `;
+                    $('#statsContainer').html(html);
+                })
+                .fail(function() {
+                    $('#statsContainer').html('<p class="text-danger">Erro ao carregar estatísticas</p>');
+                });
+        }
+
+        function validateCredentials() {
+            $.post('/Integration/Google/ValidateCredentials')
+                .done(function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                    } else {
+                        toastr.error(response.message);
+                    }
+                })
+                .fail(function() {
+                    toastr.error('Erro ao validar credenciais');
+                });
+        }
+
+        function syncCustomer(customerId) {
+            $.post('/Integration/Google/SyncCustomer', { customerId: customerId })
+                .done(function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        loadStats();
+                        $('#customerIdInput').val('');
+                    } else {
+                        toastr.error(response.message);
+                    }
+                })
+                .fail(function() {
+                    toastr.error('Erro ao sincronizar cliente');
+                });
+        }
+
+        function syncAllCustomers() {
+            var $btn = $('#btnSyncAllCustomers');
+            $btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm me-2"></i>Sincronizando...');
+
+            $.post('/Integration/Google/SyncAllCustomers')
+                .done(function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        loadStats();
+                    } else {
+                        toastr.error(response.message);
+                    }
+                })
+                .fail(function() {
+                    toastr.error('Erro na sincronização em massa');
+                })
+                .always(function() {
+                    $btn.prop('disabled', false).html('<i class="mdi mdi-sync"></i> Sincronizar Todos os Clientes');
+                });
+        }
+    </script>
+} 

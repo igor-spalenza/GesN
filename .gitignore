@@ -74,6 +74,30 @@ GesN.Web/Data/Database/
 *.db
 *.db-journal
 
+# SECURITY: OAuth Tokens and Credentials
+**/TokenStore/
+TokenStore/
+*.token
+*.refresh_token
+Google.Apis.Auth.OAuth2.Responses.TokenResponse*
+System.String-oauth*
+
+# SECURITY: Configuration files with sensitive data
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+.env
+.env.local
+.env.production
+
+# SECURITY: API Keys and Certificates
+*.pfx
+*.p12
+*.key
+*.pem
+service-account*.json
+credentials*.json
+
 # Files built by Visual Studio
 *_i.c
 *_p.c
@@ -249,7 +273,7 @@ orleans.codegen.cs
 # (https://github.com/github/gitignore/pull/2483#issue-259490424)
 #*.snk
 
-# Since there are multiple workflows, uncomment next line to ignore bower_components
+# Since there are multiple workflows, uncomment the next line to ignore bower_components
 # (https://github.com/github/gitignore/pull/1529#issuecomment-104372622)
 #bower_components/
 
@@ -263,8 +287,7 @@ _UpgradeReport_Files/
 Backup*/
 UpgradeLog*.XML
 UpgradeLog*.htm
-ServiceFabricBackup/
-*.rptproj.bak
+CordovaApp.projitems
 
 # SQL Server files
 *.mdf
@@ -367,3 +390,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /GesN.Web/Data/Database/gesn.db
+/setup-development.ps1
+/SECURITY.md
+/GesN.Web/TokenStore/System.String-oauth_user

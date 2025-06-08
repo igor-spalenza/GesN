@@ -22,6 +22,14 @@
         "css/select2.min.css",
         "js/i18n/pt-BR.min.js"
       ]
+    },
+    {
+      "provider": "cdnjs",
+      "library": "jquery.mask@1.14.16",
+      "destination": "wwwroot/lib/jquery.mask/",
+      "files": [
+        "jquery.mask.min.js"
+      ]
     }
   ]
 }
