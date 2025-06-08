@@ -1,0 +1,124 @@
+@model GesN.Web.Models.ViewModels.Sales.EditCustomerViewModel
+
+<div class="container-fluid">
+    <form id="formEditarCliente" style="position: relative;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <input type="hidden" name="StateCode" value="@Model.StateCode" />
+        <input type="hidden" name="CreatedAt" value="@Model.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss")" />
+        <input type="hidden" name="LastModifiedAt" value="@(Model.LastModifiedAt?.ToString("yyyy-MM-ddTHH:mm:ss"))" />
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">
+                <i class="fas fa-user-edit"></i> Editando Cliente: @Model.FirstName @Model.LastName
+            </h4>
+            <div>
+                <button type="button" class="btn btn-outline-secondary me-2" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="clientesManager.salvarClienteEditado('@Model.Id')">
+                    <i class="fas fa-save"></i> Salvar Alterações
+                </button>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-user"></i> Dados do Cliente
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="FirstName" class="form-label">Primeiro Nome *</label>
+                                    <input type="text" class="form-control" id="FirstName" name="FirstName" value="@Model.FirstName" required maxlength="100" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="LastName" class="form-label">Sobrenome</label>
+                                    <input type="text" class="form-control" id="LastName" name="LastName" value="@Model.LastName" maxlength="100" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="Email" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" required maxlength="200" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="DocumentType" class="form-label">Tipo de Documento *</label>
+                                    <select class="form-select" id="DocumentType" name="DocumentType" required>
+                                        <option value="">Selecione...</option>
+                                        @foreach (var docType in Model.AvailableDocumentTypes)
+                                        {
+                                            <option value="@((int)docType.Value)" selected="@docType.IsSelected">@docType.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="DocumentNumber" class="form-label">Número do Documento *</label>
+                                    <input type="text" class="form-control" id="DocumentNumber" name="DocumentNumber" value="@Model.DocumentNumber" required maxlength="20" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="Phone" class="form-label">Telefone</label>
+                                    <input type="tel" class="form-control" id="Phone" name="Phone" value="@Model.Phone" maxlength="20" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="StatusAtivo" @(Model.StateCode == GesN.Web.Models.Enumerators.ObjectState.Active ? "checked" : "") />
+                                        <label class="form-check-label" for="StatusAtivo">
+                                            Cliente Ativo
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Informações de auditoria -->
+                        <div class="border-top pt-3 mt-4">
+                            <div class="row text-muted small">
+                                <div class="col-md-6">
+                                    <strong>Criado em:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                                <div class="col-md-6">
+                                    @if (Model.LastModifiedAt.HasValue)
+                                    {
+                                        <strong>Última modificação:</strong> @Model.LastModifiedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Aplicar máscaras quando a página carregar
+    $(document).ready(function() {
+        if (typeof clientesManager !== 'undefined') {
+            clientesManager.aplicarMascaras($('#formEditarCliente'));
+        }
+    });
+</script> 
