@@ -1,0 +1,25 @@
+@model GesN.Web.Models.ViewModels.Sales.OrderDetailsViewModel
+<div class="row" id="detailsOrderContainer">
+    <div class="col-md-12">
+        <h2>Detalhes do Pedido</h2>
+        <dl class="row">
+            <dt class="col-sm-3">Número</dt>
+            <dd class="col-sm-9">@Model.NumberSequence</dd>
+            <dt class="col-sm-3">Cliente</dt>
+            <dd class="col-sm-9">@Model.CustomerName</dd>
+            <dt class="col-sm-3">Data do Pedido</dt>
+            <dd class="col-sm-9">@Model.FormattedOrderDate</dd>
+            <dt class="col-sm-3">Data de Entrega</dt>
+            <dd class="col-sm-9">@Model.FormattedDeliveryDate</dd>
+            <dt class="col-sm-3">Tipo</dt>
+            <dd class="col-sm-9">@Model.TypeDisplay</dd>
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9">@Model.StatusDisplay</dd>
+            <dt class="col-sm-3">Valor Total</dt>
+            <dd class="col-sm-9">@Model.TotalAmount.ToString("C")</dd>
+        </dl>
+        <div id="orderItemsDetailsContainer">
+            @await Html.PartialAsync("_OrderItems", Model.Items)
+        </div>
+    </div>
+</div> 

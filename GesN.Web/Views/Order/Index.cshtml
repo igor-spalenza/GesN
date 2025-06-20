@@ -1,0 +1,79 @@
+@model IEnumerable<GesN.Web.Models.Entities.Sales.Order>
+@using GesN.Web.Models.Enumerators
+
+@{
+    ViewData["Title"] = "Pedidos";
+    var status = ViewBag.Status as string ?? "Todos os Pedidos";
+}
+
+<div class="venda-main">
+
+    <div class="container-fluid venda-lateral-fixa">
+        <h1>Vendas</h1><br />
+
+        <button type="button" class="btn btn-sales mb-3" onclick="ordersManager.novoOrderModal()">
+            Novo Pedido
+        </button><br />
+
+        <h3 class="text-lg font-semibold mb-2">Lembretes</h3>
+        <p class="text-sm">Sem lembretes no momento.</p>
+    </div> 
+    
+    <div class="venda-conteudo-dinamico">
+
+
+        <!-- Abas de Navegação -->
+        <ul class="nav nav-tabs" id="orderTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#lista-orders" type="button" role="tab">
+                    Página Inicial
+                </button>
+            </li>
+        </ul>
+
+        <!-- Conteúdo das Abas -->
+        <div class="tab-content" id="orderTabsContent">
+            <div class="tab-pane fade show active" id="lista-orders" role="tabpanel">
+                <div class="container-fluid mt-3">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <h2>@status</h2>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="lista-orders-container">
+                                <div class="d-flex justify-content-center my-5">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Carregando...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="orderModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Pedido</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body"> </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+    <script src="~/js/Order.js" asp-append-version="true"></script>
+} 

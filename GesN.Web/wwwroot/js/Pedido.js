@@ -1,175 +1,4 @@
-﻿/*document.getElementById('btnAbrirPedido').addEventListener('click', () => {
-    abaContador++;
-    qtdAbasAbertas++;
-    const pedidoId = `pedido${abaContador}`;
-
-    // Criar a aba dinamicamente
-    const novaAba = `
-        <li class="nav-item" role="presentation">
-            <button class="nav-link"
-                    id="${pedidoId}-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#${pedidoId}"
-                    type="button"
-                    role="tab">
-                Novo Pedido
-                <span class="btn-close ms-2" onclick="fecharAba('${pedidoId}')"></span>
-            </button>
-        </li>`;
-    document.getElementById('pedidoTabs').insertAdjacentHTML('beforeend', novaAba);
-
-    // Criar o conteúdo da aba e carregar a Partial View via AJAX
-    const novoConteudo = `
-        <div class="main-div tab-pane fade ${abaContador === 1 ? 'show active' : ''}"
-             id="${pedidoId}"
-             role="tabpanel">
-            <div id="conteudo-${pedidoId}">Carregando...</div>
-        </div>`;
-    document.getElementById('pedidoTabsContent').insertAdjacentHTML('beforeend', novoConteudo);
-
-    // Chamada AJAX para buscar a Partial View
-    fetch('/Pedido/NovoPedido')
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById(`conteudo-${pedidoId}`).innerHTML = html;
-        })
-        .catch(error => {
-            document.getElementById(`conteudo-${pedidoId}`).innerHTML = '<p>Erro ao carregar o pedido.</p>';
-            console.error('Erro ao carregar a partial view:', error);
-        });
-
-    // Ativar a nova aba automaticamente
-    const tabTrigger = new bootstrap.Tab(document.getElementById(`${pedidoId}-tab`));
-    tabTrigger.show();
-});*/
-/*
-document.getElementById('btnHomeVendas').addEventListener('click', () => {
-    // 1. Remover as classes "active" e "show" de todas as abas ativas
-    document.querySelectorAll('.tab-pane.active, .nav-link.active').forEach(element => {
-        element.classList.remove('active', 'show');
-    });
-
-    // 2. Adicionar as classes "active" e "show" à aba principal
-    const mainTab = document.getElementById('main-tab');
-    mainTab.classList.add('active', 'show');
-
-    // 3. Ativar a aba principal usando o Bootstrap Tab
-    const tabTrigger = new bootstrap.Tab(document.querySelector('[data-bs-target="#main-tab"]'));
-    tabTrigger.show();
-});
-
-function fecharAba(pedidoId) {
-    const aba = document.getElementById(`${pedidoId}-tab`);
-    const conteudo = document.getElementById(pedidoId);
-
-    aba.remove();
-    conteudo.remove();
-    qtdAbasAbertas--;
-    if (qtdAbasAbertas == 0) {
-        const mainTab = document.getElementById('main-tab');
-        mainTab.classList.add('active', 'show');
-    }
-}
-
-function EditarPedido(IdPedido, editing) {
-    abaContador++;
-    qtdAbasAbertas++;
-    const pedidoId = `pedido${abaContador}`;
-
-    // Criar a aba dinamicamente
-    const novaAba = `
-        <li class="nav-item" role="presentation">
-            <button class="nav-link"
-                    id="${pedidoId}-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#${pedidoId}"
-                    type="button"
-                    role="tab">
-                Novo Pedido
-                <span class="btn-close ms-2" onclick="fecharAba('${pedidoId}')"></span>
-            </button>
-        </li>`;
-    document.getElementById('pedidoTabs').insertAdjacentHTML('beforeend', novaAba);
-
-    // Criar o conteúdo da aba e carregar a Partial View via AJAX
-    const novoConteudo = `
-        <div class="main-div tab-pane fade ${abaContador === 1 ? 'show active' : ''}"
-             id="${pedidoId}"
-             role="tabpanel">
-            <div id="conteudo-${pedidoId}">Carregando...</div>
-        </div>`;
-    document.getElementById('pedidoTabsContent').insertAdjacentHTML('beforeend', novoConteudo);
-    let action = (editing == true ? "EditPartial" : "DetailsPartialView");
-
-    // Chamada AJAX para buscar a Partial View de EDIT ou DETAILS
-    fetch('/Pedido/' + action + '/' + IdPedido)
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById(`conteudo-${pedidoId}`).innerHTML = html;
-        })
-        .catch(error => {
-            document.getElementById(`conteudo-${pedidoId}`).innerHTML = '<p>Erro ao carregar o pedido.</p>';
-            console.error('Erro ao carregar a partial view:', error);
-        });
-    
-    // Ativar a nova aba automaticamente
-    const tabTrigger = new bootstrap.Tab(document.getElementById(`${pedidoId}-tab`));
-    tabTrigger.show();
-}
-
-function CriarPedido(IdPedido, editing) {
-    abaContador++;
-    qtdAbasAbertas++;
-    const pedidoId = `pedido${abaContador}`;
-
-    // Criar a aba dinamicamente
-    const novaAba = `
-        <li class="nav-item" role="presentation">
-            <button class="nav-link"
-                    id="${pedidoId}-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#${pedidoId}"
-                    type="button"
-                    role="tab">
-                Novo Pedido
-                <span class="btn-close ms-2" onclick="fecharAba('${pedidoId}')"></span>
-            </button>
-        </li>`;
-    document.getElementById('pedidoTabs').insertAdjacentHTML('beforeend', novaAba);
-
-    // Criar o conteúdo da aba e carregar a Partial View via AJAX
-
-    const novoConteudo = `
-        <div class="main-div tab-pane fade ${abaContador === 1 ? 'show active' : ''}"
-             id="${pedidoId}"
-             role="tabpanel">
-            <div id="conteudo-${pedidoId}">Carregando...</div>
-        </div>`;
-    document.getElementById('pedidoTabsContent').insertAdjacentHTML('beforeend', novoConteudo);
-    let action = (editing == true ? "EditPartial" : "DetailsPartialView");
-
-    // Chamada AJAX para buscar a Partial View de EDIT ou DETAILS
-    fetch('/Pedido/' + action + '/' + IdPedido)
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById(`conteudo-${pedidoId}`).innerHTML = html;
-        })
-        .catch(error => {
-            document.getElementById(`conteudo-${pedidoId}`).innerHTML = '<p>Erro ao carregar o pedido.</p>';
-            console.error('Erro ao carregar a partial view:', error);
-        });
-
-    // Ativar a nova aba automaticamente
-    const tabTrigger = new bootstrap.Tab(document.getElementById(`${pedidoId}-tab`));
-    tabTrigger.show();
-}*/
-
-
-
-//
-// NOVO Objeto para gerenciar os pedidos
-// 
-const pedidosManager = {
+﻿const pedidosManager = {
     contador: 0,
     qtdAbasAbertas: 0,
     
@@ -529,7 +358,7 @@ const pedidosManager = {
 };
 
 // Inicializa o gerenciador de pedidos quando o documento estiver pronto
-$(document).ready(function() {
+$(function() {
     pedidosManager.carregarListaPedidos();
 
     $('#pedidoModal').on('shown.bs.modal', function () {
@@ -542,7 +371,7 @@ $(document).ready(function() {
 
     $(document).on('submit', '.form-editar-pedido', function (e) {
         e.preventDefault();
-        $(this).find('button[onclick^="pedidosManager.salvarEdicao"]').click();
+        $(this).find('button[onclick^="pedidosManager.salvarEdicao"]').trigger('click');
     });
 
 });

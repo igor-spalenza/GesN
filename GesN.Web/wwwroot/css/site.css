@@ -146,7 +146,7 @@ logo-gesn {
     color: white !important;
 }
 
-/* Estilos específicos para autocomplete em modal */
+/* Estilos especï¿½ficos para autocomplete em modal */
 
 .autocomplete-modal-menu {
     z-index: 9999999 !important;
@@ -181,4 +181,26 @@ logo-gesn {
     margin: 0 !important;
 }
 /* Estilo para o autocomplete */
+
+/* Estilos para Customer Table */
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.btn-group .btn {
+    border-radius: 0.25rem;
+    margin-right: 2px;
+}
+
+.btn-group .btn:last-child {
+    margin-right: 0;
+}
+/* Fim dos estilos para Customer Table */
 

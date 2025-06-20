@@ -34,6 +34,9 @@ namespace GesN.Web.Infrastructure.Configuration
             services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<IContractRepository, ContractRepository>();
             services.AddScoped<IContractService, ContractService>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 
             // Legados
             services.AddScoped<IClienteService, ClienteService>();

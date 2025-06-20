@@ -24,11 +24,25 @@
       ]
     },
     {
-      "provider": "cdnjs",
       "library": "jquery.mask@1.14.16",
       "destination": "wwwroot/lib/jquery.mask/",
       "files": [
         "jquery.mask.min.js"
+      ]
+    },
+    {
+      "library": "datatables.net@2.3.2",
+      "destination": "wwwroot/lib/datatables.net/",
+      "files": [
+        "dataTables.min.js"
+      ]
+    },
+    {
+      "library": "datatables.net-bs5@2.3.2",
+      "destination": "wwwroot/lib/datatables.net-bs5/",
+      "files": [
+        "dataTables.bootstrap5.min.js",
+        "dataTables.bootstrap5.min.css"
       ]
     }
   ]

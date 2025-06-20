@@ -90,7 +90,7 @@ namespace GesN.Web.Data.Migrations
                 );";
 
                 var createOrderTable = @"
-                CREATE TABLE IF NOT EXISTS [Order] (
+                CREATE TABLE IF NOT EXISTS Order (
                     Id TEXT NOT NULL UNIQUE,
                     CreatedAt TEXT NOT NULL,
                     CreatedBy TEXT NOT NULL,
@@ -98,7 +98,7 @@ namespace GesN.Web.Data.Migrations
                     LastModifiedBy TEXT,
                     StateCode INTEGER NOT NULL DEFAULT 1,
                     NumberSequence TEXT NOT NULL,
-                    OrderDate TEXT NOT NULL,
+                    OrderDate TEXT,
                     DeliveryDate TEXT,
                     CustomerId TEXT NOT NULL,
                     Status TEXT NOT NULL DEFAULT 'Draft',
