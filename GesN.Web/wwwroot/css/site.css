@@ -202,5 +202,58 @@ logo-gesn {
 .btn-group .btn:last-child {
     margin-right: 0;
 }
+
+/* Estilos para Algolia Autocomplete.js */
+.algolia-autocomplete {
+    width: 100%;
+}
+
+.algolia-autocomplete .aa-input, 
+.algolia-autocomplete .aa-hint {
+    width: 100%;
+}
+
+.algolia-autocomplete .aa-hint {
+    color: #999;
+}
+
+.algolia-autocomplete .aa-dropdown-menu {
+    width: 100%;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 9999;
+}
+
+.algolia-autocomplete .aa-suggestion {
+    cursor: pointer;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.algolia-autocomplete .aa-suggestion:hover,
+.algolia-autocomplete .aa-suggestion.aa-cursor {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.algolia-autocomplete .aa-suggestion:last-child {
+    border-bottom: none;
+}
+
+.algolia-autocomplete .aa-suggestion em {
+    font-weight: bold;
+    font-style: normal;
+}
+
+/* Estilos específicos para modais */
+.modal .algolia-autocomplete .aa-dropdown-menu {
+    z-index: 10060; /* Maior que o z-index do modal (1050) */
+}
 /* Fim dos estilos para Customer Table */
 

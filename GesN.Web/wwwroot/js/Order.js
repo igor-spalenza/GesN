@@ -89,65 +89,62 @@ const ordersManager = {
             return;
         }
 
-        if (field.data('ui-autocomplete')) {
-            field.autocomplete('destroy');
+        // Remove instância anterior se houver
+        if (field.data('aaAutocomplete')) {
+            field.autocomplete.destroy();
         }
 
-        field.autocomplete({
-            source: function (request, response) {
+        // Inicializa Algolia Autocomplete.js
+        const autocompleteInstance = autocomplete(field[0], {
+            hint: false,
+            debug: false,
+            minLength: 2,
+            openOnFocus: false,
+            autoselect: true,
+            appendTo: container[0] // Anexa ao container do modal
+        }, [{
+            source: function(query, callback) {
                 $.ajax({
                     url: '/Customer/BuscaCustomerAutocomplete',
-                    data: { termo: request.term },
+                    type: 'GET',
                     dataType: 'json',
-                    success: function (data) {
-                        response($.map(data, function (item) {
+                    data: { termo: query },
+                    success: function(data) {
+                        const suggestions = $.map(data, function(item) {
                             return {
                                 label: item.label,
                                 value: item.value,
                                 id: item.id
                             };
-                        }));
+                        });
+                        callback(suggestions);
                     },
-                    error: function () {
-                        response([]);
+                    error: function() {
+                        callback([]);
                     }
                 });
             },
-            minLength: 2,
-            delay: 300,
-            select: function (event, ui) {
-                $(this).val(ui.item.value);
-                container.find('#CustomerId').val(ui.item.id);
-                return false;
+            displayKey: 'value',
+            templates: {
+                suggestion: function(suggestion) {
+                    return '<div class="autocomplete-suggestion">' + suggestion.label + '</div>';
+                }
             }
+        }]);
+
+        // Eventos
+        autocompleteInstance.on('autocomplete:selected', function(event, suggestion, dataset) {
+            container.find('#CustomerId').val(suggestion.id);
+            field.val(suggestion.value);
         });
 
-        // Função para forçar fechamento (workaround para conflito)
-        function forceCloseAutocomplete() {
-            field.autocomplete('close');
-            setTimeout(() => {
-                $('.ui-autocomplete').hide(); // Force hide se ainda visível
-            }, 50);
-        }
-
-        // Fechar ao clicar fora
-        $(document).on('click.orderClose', function(e) {
-            if (!$(e.target).is(field) && !$(e.target).closest('.ui-autocomplete').length) {
-                forceCloseAutocomplete();
-            }
+        autocompleteInstance.on('autocomplete:empty', function() {
+            container.find('#CustomerId').val('');
         });
 
-        // Fechar ao perder foco
-        field.on('blur.orderClose', function() {
-            setTimeout(forceCloseAutocomplete, 100);
-        });
-
-        // Fechar com ESC
-        field.on('keydown.orderClose', function(e) {
-            if (e.keyCode === 27) {
-                forceCloseAutocomplete();
-            }
-        });
+        // Adiciona placeholder e estilos
+        field.attr('placeholder', 'Digite para buscar cliente...');
+        field.addClass('form-control');
     },
 
     salvarNovoModal: function () {
@@ -175,8 +172,8 @@ const ordersManager = {
                     toastr.success(response.message || 'Pedido criado com sucesso!');
 
                     if (response.id) {
-                        // Chama o método de edição
-                        ordersManager.abrirEdicao(response.id);
+                        // Chama o método de edição passando também o numberSequence
+                        ordersManager.abrirEdicao(response.id, response.numberSequence);
                     }
                 } else {
                     toastr.error(response.message || 'Não foi possível criar o pedido');
@@ -194,30 +191,69 @@ const ordersManager = {
         });
     },
 
-    abrirEdicao: function (orderId) {
+    abrirEdicao: function (orderId, numberSequence = null) {
+        // Verifica se a aba já existe usando o orderId como identificador
+        const existingTabId = `order-${orderId}`;
+        const existingTab = $(`#${existingTabId}-tab`);
+        
+        if (existingTab.length > 0) {
+            // Se a aba já existe, apenas ativa ela
+            const tabTrigger = new bootstrap.Tab(document.getElementById(`${existingTabId}-tab`));
+            tabTrigger.show();
+            toastr.info('Pedido já está aberto em outra aba');
+            return;
+        }
+
+        // Se não existe, cria nova aba
         ordersManager.contador++;
         ordersManager.qtdAbasAbertas++;
-        const tabId = `order${ordersManager.contador}`;
+        const tabId = existingTabId; // Usa o orderId como base do ID
+        
+        // Se numberSequence não foi fornecido, usa um placeholder que será atualizado
+        const tabTitle = numberSequence || 'Carregando...';
+        
         const novaAba = `
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="${tabId}-tab" data-bs-toggle="tab" data-bs-target="#${tabId}" type="button" role="tab">
-                    Pedido ${orderId}
+                <button class="nav-link" id="${tabId}-tab" data-bs-toggle="tab" data-bs-target="#${tabId}" type="button" role="tab" data-order-id="${orderId}">
+                    ${tabTitle}
                     <span class="btn-close ms-2" onclick="ordersManager.fecharAba('${tabId}')"></span>
                 </button>
             </li>`;
         $('#orderTabs').append(novaAba);
+        
         const novoConteudo = `
             <div class="main-div tab-pane fade" id="${tabId}" role="tabpanel">
-                <div id="conteudo-${tabId}">Carregando...</div>
+                <div id="conteudo-${tabId}">
+                    <div class="d-flex justify-content-center my-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
             </div>`;
         $('#orderTabsContent').append(novoConteudo);
+        
+        // Carrega o conteúdo da aba
         $.get(`/Order/EditPartial/${orderId}`)
             .done(function (data) {
                 $(`#conteudo-${tabId}`).html(data);
+                
+                // Se numberSequence não foi fornecido, extrai do conteúdo carregado
+                if (!numberSequence) {
+                    const numberSequenceElement = $(`#conteudo-${tabId}`).find('[data-number-sequence]');
+                    if (numberSequenceElement.length > 0) {
+                        const extractedNumberSequence = numberSequenceElement.data('number-sequence');
+                        if (extractedNumberSequence) {
+                            $(`#${tabId}-tab`).html(`${extractedNumberSequence} <span class="btn-close ms-2" onclick="ordersManager.fecharAba('${tabId}')"></span>`);
+                        }
+                    }
+                }
             })
             .fail(function () {
-                $(`#conteudo-${tabId}`).html('<div class="alert alert-danger">Erro ao carregar pedido.</div>');
+                $(`#conteudo-${tabId}`).html('<div class="alert alert-danger">Erro ao carregar pedido. Tente novamente.</div>');
             });
+            
+        // Ativa a nova aba
         const tabTrigger = new bootstrap.Tab(document.getElementById(`${tabId}-tab`));
         tabTrigger.show();
     },
@@ -238,12 +274,38 @@ const ordersManager = {
     },
 
     fecharAba: function (tabId) {
-        $(`#${tabId}-tab`).remove();
-        $(`#${tabId}`).remove();
+        // Remove a aba e seu conteúdo
+        $(`#${tabId}-tab`).parent().remove(); // Remove o <li> que contém o button
+        $(`#${tabId}`).remove(); // Remove o conteúdo da aba
+        
         ordersManager.qtdAbasAbertas--;
+        
+        // Se não há mais abas abertas, volta para a aba principal
         if (ordersManager.qtdAbasAbertas === 0) {
-            $('#main-tab').addClass('active show');
+            const mainTab = new bootstrap.Tab(document.getElementById('main-tab'));
+            mainTab.show();
+        } else {
+            // Se ainda há abas abertas, ativa a última aba disponível
+            const remainingTabs = $('#orderTabs .nav-item button[data-order-id]');
+            if (remainingTabs.length > 0) {
+                const lastTab = new bootstrap.Tab(remainingTabs.last()[0]);
+                lastTab.show();
+            }
         }
+    },
+
+    // Método para verificar se um pedido já está aberto
+    isPedidoAberto: function(orderId) {
+        return $(`#order-${orderId}-tab`).length > 0;
+    },
+
+    // Método para obter lista de pedidos abertos
+    getPedidosAbertos: function() {
+        const abertos = [];
+        $('#orderTabs button[data-order-id]').each(function() {
+            abertos.push($(this).data('order-id'));
+        });
+        return abertos;
     },
 
     exportarPedidos: function() {

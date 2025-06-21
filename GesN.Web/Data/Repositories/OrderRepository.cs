@@ -682,11 +682,9 @@ namespace GesN.Web.Data.Repositories
 
                 if (string.IsNullOrEmpty(lastNumber))
                 {
-                    // Se não houver nenhum pedido, começa do 1
                     return "PED-1";
                 }
 
-                // Extrai o número e incrementa
                 var number = int.Parse(lastNumber.Substring(4)) + 1;
                 return $"PED-{number}";
             }

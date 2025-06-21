@@ -43,41 +43,63 @@
             return;
         }
 
-        if (buscarClienteField.data('ui-autocomplete')) {
-            buscarClienteField.autocomplete('destroy');
+        // Remove instância anterior se houver
+        if (buscarClienteField.data('aaAutocomplete')) {
+            buscarClienteField.autocomplete.destroy();
         }
 
-        buscarClienteField.autocomplete({
-            source: function (request, response) {
+        // Inicializa Algolia Autocomplete.js
+        const autocompleteInstance = autocomplete(buscarClienteField[0], {
+            hint: false,
+            debug: false,
+            minLength: 2,
+            openOnFocus: false,
+            autoselect: true,
+            appendTo: container[0] // Anexa ao container do modal
+        }, [{
+            source: function(query, callback) {
                 $.ajax({
                     url: '/Pedido/BuscarClienteNomeTel',
-                    data: { termo: request.term },
+                    type: 'GET',
                     dataType: 'json',
-                    success: function (data) {
+                    data: { termo: query },
+                    success: function(data) {
                         console.log('Dados recebidos:', data);
-                        response($.map(data, function (item) {
+                        const suggestions = $.map(data, function(item) {
                             return {
                                 label: item.nome + ' - ' + item.telefonePrincipal,
                                 value: item.nome,
                                 id: item.id
                             };
-                        }));
+                        });
+                        callback(suggestions);
                     },
-                    error: function (xhr, status, error) {
-                        console.error('Erro na requisição:', error);
-                        response([]);
+                    error: function() {
+                        callback([]);
                     }
                 });
             },
-            minLength: 2,
-            delay: 300,
-            appendTo: container, // Anexa ao container fornecido (modal)
-            select: function (event, ui) {
-                container.find('#ClienteId').val(ui.item.id);
-                $(this).autocomplete('close');
-                return true;
+            displayKey: 'value',
+            templates: {
+                suggestion: function(suggestion) {
+                    return '<div class="autocomplete-suggestion">' + suggestion.label + '</div>';
+                }
             }
+        }]);
+
+        // Eventos
+        autocompleteInstance.on('autocomplete:selected', function(event, suggestion, dataset) {
+            container.find('#ClienteId').val(suggestion.id);
+            buscarClienteField.val(suggestion.value);
         });
+
+        autocompleteInstance.on('autocomplete:empty', function() {
+            container.find('#ClienteId').val('');
+        });
+
+        // Adiciona placeholder e estilos
+        buscarClienteField.attr('placeholder', 'Digite para buscar cliente...');
+        buscarClienteField.addClass('form-control');
     },
 
     salvarNovoModal: function () {

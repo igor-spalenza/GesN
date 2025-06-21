@@ -3,10 +3,6 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "library": "jqueryui@1.14.1",
-      "destination": "wwwroot/lib/jqueryui/"
-    },
-    {
       "library": "toastr.js@2.1.4",
       "destination": "wwwroot/lib/toastr.js/"
     },
@@ -43,6 +39,15 @@
       "files": [
         "dataTables.bootstrap5.min.js",
         "dataTables.bootstrap5.min.css"
+      ]
+    },
+    {
+      "provider": "cdnjs",
+      "library": "autocomplete.js@0.38.1",
+      "destination": "wwwroot/lib/autocomplete.js/",
+      "files": [
+        "autocomplete.min.js",
+        "autocomplete.js"
       ]
     }
   ]

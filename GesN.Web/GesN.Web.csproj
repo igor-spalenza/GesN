@@ -9,6 +9,8 @@
     <!-- Configuração para resolver conflitos de assets -->
     <StaticWebAssetsEnabled>true</StaticWebAssetsEnabled>
     <GenerateStaticWebAssetsManifest>true</GenerateStaticWebAssetsManifest>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <StaticWebAssetsCompression>false</StaticWebAssetsCompression>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,6 +38,12 @@
     <Folder Include="Models\Entities\Production\" />
     <Folder Include="Models\ViewModels\Financial\" />
     <Folder Include="Models\ViewModels\Production\" />
+  </ItemGroup>
+
+  <!-- Excluir arquivos duplicados da compressão -->
+  <ItemGroup>
+    <StaticWebAsset Remove="wwwroot\lib\**\*.min.js.map" />
+    <StaticWebAsset Remove="wwwroot\lib\**\*.js.map" />
   </ItemGroup>
 
 </Project>

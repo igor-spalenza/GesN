@@ -24,7 +24,7 @@
                     <td>@item.TotalAmount.ToString("C")</td>
                     <td>@item.Status</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="ordersManager.abrirEdicao('@item.Id')">Editar</button>
+                                                        <button class="btn btn-sm btn-outline-primary" onclick="ordersManager.abrirEdicao('@item.Id', '@item.NumberSequence')">Editar</button>
                         <button class="btn btn-sm btn-outline-secondary" onclick="ordersManager.abrirDetalhes('@item.Id')">Detalhes</button>
                     </td>
                 </tr>

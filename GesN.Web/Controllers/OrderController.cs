@@ -215,11 +215,16 @@ namespace GesN.Web.Controllers
                 }
                 
                 var orderId = await _orderService.CreateOrderAsync(orderViewModel);
+                
+                // Busca o pedido criado para obter o NumberSequence
+                var createdOrder = await _orderService.GetOrderByIdAsync(orderId);
+                
                 return Json(new
                 {
                     success = true,
                     message = "Pedido criado com sucesso!",
-                    id = orderId
+                    id = orderId,
+                    numberSequence = createdOrder?.NumberSequence
                 });
             }
             catch (Exception ex)
