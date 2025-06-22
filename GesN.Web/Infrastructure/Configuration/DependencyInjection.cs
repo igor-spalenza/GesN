@@ -12,6 +12,8 @@ using System.Data;
 using GesN.Web.Areas.Identity.Data.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using GesN.Web.Data.Migrations;
+using GesN.Web.Areas.Integration.Models.Settings;
+using GesN.Web.Areas.Integration.Services;
 using Dapper;
 
 namespace GesN.Web.Infrastructure.Configuration
@@ -24,13 +26,37 @@ namespace GesN.Web.Infrastructure.Configuration
 
             services.AddHttpContextAccessor();
 
+            // Google Workspace Integration (moved to Integration area)
+            services.AddScoped<IGooglePeopleService, GooglePeopleService>();
+
+            // Domínio Sales
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<ICustomerService, CustomerService>();
+            services.AddScoped<IContractRepository, ContractRepository>();
+            services.AddScoped<IContractService, ContractService>();
+
+            // Legados
             services.AddScoped<IClienteService, ClienteService>();
             services.AddScoped<IClienteRepository, ClienteRepository>();
-
             services.AddScoped<IPedidoService, PedidoService>();
             services.AddScoped<IPedidoRepository, PedidoRepository>();
 
             services.AddMemoryCache();
+        }
+
+        public static void AddGoogleWorkspaceConfiguration(this IServiceCollection services, IConfiguration configuration)
+        {
+            // Configurar Google Workspace settings
+            services.Configure<GoogleWorkspaceSettings>(
+                configuration.GetSection(GoogleWorkspaceSettings.SectionName));
+        }
+
+        public static void EnsureDatabaseInitialized(this IServiceProvider serviceProvider, string connectionString)
+        {
+            var dbInit = new DbInit(connectionString);
+            dbInit.Initialize();
+
+            DefaultTypeMap.MatchNamesWithUnderscores = false;
         }
 
         public static void AddIdentityServices(this IServiceCollection services)
