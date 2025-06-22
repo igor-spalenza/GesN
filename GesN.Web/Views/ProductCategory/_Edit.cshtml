@@ -1,0 +1,33 @@
+@model GesN.Web.Models.ViewModels.Production.EditProductCategoryViewModel
+
+<div class="row" id="editCategoriaContainer" data-category-name="@Model.Name">
+    <div class="col-md-12">
+        <h2>Edição de Categoria</h2>
+        <form id="editCategoriaForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            
+            <div class="form-group">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" class="form-control" />
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Description"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="IsActive"></label>
+                <select asp-for="IsActive" class="form-control">
+                    <option value="true">Ativa</option>
+                    <option value="false">Inativa</option>
+                </select>
+            </div>
+            
+            <div class="form-group mt-3">
+                <button type="submit" class="btn btn-primary" id="btnSalvarCategoria">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div> 

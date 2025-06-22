@@ -38,6 +38,16 @@ namespace GesN.Web.Infrastructure.Configuration
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 
+            // Domínio Production
+            services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+            services.AddScoped<IProductCategoryService, ProductCategoryService>();
+            services.AddScoped<ISupplierRepository, SupplierRepository>();
+            services.AddScoped<ISupplierService, SupplierService>();
+            services.AddScoped<IIngredientRepository, IngredientRepository>();
+            services.AddScoped<IIngredientService, IngredientService>();
+            services.AddScoped<IProductIngredientRepository, ProductIngredientRepository>();
+            services.AddScoped<IProductIngredientService, ProductIngredientService>();
+
             // Legados
             services.AddScoped<IClienteService, ClienteService>();
             services.AddScoped<IClienteRepository, ClienteRepository>();

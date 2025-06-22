@@ -90,7 +90,7 @@ namespace GesN.Web.Data.Migrations
                 );";
 
                 var createOrderTable = @"
-                CREATE TABLE IF NOT EXISTS Order (
+                CREATE TABLE IF NOT EXISTS OrderEntry (
                     Id TEXT NOT NULL UNIQUE,
                     CreatedAt TEXT NOT NULL,
                     CreatedBy TEXT NOT NULL,

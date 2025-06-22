@@ -1,0 +1,214 @@
+@using GesN.Web.Models.ViewModels.Production
+@using GesN.Web.Models.Enumerators
+@model EditIngredientViewModel
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <form id="ingredientEditForm" onsubmit="return ingredientsManager.salvarEdicaoIngredient(this)">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@Model.Id" />
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Editar Ingrediente</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="Name" class="form-label">Nome *</label>
+                                    <input type="text" class="form-control" id="Name" name="Name" value="@Model.Name" required maxlength="100">
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="Unit" class="form-label">Unidade *</label>
+                                    <select class="form-select" id="Unit" name="Unit" required>
+                                        <option value="">Selecione...</option>
+                                        @foreach (ProductionUnit unit in Enum.GetValues<ProductionUnit>())
+                                        {
+                                            <option value="@unit" selected="@(Model.Unit == unit)">
+                                                @EnumHelper.GetDescription(unit)
+                                            </option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="Unit" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="Description" name="Description" rows="3" maxlength="500">@Model.Description</textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="CostPerUnit" class="form-label">Custo por Unidade *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="number" class="form-control" id="CostPerUnit" name="CostPerUnit" value="@Model.CostPerUnit" step="0.01" min="0" required>
+                                    </div>
+                                    <span asp-validation-for="CostPerUnit" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="SupplierId" class="form-label">Fornecedor</label>
+                                    <select class="form-select" id="SupplierId" name="SupplierId">
+                                        <option value="">Selecione um fornecedor...</option>
+                                        <!-- Opções carregadas via JavaScript -->
+                                    </select>
+                                    <span asp-validation-for="SupplierId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="MinStock" class="form-label">Estoque Mínimo *</label>
+                                    <input type="number" class="form-control" id="MinStock" name="MinStock" value="@Model.MinStock" step="0.01" min="0" required>
+                                    <span asp-validation-for="MinStock" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="CurrentStock" class="form-label">Estoque Atual *</label>
+                                    <input type="number" class="form-control" id="CurrentStock" name="CurrentStock" value="@Model.CurrentStock" step="0.01" min="0" required>
+                                    <div class="d-flex gap-2 mt-1">
+                                        <button type="button" class="btn btn-outline-info btn-sm" onclick="ingredientsManager.atualizarEstoque('@Model.Id')">
+                                            <i class="bi bi-arrow-up-circle"></i> Atualizar Estoque
+                                        </button>
+                                    </div>
+                                    <span asp-validation-for="CurrentStock" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="ExpirationDays" class="form-label">Dias para Expiração</label>
+                            <input type="number" class="form-control" id="ExpirationDays" name="ExpirationDays" value="@Model.ExpirationDays" min="0">
+                            <small class="form-text text-muted">Deixe em branco se o ingrediente não expira</small>
+                            <span asp-validation-for="ExpirationDays" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="IsActive" name="IsActive" value="true" checked="@Model.IsActive">
+                                <input type="hidden" name="IsActive" value="false">
+                                <label class="form-check-label" for="IsActive">
+                                    Ingrediente ativo
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check"></i> Salvar Alterações
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Informações do Registro</h6>
+                </div>
+                <div class="card-body">
+                    <small class="text-muted">
+                        <strong>ID:</strong> @Model.Id<br />
+                        <strong>Criado em:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")<br />
+                        @if (Model.LastModifiedAt.HasValue)
+                        {
+                            <strong>Atualizado em:</strong> @Model.LastModifiedAt.Value.ToString("dd/MM/yyyy HH:mm")<br />
+                        }
+                        <strong>Status:</strong> 
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">Ativo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inativo</span>
+                        }
+                    </small>
+                </div>
+            </div>
+
+            <!-- Card de Status do Estoque -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">Status do Estoque</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <strong class="text-primary">@Model.CurrentStock.ToString("N2")</strong>
+                                <br />
+                                <small class="text-muted">Atual</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <strong class="text-warning">@Model.MinStock.ToString("N2")</strong>
+                                <br />
+                                <small class="text-muted">Mínimo</small>
+                            </div>
+                        </div>
+                    </div>
+                    @if (Model.CurrentStock <= Model.MinStock)
+                    {
+                        <div class="alert alert-warning mt-2 mb-0">
+                            <i class="bi bi-exclamation-triangle"></i> Estoque baixo!
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Carregar fornecedores
+    $.ajax({
+        url: '/Supplier/BuscaSupplierAutocomplete',
+        type: 'GET',
+        data: { termo: '' },
+        success: function(data) {
+            var select = $('#SupplierId');
+            var currentSupplierId = '@Model.SupplierId';
+            
+            data.forEach(function(supplier) {
+                var selected = supplier.id === currentSupplierId ? 'selected' : '';
+                select.append('<option value="' + supplier.id + '" ' + selected + '>' + supplier.text + '</option>');
+            });
+        }
+    });
+
+    // Formatação de moeda
+    $('#CostPerUnit').on('blur', function() {
+        var value = parseFloat($(this).val());
+        if (!isNaN(value)) {
+            $(this).val(value.toFixed(2));
+        }
+    });
+
+    // Validação de estoque
+    $('#MinStock, #CurrentStock').on('blur', function() {
+        var value = parseFloat($(this).val());
+        if (!isNaN(value)) {
+            $(this).val(value.toFixed(2));
+        }
+    });
+});
+</script> 
