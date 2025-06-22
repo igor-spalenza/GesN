@@ -12,47 +12,47 @@ namespace GesN.Web.Interfaces.Services
         /// <summary>
         /// Obtém todos os pedidos ativos
         /// </summary>
-        Task<IEnumerable<Order>> GetAllOrdersAsync();
+        Task<IEnumerable<OrderEntry>> GetAllOrdersAsync();
 
         /// <summary>
         /// Obtém um pedido pelo ID
         /// </summary>
-        Task<Order?> GetOrderByIdAsync(string id);
+        Task<OrderEntry?> GetOrderByIdAsync(string id);
 
         /// <summary>
         /// Obtém um pedido pelo número sequencial
         /// </summary>
-        Task<Order?> GetOrderByNumberAsync(string numberSequence);
+        Task<OrderEntry?> GetOrderByNumberAsync(string numberSequence);
 
         /// <summary>
         /// Obtém todos os pedidos de um cliente
         /// </summary>
-        Task<IEnumerable<Order>> GetOrdersByCustomerIdAsync(string customerId);
+        Task<IEnumerable<OrderEntry>> GetOrdersByCustomerIdAsync(string customerId);
 
         /// <summary>
         /// Obtém todos os pedidos com um determinado status
         /// </summary>
-        Task<IEnumerable<Order>> GetOrdersByStatusAsync(OrderStatus status);
+        Task<IEnumerable<OrderEntry>> GetOrdersByStatusAsync(OrderStatus status);
 
         /// <summary>
         /// Obtém todos os pedidos ativos
         /// </summary>
-        Task<IEnumerable<Order>> GetActiveOrdersAsync();
+        Task<IEnumerable<OrderEntry>> GetActiveOrdersAsync();
 
         /// <summary>
         /// Obtém todos os pedidos pendentes de entrega
         /// </summary>
-        Task<IEnumerable<Order>> GetPendingDeliveryOrdersAsync();
+        Task<IEnumerable<OrderEntry>> GetPendingDeliveryOrdersAsync();
 
         /// <summary>
         /// Obtém todos os pedidos pendentes de impressão
         /// </summary>
-        Task<IEnumerable<Order>> GetPendingPrintOrdersAsync();
+        Task<IEnumerable<OrderEntry>> GetPendingPrintOrdersAsync();
 
         /// <summary>
         /// Busca pedidos por termo de pesquisa
         /// </summary>
-        Task<IEnumerable<Order>> SearchOrdersAsync(string searchTerm);
+        Task<IEnumerable<OrderEntry>> SearchOrdersAsync(string searchTerm);
 
         /// <summary>
         /// Cria um novo pedido
@@ -62,37 +62,22 @@ namespace GesN.Web.Interfaces.Services
         /// <summary>
         /// Atualiza um pedido existente
         /// </summary>
-        Task<bool> UpdateOrderAsync(Order order, string modifiedBy);
+        Task<bool> UpdateOrderAsync(OrderEntry order, string modifiedBy);
 
         /// <summary>
-        /// Exclui um pedido (soft delete)
+        /// Exclui um pedido
         /// </summary>
         Task<bool> DeleteOrderAsync(string id);
 
         /// <summary>
-        /// Verifica se um pedido existe
-        /// </summary>
-        Task<bool> OrderExistsAsync(string id);
-
-        /// <summary>
-        /// Obtém o total de pedidos ativos
-        /// </summary>
-        Task<int> GetOrderCountAsync();
-
-        /// <summary>
         /// Obtém pedidos paginados
         /// </summary>
-        Task<IEnumerable<Order>> GetPagedOrdersAsync(int page, int pageSize);
+        Task<IEnumerable<OrderEntry>> GetPagedOrdersAsync(int page, int pageSize);
 
         /// <summary>
-        /// Obtém o próximo número sequencial disponível
+        /// Conta o número total de pedidos
         /// </summary>
-        Task<string> GetNextOrderNumberAsync();
-
-        /// <summary>
-        /// Atualiza o status de impressão de um pedido
-        /// </summary>
-        Task<bool> UpdateOrderPrintStatusAsync(string id, PrintStatus status, int? batchNumber = null);
+        Task<int> CountOrdersAsync();
 
         /// <summary>
         /// Atualiza o status de um pedido
@@ -100,84 +85,38 @@ namespace GesN.Web.Interfaces.Services
         Task<bool> UpdateOrderStatusAsync(string id, OrderStatus status, string modifiedBy);
 
         /// <summary>
-        /// Adiciona um item ao pedido
+        /// Atualiza o status de impressão de um pedido
         /// </summary>
-        Task<string> AddOrderItemAsync(string orderId, OrderItem item, string modifiedBy);
+        Task<bool> UpdatePrintStatusAsync(string id, PrintStatus printStatus, string modifiedBy);
 
         /// <summary>
-        /// Atualiza um item do pedido
+        /// Obtém estatísticas dos pedidos
         /// </summary>
-        Task<bool> UpdateOrderItemAsync(string orderId, OrderItem item, string modifiedBy);
+        Task<OrderStatisticsViewModel> GetOrderStatisticsAsync();
 
         /// <summary>
-        /// Remove um item do pedido
+        /// Converte um pedido para ViewModel
         /// </summary>
-        Task<bool> RemoveOrderItemAsync(string orderId, string itemId, string modifiedBy);
+        OrderViewModel ConvertToViewModel(OrderEntry order);
 
         /// <summary>
-        /// Obtém todos os itens de um pedido
+        /// Converte um pedido para DetailsViewModel
         /// </summary>
-        Task<IEnumerable<OrderItem>> GetOrderItemsAsync(string orderId);
+        OrderDetailsViewModel ConvertToDetailsViewModel(OrderEntry order);
 
         /// <summary>
-        /// Obtém todos os itens de um pedido pelo ID do pedido
+        /// Converte um pedido para EditViewModel
         /// </summary>
-        Task<IEnumerable<OrderItem>> GetOrderItemsByOrderIdAsync(string orderId);
-
-        /// <summary>
-        /// Obtém um item de pedido pelo ID
-        /// </summary>
-        Task<OrderItem?> GetOrderItemByIdAsync(string id);
+        EditOrderViewModel ConvertToEditViewModel(OrderEntry order);
 
         /// <summary>
         /// Valida os dados de um pedido
         /// </summary>
-        Task<bool> ValidateOrderDataAsync(Order order);
+        Task<bool> ValidateOrderDataAsync(OrderEntry order);
+
+        /// <summary>
+        /// Valida os dados de um pedido
+        /// </summary>
         Task<bool> ValidateCreateOrderDataAsync(CreateOrderViewModel order);
-
-        /// <summary>
-        /// Valida os dados de um item de pedido
-        /// </summary>
-        Task<bool> ValidateOrderItemDataAsync(OrderItem item);
-
-        /// <summary>
-        /// Calcula os totais de um pedido
-        /// </summary>
-        Task CalculateOrderTotalsAsync(string orderId);
-
-        /// <summary>
-        /// Finaliza um pedido
-        /// </summary>
-        Task<bool> CompleteOrderAsync(string id, string modifiedBy);
-
-        /// <summary>
-        /// Cancela um pedido
-        /// </summary>
-        Task<bool> CancelOrderAsync(string id, string modifiedBy);
-
-        /// <summary>
-        /// Confirma um pedido
-        /// </summary>
-        Task<bool> ConfirmOrderAsync(string id, string modifiedBy);
-
-        /// <summary>
-        /// Marca um pedido como em produção
-        /// </summary>
-        Task<bool> StartOrderProductionAsync(string id, string modifiedBy);
-
-        /// <summary>
-        /// Marca um pedido como pronto para entrega
-        /// </summary>
-        Task<bool> MarkOrderReadyForDeliveryAsync(string id, string modifiedBy);
-
-        /// <summary>
-        /// Marca um pedido como em entrega
-        /// </summary>
-        Task<bool> StartOrderDeliveryAsync(string id, string modifiedBy);
-
-        /// <summary>
-        /// Marca um pedido como entregue
-        /// </summary>
-        Task<bool> MarkOrderDeliveredAsync(string id, string modifiedBy);
     }
 } 

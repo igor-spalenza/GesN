@@ -330,7 +330,7 @@ namespace GesN.Web.Controllers
         // POST: Order/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, Order order)
+        public async Task<IActionResult> Edit(string id, OrderEntry order)
         {
             try
             {
@@ -449,7 +449,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Confirma o pedido
-                var success = await _orderService.ConfirmOrderAsync(id, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Confirmed, User.FindFirstValue(ClaimTypes.NameIdentifier));
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao confirmar pedido. Por favor, tente novamente.";
@@ -483,7 +483,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Cancela o pedido
-                var success = await _orderService.CancelOrderAsync(id, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Cancelled, User.FindFirstValue(ClaimTypes.NameIdentifier));
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao cancelar pedido. Por favor, tente novamente.";
@@ -517,7 +517,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Inicia produção
-                var success = await _orderService.StartOrderProductionAsync(id, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.InProduction, User.FindFirstValue(ClaimTypes.NameIdentifier));
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao iniciar produção do pedido. Por favor, tente novamente.";
@@ -551,7 +551,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Marca para entrega
-                var success = await _orderService.MarkOrderReadyForDeliveryAsync(id, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.ReadyForDelivery, User.FindFirstValue(ClaimTypes.NameIdentifier));
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao marcar pedido para entrega. Por favor, tente novamente.";
@@ -585,7 +585,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Inicia entrega
-                var success = await _orderService.StartOrderDeliveryAsync(id, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.InDelivery, User.FindFirstValue(ClaimTypes.NameIdentifier));
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao iniciar entrega do pedido. Por favor, tente novamente.";
@@ -619,7 +619,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Marca como entregue
-                var success = await _orderService.MarkOrderDeliveredAsync(id, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Delivered, User.FindFirstValue(ClaimTypes.NameIdentifier));
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao marcar pedido como entregue. Por favor, tente novamente.";
@@ -653,7 +653,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Marca como concluído
-                var success = await _orderService.CompleteOrderAsync(id, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Completed, User.FindFirstValue(ClaimTypes.NameIdentifier));
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao marcar pedido como concluído. Por favor, tente novamente.";

@@ -20,7 +20,7 @@ namespace GesN.Web.Models.Entities.Sales
         /// <summary>
         /// Pedido (navegação)
         /// </summary>
-        public Order? Order { get; set; }
+        public OrderEntry? Order { get; set; }
 
         /// <summary>
         /// ID do produto

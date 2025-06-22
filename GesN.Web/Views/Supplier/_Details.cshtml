@@ -2,145 +2,108 @@
 @using GesN.Web.Models.Enumerators
 @model SupplierDetailsViewModel
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Detalhes do Fornecedor</h5>
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="bi bi-info-circle"></i> Detalhes do Fornecedor
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nome</label>
+                    <p class="form-control-plaintext">@Model.Name</p>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Nome</label>
-                                <p class="form-control-plaintext">@Model.Name</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Nome da Empresa</label>
-                                <p class="form-control-plaintext">
-                                    @if (!string.IsNullOrWhiteSpace(Model.CompanyName))
-                                    {
-                                        @Model.CompanyName
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">Não informado</span>
-                                    }
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Tipo de Documento</label>
-                                <p class="form-control-plaintext">
-                                    @if (Model.DocumentType.HasValue)
-                                    {
-                                        @EnumHelper.GetDescription(Model.DocumentType.Value)
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">Não informado</span>
-                                    }
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Número do Documento</label>
-                                <p class="form-control-plaintext">
-                                    @if (!string.IsNullOrWhiteSpace(Model.DocumentNumber))
-                                    {
-                                        @Model.DocumentNumber
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">Não informado</span>
-                                    }
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Email</label>
-                                <p class="form-control-plaintext">
-                                    @if (!string.IsNullOrWhiteSpace(Model.Email))
-                                    {
-                                        <a href="mailto:@Model.Email">@Model.Email</a>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">Não informado</span>
-                                    }
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Telefone</label>
-                                <p class="form-control-plaintext">
-                                    @if (!string.IsNullOrWhiteSpace(Model.Phone))
-                                    {
-                                        <a href="tel:@Model.Phone">@Model.Phone</a>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">Não informado</span>
-                                    }
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Status</label>
-                                <p class="form-control-plaintext">
-                                    @if (Model.IsActive)
-                                    {
-                                        <span class="badge bg-success">Ativo</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">Inativo</span>
-                                    }
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-primary" onclick="suppliersManager.editarSupplier('@Model.Id')">
-                            <i class="bi bi-pencil"></i> Editar
-                        </button>
-                    </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nome da Empresa</label>
+                    <p class="form-control-plaintext">
+                        @if (!string.IsNullOrWhiteSpace(Model.CompanyName))
+                        {
+                            @Model.CompanyName
+                        }
+                        else
+                        {
+                            <span class="text-muted">Não informado</span>
+                        }
+                    </p>
                 </div>
             </div>
         </div>
-        
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">Informações do Registro</h6>
-                </div>
-                <div class="card-body">
-                    <small class="text-muted">
-                        <strong>ID:</strong> @Model.Id<br />
-                        <strong>Criado em:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")<br />
-                        @if (Model.LastModifiedAt.HasValue)
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tipo de Documento</label>
+                    <p class="form-control-plaintext">
+                        @if (Model.DocumentType.HasValue)
                         {
-                            <strong>Atualizado em:</strong> @Model.LastModifiedAt.Value.ToString("dd/MM/yyyy HH:mm")<br />
+                            @EnumHelper.GetDescription(Model.DocumentType.Value)
                         }
-                        <strong>Status:</strong> 
+                        else
+                        {
+                            <span class="text-muted">Não informado</span>
+                        }
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Número do Documento</label>
+                    <p class="form-control-plaintext">
+                        @if (!string.IsNullOrWhiteSpace(Model.DocumentNumber))
+                        {
+                            @Model.DocumentNumber
+                        }
+                        else
+                        {
+                            <span class="text-muted">Não informado</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Email</label>
+                    <p class="form-control-plaintext">
+                        @if (!string.IsNullOrWhiteSpace(Model.Email))
+                        {
+                            <a href="mailto:@Model.Email">@Model.Email</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Não informado</span>
+                        }
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Telefone</label>
+                    <p class="form-control-plaintext">
+                        @if (!string.IsNullOrWhiteSpace(Model.Phone))
+                        {
+                            <a href="tel:@Model.Phone">@Model.Phone</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Não informado</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Status</label>
+                    <p class="form-control-plaintext">
                         @if (Model.IsActive)
                         {
                             <span class="badge bg-success">Ativo</span>
@@ -149,29 +112,46 @@
                         {
                             <span class="badge bg-secondary">Inativo</span>
                         }
-                    </small>
+                    </p>
                 </div>
             </div>
+        </div>
 
-            <!-- Card com estatísticas ou informações adicionais -->
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h6 class="mb-0">Ações Rápidas</h6>
+        <!-- Metadados -->
+        <hr />
+        <h6 class="text-muted">Informações de Auditoria</h6>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Criado em</label>
+                    <p class="form-control-plaintext">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
                 </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="suppliersManager.editarSupplier('@Model.Id')">
-                            <i class="bi bi-pencil"></i> Editar Fornecedor
-                        </button>
-                        <button type="button" class="btn btn-outline-info btn-sm" onclick="alert('Funcionalidade em desenvolvimento')">
-                            <i class="bi bi-box"></i> Ver Ingredientes
-                        </button>
-                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="alert('Funcionalidade em desenvolvimento')">
-                            <i class="bi bi-file-text"></i> Gerar Relatório
-                        </button>
-                    </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Última modificação</label>
+                    <p class="form-control-plaintext">
+                        @if (Model.LastModifiedAt.HasValue)
+                        {
+                            @Model.LastModifiedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                        }
+                        else
+                        {
+                            <span class="text-muted">Nunca modificado</span>
+                        }
+                    </p>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <i class="bi bi-x"></i> Fechar
+    </button>
+    <button type="button" class="btn btn-primary" onclick="suppliersManager.editarSupplier('@Model.Id')">
+        <i class="bi bi-pencil"></i> Editar
+    </button>
 </div> 

@@ -2,7 +2,7 @@
 @using GesN.Web.Models.Enumerators
 @model CreateSupplierViewModel
 
-<form id="supplierCreateForm" onsubmit="return suppliersManager.salvarNovoSupplier(this)">
+<form id="supplierCreateForm">
     @Html.AntiForgeryToken()
     
     <div class="row">
@@ -76,7 +76,7 @@
 
     <div class="d-flex justify-content-end gap-2">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary">
+        <button type="button" class="btn btn-primary" onclick="suppliersManager.salvarNovoSupplier(document.getElementById('supplierCreateForm'))">
             <i class="bi bi-check"></i> Salvar
         </button>
     </div>

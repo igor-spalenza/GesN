@@ -54,9 +54,8 @@ namespace GesN.Web.Models.ViewModels.Production
         [Range(0.01, 999999.99, ErrorMessage = "O custo deve estar entre 0,01 e 999.999,99")]
         public decimal CostPerUnit { get; set; }
 
-        [Required(ErrorMessage = "O fornecedor é obrigatório")]
         [Display(Name = "Fornecedor")]
-        public string SupplierId { get; set; } = string.Empty;
+        public string? SupplierId { get; set; }
 
         [Display(Name = "Estoque Mínimo")]
         [Range(0, 999999.99, ErrorMessage = "O estoque mínimo deve estar entre 0 e 999.999,99")]
@@ -99,9 +98,8 @@ namespace GesN.Web.Models.ViewModels.Production
         [Range(0.01, 999999.99, ErrorMessage = "O custo deve estar entre 0,01 e 999.999,99")]
         public decimal CostPerUnit { get; set; }
 
-        [Required(ErrorMessage = "O fornecedor é obrigatório")]
         [Display(Name = "Fornecedor")]
-        public string SupplierId { get; set; } = string.Empty;
+        public string? SupplierId { get; set; }
 
         [Display(Name = "Estoque Mínimo")]
         [Range(0, 999999.99, ErrorMessage = "O estoque mínimo deve estar entre 0 e 999.999,99")]
@@ -135,7 +133,7 @@ namespace GesN.Web.Models.ViewModels.Production
         public string? Description { get; set; }
         public ProductionUnit Unit { get; set; }
         public decimal CostPerUnit { get; set; }
-        public string SupplierId { get; set; } = string.Empty;
+        public string? SupplierId { get; set; }
         public decimal MinStock { get; set; }
         public decimal CurrentStock { get; set; }
         public int? ExpirationDays { get; set; }

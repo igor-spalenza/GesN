@@ -34,21 +34,59 @@ var ingredientsManager = {
 
     // Inicializar DataTable
     inicializarDataTable: function() {
-        if ($.fn.DataTable.isDataTable('#ingredientsTable')) {
-            $('#ingredientsTable').DataTable().destroy();
+        // Verifica se a tabela existe antes de inicializar
+        if ($('#ingredientsTable').length > 0) {
+            // Aguarda um pouco para garantir que o DOM está completamente carregado
+            setTimeout(function() {
+                try {
+                    // Destrói instância existente se houver
+                    if ($.fn.DataTable.isDataTable('#ingredientsTable')) {
+                        $('#ingredientsTable').DataTable().destroy();
+                    }
+                    
+                    $('#ingredientsTable').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
+                        },
+                        responsive: true,
+                        pageLength: 10,
+                        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+                        order: [[0, 'asc']],
+                        columnDefs: [
+                            {
+                                targets: [7], // Coluna de ações (última coluna - índice 7)
+                                orderable: false,
+                                searchable: false
+                            },
+                            {
+                                targets: [5], // Coluna de status
+                                searchable: true,
+                                orderable: true
+                            },
+                            {
+                                targets: [2], // Coluna de custo
+                                orderable: true,
+                                searchable: false
+                            },
+                            {
+                                targets: [3], // Coluna de estoque
+                                orderable: true,
+                                searchable: false
+                            }
+                        ],
+                        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+                        drawCallback: function() {
+                            // Reaplica tooltips após redraw da tabela
+                            if (typeof $.fn.tooltip !== 'undefined') {
+                                $('[title]').tooltip();
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error('Erro ao inicializar DataTable:', error);
+                }
+            }, 100);
         }
-        
-        $('#ingredientsTable').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
-            },
-            responsive: true,
-            pageLength: 10,
-            order: [[0, 'asc']],
-            columnDefs: [
-                { targets: [-1], orderable: false }
-            ]
-        });
     },
 
     // Modal para novo ingrediente
@@ -69,17 +107,33 @@ var ingredientsManager = {
 
     // Salvar novo ingrediente
     salvarNovoIngredient: function(form) {
-        if (!$(form).valid()) {
+        console.log('salvarNovoIngredient called', form);
+        
+        // Validação simples dos campos obrigatórios
+        var name = $(form).find('#Name').val();
+        var unit = $(form).find('#Unit').val();
+        var costPerUnit = $(form).find('#CostPerUnit').val();
+        var minStock = $(form).find('#MinStock').val();
+        var currentStock = $(form).find('#CurrentStock').val();
+        
+        if (!name || !unit || !costPerUnit || minStock === '' || currentStock === '') {
+            console.log('Required fields validation failed');
+            toastr.error('Por favor, preencha todos os campos obrigatórios');
             return false;
         }
 
         var formData = $(form).serialize();
+        console.log('Form data:', formData);
         
         $.ajax({
             url: '/Ingredient/Create',
             type: 'POST',
             data: formData,
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
             success: function(response) {
+                console.log('Success response:', response);
                 if (response.success) {
                     $('#ingredientModal').modal('hide');
                     toastr.success('Ingrediente criado com sucesso!');
@@ -91,10 +145,13 @@ var ingredientsManager = {
                         }, 500);
                     }
                 } else {
+                    console.log('Response indicated failure:', response.message);
                     toastr.error(response.message || 'Erro ao criar ingrediente');
                 }
             },
-            error: function() {
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', xhr, status, error);
+                console.error('Response text:', xhr.responseText);
                 toastr.error('Erro ao salvar ingrediente');
             }
         });
@@ -104,30 +161,18 @@ var ingredientsManager = {
 
     // Ver detalhes do ingrediente
     verDetalhes: function(ingredientId) {
-        ingredientsManager.abrirDetalhes(ingredientId);
-    },
+        $('#ingredientModal .modal-title').text('Detalhes do Ingrediente');
+        $('#ingredientModal .modal-dialog').removeClass('modal-lg').addClass('modal-xl');
+        $('#ingredientModal .modal-body').html('<div class="text-center"><div class="spinner-border" role="status"></div></div>');
+        $('#ingredientModal').modal('show');
 
-    // Abrir detalhes em nova aba
-    abrirDetalhes: function(ingredientId) {
-        var tabId = 'ingredient-details-' + ingredientId;
-        
-        // Verificar se a aba já está aberta
-        if ($('#' + tabId).length > 0) {
-            var tab = new bootstrap.Tab(document.getElementById('tab-' + tabId));
-            tab.show();
-            return;
-        }
-
-        $.ajax({
-            url: '/Ingredient/DetailsPartial/' + ingredientId,
-            type: 'GET',
-            success: function(data) {
-                ingredientsManager.adicionarAba(tabId, 'Detalhes do Ingrediente', data, true);
-            },
-            error: function() {
-                toastr.error('Erro ao carregar detalhes do ingrediente');
-            }
-        });
+        $.get(`/Ingredient/DetailsPartial/${ingredientId}`)
+            .done(function (data) {
+                $('#ingredientModal .modal-body').html(data);
+            })
+            .fail(function () {
+                $('#ingredientModal .modal-body').html('<div class="alert alert-danger">Erro ao carregar detalhes do ingrediente</div>');
+            });
     },
 
     // Editar ingrediente
@@ -217,8 +262,7 @@ var ingredientsManager = {
         var tabNav = '<li class="nav-item" role="presentation">' +
                      '<button class="nav-link" id="tab-' + tabId + '" data-bs-toggle="tab" data-bs-target="#' + tabId + '" type="button" role="tab">' +
                      titulo +
-                     (!isReadOnly ? ' <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="ingredientsManager.fecharAba(\'' + tabId + '\')" title="Fechar aba">' +
-                     '<i class="bi bi-x"></i></button>' : '') +
+                     (!isReadOnly ? ' <span class="btn-close ms-2" onclick="ingredientsManager.fecharAba(\'' + tabId + '\')" title="Fechar aba"></span>' : '') +
                      '</button></li>';
         
         $('#ingredientsTabs').append(tabNav);
@@ -298,74 +342,7 @@ var ingredientsManager = {
         }
     },
 
-    // Funcionalidades específicas do Ingredient
-    
-    // Atualizar estoque
-    atualizarEstoque: function(ingredientId) {
-        $.ajax({
-            url: '/Ingredient/UpdateStockPartial/' + ingredientId,
-            type: 'GET',
-            success: function(data) {
-                $('#ingredientModal .modal-body').html(data);
-                $('#ingredientModal .modal-title').text('Atualizar Estoque');
-                $('#ingredientModal').modal('show');
-            },
-            error: function() {
-                toastr.error('Erro ao carregar formulário de atualização de estoque');
-            }
-        });
-    },
 
-    // Salvar atualização de estoque
-    salvarAtualizacaoEstoque: function(form) {
-        if (!$(form).valid()) {
-            return false;
-        }
-
-        var formData = $(form).serialize();
-        
-        $.ajax({
-            url: '/Ingredient/UpdateStock',
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-                if (response.success) {
-                    $('#ingredientModal').modal('hide');
-                    toastr.success('Estoque atualizado com sucesso!');
-                    ingredientsManager.carregarListaIngredients();
-                } else {
-                    toastr.error(response.message || 'Erro ao atualizar estoque');
-                }
-            },
-            error: function() {
-                toastr.error('Erro ao salvar atualização de estoque');
-            }
-        });
-        
-        return false;
-    },
-
-    // Verificar ingredientes com estoque baixo
-    verificarEstoqueBaixo: function() {
-        $.ajax({
-            url: '/Ingredient/LowStock',
-            type: 'GET',
-            success: function(data) {
-                if (data.length > 0) {
-                    var mensagem = 'Ingredientes com estoque baixo:\n';
-                    data.forEach(function(item) {
-                        mensagem += '- ' + item.name + ' (Atual: ' + item.currentStock + ', Mín: ' + item.minStock + ')\n';
-                    });
-                    alert(mensagem);
-                } else {
-                    toastr.success('Todos os ingredientes estão com estoque adequado!');
-                }
-            },
-            error: function() {
-                toastr.error('Erro ao verificar estoque baixo');
-            }
-        });
-    }
 };
 
 // Inicializar quando o documento estiver pronto

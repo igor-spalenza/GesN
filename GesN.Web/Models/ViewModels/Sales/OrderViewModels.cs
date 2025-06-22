@@ -334,6 +334,9 @@ namespace GesN.Web.Models.ViewModels.Sales
     {
         public string? Id { get; set; }
 
+        [Display(Name = "Pedido")]
+        public string OrderId { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "O produto é obrigatório")]
         [Display(Name = "Produto")]
         public string ProductId { get; set; } = string.Empty;

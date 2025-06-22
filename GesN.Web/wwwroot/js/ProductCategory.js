@@ -36,12 +36,12 @@ const productCategoriesManager = {
                             url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
                         },
                         responsive: true,
-                        pageLength: 25,
+                        pageLength: 10,
                         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
                         order: [[0, 'asc']], // Ordena por nome crescente
                         columnDefs: [
                             {
-                                targets: [3], // Coluna de ações
+                                targets: [4], // Coluna de ações (última coluna - índice 4)
                                 orderable: false,
                                 searchable: false
                             },

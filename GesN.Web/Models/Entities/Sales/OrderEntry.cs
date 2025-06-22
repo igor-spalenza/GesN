@@ -6,9 +6,9 @@ using System.ComponentModel.DataAnnotations;
 namespace GesN.Web.Models.Entities.Sales
 {
     /// <summary>
-    /// Entidade Order (Pedido) do domínio de vendas
+    /// Entidade OrderEntry (Pedido) do domínio de vendas
     /// </summary>
-    public class Order : Entity
+    public class OrderEntry : Entity
     {
         /// <summary>
         /// Número sequencial do pedido
@@ -153,12 +153,12 @@ namespace GesN.Web.Models.Entities.Sales
         /// <summary>
         /// Construtor padrão
         /// </summary>
-        public Order() { }
+        public OrderEntry() { }
 
         /// <summary>
         /// Construtor com dados básicos
         /// </summary>
-        public Order(string customerId, OrderType type)
+        public OrderEntry(string customerId, OrderType type)
         {
             CustomerId = customerId;
             Type = type;

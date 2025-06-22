@@ -34,21 +34,49 @@ var suppliersManager = {
 
     // Inicializar DataTable
     inicializarDataTable: function() {
-        if ($.fn.DataTable.isDataTable('#suppliersTable')) {
-            $('#suppliersTable').DataTable().destroy();
+        // Verifica se a tabela existe antes de inicializar
+        if ($('#suppliersTable').length > 0) {
+            // Aguarda um pouco para garantir que o DOM está completamente carregado
+            setTimeout(function() {
+                try {
+                    // Destrói instância existente se houver
+                    if ($.fn.DataTable.isDataTable('#suppliersTable')) {
+                        $('#suppliersTable').DataTable().destroy();
+                    }
+                    
+                    $('#suppliersTable').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
+                        },
+                        responsive: true,
+                        pageLength: 10,
+                        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+                        order: [[0, 'asc']],
+                        columnDefs: [
+                            {
+                                targets: [6], // Coluna de ações (última coluna - índice 6)
+                                orderable: false,
+                                searchable: false
+                            },
+                            {
+                                targets: [4], // Coluna de status
+                                searchable: true,
+                                orderable: true
+                            }
+                        ],
+                        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+                        drawCallback: function() {
+                            // Reaplica tooltips após redraw da tabela
+                            if (typeof $.fn.tooltip !== 'undefined') {
+                                $('[title]').tooltip();
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error('Erro ao inicializar DataTable:', error);
+                }
+            }, 100);
         }
-        
-        $('#suppliersTable').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
-            },
-            responsive: true,
-            pageLength: 10,
-            order: [[0, 'asc']],
-            columnDefs: [
-                { targets: [-1], orderable: false }
-            ]
-        });
     },
 
     // Modal para novo fornecedor
@@ -69,17 +97,29 @@ var suppliersManager = {
 
     // Salvar novo fornecedor
     salvarNovoSupplier: function(form) {
-        if (!$(form).valid()) {
+        console.log('salvarNovoSupplier called', form);
+        
+        // Validação simples dos campos obrigatórios
+        var name = $(form).find('#Name').val();
+        
+        if (!name) {
+            console.log('Required fields validation failed');
+            toastr.error('Por favor, preencha o nome do fornecedor');
             return false;
         }
 
         var formData = $(form).serialize();
+        console.log('Form data:', formData);
         
         $.ajax({
             url: '/Supplier/Create',
             type: 'POST',
             data: formData,
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
             success: function(response) {
+                console.log('Success response:', response);
                 if (response.success) {
                     $('#supplierModal').modal('hide');
                     toastr.success('Fornecedor criado com sucesso!');
@@ -91,10 +131,13 @@ var suppliersManager = {
                         }, 500);
                     }
                 } else {
+                    console.log('Response indicated failure:', response.message);
                     toastr.error(response.message || 'Erro ao criar fornecedor');
                 }
             },
-            error: function() {
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', xhr, status, error);
+                console.error('Response text:', xhr.responseText);
                 toastr.error('Erro ao salvar fornecedor');
             }
         });
@@ -104,30 +147,18 @@ var suppliersManager = {
 
     // Ver detalhes do fornecedor
     verDetalhes: function(supplierId) {
-        suppliersManager.abrirDetalhes(supplierId);
-    },
+        $('#supplierModal .modal-title').text('Detalhes do Fornecedor');
+        $('#supplierModal .modal-dialog').removeClass('modal-lg').addClass('modal-xl');
+        $('#supplierModal .modal-body').html('<div class="text-center"><div class="spinner-border" role="status"></div></div>');
+        $('#supplierModal').modal('show');
 
-    // Abrir detalhes em nova aba
-    abrirDetalhes: function(supplierId) {
-        var tabId = 'supplier-details-' + supplierId;
-        
-        // Verificar se a aba já está aberta
-        if ($('#' + tabId).length > 0) {
-            var tab = new bootstrap.Tab(document.getElementById('tab-' + tabId));
-            tab.show();
-            return;
-        }
-
-        $.ajax({
-            url: '/Supplier/DetailsPartial/' + supplierId,
-            type: 'GET',
-            success: function(data) {
-                suppliersManager.adicionarAba(tabId, 'Detalhes do Fornecedor', data, true);
-            },
-            error: function() {
-                toastr.error('Erro ao carregar detalhes do fornecedor');
-            }
-        });
+        $.get(`/Supplier/DetailsPartial/${supplierId}`)
+            .done(function (data) {
+                $('#supplierModal .modal-body').html(data);
+            })
+            .fail(function () {
+                $('#supplierModal .modal-body').html('<div class="alert alert-danger">Erro ao carregar detalhes do fornecedor</div>');
+            });
     },
 
     // Editar fornecedor
@@ -217,8 +248,7 @@ var suppliersManager = {
         var tabNav = '<li class="nav-item" role="presentation">' +
                      '<button class="nav-link" id="tab-' + tabId + '" data-bs-toggle="tab" data-bs-target="#' + tabId + '" type="button" role="tab">' +
                      titulo +
-                     (!isReadOnly ? ' <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="suppliersManager.fecharAba(\'' + tabId + '\')" title="Fechar aba">' +
-                     '<i class="bi bi-x"></i></button>' : '') +
+                     (!isReadOnly ? ' <span class="btn-close ms-2" onclick="suppliersManager.fecharAba(\'' + tabId + '\')" title="Fechar aba"></span>' : '') +
                      '</button></li>';
         
         $('#suppliersTabs').append(tabNav);

@@ -2,7 +2,7 @@
 @using GesN.Web.Models.Enumerators
 @model CreateIngredientViewModel
 
-<form id="ingredientCreateForm" onsubmit="return ingredientsManager.salvarNovoIngredient(this)">
+<form id="ingredientCreateForm">
     @Html.AntiForgeryToken()
     
     <div class="row">
@@ -49,7 +49,7 @@
         </div>
         <div class="col-md-6">
             <div class="mb-3">
-                <label for="SupplierId" class="form-label">Fornecedor</label>
+                <label for="SupplierId" class="form-label">Fornecedor (Opcional)</label>
                 <select class="form-select" id="SupplierId" name="SupplierId">
                     <option value="">Selecione um fornecedor...</option>
                     <!-- Opções carregadas via JavaScript -->
@@ -95,7 +95,7 @@
 
     <div class="d-flex justify-content-end gap-2">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary">
+        <button type="button" class="btn btn-primary" onclick="ingredientsManager.salvarNovoIngredient(document.getElementById('ingredientCreateForm'))">
             <i class="bi bi-check"></i> Salvar
         </button>
     </div>
