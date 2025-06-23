@@ -1,4 +1,5 @@
 using GesN.Web.Models.Entities.Base;
+using GesN.Web.Models.Enumerators;
 using System.ComponentModel.DataAnnotations;
 
 namespace GesN.Web.Models.Entities.Production
@@ -8,6 +9,12 @@ namespace GesN.Web.Models.Entities.Production
     /// </summary>
     public abstract class Product : Entity
     {
+        /// <summary>
+        /// Tipo do produto (determinado pela classe concreta)
+        /// </summary>
+        [Display(Name = "Tipo de Produto")]
+        public virtual ProductType ProductType { get; protected set; }
+
         /// <summary>
         /// Nome do produto
         /// </summary>
@@ -56,7 +63,54 @@ namespace GesN.Web.Models.Entities.Production
         [Display(Name = "Fornecedor")]
         public string? SupplierId { get; set; }
 
+        /// <summary>
+        /// Estoque mínimo
+        /// </summary>
+        [Display(Name = "Estoque Mínimo")]
+        public int MinStock { get; set; } = 0;
 
+        /// <summary>
+        /// Estoque atual
+        /// </summary>
+        [Display(Name = "Estoque Atual")]
+        public int CurrentStock { get; set; } = 0;
+
+        /// <summary>
+        /// Unidade de medida
+        /// </summary>
+        [Display(Name = "Unidade")]
+        [MaxLength(10)]
+        public string Unit { get; set; } = "UN";
+
+        /// <summary>
+        /// Permite customização
+        /// </summary>
+        [Display(Name = "Permite Customização")]
+        public bool AllowCustomization { get; set; } = false;
+
+        /// <summary>
+        /// Quantidade mínima de itens necessários (para ProductGroup)
+        /// </summary>
+        [Display(Name = "Itens Mínimos Necessários")]
+        public int MinItemsRequired { get; set; } = 1;
+
+        /// <summary>
+        /// Quantidade máxima de itens permitidos (para ProductGroup)
+        /// </summary>
+        [Display(Name = "Itens Máximos Permitidos")]
+        public int? MaxItemsAllowed { get; set; }
+
+        /// <summary>
+        /// Tempo de montagem em minutos
+        /// </summary>
+        [Display(Name = "Tempo de Montagem (min)")]
+        public int AssemblyTime { get; set; } = 0;
+
+        /// <summary>
+        /// Instruções de montagem
+        /// </summary>
+        [Display(Name = "Instruções de Montagem")]
+        public string? AssemblyInstructions { get; set; }
 
         /// <summary>
         /// Propriedade navegacional para categoria

@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using GesN.Web.Interfaces.Services;
 using GesN.Web.Models.ViewModels.Production;
 using GesN.Web.Models.Entities.Production;
+using GesN.Web.Models.Enumerators;
 using System.Security.Claims;
 
 namespace GesN.Web.Controllers
@@ -14,6 +16,10 @@ namespace GesN.Web.Controllers
         private readonly ISupplierService _supplierService;
         private readonly IIngredientService _ingredientService;
         private readonly IProductIngredientService _productIngredientService;
+        private readonly IProductService _productService;
+        private readonly IProductComponentService _productComponentService;
+        private readonly IProductGroupService _productGroupService;
+        private readonly IProductionOrderService _productionOrderService;
         private readonly ILogger<ProductController> _logger;
 
         public ProductController(
@@ -21,12 +27,20 @@ namespace GesN.Web.Controllers
             ISupplierService supplierService,
             IIngredientService ingredientService,
             IProductIngredientService productIngredientService,
+            IProductService productService,
+            IProductComponentService productComponentService,
+            IProductGroupService productGroupService,
+            IProductionOrderService productionOrderService,
             ILogger<ProductController> logger)
         {
             _productCategoryService = productCategoryService;
             _supplierService = supplierService;
             _ingredientService = ingredientService;
             _productIngredientService = productIngredientService;
+            _productService = productService;
+            _productComponentService = productComponentService;
+            _productGroupService = productGroupService;
+            _productionOrderService = productionOrderService;
             _logger = logger;
         }
 
@@ -35,19 +49,39 @@ namespace GesN.Web.Controllers
         {
             try
             {
-                // TODO: Implementar repositório para Product quando estiver pronto
+                var products = await _productService.GetAllAsync();
+                var productViewModels = products.Select(p => new ProductViewModel
+                {
+                    Id = p.Id,
+                    Code = p.Code,
+                    Name = p.Name,
+                    Description = p.Description,
+                    ProductType = p.ProductType,
+                    CategoryId = p.CategoryId,
+                    CategoryName = p.Category?.Name,
+                    Price = p.UnitPrice,
+                    Cost = p.Cost,
+                    Unit = p.Unit,
+                    CurrentStock = null, // Product base não tem estoque
+                    MinStock = null, // Product base não tem estoque
+                    StateCode = (int)p.StateCode,
+                    CreatedAt = p.CreatedAt,
+                    ModifiedAt = p.LastModifiedAt
+                }).ToList();
+                
                 var viewModel = new ProductIndexViewModel
                 {
-                    Products = new List<Product>(),
+                    Products = productViewModels,
                     Statistics = new ProductStatisticsViewModel
                     {
-                        TotalProducts = 0,
-                        ActiveProducts = 0,
-                        InactiveProducts = 0,
-                        SimpleProducts = 0,
-                        CompositeProducts = 0,
-                        ProductGroups = 0,
-                        LowStockProducts = 0,
+                        TotalProducts = products.Count(),
+                        ActiveProducts = products.Count(p => p.StateCode == ObjectState.Active),
+                        InactiveProducts = products.Count(p => p.StateCode == ObjectState.Inactive),
+                        SimpleProducts = products.Count(p => p.ProductType == ProductType.Simple),
+                        CompositeProducts = products.Count(p => p.ProductType == ProductType.Composite),
+                        GroupProducts = products.Count(p => p.ProductType == ProductType.Group),
+                        ProductGroups = products.Count(p => p.ProductType == ProductType.Group),
+                        LowStockProducts = 0, // Será calculado quando implementarmos estoque
                         LastUpdate = DateTime.Now
                     }
                 };
@@ -72,16 +106,26 @@ namespace GesN.Web.Controllers
 
         // GET: Product/FormularioCriacao
         [HttpGet]
-        public IActionResult FormularioCriacao(ProductType productType = ProductType.SimpleProduct)
+        public async Task<IActionResult> FormularioCriacao(ProductType productType = ProductType.Simple)
         {
-            // Por enquanto, só SimpleProduct está implementado
-            if (productType != ProductType.SimpleProduct)
+            try
             {
-                return BadRequest("Tipo de produto não implementado ainda");
-            }
+                await PopulateDropdownsAsync();
 
-            var viewModel = new CreateSimpleProductViewModel();
-            return PartialView("_Create", viewModel);
+                var viewModel = new CreateProductViewModel
+                {
+                    ProductType = productType,
+                    AvailableProductTypes = ProductTypeSelectionViewModel.GetProductTypes(),
+                    AvailableCategories = new List<CategorySelectionViewModel>()
+                };
+
+                return PartialView("_Create", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar formulário de criação para tipo: {ProductType}", productType);
+                return StatusCode(500, "Erro interno do servidor");
+            }
         }
 
         // GET: Product/FormularioEdicao/5
@@ -130,7 +174,7 @@ namespace GesN.Web.Controllers
         // POST: Product/SalvarNovo
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SalvarNovo(CreateSimpleProductViewModel viewModel)
+        public async Task<IActionResult> SalvarNovo(CreateProductViewModel viewModel)
         {
             try
             {
@@ -166,7 +210,7 @@ namespace GesN.Web.Controllers
         // POST: Product/SalvarEdicaoProduct/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SalvarEdicaoProduct(string id, EditSimpleProductViewModel viewModel)
+        public async Task<IActionResult> SalvarEdicaoProduct(string id, EditProductViewModel viewModel)
         {
             try
             {
@@ -507,6 +551,64 @@ namespace GesN.Web.Controllers
                 _logger.LogError(ex, "Erro ao verificar estoque do produto: {ProductId}", productId);
                 return Json(new { success = false, message = "Erro interno do servidor" });
             }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private async Task PopulateDropdownsAsync()
+        {
+            // TODO: Implementar quando os serviços estiverem completos
+            // ViewBag.Categories = await _productCategoryService.GetAllAsync();
+            // ViewBag.Suppliers = await _supplierService.GetAllAsync();
+            // ViewBag.Ingredients = await _ingredientService.GetAllAsync();
+            await Task.CompletedTask;
+        }
+
+        private List<SelectListItem> GetProductTypeSelectList(ProductType? selectedType = null)
+        {
+            return Enum.GetValues<ProductType>()
+                .Select(pt => new SelectListItem
+                {
+                    Value = ((int)pt).ToString(),
+                    Text = GetProductTypeDisplayName(pt),
+                    Selected = pt == selectedType
+                }).ToList();
+        }
+
+        private async Task<List<CategorySelectionViewModel>> GetCategoriesSelectListAsync()
+        {
+            try
+            {
+                // TODO: Implementar quando IProductCategoryService.GetAllAsync() estiver disponível
+                // var categories = await _productCategoryService.GetAllAsync();
+                // return categories.Select(c => new CategorySelectionViewModel
+                // {
+                //     Value = c.Id,
+                //     Text = c.Name,
+                //     IsSelected = false
+                // }).ToList();
+                
+                await Task.CompletedTask;
+                return new List<CategorySelectionViewModel>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar categorias");
+                return new List<CategorySelectionViewModel>();
+            }
+        }
+
+        private string GetProductTypeDisplayName(ProductType productType)
+        {
+            return productType switch
+            {
+                ProductType.Simple => "Produto Simples",
+                ProductType.Composite => "Produto Composto",
+                ProductType.Group => "Grupo de Produtos",
+                _ => productType.ToString()
+            };
         }
 
         #endregion

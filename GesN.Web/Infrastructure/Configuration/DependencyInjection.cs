@@ -48,6 +48,18 @@ namespace GesN.Web.Infrastructure.Configuration
             services.AddScoped<IProductIngredientRepository, ProductIngredientRepository>();
             services.AddScoped<IProductIngredientService, ProductIngredientService>();
 
+            // Sprint 4 - Advanced Production Entities
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IProductComponentRepository, ProductComponentRepository>();
+            services.AddScoped<IProductComponentService, ProductComponentService>();
+            services.AddScoped<IProductGroupItemRepository, ProductGroupItemRepository>();
+            services.AddScoped<IProductGroupOptionRepository, ProductGroupOptionRepository>();
+            services.AddScoped<IProductGroupExchangeRuleRepository, ProductGroupExchangeRuleRepository>();
+            services.AddScoped<IProductGroupService, ProductGroupService>();
+            services.AddScoped<IProductionOrderRepository, ProductionOrderRepository>();
+            services.AddScoped<IProductionOrderService, ProductionOrderService>();
+
             // Legados
             services.AddScoped<IClienteService, ClienteService>();
             services.AddScoped<IClienteRepository, ClienteRepository>();

@@ -9,59 +9,55 @@ namespace GesN.Web.Models.Entities.Production
     public class SimpleProduct : Product
     {
         /// <summary>
-        /// Estoque mínimo
+        /// Construtor padrão
         /// </summary>
-        [Display(Name = "Estoque Mínimo")]
-        [Range(0, double.MaxValue, ErrorMessage = "O estoque mínimo deve ser maior ou igual a zero")]
-        public decimal MinStock { get; set; } = 0;
+        public SimpleProduct()
+        {
+            ProductType = ProductType.Simple;
+        }
 
         /// <summary>
-        /// Estoque atual
+        /// Estoque atual do produto simples
         /// </summary>
         [Display(Name = "Estoque Atual")]
         [Range(0, double.MaxValue, ErrorMessage = "O estoque atual deve ser maior ou igual a zero")]
-        public decimal CurrentStock { get; set; } = 0;
+        public new decimal CurrentStock { get; set; } = 0;
 
         /// <summary>
-        /// Unidade de medida
+        /// Estoque mínimo para alertas
         /// </summary>
-        [Display(Name = "Unidade")]
-        public ProductionUnit Unit { get; set; } = ProductionUnit.Unidades;
+        [Display(Name = "Estoque Mínimo")]
+        [Range(0, double.MaxValue, ErrorMessage = "O estoque mínimo deve ser maior ou igual a zero")]
+        public new decimal MinStock { get; set; } = 0;
+
+        /// <summary>
+        /// Preço unitário do produto simples
+        /// </summary>
+        [Display(Name = "Preço Unitário")]
+        [DataType(DataType.Currency)]
+        public new decimal? UnitPrice { get; set; }
+
+
 
         /// <summary>
         /// Permite customização do produto
         /// </summary>
         [Display(Name = "Permite Customização")]
-        public bool AllowCustomization { get; set; } = false;
+        public new bool AllowCustomization { get; set; } = false;
 
         /// <summary>
         /// Tempo de montagem em minutos
         /// </summary>
         [Display(Name = "Tempo de Montagem (min)")]
         [Range(0, int.MaxValue, ErrorMessage = "O tempo de montagem deve ser maior ou igual a zero")]
-        public int? AssemblyTime { get; set; }
+        public new int? AssemblyTime { get; set; }
 
         /// <summary>
         /// Instruções de montagem
         /// </summary>
         [Display(Name = "Instruções de Montagem")]
         [MaxLength(1000)]
-        public string? AssemblyInstructions { get; set; }
-
-        /// <summary>
-        /// Construtor padrão
-        /// </summary>
-        public SimpleProduct()
-        {
-        }
-
-        /// <summary>
-        /// Construtor com dados básicos
-        /// </summary>
-        public SimpleProduct(string name, decimal unitPrice, ProductionUnit unit = ProductionUnit.Unidades) : base(name, unitPrice)
-        {
-            Unit = unit;
-        }
+        public new string? AssemblyInstructions { get; set; }
 
         /// <summary>
         /// Verifica se o estoque está baixo

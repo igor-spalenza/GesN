@@ -1,0 +1,164 @@
+@using GesN.Web.Models.ViewModels.Production
+@model EditProductViewModel
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Navegação por Abas -->
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="productEditTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" 
+                            data-bs-target="#basic-tab-pane" type="button" role="tab">
+                        <i class="fas fa-box"></i> Dados Básicos
+                    </button>
+                </li>
+                
+                @if (Model.ProductType == ProductType.Composite)
+                {
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="components-tab" data-bs-toggle="tab" 
+                                data-bs-target="#components-tab-pane" type="button" role="tab">
+                            <i class="fas fa-cogs"></i> Componentes
+                        </button>
+                    </li>
+                }
+                
+                @if (Model.ProductType == ProductType.Group)
+                {
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="group-items-tab" data-bs-toggle="tab" 
+                                data-bs-target="#group-items-tab-pane" type="button" role="tab">
+                            <i class="fas fa-list"></i> Itens do Grupo
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="group-options-tab" data-bs-toggle="tab" 
+                                data-bs-target="#group-options-tab-pane" type="button" role="tab">
+                            <i class="fas fa-sliders-h"></i> Opções
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="exchange-rules-tab" data-bs-toggle="tab" 
+                                data-bs-target="#exchange-rules-tab-pane" type="button" role="tab">
+                            <i class="fas fa-exchange-alt"></i> Regras de Troca
+                        </button>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <!-- Conteúdo das Abas -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="tab-content" id="productEditTabsContent">
+                
+                <!-- Aba Dados Básicos -->
+                <div class="tab-pane fade show active" id="basic-tab-pane" role="tabpanel">
+                    <div id="basicDataContainer">
+                        @await Html.PartialAsync("_EditBasicData", Model)
+                    </div>
+                </div>
+
+                <!-- Aba Componentes (só para Composite) -->
+                @if (Model.ProductType == ProductType.Composite)
+                {
+                    <div class="tab-pane fade" id="components-tab-pane" role="tabpanel">
+                        <div id="componentsContainer">
+                            <!-- Será carregado via AJAX quando a aba for clicada -->
+                            <div class="text-center py-4">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                                <p class="mt-2">Carregando componentes...</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Abas do Grupo (só para Group) -->
+                @if (Model.ProductType == ProductType.Group)
+                {
+                    <div class="tab-pane fade" id="group-items-tab-pane" role="tabpanel">
+                        <div id="groupItemsContainer">
+                            <!-- Será carregado via AJAX quando a aba for clicada -->
+                            <div class="text-center py-4">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                                <p class="mt-2">Carregando itens do grupo...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="group-options-tab-pane" role="tabpanel">
+                        <div id="groupOptionsContainer">
+                            <!-- Será carregado via AJAX quando a aba for clicada -->
+                            <div class="text-center py-4">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                                <p class="mt-2">Carregando opções...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="exchange-rules-tab-pane" role="tabpanel">
+                        <div id="exchangeRulesContainer">
+                            <!-- Será carregado via AJAX quando a aba for clicada -->
+                            <div class="text-center py-4">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                                <p class="mt-2">Carregando regras de troca...</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botões de Ação Fixos -->
+<div class="modal-footer bg-light">
+    <button type="button" class="btn btn-secondary" onclick="productManager.cancelarEdicao()">
+        <i class="fas fa-times"></i> Cancelar
+    </button>
+    <button type="button" class="btn btn-primary" onclick="productManager.salvarEdicao()">
+        <i class="fas fa-save"></i> Salvar Alterações
+    </button>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Configurar carregamento lazy das abas
+        $('#productEditTabs button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            const targetTab = $(e.target).attr('data-bs-target');
+            const productId = '@Model.Id';
+            
+            switch(targetTab) {
+                case '#components-tab-pane':
+                    if ($('#componentsContainer .spinner-border').length > 0) {
+                        productManager.components.carregarComponentes(productId);
+                    }
+                    break;
+                case '#group-items-tab-pane':
+                    if ($('#groupItemsContainer .spinner-border').length > 0) {
+                        productManager.groupItems.carregarItens(productId);
+                    }
+                    break;
+                case '#group-options-tab-pane':
+                    if ($('#groupOptionsContainer .spinner-border').length > 0) {
+                        productManager.groupOptions.carregarOpcoes(productId);
+                    }
+                    break;
+                case '#exchange-rules-tab-pane':
+                    if ($('#exchangeRulesContainer .spinner-border').length > 0) {
+                        productManager.exchangeRules.carregarRegras(productId);
+                    }
+                    break;
+            }
+        });
+    });
+</script> 
