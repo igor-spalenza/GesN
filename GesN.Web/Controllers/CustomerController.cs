@@ -496,5 +496,36 @@ namespace GesN.Web.Controllers
                 return Json(new { total = 0, ativos = 0 });
             }
         }
+
+        /// <summary>
+        /// Busca customers para autocomplete baseado em FirstName, LastName e Phone
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> BuscaCustomerAutocomplete(string termo)
+        {
+            if (string.IsNullOrWhiteSpace(termo))
+                return Json(new List<object>());
+
+            try
+            {
+                var customers = await _customerService.SearchCustomersForAutocompleteAsync(termo);
+
+                var resultado = customers.Select(c => new {
+                    id = c.Id,
+                    label = $"{c.FullName}" + (!string.IsNullOrWhiteSpace(c.Phone) ? $" - {c.Phone}" : ""),
+                    value = c.FullName,
+                    phone = c.Phone ?? "",
+                    email = c.Email ?? ""
+                });
+
+                return Json(resultado);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar customers para autocomplete: {Termo}", termo);
+                return Json(new List<object>());
+            }
+        }
+
     }
 } 

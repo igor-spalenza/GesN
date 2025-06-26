@@ -6,6 +6,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-GesN.Web-3fbcea1e-6b7e-4eec-8775-0d1a07170825</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <!-- Configuração para resolver conflitos de assets -->
+    <StaticWebAssetsEnabled>true</StaticWebAssetsEnabled>
+    <GenerateStaticWebAssetsManifest>true</GenerateStaticWebAssetsManifest>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <StaticWebAssetsCompression>false</StaticWebAssetsCompression>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +25,6 @@
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.4" />
-
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.4" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2" />
@@ -34,6 +38,12 @@
     <Folder Include="Models\Entities\Production\" />
     <Folder Include="Models\ViewModels\Financial\" />
     <Folder Include="Models\ViewModels\Production\" />
+  </ItemGroup>
+
+  <!-- Excluir arquivos duplicados da compressão -->
+  <ItemGroup>
+    <StaticWebAsset Remove="wwwroot\lib\**\*.min.js.map" />
+    <StaticWebAsset Remove="wwwroot\lib\**\*.js.map" />
   </ItemGroup>
 
 </Project>

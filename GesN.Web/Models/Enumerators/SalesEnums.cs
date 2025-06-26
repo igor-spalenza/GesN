@@ -1,32 +1,5 @@
 namespace GesN.Web.Models.Enumerators
 {
-    /// <summary>
-    /// Status do pedido (Order)
-    /// Valores como TEXT no banco de dados
-    /// </summary>
-    public enum OrderStatus
-    {
-        Draft,          // Rascunho
-        Confirmed,      // Confirmado
-        InProduction,   // Em Produção
-        ReadyForDelivery, // Pronto para Entrega
-        Delivered,      // Entregue
-        Cancelled,      // Cancelado
-        Completed       // Finalizado
-    }
-
-    /// <summary>
-    /// Tipo do pedido (Order)
-    /// Valores como TEXT no banco de dados
-    /// </summary>
-    public enum OrderType
-    {
-        Order,          // Encomenda
-        Event,          // Evento
-        Catering,       // Buffet
-        Delivery,       // Entrega
-        PickUp          // Retirada
-    }
 
     /// <summary>
     /// Status do contrato (Contract)
@@ -58,5 +31,39 @@ namespace GesN.Web.Models.Enumerators
         Reprinted,      // Reimpresso
         Failed,         // Falha na Impressão
         Cancelled       // Cancelado
+    }
+
+    /// <summary>
+    /// Status de Order
+    /// </summary>
+    public enum OrderStatus
+    {
+        Draft,
+        Confirmed,
+        InProduction,
+        ReadyForDelivery,
+        InDelivery,
+        Delivered,
+        Cancelled,
+        Completed
+    }
+
+    /// <summary>
+    /// Tipos possíveis de um pedido
+    /// </summary>
+    public enum OrderType
+    {
+        Order,
+        Event
+    }
+
+    /// <summary>
+    /// Status de impressão de um pedido
+    /// </summary>
+    public enum PrintStatus
+    {
+        NotPrinted,
+        Printed
+
     }
 } 

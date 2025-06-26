@@ -1,0 +1,93 @@
+@using GesN.Web.Models.ViewModels.Production
+@model ProductCategoryDetailsViewModel
+
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-info-circle"></i> Detalhes da Categoria
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nome</label>
+                    <p class="form-control-plaintext">@Model.Name</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Status</label>
+                    <p class="form-control-plaintext">
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">Ativa</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inativa</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descrição</label>
+                        <p class="form-control-plaintext">@Model.Description</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Metadados -->
+        <hr />
+        <h6 class="text-muted">Informações de Auditoria</h6>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Criado em</label>
+                    <p class="form-control-plaintext">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Criado por</label>
+                    <p class="form-control-plaintext">@Model.CreatedBy</p>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.LastModifiedAt.HasValue)
+        {
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Última modificação</label>
+                        <p class="form-control-plaintext">@Model.LastModifiedAt.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Modificado por</label>
+                        <p class="form-control-plaintext">@Model.LastModifiedBy</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <i class="fas fa-times"></i> Fechar
+    </button>
+    <button type="button" class="btn btn-primary" onclick="productCategoriesManager.editarCategoria('@Model.Id')">
+        <i class="fas fa-edit"></i> Editar
+    </button>
+</div> 

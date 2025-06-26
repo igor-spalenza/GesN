@@ -1,0 +1,55 @@
+@using GesN.Web.Models.ViewModels.Production
+@model CreateProductCategoryViewModel
+
+<form id="formNovaCategoria" enctype="application/x-www-form-urlencoded">
+    @Html.AntiForgeryToken()
+    
+    <!-- Informações Básicas da Categoria -->
+    <div class="card">
+        <div class="card-header">
+            <h6 class="card-title mb-0">
+                <i class="fas fa-tag"></i> Dados da Categoria
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" placeholder="Nome da categoria" required />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="IsActive" class="form-label"></label>
+                        <select asp-for="IsActive" class="form-select">
+                            <option value="true" selected>Ativa</option>
+                            <option value="false">Inativa</option>
+                        </select>
+                        <span asp-validation-for="IsActive" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Descrição da categoria (opcional)"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-primary" onclick="productCategoriesManager.salvarNovoModal()">
+            <i class="fas fa-save"></i> Criar Categoria
+        </button>
+    </div>
+</form> 

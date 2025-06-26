@@ -93,6 +93,39 @@ namespace GesN.Web.Data.Repositories
                 new { StateCode = (int)ObjectState.Active, SearchTerm = searchPattern });
         }
 
+        public async Task<IEnumerable<Customer>> SearchForAutocompleteAsync(string searchTerm)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+            
+            const string sql = @"
+                SELECT * FROM Customer 
+                WHERE StateCode = @StateCode
+                  AND (FirstName LIKE @SearchTerm
+                       OR LastName LIKE @SearchTerm
+                       OR Phone LIKE @SearchTerm)
+                ORDER BY 
+                    CASE 
+                        WHEN FirstName LIKE @ExactStart THEN 1
+                        WHEN LastName LIKE @ExactStart THEN 2
+                        WHEN Phone LIKE @ExactStart THEN 3
+                        WHEN FirstName LIKE @SearchTerm THEN 4
+                        WHEN LastName LIKE @SearchTerm THEN 5
+                        ELSE 6
+                    END,
+                    FirstName, LastName
+                LIMIT 10";
+
+            var searchPattern = $"%{searchTerm}%";
+            var exactStartPattern = $"{searchTerm}%";
+            
+            return await connection.QueryAsync<Customer>(sql, 
+                new { 
+                    StateCode = (int)ObjectState.Active, 
+                    SearchTerm = searchPattern,
+                    ExactStart = exactStartPattern
+                });
+        }
+
         public async Task<string> CreateAsync(Customer customer)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();

@@ -1,9 +1,8 @@
 var claimsManager = {
-    currentView: 'cards', // 'cards' ou 'table'
+    currentView: 'table', // 'cards' ou 'table'
     
-    init: function() {
-        console.log('ClaimsManager: Inicializando...');
-        
+    init: function () {
+
         // Inicializar eventos dos modais
         $(document).on('shown.bs.modal', '#modalContainer', function () {
             console.log('ClaimsManager: Modal container mostrado');
@@ -11,7 +10,6 @@ var claimsManager = {
         });
 
         $(document).on('hidden.bs.modal', '#modalContainer', function () {
-            console.log('ClaimsManager: Modal container escondido');
             // Destruir instâncias do Select2 antes de limpar o modal
             $('.form-select[multiple]').each(function() {
                 if ($(this).hasClass('select2-hidden-accessible')) {
