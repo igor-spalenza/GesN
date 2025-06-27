@@ -42,6 +42,10 @@
 
   <!-- Excluir arquivos duplicados da compressão -->
   <ItemGroup>
+    <Compile Remove="TokenStore\**" />
+    <Content Remove="TokenStore\**" />
+    <EmbeddedResource Remove="TokenStore\**" />
+    <None Remove="TokenStore\**" />
     <StaticWebAsset Remove="wwwroot\lib\**\*.min.js.map" />
     <StaticWebAsset Remove="wwwroot\lib\**\*.js.map" />
   </ItemGroup>

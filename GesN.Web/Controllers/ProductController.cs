@@ -139,9 +139,30 @@ namespace GesN.Web.Controllers
                     return BadRequest("ID do produto é obrigatório");
                 }
 
-                // TODO: Implementar busca do produto quando repositório estiver pronto
-                // Por enquanto, retornar erro
-                return NotFound("Funcionalidade em desenvolvimento");
+                var product = await _productService.GetByIdAsync(id);
+                if (product == null)
+                {
+                    return NotFound("Produto não encontrado");
+                }
+
+                await PopulateDropdownsAsync();
+
+                var viewModel = new EditProductViewModel
+                {
+                    Id = product.Id,
+                    Code = product.Code,
+                    Name = product.Name,
+                    Description = product.Description,
+                    ProductType = product.ProductType,
+                    CategoryId = product.CategoryId,
+                    Price = product.UnitPrice,
+                    Cost = product.Cost,
+                    Unit = product.Unit,
+                    StateCode = (int)product.StateCode,
+                    AvailableCategories = new List<CategorySelectionViewModel>()
+                };
+
+                return PartialView("_Edit", viewModel);
             }
             catch (Exception ex)
             {
@@ -161,8 +182,30 @@ namespace GesN.Web.Controllers
                     return BadRequest("ID do produto é obrigatório");
                 }
 
-                // TODO: Implementar busca do produto quando repositório estiver pronto
-                return NotFound("Funcionalidade em desenvolvimento");
+                var product = await _productService.GetByIdAsync(id);
+                if (product == null)
+                {
+                    return NotFound("Produto não encontrado");
+                }
+
+                var viewModel = new ProductDetailsViewModel
+                {
+                    Id = product.Id,
+                    Code = product.Code,
+                    Name = product.Name,
+                    Description = product.Description,
+                    ProductType = product.ProductType,
+                    CategoryId = product.CategoryId,
+                    CategoryName = product.Category?.Name,
+                    Price = product.UnitPrice,
+                    Cost = product.Cost,
+                    Unit = product.Unit,
+                    StateCode = (int)product.StateCode,
+                    CreatedAt = product.CreatedAt,
+                    ModifiedAt = product.LastModifiedAt
+                };
+
+                return PartialView("_Details", viewModel);
             }
             catch (Exception ex)
             {
@@ -185,14 +228,64 @@ namespace GesN.Web.Controllers
 
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
                 
-                // TODO: Implementar criação do produto quando repositório estiver pronto
-                // Por enquanto, simular sucesso
-                var productId = Guid.NewGuid().ToString();
+                // Criar o produto baseado no tipo
+                Product product = viewModel.ProductType switch
+                {
+                    ProductType.Simple => new SimpleProduct
+                    {
+                        Code = viewModel.Code,
+                        Name = viewModel.Name,
+                        Description = viewModel.Description,
+                        CategoryId = viewModel.CategoryId,
+                        UnitPrice = viewModel.Price ?? 0,
+                        Cost = viewModel.Cost ?? 0,
+                        Unit = viewModel.Unit,
+                        StateCode = ObjectState.Active,
+                        CreatedBy = userId,
+                        CreatedAt = DateTime.UtcNow,
+                        LastModifiedBy = userId,
+                        LastModifiedAt = DateTime.UtcNow
+                    },
+                    ProductType.Composite => new CompositeProduct
+                    {
+                        Code = viewModel.Code,
+                        Name = viewModel.Name,
+                        Description = viewModel.Description,
+                        CategoryId = viewModel.CategoryId,
+                        UnitPrice = viewModel.Price ?? 0,
+                        Cost = viewModel.Cost ?? 0,
+                        Unit = viewModel.Unit,
+                        StateCode = ObjectState.Active,
+                        CreatedBy = userId,
+                        CreatedAt = DateTime.UtcNow,
+                        LastModifiedBy = userId,
+                        LastModifiedAt = DateTime.UtcNow
+                    },
+                    ProductType.Group => new ProductGroup
+                    {
+                        Code = viewModel.Code,
+                        Name = viewModel.Name,
+                        Description = viewModel.Description,
+                        CategoryId = viewModel.CategoryId,
+                        UnitPrice = viewModel.Price ?? 0,
+                        Cost = viewModel.Cost ?? 0,
+                        Unit = viewModel.Unit,
+                        StateCode = ObjectState.Active,
+                        CreatedBy = userId,
+                        CreatedAt = DateTime.UtcNow,
+                        LastModifiedBy = userId,
+                        LastModifiedAt = DateTime.UtcNow
+                    },
+                    _ => throw new ArgumentException("Tipo de produto inválido")
+                };
+
+                var productId = await _productService.CreateAsync(product);
 
                 return Json(new { 
                     success = true, 
                     message = "Produto criado com sucesso!", 
                     productId = productId,
+                    productType = (int)viewModel.ProductType,
                     redirectUrl = Url.Action("FormularioEdicao", new { id = productId })
                 });
             }
@@ -226,8 +319,34 @@ namespace GesN.Web.Controllers
 
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
                 
-                // TODO: Implementar atualização do produto quando repositório estiver pronto
-                return Json(new { success = true, message = "Produto atualizado com sucesso!" });
+                // Buscar o produto existente
+                var existingProduct = await _productService.GetByIdAsync(id);
+                if (existingProduct == null)
+                {
+                    return Json(new { success = false, message = "Produto não encontrado" });
+                }
+
+                // Atualizar propriedades
+                existingProduct.Code = viewModel.Code;
+                existingProduct.Name = viewModel.Name;
+                existingProduct.Description = viewModel.Description;
+                existingProduct.CategoryId = viewModel.CategoryId;
+                existingProduct.UnitPrice = viewModel.Price ?? 0;
+                existingProduct.Cost = viewModel.Cost ?? 0;
+                existingProduct.Unit = viewModel.Unit;
+                existingProduct.StateCode = (ObjectState)viewModel.StateCode;
+                existingProduct.LastModifiedBy = userId;
+                existingProduct.LastModifiedAt = DateTime.UtcNow;
+
+                var success = await _productService.UpdateAsync(existingProduct);
+                if (success)
+                {
+                    return Json(new { success = true, message = "Produto atualizado com sucesso!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Erro ao atualizar produto" });
+                }
             }
             catch (InvalidOperationException ex)
             {
@@ -252,8 +371,15 @@ namespace GesN.Web.Controllers
                     return Json(new { success = false, message = "ID do produto é obrigatório" });
                 }
 
-                // TODO: Implementar exclusão do produto quando repositório estiver pronto
-                return Json(new { success = true, message = "Produto excluído com sucesso!" });
+                var success = await _productService.DeleteAsync(id);
+                if (success)
+                {
+                    return Json(new { success = true, message = "Produto excluído com sucesso!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Erro ao excluir produto ou produto não encontrado" });
+                }
             }
             catch (Exception ex)
             {
@@ -268,9 +394,33 @@ namespace GesN.Web.Controllers
         {
             try
             {
-                // TODO: Implementar listagem quando repositório estiver pronto
-                var products = new List<Product>();
-                return PartialView("_ListaProduct", products);
+                var products = await _productService.GetAllAsync();
+                
+                // Aplicar filtros
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    products = products.Where(p => 
+                        p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        p.Code.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        (p.Description?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false));
+                }
+
+                if (!showInactive)
+                {
+                    products = products.Where(p => p.StateCode == ObjectState.Active);
+                }
+
+                if (productType.HasValue)
+                {
+                    products = products.Where(p => p.ProductType == productType.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(categoryId))
+                {
+                    products = products.Where(p => p.CategoryId == categoryId);
+                }
+
+                return PartialView("_ListaProduct", products.ToList());
             }
             catch (Exception ex)
             {
@@ -290,8 +440,22 @@ namespace GesN.Web.Controllers
                     return Json(new List<object>());
                 }
 
-                // TODO: Implementar busca quando repositório estiver pronto
-                return Json(new List<object>());
+                var products = await _productService.SearchAsync(termo);
+                var result = products.Select(p => new
+                {
+                    id = p.Id,
+                    code = p.Code,
+                    name = p.Name,
+                    description = p.Description,
+                    price = p.UnitPrice,
+                    cost = p.Cost,
+                    unit = p.Unit,
+                    productType = p.ProductType.ToString(),
+                    categoryName = p.Category?.Name,
+                    isActive = p.StateCode == ObjectState.Active
+                }).ToList();
+
+                return Json(result);
             }
             catch (Exception ex)
             {
@@ -311,8 +475,18 @@ namespace GesN.Web.Controllers
                     return Json(new List<object>());
                 }
 
-                // TODO: Implementar autocomplete quando repositório estiver pronto
-                return Json(new List<object>());
+                var products = await _productService.SearchAsync(termo);
+                var result = products.Take(10).Select(p => new
+                {
+                    id = p.Id,
+                    value = p.Name,
+                    label = $"{p.Code} - {p.Name}",
+                    code = p.Code,
+                    price = p.UnitPrice,
+                    unit = p.Unit
+                }).ToList();
+
+                return Json(result);
             }
             catch (Exception ex)
             {
@@ -327,9 +501,45 @@ namespace GesN.Web.Controllers
         {
             try
             {
-                // TODO: Implementar grid quando repositório estiver pronto
-                var products = new List<Product>();
-                return PartialView("_Grid", products);
+                var products = await _productService.GetAllAsync();
+                
+                // Aplicar filtros
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    products = products.Where(p => 
+                        p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        p.Code.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        (p.Description?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false));
+                }
+
+                if (!showInactive)
+                {
+                    products = products.Where(p => p.StateCode == ObjectState.Active);
+                }
+
+                if (productType.HasValue)
+                {
+                    products = products.Where(p => p.ProductType == productType.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(categoryId))
+                {
+                    products = products.Where(p => p.CategoryId == categoryId);
+                }
+
+                // Paginação
+                var totalItems = products.Count();
+                var pagedProducts = products
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                ViewBag.CurrentPage = page;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalItems = totalItems;
+                ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+                return PartialView("_Grid", pagedProducts);
             }
             catch (Exception ex)
             {
