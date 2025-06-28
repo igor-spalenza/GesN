@@ -9,10 +9,10 @@
     <div class="d-flex gap-2">
         <!-- Botões de Ação -->
         <button type="button" class="btn btn-success" onclick="clientesManager.novoClienteModal()">
-            <i class="fas fa-plus"></i> Novo
+            <i class="bi bi-plus-lg"></i> Novo
         </button>
         <button type="button" class="btn btn-outline-primary" onclick="clientesManager.exportarClientes()">
-            <i class="fas fa-download"></i> Exportar
+            <i class="bi bi-download"></i> Exportar
         </button>
     </div>
 </div>
@@ -29,7 +29,7 @@
                     <th>Documento</th>
                     <th>Telefone</th>
                     <th>Status</th>
-                    <th width="140">Ações</th>
+                    <th width="150">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -82,17 +82,17 @@
                                 <button type="button" class="btn btn-outline-primary btn-sm" 
                                         onclick="clientesManager.visualizarCliente('@customer.Id')" 
                                         title="Visualizar">
-                                    <i class="fas fa-eye"></i>
+                                    <i class="bi bi-eye"></i>
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm" 
                                         onclick="clientesManager.editarCliente('@customer.Id')" 
                                         title="Editar">
-                                    <i class="fas fa-edit"></i>
+                                    <i class="bi bi-pencil"></i>
                                 </button>
                                 <button type="button" class="btn btn-outline-danger btn-sm" 
                                         onclick="clientesManager.excluirCliente('@customer.Id', '@customer.FullName')" 
                                         title="Excluir">
-                                    <i class="fas fa-trash"></i>
+                                    <i class="bi bi-trash"></i>
                                 </button>
                             </div>
                         </td>
@@ -106,12 +106,12 @@ else
 {
     <div class="text-center py-5">
         <div class="mb-3">
-            <i class="fas fa-users fa-3x text-muted"></i>
+            <i class="bi bi-people fa-3x text-muted"></i>
         </div>
         <h5 class="text-muted">Nenhum cliente encontrado</h5>
         <p class="text-muted">Comece criando seu primeiro cliente!</p>
         <button type="button" class="btn btn-primary" onclick="clientesManager.novoClienteModal()">
-            <i class="fas fa-plus"></i> Criar Primeiro Cliente
+            <i class="bi bi-plus-lg"></i> Criar Primeiro Cliente
         </button>
     </div>
 } 

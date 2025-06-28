@@ -1,0 +1,143 @@
+@model IEnumerable<GesN.Web.Models.ViewModels.Production.ProductViewModel>
+
+<div class="table-responsive">
+    <table class="table table-hover table-striped" id="productsTable">
+        <thead class="table-dark">
+            <tr>
+                <th>SKU</th>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Preço Unit.</th>
+                <th>Status</th>
+                <th width="180px">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(product.SKU))
+                        {
+                            <code class="text-primary">@product.SKU</code>
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </td>
+                    <td>
+                        <div>
+                            <strong>@product.Name</strong>
+                            @if (!string.IsNullOrEmpty(product.Description))
+                            {
+                                <br><small class="text-muted">@product.Description</small>
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        @{
+                            var typeClass = product.ProductType switch
+                            {
+                                ProductType.Simple => "badge-primary",
+                                ProductType.Composite => "badge-info", 
+                                ProductType.Group => "badge-success",
+                                _ => "badge-secondary"
+                            };
+                        }
+                        <span class="badge @typeClass">@product.ProductTypeDisplay</span>
+                    </td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(product.CategoryName))
+                        {
+                            <span class="badge bg-light text-dark">@product.CategoryName</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </td>
+                    <td>
+                        @if (product.Price > 0)
+                        {
+                            <span class="fw-bold text-success">@product.PriceDisplay</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">N/A</span>
+                        }
+                    </td>
+                    <td>
+                        @if (product.UnitPrice > 0)
+                        {
+                            <span class="text-info">@product.UnitPriceDisplay</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">N/A</span>
+                        }
+                    </td>
+                    <td>
+                        @if (product.StateCode == 1)
+                        {
+                            <span class="badge bg-success">Ativo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Inativo</span>
+                        }
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                    onclick="productManager.verDetalhes('@product.Id')" 
+                                    title="Ver Detalhes">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" 
+                                    onclick="productManager.editarProduct('@product.Id')" 
+                                    title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                    onclick="productManager.excluirProduct('@product.Id', '@product.Name')" 
+                                    title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            @if (product.ProductType == ProductType.Composite)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-info" 
+                                        onclick="productManager.gerenciarComponentes('@product.Id')" 
+                                        title="Gerenciar Componentes">
+                                    <i class="bi bi-gear"></i>
+                                </button>
+                            }
+                            @if (product.ProductType == ProductType.Group)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                        onclick="productManager.gerenciarGrupo('@product.Id')" 
+                                        title="Gerenciar Grupo">
+                                    <i class="bi bi-layers"></i>
+                                </button>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-box-seam fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">Nenhum produto encontrado</h5>
+        <p class="text-muted">Clique no botão "Novo Produto" para criar o primeiro produto.</p>
+        <button type="button" class="btn btn-primary" onclick="productManager.novoProduct()">
+            <i class="bi bi-plus-lg"></i> Criar Primeiro Produto
+        </button>
+    </div>
+} 

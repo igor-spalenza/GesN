@@ -1,0 +1,390 @@
+@model IEnumerable<GesN.Web.Models.Entities.Production.ProductionOrder>
+
+@{
+    ViewData["Title"] = "Ordens de Produção";
+}
+
+<div class="container-fluid">
+    <!-- Status Cards -->
+    <div class="row mb-3">
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>@ViewBag.PendingCount</h3>
+                    <p>Pendentes</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <a href="@Url.Action("Index", new { status = "Pending" })" class="small-box-footer">
+                    Ver Detalhes <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3>@ViewBag.CompletedCount</h3>
+                    <p>Concluídas (30 dias)</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <a href="@Url.Action("Index", new { status = "Completed" })" class="small-box-footer">
+                    Ver Detalhes <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>@ViewBag.OverdueCount</h3>
+                    <p>Atrasadas</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <a href="@Url.Action("Overdue")" class="small-box-footer">
+                    Ver Detalhes <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-secondary">
+                <div class="inner">
+                    <h3>@(ViewBag.AverageCompletionTime?.ToString("F1") ?? "0")h</h3>
+                    <p>Tempo Médio</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-stopwatch"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">@ViewData["Title"]</h3>
+                    <div class="card-tools">
+                        <div class="btn-group">
+                            <a href="@Url.Action("Create")" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus"></i> Nova Ordem
+                            </a>
+                            <a href="@Url.Action("Dashboard")" class="btn btn-info btn-sm">
+                                <i class="fas fa-chart-bar"></i> Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filtros -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <select class="form-control" id="statusFilter">
+                                <option value="">Todos os Status</option>
+                                <option value="Pending">Pendente</option>
+                                <option value="Scheduled">Agendado</option>
+                                <option value="InProgress">Em Progresso</option>
+                                <option value="Paused">Pausado</option>
+                                <option value="Completed">Concluído</option>
+                                <option value="Cancelled">Cancelado</option>
+                                <option value="Failed">Falhou</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-control" id="priorityFilter">
+                                <option value="">Todas as Prioridades</option>
+                                <option value="Low">Baixa</option>
+                                <option value="Normal">Normal</option>
+                                <option value="High">Alta</option>
+                                <option value="Urgent">Urgente</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Buscar por produto, pedido ou responsável...">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-secondary btn-block" id="clearFilters">
+                                <i class="fas fa-times"></i> Limpar
+                            </button>
+                        </div>
+                    </div>
+
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped" id="ordersTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Produto</th>
+                                        <th>Quantidade</th>
+                                        <th>Status</th>
+                                        <th>Prioridade</th>
+                                        <th>Agendado</th>
+                                        <th>Responsável</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model)
+                                    {
+                                        <tr class="@(order.Status == ProductionOrderStatus.Failed ? "table-danger" : order.Status == ProductionOrderStatus.Completed ? "table-success" : "")">
+                                            <td>
+                                                <small class="text-muted">#@order.Id.Substring(0, 8)</small>
+                                            </td>
+                                            <td>
+                                                <strong>@order.Product?.Name</strong>
+                                                @if (!string.IsNullOrEmpty(order.OrderId))
+                                                {
+                                                    <br><small class="text-muted">Pedido: #@order.OrderId</small>
+                                                }
+                                            </td>
+                                            <td>@order.Quantity</td>
+                                            <td>
+                                                @{
+                                                    var statusClass = order.Status switch
+                                                    {
+                                                        ProductionOrderStatus.Pending => "badge-secondary",
+                                                        ProductionOrderStatus.Scheduled => "badge-info",
+                                                        ProductionOrderStatus.InProgress => "badge-primary",
+                                                        ProductionOrderStatus.Paused => "badge-warning",
+                                                        ProductionOrderStatus.Completed => "badge-success",
+                                                        ProductionOrderStatus.Cancelled => "badge-dark",
+                                                        ProductionOrderStatus.Failed => "badge-danger",
+                                                        _ => "badge-secondary"
+                                                    };
+                                                    
+                                                    var statusText = order.Status switch
+                                                    {
+                                                        ProductionOrderStatus.Pending => "Pendente",
+                                                        ProductionOrderStatus.Scheduled => "Agendado",
+                                                        ProductionOrderStatus.InProgress => "Em Progresso",
+                                                        ProductionOrderStatus.Paused => "Pausado",
+                                                        ProductionOrderStatus.Completed => "Concluído",
+                                                        ProductionOrderStatus.Cancelled => "Cancelado",
+                                                        ProductionOrderStatus.Failed => "Falhou",
+                                                        _ => order.Status.ToString()
+                                                    };
+                                                }
+                                                <span class="badge @statusClass">@statusText</span>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var priorityClass = order.Priority switch
+                                                    {
+                                                        ProductionOrderPriority.Low => "badge-light",
+                                                        ProductionOrderPriority.Normal => "badge-secondary",
+                                                        ProductionOrderPriority.High => "badge-warning",
+                                                        ProductionOrderPriority.Urgent => "badge-danger",
+                                                        _ => "badge-secondary"
+                                                    };
+                                                    
+                                                    var priorityText = order.Priority switch
+                                                    {
+                                                        ProductionOrderPriority.Low => "Baixa",
+                                                        ProductionOrderPriority.Normal => "Normal",
+                                                        ProductionOrderPriority.High => "Alta",
+                                                        ProductionOrderPriority.Urgent => "Urgente",
+                                                        _ => order.Priority.ToString()
+                                                    };
+                                                }
+                                                <span class="badge @priorityClass">@priorityText</span>
+                                            </td>
+                                            <td>
+                                                @if (order.ScheduledStartDate.HasValue)
+                                                {
+                                                    @order.ScheduledStartDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                                    @if (order.ScheduledEndDate.HasValue && order.ScheduledEndDate < DateTime.Now && order.Status != ProductionOrderStatus.Completed)
+                                                    {
+                                                        <br><small class="text-danger"><i class="fas fa-exclamation-triangle"></i> Atrasado</small>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Não agendado</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(order.AssignedTo))
+                                                {
+                                                    @order.AssignedTo
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Não atribuído</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Details", new { id = order.Id })" 
+                                                       class="btn btn-info btn-sm" title="Detalhes">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    
+                                                    @if (order.Status == ProductionOrderStatus.Pending || order.Status == ProductionOrderStatus.Scheduled)
+                                                    {
+                                                        <button type="button" class="btn btn-success btn-sm" 
+                                                                onclick="startProduction('@order.Id')" title="Iniciar Produção">
+                                                            <i class="fas fa-play"></i>
+                                                        </button>
+                                                    }
+                                                    
+                                                    @if (order.Status == ProductionOrderStatus.InProgress)
+                                                    {
+                                                        <button type="button" class="btn btn-warning btn-sm" 
+                                                                onclick="pauseProduction('@order.Id')" title="Pausar">
+                                                            <i class="fas fa-pause"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-primary btn-sm" 
+                                                                onclick="completeProduction('@order.Id')" title="Concluir">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    }
+                                                    
+                                                    @if (order.Status == ProductionOrderStatus.Paused)
+                                                    {
+                                                        <button type="button" class="btn btn-info btn-sm" 
+                                                                onclick="resumeProduction('@order.Id')" title="Retomar">
+                                                            <i class="fas fa-play"></i>
+                                                        </button>
+                                                    }
+                                                    
+                                                    <a href="@Url.Action("Edit", new { id = order.Id })" 
+                                                       class="btn btn-warning btn-sm" title="Editar">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Nenhuma ordem de produção encontrada. <a href="@Url.Action("Create")">Clique aqui para criar a primeira</a>.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var table = $('#ordersTable').DataTable({
+                "language": {
+                    "url": "/lib/datatables.net/pt-br.json"
+                },
+                "order": [[5, "asc"], [3, "asc"]],
+                "pageLength": 25,
+                "columnDefs": [
+                    { "orderable": false, "targets": [7] }
+                ]
+            });
+
+            // Filtros
+            $('#statusFilter, #priorityFilter').on('change', function() {
+                applyFilters();
+            });
+
+            $('#searchInput').on('keyup', function() {
+                table.search(this.value).draw();
+            });
+
+            $('#clearFilters').on('click', function() {
+                $('#statusFilter, #priorityFilter').val('');
+                $('#searchInput').val('');
+                table.search('').columns().search('').draw();
+            });
+
+            function applyFilters() {
+                var statusFilter = $('#statusFilter').val();
+                var priorityFilter = $('#priorityFilter').val();
+                
+                table.column(3).search(statusFilter).draw();
+                table.column(4).search(priorityFilter).draw();
+            }
+        });
+
+        // Funções de controle de produção
+        function startProduction(orderId) {
+            var assignedTo = prompt('Responsável pela produção:');
+            if (assignedTo) {
+                $.post('@Url.Action("StartProduction")', {
+                    id: orderId,
+                    assignedTo: assignedTo
+                }).done(function(result) {
+                    if (result.success) {
+                        showSuccess(result.message);
+                        location.reload();
+                    } else {
+                        showError(result.message);
+                    }
+                });
+            }
+        }
+
+        function completeProduction(orderId) {
+            var actualTime = prompt('Tempo real gasto (horas):');
+            $.post('@Url.Action("CompleteProduction")', {
+                id: orderId,
+                actualTime: actualTime
+            }).done(function(result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                    location.reload();
+                } else {
+                    showError(result.message);
+                }
+            });
+        }
+
+        function pauseProduction(orderId) {
+            var reason = prompt('Motivo da pausa:');
+            if (reason) {
+                $.post('@Url.Action("PauseProduction")', {
+                    id: orderId,
+                    reason: reason
+                }).done(function(result) {
+                    if (result.success) {
+                        showSuccess(result.message);
+                        location.reload();
+                    } else {
+                        showError(result.message);
+                    }
+                });
+            }
+        }
+
+        function resumeProduction(orderId) {
+            $.post('@Url.Action("ResumeProduction")', {
+                id: orderId
+            }).done(function(result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                    location.reload();
+                } else {
+                    showError(result.message);
+                }
+            });
+        }
+
+        function showSuccess(message) {
+            toastr.success(message);
+        }
+
+        function showError(message) {
+            toastr.error(message);
+        }
+    </script>
+} 

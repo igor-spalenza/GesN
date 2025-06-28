@@ -29,7 +29,7 @@ namespace GesN.Web.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+        public async Task<IEnumerable<OrderEntry>> GetAllOrdersAsync()
         {
             try
             {
@@ -42,15 +42,25 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<Order?> GetOrderByIdAsync(string id)
+        public async Task<OrderEntry?> GetOrderByIdAsync(string id)
         {
             try
             {
+                if (string.IsNullOrEmpty(id))
+                {
+                    _logger.LogWarning("ID do pedido não fornecido");
+                    return null;
+                }
+
                 var order = await _orderRepository.GetByIdAsync(id);
+                
                 if (order != null)
                 {
-                    order.Items = (await _orderItemRepository.GetByOrderIdAsync(id)).ToList();
+                    // Carrega os itens do pedido
+                    var items = await _orderItemRepository.GetByOrderIdAsync(id);
+                    order.Items = items.ToList();
                 }
+
                 return order;
             }
             catch (Exception ex)
@@ -60,15 +70,25 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<Order?> GetOrderByNumberAsync(string numberSequence)
+        public async Task<OrderEntry?> GetOrderByNumberAsync(string numberSequence)
         {
             try
             {
+                if (string.IsNullOrEmpty(numberSequence))
+                {
+                    _logger.LogWarning("Número do pedido não fornecido");
+                    return null;
+                }
+
                 var order = await _orderRepository.GetByNumberAsync(numberSequence);
+                
                 if (order != null)
                 {
-                    order.Items = (await _orderItemRepository.GetByOrderIdAsync(order.Id)).ToList();
+                    // Carrega os itens do pedido
+                    var items = await _orderItemRepository.GetByOrderIdAsync(order.Id);
+                    order.Items = items.ToList();
                 }
+
                 return order;
             }
             catch (Exception ex)
@@ -78,16 +98,17 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<IEnumerable<Order>> GetOrdersByCustomerIdAsync(string customerId)
+        public async Task<IEnumerable<OrderEntry>> GetOrdersByCustomerIdAsync(string customerId)
         {
             try
             {
-                var orders = await _orderRepository.GetByCustomerIdAsync(customerId);
-                foreach (var order in orders)
+                if (string.IsNullOrEmpty(customerId))
                 {
-                    order.Items = (await _orderItemRepository.GetByOrderIdAsync(order.Id)).ToList();
+                    _logger.LogWarning("ID do cliente não fornecido");
+                    return Enumerable.Empty<OrderEntry>();
                 }
-                return orders;
+
+                return await _orderRepository.GetByCustomerIdAsync(customerId);
             }
             catch (Exception ex)
             {
@@ -96,16 +117,11 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<IEnumerable<Order>> GetOrdersByStatusAsync(OrderStatus status)
+        public async Task<IEnumerable<OrderEntry>> GetOrdersByStatusAsync(OrderStatus status)
         {
             try
             {
-                var orders = await _orderRepository.GetByStatusAsync(status);
-                foreach (var order in orders)
-                {
-                    order.Items = (await _orderItemRepository.GetByOrderIdAsync(order.Id)).ToList();
-                }
-                return orders;
+                return await _orderRepository.GetByStatusAsync(status);
             }
             catch (Exception ex)
             {
@@ -114,16 +130,11 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<IEnumerable<Order>> GetActiveOrdersAsync()
+        public async Task<IEnumerable<OrderEntry>> GetActiveOrdersAsync()
         {
             try
             {
-                var orders = await _orderRepository.GetActiveAsync();
-                foreach (var order in orders)
-                {
-                    order.Items = (await _orderItemRepository.GetByOrderIdAsync(order.Id)).ToList();
-                }
-                return orders;
+                return await _orderRepository.GetActiveAsync();
             }
             catch (Exception ex)
             {
@@ -132,16 +143,11 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<IEnumerable<Order>> GetPendingDeliveryOrdersAsync()
+        public async Task<IEnumerable<OrderEntry>> GetPendingDeliveryOrdersAsync()
         {
             try
             {
-                var orders = await _orderRepository.GetPendingDeliveryAsync();
-                foreach (var order in orders)
-                {
-                    order.Items = (await _orderItemRepository.GetByOrderIdAsync(order.Id)).ToList();
-                }
-                return orders;
+                return await _orderRepository.GetPendingDeliveryAsync();
             }
             catch (Exception ex)
             {
@@ -150,16 +156,11 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<IEnumerable<Order>> GetPendingPrintOrdersAsync()
+        public async Task<IEnumerable<OrderEntry>> GetPendingPrintOrdersAsync()
         {
             try
             {
-                var orders = await _orderRepository.GetPendingPrintAsync();
-                foreach (var order in orders)
-                {
-                    order.Items = (await _orderItemRepository.GetByOrderIdAsync(order.Id)).ToList();
-                }
-                return orders;
+                return await _orderRepository.GetPendingPrintAsync();
             }
             catch (Exception ex)
             {
@@ -168,16 +169,16 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<IEnumerable<Order>> SearchOrdersAsync(string searchTerm)
+        public async Task<IEnumerable<OrderEntry>> SearchOrdersAsync(string searchTerm)
         {
             try
             {
-                var orders = await _orderRepository.SearchAsync(searchTerm);
-                foreach (var order in orders)
+                if (string.IsNullOrEmpty(searchTerm))
                 {
-                    order.Items = (await _orderItemRepository.GetByOrderIdAsync(order.Id)).ToList();
+                    return await GetAllOrdersAsync();
                 }
-                return orders;
+
+                return await _orderRepository.SearchAsync(searchTerm);
             }
             catch (Exception ex)
             {
@@ -195,7 +196,7 @@ namespace GesN.Web.Services
                     throw new InvalidOperationException("Dados do pedido inválidos");
 
                 // Converte ViewModel para Entity
-                var order = new Order
+                var order = new OrderEntry
                 {
                     CustomerId = orderViewModel.CustomerId,
                     Type = orderViewModel.Type,
@@ -224,7 +225,7 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<bool> UpdateOrderAsync(Order order, string modifiedBy)
+        public async Task<bool> UpdateOrderAsync(OrderEntry order, string modifiedBy)
         {
             try
             {
@@ -238,37 +239,16 @@ namespace GesN.Web.Services
                 // Atualiza o pedido
                 var success = await _orderRepository.UpdateAsync(order);
 
-                // Atualiza os itens
-                if (success && order.Items != null)
+                if (success)
                 {
-                    // Remove itens excluídos
-                    var existingItems = await _orderItemRepository.GetByOrderIdAsync(order.Id);
-                    var itemsToDelete = existingItems.Where(ei => !order.Items.Any(i => i.Id == ei.Id));
-                    foreach (var item in itemsToDelete)
-                    {
-                        await _orderItemRepository.DeleteAsync(item.Id);
-                    }
-
-                    // Atualiza ou cria itens
-                    foreach (var item in order.Items)
-                    {
-                        item.OrderId = order.Id;
-                        if (string.IsNullOrEmpty(item.Id))
-                        {
-                            await _orderItemRepository.CreateAsync(item);
-                        }
-                        else
-                        {
-                            await _orderItemRepository.UpdateAsync(item);
-                        }
-                    }
+                    _logger.LogInformation("Pedido atualizado com sucesso: {OrderId}", order.Id);
                 }
 
                 return success;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar pedido: {Id}", order.Id);
+                _logger.LogError(ex, "Erro ao atualizar pedido: {OrderId}", order.Id);
                 throw;
             }
         }
@@ -277,42 +257,45 @@ namespace GesN.Web.Services
         {
             try
             {
-                // Verifica se o pedido existe
-                var order = await _orderRepository.GetByIdAsync(id);
-                if (order == null)
+                if (string.IsNullOrEmpty(id))
+                {
+                    _logger.LogWarning("ID do pedido não fornecido para exclusão");
                     return false;
+                }
 
-                // Verifica se pode ser excluído
-                if (order.Status != OrderStatus.Draft)
-                    throw new InvalidOperationException("Apenas pedidos em rascunho podem ser excluídos");
+                var success = await _orderRepository.DeleteAsync(id);
 
-                // Exclui os itens
-                await _orderItemRepository.DeleteByOrderIdAsync(id);
+                if (success)
+                {
+                    _logger.LogInformation("Pedido excluído com sucesso: {OrderId}", id);
+                }
 
-                // Exclui o pedido
-                return await _orderRepository.DeleteAsync(id);
+                return success;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao excluir pedido: {Id}", id);
+                _logger.LogError(ex, "Erro ao excluir pedido: {OrderId}", id);
                 throw;
             }
         }
 
-        public async Task<bool> OrderExistsAsync(string id)
+        public async Task<IEnumerable<OrderEntry>> GetPagedOrdersAsync(int page, int pageSize)
         {
             try
             {
-                return await _orderRepository.ExistsAsync(id);
+                if (page < 1) page = 1;
+                if (pageSize < 1) pageSize = 10;
+
+                return await _orderRepository.GetPagedAsync(page, pageSize);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao verificar existência do pedido: {Id}", id);
+                _logger.LogError(ex, "Erro ao buscar pedidos paginados: Page={Page}, PageSize={PageSize}", page, pageSize);
                 throw;
             }
         }
 
-        public async Task<int> GetOrderCountAsync()
+        public async Task<int> CountOrdersAsync()
         {
             try
             {
@@ -325,536 +308,266 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<IEnumerable<Order>> GetPagedOrdersAsync(int page, int pageSize)
-        {
-            try
-            {
-                var orders = await _orderRepository.GetPagedAsync(page, pageSize);
-                foreach (var order in orders)
-                {
-                    order.Items = (await _orderItemRepository.GetByOrderIdAsync(order.Id)).ToList();
-                }
-                return orders;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao buscar pedidos paginados: Page={Page}, PageSize={PageSize}", page, pageSize);
-                throw;
-            }
-        }
-
-        public async Task<string> GetNextOrderNumberAsync()
-        {
-            try
-            {
-                return await _orderRepository.GetNextNumberSequenceAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao obter próximo número de pedido");
-                throw;
-            }
-        }
-
-        public async Task<bool> UpdateOrderPrintStatusAsync(string id, PrintStatus status, int? batchNumber = null)
-        {
-            try
-            {
-                // Verifica se o pedido existe
-                if (!await _orderRepository.ExistsAsync(id))
-                    return false;
-
-                return await _orderRepository.UpdatePrintStatusAsync(id, status, batchNumber);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao atualizar status de impressão do pedido: {Id}", id);
-                throw;
-            }
-        }
-
         public async Task<bool> UpdateOrderStatusAsync(string id, OrderStatus status, string modifiedBy)
         {
             try
             {
-                // Verifica se o pedido existe
-                var order = await _orderRepository.GetByIdAsync(id);
-                if (order == null)
+                if (string.IsNullOrEmpty(id))
+                {
+                    _logger.LogWarning("ID do pedido não fornecido para atualização de status");
                     return false;
+                }
 
-                // Verifica se a transição de status é válida
-                if (!IsValidStatusTransition(order.Status, status))
-                    throw new InvalidOperationException($"Transição de status inválida: {order.Status} -> {status}");
+                var success = await _orderRepository.UpdateStatusAsync(id, status, modifiedBy);
 
-                return await _orderRepository.UpdateStatusAsync(id, status);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao atualizar status do pedido: {Id}", id);
-                throw;
-            }
-        }
-
-        public async Task<OrderItem?> GetOrderItemByIdAsync(string id)
-        {
-            try
-            {
-                return await _orderItemRepository.GetByIdAsync(id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao buscar item de pedido por ID: {Id}", id);
-                throw;
-            }
-        }
-
-        public async Task<IEnumerable<OrderItem>> GetOrderItemsByOrderIdAsync(string orderId)
-        {
-            try
-            {
-                return await _orderItemRepository.GetByOrderIdAsync(orderId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao buscar itens do pedido: {OrderId}", orderId);
-                throw;
-            }
-        }
-
-        public async Task<IEnumerable<OrderItem>> GetOrderItemsAsync(string orderId)
-        {
-            try
-            {
-                return await _orderItemRepository.GetByOrderIdAsync(orderId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao buscar itens do pedido: {OrderId}", orderId);
-                throw;
-            }
-        }
-
-        public async Task<string> AddOrderItemAsync(string orderId, OrderItem item, string modifiedBy)
-        {
-            try
-            {
-                // Verifica se o pedido existe
-                var order = await _orderRepository.GetByIdAsync(orderId);
-                if (order == null)
-                    throw new InvalidOperationException("Pedido não encontrado");
-
-                // Verifica se o pedido pode ser alterado
-                if (order.Status != OrderStatus.Draft)
-                    throw new InvalidOperationException("Apenas pedidos em rascunho podem ser alterados");
-
-                // Valida o item
-                if (!await ValidateOrderItemDataAsync(item))
-                    throw new InvalidOperationException("Item de pedido inválido");
-
-                // Adiciona o item
-                item.OrderId = orderId;
-                item.CreatedBy = modifiedBy;
-                item.LastModifiedBy = modifiedBy;
-                var itemId = await _orderItemRepository.CreateAsync(item);
-
-                // Recalcula totais do pedido
-                await CalculateOrderTotalsAsync(orderId);
-
-                return itemId;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao adicionar item ao pedido: {OrderId}", orderId);
-                throw;
-            }
-        }
-
-        public async Task<bool> UpdateOrderItemAsync(string orderId, OrderItem item, string modifiedBy)
-        {
-            try
-            {
-                // Verifica se o pedido existe
-                var order = await _orderRepository.GetByIdAsync(orderId);
-                if (order == null)
-                    return false;
-
-                // Verifica se o pedido pode ser alterado
-                if (order.Status != OrderStatus.Draft)
-                    throw new InvalidOperationException("Apenas pedidos em rascunho podem ser alterados");
-
-                // Verifica se o item existe
-                var existingItem = await _orderItemRepository.GetByIdAsync(item.Id);
-                if (existingItem == null)
-                    return false;
-
-                // Verifica se o item pertence ao pedido
-                if (existingItem.OrderId != orderId)
-                    throw new InvalidOperationException("Item não pertence ao pedido");
-
-                // Valida o item
-                if (!await ValidateOrderItemDataAsync(item))
-                    throw new InvalidOperationException("Item de pedido inválido");
-
-                // Atualiza o item
-                item.OrderId = orderId;
-                item.LastModifiedBy = modifiedBy;
-                var success = await _orderItemRepository.UpdateAsync(item);
-
-                // Recalcula totais do pedido
                 if (success)
                 {
-                    await CalculateOrderTotalsAsync(orderId);
+                    _logger.LogInformation("Status do pedido atualizado: {OrderId} -> {Status}", id, status);
                 }
 
                 return success;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar item do pedido: {OrderId}", orderId);
+                _logger.LogError(ex, "Erro ao atualizar status do pedido: {OrderId}", id);
                 throw;
             }
         }
 
-        public async Task<bool> RemoveOrderItemAsync(string orderId, string itemId, string modifiedBy)
+        public async Task<bool> UpdatePrintStatusAsync(string id, PrintStatus printStatus, string modifiedBy)
         {
             try
             {
-                // Verifica se o pedido existe
-                var order = await _orderRepository.GetByIdAsync(orderId);
-                if (order == null)
+                if (string.IsNullOrEmpty(id))
+                {
+                    _logger.LogWarning("ID do pedido não fornecido para atualização de status de impressão");
                     return false;
+                }
 
-                // Verifica se o pedido pode ser alterado
-                if (order.Status != OrderStatus.Draft)
-                    throw new InvalidOperationException("Apenas pedidos em rascunho podem ser alterados");
+                var success = await _orderRepository.UpdatePrintStatusAsync(id, printStatus, modifiedBy);
 
-                // Verifica se o item existe
-                var item = await _orderItemRepository.GetByIdAsync(itemId);
-                if (item == null)
-                    return false;
-
-                // Verifica se o item pertence ao pedido
-                if (item.OrderId != orderId)
-                    throw new InvalidOperationException("Item não pertence ao pedido");
-
-                // Remove o item
-                var success = await _orderItemRepository.DeleteAsync(itemId);
-
-                // Recalcula totais do pedido
                 if (success)
                 {
-                    await CalculateOrderTotalsAsync(orderId);
+                    _logger.LogInformation("Status de impressão do pedido atualizado: {OrderId} -> {PrintStatus}", id, printStatus);
                 }
 
                 return success;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao remover item do pedido: {OrderId}", orderId);
+                _logger.LogError(ex, "Erro ao atualizar status de impressão do pedido: {OrderId}", id);
                 throw;
             }
         }
 
-        public async Task<bool> CompleteOrderAsync(string id, string modifiedBy)
+        public async Task<OrderStatisticsViewModel> GetOrderStatisticsAsync()
         {
             try
             {
-                // Verifica se o pedido existe
-                var order = await _orderRepository.GetByIdAsync(id);
-                if (order == null)
-                    return false;
+                var allOrders = await _orderRepository.GetAllAsync();
+                var stats = new OrderStatisticsViewModel();
 
-                // Verifica se o pedido pode ser completado
-                if (order.Status != OrderStatus.Delivered)
-                    throw new InvalidOperationException("Apenas pedidos entregues podem ser completados");
+                stats.TotalOrders = allOrders.Count();
+                stats.DraftOrders = allOrders.Count(o => o.Status == OrderStatus.Draft);
+                stats.ConfirmedOrders = allOrders.Count(o => o.Status == OrderStatus.Confirmed);
+                stats.InProductionOrders = allOrders.Count(o => o.Status == OrderStatus.InProduction);
+                stats.PendingDeliveryOrders = allOrders.Count(o => o.Status == OrderStatus.ReadyForDelivery || o.Status == OrderStatus.InDelivery);
+                stats.CompletedOrders = allOrders.Count(o => o.Status == OrderStatus.Completed || o.Status == OrderStatus.Delivered);
+                stats.TotalOrdersValue = allOrders.Sum(o => o.TotalAmount);
 
-                // Atualiza o status
-                return await _orderRepository.UpdateStatusAsync(id, OrderStatus.Completed);
+                var thisMonth = DateTime.Now.Month;
+                var thisYear = DateTime.Now.Year;
+                stats.NewOrdersThisMonth = allOrders.Count(o => o.CreatedAt.Month == thisMonth && o.CreatedAt.Year == thisYear);
+
+                return stats;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao completar pedido: {Id}", id);
+                _logger.LogError(ex, "Erro ao obter estatísticas dos pedidos");
                 throw;
             }
         }
 
-        public async Task<bool> CancelOrderAsync(string id, string modifiedBy)
+        public OrderViewModel ConvertToViewModel(OrderEntry order)
         {
-            try
+            return new OrderViewModel
             {
-                // Verifica se o pedido existe
-                var order = await _orderRepository.GetByIdAsync(id);
-                if (order == null)
-                    return false;
-
-                // Verifica se o pedido pode ser cancelado
-                if (order.Status == OrderStatus.Completed || order.Status == OrderStatus.Cancelled)
-                    throw new InvalidOperationException("Pedido não pode ser cancelado");
-
-                // Atualiza o status
-                return await _orderRepository.UpdateStatusAsync(id, OrderStatus.Cancelled);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao cancelar pedido: {Id}", id);
-                throw;
-            }
-        }
-
-        public async Task<bool> ConfirmOrderAsync(string id, string modifiedBy)
-        {
-            try
-            {
-                // Verifica se o pedido existe
-                var order = await _orderRepository.GetByIdAsync(id);
-                if (order == null)
-                    return false;
-
-                // Verifica se o pedido pode ser confirmado
-                if (order.Status != OrderStatus.Draft)
-                    throw new InvalidOperationException("Apenas pedidos em rascunho podem ser confirmados");
-
-                // Verifica se tem itens
-                var items = await _orderItemRepository.GetByOrderIdAsync(id);
-                if (!items.Any())
-                    throw new InvalidOperationException("Pedido não possui itens");
-
-                // Atualiza o status
-                return await _orderRepository.UpdateStatusAsync(id, OrderStatus.Confirmed);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao confirmar pedido: {Id}", id);
-                throw;
-            }
-        }
-
-        public async Task<bool> MarkOrderReadyForDeliveryAsync(string id, string modifiedBy)
-        {
-            try
-            {
-                // Verifica se o pedido existe
-                var order = await _orderRepository.GetByIdAsync(id);
-                if (order == null)
-                    return false;
-
-                // Verifica se o pedido pode ser marcado para entrega
-                if (order.Status != OrderStatus.InProduction)
-                    throw new InvalidOperationException("Apenas pedidos em produção podem ser marcados para entrega");
-
-                // Atualiza o status
-                return await _orderRepository.UpdateStatusAsync(id, OrderStatus.ReadyForDelivery);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao marcar pedido para entrega: {Id}", id);
-                throw;
-            }
-        }
-
-        public async Task<bool> StartOrderDeliveryAsync(string id, string modifiedBy)
-        {
-            try
-            {
-                // Verifica se o pedido existe
-                var order = await _orderRepository.GetByIdAsync(id);
-                if (order == null)
-                    return false;
-
-                // Verifica se o pedido pode iniciar entrega
-                if (order.Status != OrderStatus.ReadyForDelivery)
-                    throw new InvalidOperationException("Apenas pedidos prontos para entrega podem iniciar entrega");
-
-                // Atualiza o status
-                return await _orderRepository.UpdateStatusAsync(id, OrderStatus.InDelivery);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao iniciar entrega do pedido: {Id}", id);
-                throw;
-            }
-        }
-
-        public async Task<bool> MarkOrderDeliveredAsync(string id, string modifiedBy)
-        {
-            try
-            {
-                // Verifica se o pedido existe
-                var order = await _orderRepository.GetByIdAsync(id);
-                if (order == null)
-                    return false;
-
-                // Verifica se o pedido pode ser entregue
-                if (order.Status != OrderStatus.InDelivery)
-                    throw new InvalidOperationException("Apenas pedidos em entrega podem ser marcados como entregues");
-
-                // Atualiza o status
-                return await _orderRepository.UpdateStatusAsync(id, OrderStatus.Delivered);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao entregar pedido: {Id}", id);
-                throw;
-            }
-        }
-
-        public async Task<bool> StartOrderProductionAsync(string id, string modifiedBy)
-        {
-            try
-            {
-                // Verifica se o pedido existe
-                var order = await _orderRepository.GetByIdAsync(id);
-                if (order == null)
-                    return false;
-
-                // Verifica se o pedido pode iniciar produção
-                if (order.Status != OrderStatus.Confirmed)
-                    throw new InvalidOperationException("Apenas pedidos confirmados podem iniciar produção");
-
-                // Atualiza o status
-                return await _orderRepository.UpdateStatusAsync(id, OrderStatus.InProduction);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao iniciar produção do pedido: {Id}", id);
-                throw;
-            }
-        }
-
-        public async Task<bool> ValidateOrderDataAsync(Order order)
-        {
-            // Validações básicas
-            if (order == null)
-                return false;
-
-            if (string.IsNullOrEmpty(order.CustomerId))
-                return false;
-
-            if (order.OrderDate == default)
-                return false;
-
-            if (order.DeliveryDate == default)
-                return false;
-
-            if (order.DeliveryDate < order.OrderDate)
-                return false;
-
-            // Verifica se o cliente existe
-            var customer = await _customerRepository.GetByIdAsync(order.CustomerId);
-            if (customer == null)
-                return false;
-
-            // Valida os itens
-            if (order.Items != null)
-            {
-                foreach (var item in order.Items)
-                {
-                    if (!await ValidateOrderItemDataAsync(item))
-                        return false;
-                }
-            }
-
-            return true;
-        }
-
-        public async Task<bool> ValidateOrderItemDataAsync(OrderItem item)
-        {
-            if (item == null)
-                return false;
-
-            if (string.IsNullOrEmpty(item.ProductId))
-                return false;
-
-            if (item.Quantity <= 0)
-                return false;
-
-            if (item.UnitPrice < 0)
-                return false;
-
-            if (item.DiscountAmount < 0)
-                return false;
-
-            if (item.TaxAmount < 0)
-                return false;
-
-            return true;
-        }
-
-        public async Task<bool> ValidateCreateOrderDataAsync(CreateOrderViewModel orderViewModel)
-        {
-            if (orderViewModel == null)
-                return false;
-
-            if (string.IsNullOrEmpty(orderViewModel.CustomerId))
-                return false;
-
-            // Verifica se o cliente existe
-            var customer = await _customerRepository.GetByIdAsync(orderViewModel.CustomerId);
-            if (customer == null)
-                return false;
-
-            return true;
-        }
-
-        private bool IsValidStatusTransition(OrderStatus currentStatus, OrderStatus newStatus)
-        {
-            return (currentStatus, newStatus) switch
-            {
-                // Rascunho -> Confirmado
-                (OrderStatus.Draft, OrderStatus.Confirmed) => true,
-
-                // Confirmado -> Em Produção
-                (OrderStatus.Confirmed, OrderStatus.InProduction) => true,
-
-                // Em Produção -> Pronto para Entrega
-                (OrderStatus.InProduction, OrderStatus.ReadyForDelivery) => true,
-
-                // Pronto para Entrega -> Em Entrega
-                (OrderStatus.ReadyForDelivery, OrderStatus.InDelivery) => true,
-
-                // Em Entrega -> Entregue
-                (OrderStatus.InDelivery, OrderStatus.Delivered) => true,
-
-                // Entregue -> Concluído
-                (OrderStatus.Delivered, OrderStatus.Completed) => true,
-
-                // Qualquer status -> Cancelado (exceto Concluído e Cancelado)
-                (var status, OrderStatus.Cancelled) => 
-                    status != OrderStatus.Completed && status != OrderStatus.Cancelled,
-
-                // Mantém o mesmo status
-                (var current, var next) when current == next => true,
-
-                // Demais transições são inválidas
-                _ => false
+                Id = order.Id,
+                NumberSequence = order.NumberSequence,
+                CustomerId = order.CustomerId,
+                CustomerName = order.Customer?.FirstName + " " + order.Customer?.LastName,
+                OrderDate = order.OrderDate,
+                DeliveryDate = order.DeliveryDate ?? DateTime.Today,
+                Type = order.Type,
+                Status = order.Status,
+                PrintStatus = order.PrintStatus,
+                Subtotal = order.Subtotal,
+                DiscountAmount = order.DiscountAmount,
+                TaxAmount = order.TaxAmount,
+                TotalAmount = order.TotalAmount
             };
         }
 
-        public async Task CalculateOrderTotalsAsync(string orderId)
+        public OrderDetailsViewModel ConvertToDetailsViewModel(OrderEntry order)
+        {
+            var detailsViewModel = new OrderDetailsViewModel
+            {
+                Id = order.Id,
+                NumberSequence = order.NumberSequence,
+                CustomerId = order.CustomerId,
+                CustomerName = order.Customer?.FirstName + " " + order.Customer?.LastName,
+                OrderDate = order.OrderDate,
+                DeliveryDate = order.DeliveryDate ?? DateTime.Today,
+                Type = order.Type,
+                Status = order.Status,
+                PrintStatus = order.PrintStatus,
+                Subtotal = order.Subtotal,
+                DiscountAmount = order.DiscountAmount,
+                TaxAmount = order.TaxAmount,
+                TotalAmount = order.TotalAmount,
+                Notes = order.Notes,
+                CreatedAt = order.CreatedAt,
+                LastModifiedAt = order.LastModifiedAt
+            };
+
+            // Converte itens se existirem
+            if (order.Items?.Any() == true)
+            {
+                detailsViewModel.Items = order.Items.Select(item => new OrderItemViewModel
+                {
+                    Id = item.Id,
+                    OrderId = item.OrderId,
+                    ProductId = item.ProductId,
+                    ProductName = item.Product?.Name ?? "Produto não encontrado",
+                    Quantity = item.Quantity,
+                    UnitPrice = item.UnitPrice,
+                    DiscountAmount = item.DiscountAmount,
+                    TaxAmount = item.TaxAmount,
+                    Notes = item.Notes
+                }).ToList();
+            }
+
+            return detailsViewModel;
+        }
+
+        public EditOrderViewModel ConvertToEditViewModel(OrderEntry order)
+        {
+            var editViewModel = new EditOrderViewModel
+            {
+                Id = order.Id,
+                NumberSequence = order.NumberSequence,
+                CustomerId = order.CustomerId,
+                CustomerName = order.Customer?.FirstName + " " + order.Customer?.LastName,
+                OrderDate = order.OrderDate,
+                DeliveryDate = order.DeliveryDate ?? DateTime.Today,
+                Type = order.Type,
+                Status = order.Status,
+                PrintStatus = order.PrintStatus,
+                Subtotal = order.Subtotal,
+                DiscountAmount = order.DiscountAmount,
+                TaxAmount = order.TaxAmount,
+                TotalAmount = order.TotalAmount,
+                Notes = order.Notes,
+                CreatedAt = order.CreatedAt,
+                LastModifiedAt = order.LastModifiedAt
+            };
+
+            // Define tipos disponíveis
+            editViewModel.AvailableOrderTypes = new List<OrderTypeSelectionViewModel>
+            {
+                new() { Value = OrderType.Order, Text = "Pedido", IsSelected = order.Type == OrderType.Order },
+                new() { Value = OrderType.Event, Text = "Evento", IsSelected = order.Type == OrderType.Event }
+            };
+
+            // Converte itens se existirem
+            if (order.Items?.Any() == true)
+            {
+                editViewModel.Items = order.Items.Select(item => new OrderItemViewModel
+                {
+                    Id = item.Id,
+                    OrderId = item.OrderId,
+                    ProductId = item.ProductId,
+                    ProductName = item.Product?.Name ?? "Produto não encontrado",
+                    Quantity = item.Quantity,
+                    UnitPrice = item.UnitPrice,
+                    DiscountAmount = item.DiscountAmount,
+                    TaxAmount = item.TaxAmount,
+                    Notes = item.Notes
+                }).ToList();
+            }
+
+            return editViewModel;
+        }
+
+        public async Task<bool> ValidateOrderDataAsync(OrderEntry order)
         {
             try
             {
-                // Busca o pedido
-                var order = await _orderRepository.GetByIdAsync(orderId);
                 if (order == null)
-                    return;
+                {
+                    _logger.LogWarning("Pedido nulo fornecido para validação");
+                    return false;
+                }
 
-                // Busca os itens
-                var items = await _orderItemRepository.GetByOrderIdAsync(orderId);
+                if (string.IsNullOrEmpty(order.CustomerId))
+                {
+                    _logger.LogWarning("Cliente não informado no pedido");
+                    return false;
+                }
 
-                // Calcula os totais
-                order.Subtotal = items.Sum(i => i.Subtotal);
-                order.DiscountAmount = items.Sum(i => i.DiscountAmount);
-                order.TaxAmount = items.Sum(i => i.TaxAmount);
-                order.TotalAmount = items.Sum(i => i.TotalPrice);
+                // Verifica se o cliente existe
+                var customer = await _customerRepository.GetByIdAsync(order.CustomerId);
+                if (customer == null)
+                {
+                    _logger.LogWarning("Cliente não encontrado: {CustomerId}", order.CustomerId);
+                    return false;
+                }
 
-                // Atualiza o pedido
-                await _orderRepository.UpdateAsync(order);
+                if (order.OrderDate == default)
+                {
+                    _logger.LogWarning("Data do pedido não informada");
+                    return false;
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao recalcular totais do pedido: {OrderId}", orderId);
-                throw;
+                _logger.LogError(ex, "Erro ao validar dados do pedido");
+                return false;
+            }
+        }
+
+        public async Task<bool> ValidateCreateOrderDataAsync(CreateOrderViewModel order)
+        {
+            try
+            {
+                if (order == null)
+                {
+                    _logger.LogWarning("Dados do pedido nulos fornecidos para validação");
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(order.CustomerId))
+                {
+                    _logger.LogWarning("Cliente não informado no pedido");
+                    return false;
+                }
+
+                // Verifica se o cliente existe
+                var customer = await _customerRepository.GetByIdAsync(order.CustomerId);
+                if (customer == null)
+                {
+                    _logger.LogWarning("Cliente não encontrado: {CustomerId}", order.CustomerId);
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao validar dados de criação do pedido");
+                return false;
             }
         }
     }

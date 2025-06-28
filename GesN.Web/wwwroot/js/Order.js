@@ -35,7 +35,7 @@ const ordersManager = {
                         language: {
                             url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
                         },
-                        responsive: true,
+                        responsive: false, // Desabilita responsive para funcionar com redimensionamento
                         pageLength: 25,
                         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
                         order: [[0, 'desc']], // Ordena por número do pedido decrescente
@@ -57,8 +57,14 @@ const ordersManager = {
                             if (typeof $.fn.tooltip !== 'undefined') {
                                 $('[title]').tooltip();
                             }
+                            
+                            // Reaplica redimensionamento após redraw
+                            ordersManager.aplicarRedimensionamento();
                         }
                     });
+                    
+                    // Inicializa o sistema de redimensionamento
+                    ordersManager.inicializarRedimensionamento();
                 } catch (error) {
                     console.error('Erro ao inicializar DataTable:', error);
                 }
@@ -336,6 +342,187 @@ const ordersManager = {
                     toastr.error(errorMessage);
                 }
             });
+        }
+    },
+
+    // ========================================
+    // SISTEMA DE REDIMENSIONAMENTO DE COLUNAS
+    // ========================================
+    
+    // Configurações de redimensionamento
+    resizeConfig: {
+        minWidths: {
+            0: 80,   // Número
+            1: 150,  // Cliente
+            2: 90,   // Data
+            3: 90,   // Entrega
+            4: 70,   // Tipo
+            5: 100,  // Valor Total
+            6: 80,   // Status
+            7: 120   // Ações
+        },
+        storageKey: 'ordersTable_column_widths',
+        isDragging: false,
+        currentColumn: null,
+        startX: 0,
+        startWidth: 0
+    },
+
+    inicializarRedimensionamento: function() {
+        // Adiciona handles de redimensionamento aos headers
+        $('#ordersTable thead th').each(function(index) {
+            const $th = $(this);
+            
+            // Remove handles existentes
+            $th.find('.resize-handle').remove();
+            
+            // Adiciona handle de redimensionamento
+            const $handle = $('<div class="resize-handle"></div>');
+            $th.append($handle);
+            
+            // Eventos para o handle
+            $handle.on('mousedown', function(e) {
+                e.preventDefault();
+                ordersManager.iniciarRedimensionamento(index, e.pageX, $th.outerWidth());
+            });
+            
+            // Duplo clique para auto-ajustar
+            $handle.on('dblclick', function(e) {
+                e.preventDefault();
+                ordersManager.autoAjustarColuna(index);
+            });
+        });
+        
+        // Eventos globais para redimensionamento
+        $(document).on('mousemove', ordersManager.redimensionarColuna);
+        $(document).on('mouseup', ordersManager.finalizarRedimensionamento);
+        
+        // Restaura larguras salvas
+        ordersManager.restaurarLargurasColunas();
+    },
+
+    iniciarRedimensionamento: function(columnIndex, startX, startWidth) {
+        ordersManager.resizeConfig.isDragging = true;
+        ordersManager.resizeConfig.currentColumn = columnIndex;
+        ordersManager.resizeConfig.startX = startX;
+        ordersManager.resizeConfig.startWidth = startWidth;
+        
+        // Adiciona classe visual ao header
+        $(`#ordersTable thead th:eq(${columnIndex})`).addClass('resizing');
+        
+        // Desabilita seleção de texto
+        $('body').addClass('user-select-none');
+        
+        // Cursor global
+        $('body').css('cursor', 'col-resize');
+    },
+
+    redimensionarColuna: function(e) {
+        if (!ordersManager.resizeConfig.isDragging) return;
+        
+        const columnIndex = ordersManager.resizeConfig.currentColumn;
+        const deltaX = e.pageX - ordersManager.resizeConfig.startX;
+        const newWidth = ordersManager.resizeConfig.startWidth + deltaX;
+        const minWidth = ordersManager.resizeConfig.minWidths[columnIndex] || 50;
+        
+        // Aplica largura mínima
+        const finalWidth = Math.max(newWidth, minWidth);
+        
+        // Aplica a nova largura
+        $(`#ordersTable thead th:eq(${columnIndex})`).css('width', finalWidth + 'px');
+        $(`#ordersTable tbody td:nth-child(${columnIndex + 1})`).css('width', finalWidth + 'px');
+    },
+
+    finalizarRedimensionamento: function() {
+        if (!ordersManager.resizeConfig.isDragging) return;
+        
+        const columnIndex = ordersManager.resizeConfig.currentColumn;
+        
+        // Remove classe visual
+        $(`#ordersTable thead th:eq(${columnIndex})`).removeClass('resizing');
+        
+        // Restaura cursor e seleção
+        $('body').css('cursor', 'default').removeClass('user-select-none');
+        
+        // Salva larguras
+        ordersManager.salvarLargurasColunas();
+        
+        // Reset das configurações
+        ordersManager.resizeConfig.isDragging = false;
+        ordersManager.resizeConfig.currentColumn = null;
+    },
+
+    autoAjustarColuna: function(columnIndex) {
+        const $th = $(`#ordersTable thead th:eq(${columnIndex})`);
+        const $cells = $(`#ordersTable tbody td:nth-child(${columnIndex + 1})`);
+        
+        // Calcula a largura máxima necessária
+        let maxWidth = $th.text().length * 8 + 40; // Largura base do header
+        
+        $cells.each(function() {
+            const cellContent = $(this).text().trim();
+            const cellWidth = cellContent.length * 8 + 20; // Estimativa baseada no texto
+            maxWidth = Math.max(maxWidth, cellWidth);
+        });
+        
+        // Aplica largura mínima
+        const minWidth = ordersManager.resizeConfig.minWidths[columnIndex] || 50;
+        const finalWidth = Math.max(maxWidth, minWidth);
+        
+        // Aplica a nova largura
+        $th.css('width', finalWidth + 'px');
+        $cells.css('width', finalWidth + 'px');
+        
+        // Salva as larguras
+        ordersManager.salvarLargurasColunas();
+        
+        toastr.success('Coluna ajustada automaticamente!');
+    },
+
+    salvarLargurasColunas: function() {
+        const widths = {};
+        
+        $('#ordersTable thead th').each(function(index) {
+            const width = $(this).outerWidth();
+            widths[index] = width + 'px';
+        });
+        
+        localStorage.setItem(ordersManager.resizeConfig.storageKey, JSON.stringify(widths));
+    },
+
+    restaurarLargurasColunas: function() {
+        const savedWidths = localStorage.getItem(ordersManager.resizeConfig.storageKey);
+        
+        if (savedWidths) {
+            try {
+                const widths = JSON.parse(savedWidths);
+                
+                $('#ordersTable thead th').each(function(index) {
+                    if (widths[index]) {
+                        $(this).css('width', widths[index]);
+                    }
+                });
+                
+                // Aplica também nas células do tbody
+                $('#ordersTable tbody tr').each(function() {
+                    $(this).find('td').each(function(index) {
+                        if (widths[index]) {
+                            $(this).css('width', widths[index]);
+                        }
+                    });
+                });
+                
+            } catch (e) {
+                console.error('Erro ao restaurar larguras das colunas:', e);
+            }
+        }
+    },
+
+    aplicarRedimensionamento: function() {
+        // Método chamado após DataTable redraw
+        if ($('#ordersTable').length > 0) {
+            // Reaplica larguras salvas após redraw
+            ordersManager.restaurarLargurasColunas();
         }
     }
 };

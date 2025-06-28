@@ -41,9 +41,9 @@ namespace GesN.Web.Services
             return await _pedidoRepository.AddAsync(pedido);
         }
 
-        public Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            await _pedidoRepository.DeleteAsync(id);
         }
 
         public async Task<IEnumerable<Pedido>> GetAllAsync()

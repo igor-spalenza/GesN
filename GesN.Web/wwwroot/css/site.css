@@ -255,5 +255,61 @@ logo-gesn {
 .modal .algolia-autocomplete .aa-dropdown-menu {
     z-index: 10060; /* Maior que o z-index do modal (1050) */
 }
+
+/* Estilos para redimensionamento de colunas - DataTables */
+#ordersTable {
+    table-layout: fixed;
+}
+
+#ordersTable th {
+    position: relative;
+    user-select: none;
+}
+
+#ordersTable th:hover {
+    border-right: 2px solid #007bff;
+}
+
+#ordersTable th.resizing {
+    border-right: 2px solid #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+#ordersTable th .resize-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 100%;
+    cursor: col-resize;
+    background: transparent;
+    z-index: 10;
+}
+
+#ordersTable th .resize-handle:hover {
+    background: rgba(0, 123, 255, 0.2);
+}
+
+#ordersTable td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Indicador visual durante redimensionamento */
+.column-resize-line {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    background-color: #007bff;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+/* Classe auxiliar para desabilitar seleção de texto */
+.user-select-none {
+    user-select: none !important;
+}
 /* Fim dos estilos para Customer Table */
 

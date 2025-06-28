@@ -70,7 +70,10 @@ ScaffoldingReadMe.txt
 StyleCopReport.xml
 
 # Database files and diretories
-GesN.Web/Data/Database/
+# GesN.Web/Data/Database/
+ArqInf.svg
+*.drawio.*
+*.drawio
 *.db
 *.db-journal
 
@@ -389,7 +392,3 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/GesN.Web/Data/Database/gesn.db
-/setup-development.ps1
-/SECURITY.md
-/GesN.Web/TokenStore/System.String-oauth_user

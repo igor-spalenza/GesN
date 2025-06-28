@@ -1,4 +1,4 @@
-Ôªøusing Dapper;
+using Dapper;
 using Microsoft.Data.Sqlite;
 
 namespace GesN.Web.Data.Migrations
@@ -68,7 +68,7 @@ namespace GesN.Web.Data.Migrations
                     PRIMARY KEY(Id)
                 );";
 
-                // ========== DOM√çNIO DE VENDAS ==========
+                // ========== DOMÕNIO DE VENDAS ==========
                 var createCustomerTable = @"
                 CREATE TABLE IF NOT EXISTS Customer (
                     Id TEXT NOT NULL UNIQUE,
@@ -90,7 +90,7 @@ namespace GesN.Web.Data.Migrations
                 );";
 
                 var createOrderTable = @"
-                CREATE TABLE IF NOT EXISTS Order (
+                CREATE TABLE IF NOT EXISTS OrderEntry (
                     Id TEXT NOT NULL UNIQUE,
                     CreatedAt TEXT NOT NULL,
                     CreatedBy TEXT NOT NULL,
@@ -134,7 +134,7 @@ namespace GesN.Web.Data.Migrations
                     Discount REAL NOT NULL DEFAULT 0,
                     Notes TEXT,
                     PRIMARY KEY(Id),
-                    FOREIGN KEY(OrderId) REFERENCES [Order](Id),
+                    FOREIGN KEY(OrderId) REFERENCES OrderEntry(Id),
                     FOREIGN KEY(ProductId) REFERENCES Product(Id)
                 );";
 
@@ -156,10 +156,10 @@ namespace GesN.Web.Data.Migrations
                     CustomerSignedAt TEXT,
                     CompanySignedAt TEXT,
                     PRIMARY KEY(Id),
-                    FOREIGN KEY(OrderId) REFERENCES [Order](Id)
+                    FOREIGN KEY(OrderId) REFERENCES OrderEntry(Id)
                 );";
 
-                // ========== DOM√çNIO DE PRODU√á√ÉO ==========
+                // ========== DOMÕNIO DE PRODU«√O ==========
                 var createProductCategoryTable = @"
                 CREATE TABLE IF NOT EXISTS ProductCategory (
                     Id TEXT NOT NULL UNIQUE,
@@ -204,25 +204,28 @@ namespace GesN.Web.Data.Migrations
                     StateCode INTEGER NOT NULL DEFAULT 1,
                     Name TEXT NOT NULL,
                     Description TEXT,
-                    SKU TEXT,
-                    CategoryId TEXT,
-                    ProductType TEXT NOT NULL CHECK (ProductType IN ('Simple', 'Composite', 'Group')),
+                    Price REAL NOT NULL DEFAULT 0,
+                    QuantityPrice INTEGER NOT NULL DEFAULT 0,
                     UnitPrice REAL NOT NULL DEFAULT 0,
+                    CategoryId TEXT,
+                    Category TEXT,
+                    SKU TEXT,
+                    ImageUrl TEXT,
+                    Note TEXT,
                     Cost REAL NOT NULL DEFAULT 0,
-                    IsActive INTEGER NOT NULL DEFAULT 1,
-                    MinStock INTEGER DEFAULT 0,
+                    AssemblyTime INTEGER DEFAULT 0,
+                    AssemblyInstructions TEXT,
+                    ProductType TEXT NOT NULL CHECK (ProductType IN ('Simple', 'Composite', 'Group')),
+                    PRIMARY KEY(Id),
+                    FOREIGN KEY(CategoryId) REFERENCES ProductCategory(Id)
+                );";
+                    /*MinStock INTEGER DEFAULT 0,
                     CurrentStock INTEGER DEFAULT 0,
-                    Unit TEXT DEFAULT 'UN',
                     SupplierId TEXT,
                     AllowCustomization INTEGER DEFAULT 0,
                     MinItemsRequired INTEGER DEFAULT 1,
                     MaxItemsAllowed INTEGER,
-                    AssemblyTime INTEGER DEFAULT 0,
-                    AssemblyInstructions TEXT,
-                    PRIMARY KEY(Id),
-                    FOREIGN KEY(CategoryId) REFERENCES ProductCategory(Id),
-                    FOREIGN KEY(SupplierId) REFERENCES Supplier(Id)
-                );";
+                    */
 
                 var createProductGroupItemTable = @"
                 CREATE TABLE IF NOT EXISTS ProductGroupItem (
@@ -366,12 +369,12 @@ namespace GesN.Web.Data.Migrations
                     EstimatedTime INTEGER,
                     ActualTime INTEGER,
                     PRIMARY KEY(Id),
-                    FOREIGN KEY(OrderId) REFERENCES [Order](Id),
+                    FOREIGN KEY(OrderId) REFERENCES OrderEntry(Id),
                     FOREIGN KEY(OrderItemId) REFERENCES OrderItem(Id),
                     FOREIGN KEY(ProductId) REFERENCES Product(Id)
                 );";
 
-                // ========== DOM√çNIO FINANCEIRO ==========
+                // ========== DOMÕNIO FINANCEIRO ==========
                 var createTransactionCategoryTable = @"
                 CREATE TABLE IF NOT EXISTS TransactionCategory (
                     Id TEXT NOT NULL UNIQUE,
@@ -418,25 +421,25 @@ namespace GesN.Web.Data.Migrations
                     OrderId TEXT,
                     PRIMARY KEY(Id),
                     FOREIGN KEY(PaymentMethodId) REFERENCES PaymentMethod(Id),
-                    FOREIGN KEY(OrderId) REFERENCES [Order](Id)
+                    FOREIGN KEY(OrderId) REFERENCES OrderEntry(Id)
                 );";
 
-                // ========== EXECU√á√ÉO DAS MIGRATIONS ==========
+                // ========== EXECU«√O DAS MIGRATIONS ==========
                 // Tabelas legadas
                 connection.Execute(createClienteTable);
                 connection.Execute(createPedidoTable);
 
-                // Value Objects (executados primeiro devido √†s depend√™ncias)
+                // Value Objects (executados primeiro devido ‡s dependÍncias)
                 connection.Execute(createAddressTable);
                 connection.Execute(createFiscalDataTable);
 
-                // Dom√≠nio de Vendas
+                // DomÌnio de Vendas
                 connection.Execute(createCustomerTable);
                 connection.Execute(createOrderTable);
                 connection.Execute(createOrderItemTable);
                 connection.Execute(createContractTable);
 
-                // Dom√≠nio de Produ√ß√£o
+                // DomÌnio de ProduÁ„o
                 connection.Execute(createProductCategoryTable);
                 connection.Execute(createSupplierTable);
                 connection.Execute(createProductTable);
@@ -448,7 +451,7 @@ namespace GesN.Web.Data.Migrations
                 connection.Execute(createProductGroupOptionTable);
                 connection.Execute(createProductionOrderTable);
 
-                // Dom√≠nio Financeiro
+                // DomÌnio Financeiro
                 connection.Execute(createTransactionCategoryTable);
                 connection.Execute(createPaymentMethodTable);
                 connection.Execute(createFinancialTransactionTable);

@@ -24,7 +24,7 @@ namespace GesN.Web.Data.Repositories
             _logger = logger;
         }
 
-        public async Task<IEnumerable<Order>> GetAllAsync()
+        public async Task<IEnumerable<OrderEntry>> GetAllAsync()
         {
             try
             {
@@ -32,16 +32,16 @@ namespace GesN.Web.Data.Repositories
                 
                 const string sql = @"
                     SELECT o.*, c.*, a.*, f.*
-                    FROM [Order] o
+                    FROM OrderEntry o
                     LEFT JOIN Customer c ON o.CustomerId = c.Id
                     LEFT JOIN Address a ON o.DeliveryAddressId = a.Id
                     LEFT JOIN FiscalData f ON o.FiscalDataId = f.Id
                     WHERE o.StateCode = @StateCode
                     ORDER BY o.OrderDate DESC";
 
-                var orderDict = new Dictionary<string, Order>();
+                var orderDict = new Dictionary<string, OrderEntry>();
 
-                await connection.QueryAsync<Order, Customer?, Address?, FiscalData?, Order>(
+                await connection.QueryAsync<OrderEntry, Customer?, Address?, FiscalData?, OrderEntry>(
                     sql,
                     (order, customer, address, fiscalData) =>
                     {
@@ -74,7 +74,7 @@ namespace GesN.Web.Data.Repositories
             }
         }
 
-        public async Task<Order?> GetByIdAsync(string id)
+        public async Task<OrderEntry?> GetByIdAsync(string id)
         {
             try
             {
@@ -82,15 +82,15 @@ namespace GesN.Web.Data.Repositories
                 
                 const string sql = @"
                     SELECT o.*, c.*, a.*, f.*
-                    FROM [Order] o
+                    FROM OrderEntry o
                     LEFT JOIN Customer c ON o.CustomerId = c.Id
                     LEFT JOIN Address a ON o.DeliveryAddressId = a.Id
                     LEFT JOIN FiscalData f ON o.FiscalDataId = f.Id
                     WHERE o.Id = @Id";
 
-                var orderDict = new Dictionary<string, Order>();
+                var orderDict = new Dictionary<string, OrderEntry>();
 
-                await connection.QueryAsync<Order, Customer?, Address?, FiscalData?, Order>(
+                await connection.QueryAsync<OrderEntry, Customer?, Address?, FiscalData?, OrderEntry>(
                     sql,
                     (order, customer, address, fiscalData) =>
                     {
@@ -123,7 +123,7 @@ namespace GesN.Web.Data.Repositories
             }
         }
 
-        public async Task<Order?> GetByNumberAsync(string numberSequence)
+        public async Task<OrderEntry?> GetByNumberAsync(string numberSequence)
         {
             try
             {
@@ -131,15 +131,15 @@ namespace GesN.Web.Data.Repositories
                 
                 const string sql = @"
                     SELECT o.*, c.*, a.*, f.*
-                    FROM [Order] o
+                    FROM OrderEntry o
                     LEFT JOIN Customer c ON o.CustomerId = c.Id
                     LEFT JOIN Address a ON o.DeliveryAddressId = a.Id
                     LEFT JOIN FiscalData f ON o.FiscalDataId = f.Id
                     WHERE o.NumberSequence = @NumberSequence";
 
-                var orderDict = new Dictionary<string, Order>();
+                var orderDict = new Dictionary<string, OrderEntry>();
 
-                await connection.QueryAsync<Order, Customer?, Address?, FiscalData?, Order>(
+                await connection.QueryAsync<OrderEntry, Customer?, Address?, FiscalData?, OrderEntry>(
                     sql,
                     (order, customer, address, fiscalData) =>
                     {
@@ -172,7 +172,7 @@ namespace GesN.Web.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Order>> GetByCustomerIdAsync(string customerId)
+        public async Task<IEnumerable<OrderEntry>> GetByCustomerIdAsync(string customerId)
         {
             try
             {
@@ -180,7 +180,7 @@ namespace GesN.Web.Data.Repositories
                 
                 const string sql = @"
                     SELECT o.*, c.*, a.*, f.*
-                    FROM [Order] o
+                    FROM OrderEntry o
                     LEFT JOIN Customer c ON o.CustomerId = c.Id
                     LEFT JOIN Address a ON o.DeliveryAddressId = a.Id
                     LEFT JOIN FiscalData f ON o.FiscalDataId = f.Id
@@ -188,9 +188,9 @@ namespace GesN.Web.Data.Repositories
                     AND o.StateCode = @StateCode
                     ORDER BY o.OrderDate DESC";
 
-                var orderDict = new Dictionary<string, Order>();
+                var orderDict = new Dictionary<string, OrderEntry>();
 
-                await connection.QueryAsync<Order, Customer?, Address?, FiscalData?, Order>(
+                await connection.QueryAsync<OrderEntry, Customer?, Address?, FiscalData?, OrderEntry>(
                     sql,
                     (order, customer, address, fiscalData) =>
                     {
@@ -223,7 +223,7 @@ namespace GesN.Web.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Order>> GetByStatusAsync(OrderStatus status)
+        public async Task<IEnumerable<OrderEntry>> GetByStatusAsync(OrderStatus status)
         {
             try
             {
@@ -231,7 +231,7 @@ namespace GesN.Web.Data.Repositories
                 
                 const string sql = @"
                     SELECT o.*, c.*, a.*, f.*
-                    FROM [Order] o
+                    FROM OrderEntry o
                     LEFT JOIN Customer c ON o.CustomerId = c.Id
                     LEFT JOIN Address a ON o.DeliveryAddressId = a.Id
                     LEFT JOIN FiscalData f ON o.FiscalDataId = f.Id
@@ -239,9 +239,9 @@ namespace GesN.Web.Data.Repositories
                     AND o.StateCode = @StateCode
                     ORDER BY o.OrderDate DESC";
 
-                var orderDict = new Dictionary<string, Order>();
+                var orderDict = new Dictionary<string, OrderEntry>();
 
-                await connection.QueryAsync<Order, Customer?, Address?, FiscalData?, Order>(
+                await connection.QueryAsync<OrderEntry, Customer?, Address?, FiscalData?, OrderEntry>(
                     sql,
                     (order, customer, address, fiscalData) =>
                     {
@@ -262,7 +262,7 @@ namespace GesN.Web.Data.Repositories
 
                         return existingOrder;
                     },
-                    new { Status = (int)status, StateCode = (int)ObjectState.Active },
+                    new { Status = status.ToString(), StateCode = (int)ObjectState.Active },
                     splitOn: "Id,Id,Id");
 
                 return orderDict.Values;
@@ -274,7 +274,7 @@ namespace GesN.Web.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Order>> GetActiveAsync()
+        public async Task<IEnumerable<OrderEntry>> GetActiveAsync()
         {
             try
             {
@@ -282,16 +282,17 @@ namespace GesN.Web.Data.Repositories
                 
                 const string sql = @"
                     SELECT o.*, c.*, a.*, f.*
-                    FROM [Order] o
+                    FROM OrderEntry o
                     LEFT JOIN Customer c ON o.CustomerId = c.Id
                     LEFT JOIN Address a ON o.DeliveryAddressId = a.Id
                     LEFT JOIN FiscalData f ON o.FiscalDataId = f.Id
                     WHERE o.StateCode = @StateCode
+                    AND o.Status NOT IN (@Cancelled, @Completed)
                     ORDER BY o.OrderDate DESC";
 
-                var orderDict = new Dictionary<string, Order>();
+                var orderDict = new Dictionary<string, OrderEntry>();
 
-                await connection.QueryAsync<Order, Customer?, Address?, FiscalData?, Order>(
+                await connection.QueryAsync<OrderEntry, Customer?, Address?, FiscalData?, OrderEntry>(
                     sql,
                     (order, customer, address, fiscalData) =>
                     {
@@ -312,7 +313,12 @@ namespace GesN.Web.Data.Repositories
 
                         return existingOrder;
                     },
-                    new { StateCode = (int)ObjectState.Active },
+                    new 
+                    { 
+                        StateCode = (int)ObjectState.Active,
+                        Cancelled = OrderStatus.Cancelled.ToString(),
+                        Completed = OrderStatus.Completed.ToString()
+                    },
                     splitOn: "Id,Id,Id");
 
                 return orderDict.Values;
@@ -324,7 +330,7 @@ namespace GesN.Web.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Order>> GetPendingDeliveryAsync()
+        public async Task<IEnumerable<OrderEntry>> GetPendingDeliveryAsync()
         {
             try
             {
@@ -332,17 +338,17 @@ namespace GesN.Web.Data.Repositories
                 
                 const string sql = @"
                     SELECT o.*, c.*, a.*, f.*
-                    FROM [Order] o
+                    FROM OrderEntry o
                     LEFT JOIN Customer c ON o.CustomerId = c.Id
                     LEFT JOIN Address a ON o.DeliveryAddressId = a.Id
                     LEFT JOIN FiscalData f ON o.FiscalDataId = f.Id
                     WHERE o.StateCode = @StateCode
                     AND o.Status IN (@ReadyForDelivery, @InDelivery)
-                    ORDER BY o.OrderDate DESC";
+                    ORDER BY o.DeliveryDate ASC";
 
-                var orderDict = new Dictionary<string, Order>();
+                var orderDict = new Dictionary<string, OrderEntry>();
 
-                await connection.QueryAsync<Order, Customer?, Address?, FiscalData?, Order>(
+                await connection.QueryAsync<OrderEntry, Customer?, Address?, FiscalData?, OrderEntry>(
                     sql,
                     (order, customer, address, fiscalData) =>
                     {
@@ -363,10 +369,11 @@ namespace GesN.Web.Data.Repositories
 
                         return existingOrder;
                     },
-                    new { 
+                    new 
+                    { 
                         StateCode = (int)ObjectState.Active,
-                        ReadyForDelivery = (int)OrderStatus.ReadyForDelivery,
-                        InDelivery = (int)OrderStatus.InDelivery
+                        ReadyForDelivery = OrderStatus.ReadyForDelivery.ToString(),
+                        InDelivery = OrderStatus.InDelivery.ToString()
                     },
                     splitOn: "Id,Id,Id");
 
@@ -379,7 +386,7 @@ namespace GesN.Web.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Order>> GetPendingPrintAsync()
+        public async Task<IEnumerable<OrderEntry>> GetPendingPrintAsync()
         {
             try
             {
@@ -387,7 +394,7 @@ namespace GesN.Web.Data.Repositories
                 
                 const string sql = @"
                     SELECT o.*, c.*, a.*, f.*
-                    FROM [Order] o
+                    FROM OrderEntry o
                     LEFT JOIN Customer c ON o.CustomerId = c.Id
                     LEFT JOIN Address a ON o.DeliveryAddressId = a.Id
                     LEFT JOIN FiscalData f ON o.FiscalDataId = f.Id
@@ -396,9 +403,9 @@ namespace GesN.Web.Data.Repositories
                     AND o.Status NOT IN (@Draft, @Cancelled)
                     ORDER BY o.OrderDate DESC";
 
-                var orderDict = new Dictionary<string, Order>();
+                var orderDict = new Dictionary<string, OrderEntry>();
 
-                await connection.QueryAsync<Order, Customer?, Address?, FiscalData?, Order>(
+                await connection.QueryAsync<OrderEntry, Customer?, Address?, FiscalData?, OrderEntry>(
                     sql,
                     (order, customer, address, fiscalData) =>
                     {
@@ -419,11 +426,12 @@ namespace GesN.Web.Data.Repositories
 
                         return existingOrder;
                     },
-                    new { 
+                    new 
+                    { 
                         StateCode = (int)ObjectState.Active,
-                        PrintStatus = (int)PrintStatus.NotPrinted,
-                        Draft = (int)OrderStatus.Draft,
-                        Cancelled = (int)OrderStatus.Cancelled
+                        PrintStatus = PrintStatus.NotPrinted.ToString(),
+                        Draft = OrderStatus.Draft.ToString(),
+                        Cancelled = OrderStatus.Cancelled.ToString()
                     },
                     splitOn: "Id,Id,Id");
 
@@ -436,7 +444,7 @@ namespace GesN.Web.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Order>> SearchAsync(string searchTerm)
+        public async Task<IEnumerable<OrderEntry>> SearchAsync(string searchTerm)
         {
             try
             {
@@ -444,25 +452,21 @@ namespace GesN.Web.Data.Repositories
                 
                 const string sql = @"
                     SELECT o.*, c.*, a.*, f.*
-                    FROM [Order] o
+                    FROM OrderEntry o
                     LEFT JOIN Customer c ON o.CustomerId = c.Id
                     LEFT JOIN Address a ON o.DeliveryAddressId = a.Id
                     LEFT JOIN FiscalData f ON o.FiscalDataId = f.Id
                     WHERE o.StateCode = @StateCode
-                    AND (
-                        o.NumberSequence LIKE @SearchTerm
-                        OR c.FirstName LIKE @SearchTerm
-                        OR c.LastName LIKE @SearchTerm
-                        OR c.Email LIKE @SearchTerm
-                        OR c.DocumentNumber LIKE @SearchTerm
-                        OR c.Phone LIKE @SearchTerm
-                    )
+                    AND (o.NumberSequence LIKE @SearchTerm 
+                         OR c.FirstName LIKE @SearchTerm 
+                         OR c.LastName LIKE @SearchTerm
+                         OR o.Notes LIKE @SearchTerm)
                     ORDER BY o.OrderDate DESC";
 
-                var orderDict = new Dictionary<string, Order>();
+                var orderDict = new Dictionary<string, OrderEntry>();
                 var searchPattern = $"%{searchTerm}%";
 
-                await connection.QueryAsync<Order, Customer?, Address?, FiscalData?, Order>(
+                await connection.QueryAsync<OrderEntry, Customer?, Address?, FiscalData?, OrderEntry>(
                     sql,
                     (order, customer, address, fiscalData) =>
                     {
@@ -490,50 +494,76 @@ namespace GesN.Web.Data.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar pedidos por termo: {SearchTerm}", searchTerm);
+                _logger.LogError(ex, "Erro ao buscar pedidos por termo de pesquisa: {SearchTerm}", searchTerm);
                 throw;
             }
         }
 
-        public async Task<string> CreateAsync(Order order)
+        public async Task<string> CreateAsync(OrderEntry order)
         {
             try
             {
                 using var connection = await _connectionFactory.CreateConnectionAsync();
                 
                 const string sql = @"
-                    INSERT INTO [Order] (
-                        Id, NumberSequence, OrderDate, DeliveryDate, CustomerId,
+                    INSERT INTO OrderEntry (
+                        Id, CreatedAt, CreatedBy, StateCode,
+                        NumberSequence, OrderDate, DeliveryDate, CustomerId,
                         Status, Type, TotalAmount, Subtotal, TaxAmount, DiscountAmount,
                         Notes, DeliveryAddressId, RequiresFiscalReceipt, FiscalDataId,
-                        PrintStatus, PrintBatchNumber, StateCode, CreatedAt, CreatedBy,
-                        LastModifiedAt, LastModifiedBy
+                        PrintStatus, PrintBatchNumber
                     ) VALUES (
-                        @Id, @NumberSequence, @OrderDate, @DeliveryDate, @CustomerId,
+                        @Id, @CreatedAt, @CreatedBy, @StateCode,
+                        @NumberSequence, @OrderDate, @DeliveryDate, @CustomerId,
                         @Status, @Type, @TotalAmount, @Subtotal, @TaxAmount, @DiscountAmount,
                         @Notes, @DeliveryAddressId, @RequiresFiscalReceipt, @FiscalDataId,
-                        @PrintStatus, @PrintBatchNumber, @StateCode, @CreatedAt, @CreatedBy,
-                        @LastModifiedAt, @LastModifiedBy
+                        @PrintStatus, @PrintBatchNumber
                     )";
 
-                await connection.ExecuteAsync(sql, order);
+                var parameters = new
+                {
+                    order.Id,
+                    order.CreatedAt,
+                    order.CreatedBy,
+                    order.StateCode,
+                    order.NumberSequence,
+                    order.OrderDate,
+                    order.DeliveryDate,
+                    order.CustomerId,
+                    Status = order.Status.ToString(),
+                    Type = order.Type.ToString(),
+                    order.TotalAmount,
+                    order.Subtotal,
+                    order.TaxAmount,
+                    order.DiscountAmount,
+                    order.Notes,
+                    order.DeliveryAddressId,
+                    order.RequiresFiscalReceipt,
+                    order.FiscalDataId,
+                    PrintStatus = order.PrintStatus.ToString(),
+                    order.PrintBatchNumber
+                };
+
+                await connection.ExecuteAsync(sql, parameters);
                 return order.Id;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao criar pedido");
+                _logger.LogError(ex, "Erro ao criar pedido: {OrderId}", order.Id);
                 throw;
             }
         }
 
-        public async Task<bool> UpdateAsync(Order order)
+        public async Task<bool> UpdateAsync(OrderEntry order)
         {
             try
             {
                 using var connection = await _connectionFactory.CreateConnectionAsync();
                 
                 const string sql = @"
-                    UPDATE [Order] SET
+                    UPDATE OrderEntry SET
+                        LastModifiedAt = @LastModifiedAt,
+                        LastModifiedBy = @LastModifiedBy,
                         NumberSequence = @NumberSequence,
                         OrderDate = @OrderDate,
                         DeliveryDate = @DeliveryDate,
@@ -549,18 +579,38 @@ namespace GesN.Web.Data.Repositories
                         RequiresFiscalReceipt = @RequiresFiscalReceipt,
                         FiscalDataId = @FiscalDataId,
                         PrintStatus = @PrintStatus,
-                        PrintBatchNumber = @PrintBatchNumber,
-                        StateCode = @StateCode,
-                        LastModifiedAt = @LastModifiedAt,
-                        LastModifiedBy = @LastModifiedBy
+                        PrintBatchNumber = @PrintBatchNumber
                     WHERE Id = @Id";
 
-                var rowsAffected = await connection.ExecuteAsync(sql, order);
+                var parameters = new
+                {
+                    order.Id,
+                    order.LastModifiedAt,
+                    order.LastModifiedBy,
+                    order.NumberSequence,
+                    order.OrderDate,
+                    order.DeliveryDate,
+                    order.CustomerId,
+                    Status = order.Status.ToString(),
+                    Type = order.Type.ToString(),
+                    order.TotalAmount,
+                    order.Subtotal,
+                    order.TaxAmount,
+                    order.DiscountAmount,
+                    order.Notes,
+                    order.DeliveryAddressId,
+                    order.RequiresFiscalReceipt,
+                    order.FiscalDataId,
+                    PrintStatus = order.PrintStatus.ToString(),
+                    order.PrintBatchNumber
+                };
+
+                var rowsAffected = await connection.ExecuteAsync(sql, parameters);
                 return rowsAffected > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar pedido: {Id}", order.Id);
+                _logger.LogError(ex, "Erro ao atualizar pedido: {OrderId}", order.Id);
                 throw;
             }
         }
@@ -570,13 +620,15 @@ namespace GesN.Web.Data.Repositories
             try
             {
                 using var connection = await _connectionFactory.CreateConnectionAsync();
-                const string sql = "UPDATE [Order] SET StateCode = @StateCode WHERE Id = @Id";
+                
+                const string sql = "UPDATE OrderEntry SET StateCode = @StateCode WHERE Id = @Id";
+                
                 var rowsAffected = await connection.ExecuteAsync(sql, new { StateCode = (int)ObjectState.Inactive, Id = id });
                 return rowsAffected > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao excluir pedido: {Id}", id);
+                _logger.LogError(ex, "Erro ao excluir pedido: {OrderId}", id);
                 throw;
             }
         }
@@ -586,13 +638,15 @@ namespace GesN.Web.Data.Repositories
             try
             {
                 using var connection = await _connectionFactory.CreateConnectionAsync();
-                const string sql = "SELECT COUNT(1) FROM [Order] WHERE Id = @Id";
+                
+                const string sql = "SELECT COUNT(1) FROM OrderEntry WHERE Id = @Id";
+                
                 var count = await connection.QuerySingleAsync<int>(sql, new { Id = id });
                 return count > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao verificar existência do pedido: {Id}", id);
+                _logger.LogError(ex, "Erro ao verificar existência do pedido: {OrderId}", id);
                 throw;
             }
         }
@@ -602,7 +656,9 @@ namespace GesN.Web.Data.Repositories
             try
             {
                 using var connection = await _connectionFactory.CreateConnectionAsync();
-                const string sql = "SELECT COUNT(*) FROM [Order] WHERE StateCode = @StateCode";
+                
+                const string sql = "SELECT COUNT(*) FROM OrderEntry WHERE StateCode = @StateCode";
+                
                 return await connection.QuerySingleAsync<int>(sql, new { StateCode = (int)ObjectState.Active });
             }
             catch (Exception ex)
@@ -612,7 +668,7 @@ namespace GesN.Web.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Order>> GetPagedAsync(int page, int pageSize)
+        public async Task<IEnumerable<OrderEntry>> GetPagedAsync(int page, int pageSize)
         {
             try
             {
@@ -620,7 +676,7 @@ namespace GesN.Web.Data.Repositories
                 
                 const string sql = @"
                     SELECT o.*, c.*, a.*, f.*
-                    FROM [Order] o
+                    FROM OrderEntry o
                     LEFT JOIN Customer c ON o.CustomerId = c.Id
                     LEFT JOIN Address a ON o.DeliveryAddressId = a.Id
                     LEFT JOIN FiscalData f ON o.FiscalDataId = f.Id
@@ -628,10 +684,10 @@ namespace GesN.Web.Data.Repositories
                     ORDER BY o.OrderDate DESC
                     LIMIT @PageSize OFFSET @Offset";
 
-                var orderDict = new Dictionary<string, Order>();
+                var orderDict = new Dictionary<string, OrderEntry>();
                 var offset = (page - 1) * pageSize;
 
-                await connection.QueryAsync<Order, Customer?, Address?, FiscalData?, Order>(
+                await connection.QueryAsync<OrderEntry, Customer?, Address?, FiscalData?, OrderEntry>(
                     sql,
                     (order, customer, address, fiscalData) =>
                     {
@@ -659,7 +715,7 @@ namespace GesN.Web.Data.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar pedidos paginados: Page={Page}, PageSize={PageSize}", page, pageSize);
+                _logger.LogError(ex, "Erro ao buscar pedidos paginados");
                 throw;
             }
         }
@@ -670,23 +726,15 @@ namespace GesN.Web.Data.Repositories
             {
                 using var connection = await _connectionFactory.CreateConnectionAsync();
                 
-                // Busca o último número sequencial
                 const string sql = @"
-                    SELECT NumberSequence
-                    FROM [Order]
-                    WHERE NumberSequence LIKE 'PED-%'
-                    ORDER BY CAST(SUBSTR(NumberSequence, 5) AS INTEGER) DESC
-                    LIMIT 1";
+                    SELECT COUNT(*) + 1
+                    FROM OrderEntry
+                    WHERE strftime('%Y', OrderDate) = strftime('%Y', 'now')";
 
-                var lastNumber = await connection.QuerySingleOrDefaultAsync<string>(sql);
-
-                if (string.IsNullOrEmpty(lastNumber))
-                {
-                    return "PED-1";
-                }
-
-                var number = int.Parse(lastNumber.Substring(4)) + 1;
-                return $"PED-{number}";
+                var nextNumber = await connection.QuerySingleAsync<int>(sql);
+                var year = DateTime.Now.Year;
+                
+                return $"PED-{year}-{nextNumber:D4}";
             }
             catch (Exception ex)
             {
@@ -695,60 +743,58 @@ namespace GesN.Web.Data.Repositories
             }
         }
 
-        public async Task<bool> UpdatePrintStatusAsync(string id, PrintStatus status, int? batchNumber = null)
+        public async Task<bool> UpdateStatusAsync(string id, OrderStatus status, string modifiedBy)
         {
             try
             {
                 using var connection = await _connectionFactory.CreateConnectionAsync();
                 
                 const string sql = @"
-                    UPDATE [Order] 
-                    SET PrintStatus = @PrintStatus,
-                        PrintBatchNumber = @PrintBatchNumber,
-                        LastModifiedAt = @LastModifiedAt
+                    UPDATE OrderEntry
+                    SET Status = @Status, LastModifiedAt = @LastModifiedAt, LastModifiedBy = @LastModifiedBy
                     WHERE Id = @Id";
 
                 var rowsAffected = await connection.ExecuteAsync(sql, new 
                 { 
-                    Id = id,
-                    PrintStatus = (int)status,
-                    PrintBatchNumber = batchNumber,
-                    LastModifiedAt = DateTime.UtcNow
+                    Id = id, 
+                    Status = status.ToString(), 
+                    LastModifiedAt = DateTime.UtcNow, 
+                    LastModifiedBy = modifiedBy 
                 });
 
                 return rowsAffected > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar status de impressão do pedido: {Id}", id);
+                _logger.LogError(ex, "Erro ao atualizar status do pedido: {OrderId}", id);
                 throw;
             }
         }
 
-        public async Task<bool> UpdateStatusAsync(string id, OrderStatus status)
+        public async Task<bool> UpdatePrintStatusAsync(string id, PrintStatus printStatus, string modifiedBy)
         {
             try
             {
                 using var connection = await _connectionFactory.CreateConnectionAsync();
                 
                 const string sql = @"
-                    UPDATE [Order] 
-                    SET Status = @Status,
-                        LastModifiedAt = @LastModifiedAt
+                    UPDATE OrderEntry
+                    SET PrintStatus = @PrintStatus, LastModifiedAt = @LastModifiedAt, LastModifiedBy = @LastModifiedBy
                     WHERE Id = @Id";
 
-                var rowsAffected = await connection.ExecuteAsync(sql, new 
-                { 
+                var rowsAffected = await connection.ExecuteAsync(sql, new
+                {
                     Id = id,
-                    Status = (int)status,
-                    LastModifiedAt = DateTime.UtcNow
+                    PrintStatus = printStatus.ToString(),
+                    LastModifiedAt = DateTime.UtcNow,
+                    LastModifiedBy = modifiedBy
                 });
 
                 return rowsAffected > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar status do pedido: {Id}", id);
+                _logger.LogError(ex, "Erro ao atualizar status de impressão do pedido: {OrderId}", id);
                 throw;
             }
         }

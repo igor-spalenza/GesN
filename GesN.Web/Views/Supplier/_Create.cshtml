@@ -1,0 +1,107 @@
+@using GesN.Web.Models.ViewModels.Production
+@using GesN.Web.Models.Enumerators
+@model CreateSupplierViewModel
+
+<form id="supplierCreateForm">
+    @Html.AntiForgeryToken()
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="Name" class="form-label">Nome *</label>
+                <input type="text" class="form-control" id="Name" name="Name" value="@Model.Name" required maxlength="100">
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="CompanyName" class="form-label">Nome da Empresa</label>
+                <input type="text" class="form-control" id="CompanyName" name="CompanyName" value="@Model.CompanyName" maxlength="150">
+                <span asp-validation-for="CompanyName" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="DocumentType" class="form-label">Tipo de Documento</label>
+                <select class="form-select" id="DocumentType" name="DocumentType">
+                    <option value="">Selecione...</option>
+                    @foreach (DocumentType docType in Enum.GetValues<DocumentType>())
+                    {
+                        <option value="@docType" selected="@(Model.DocumentType == docType)">
+                            @EnumHelper.GetDescription(docType)
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="DocumentType" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="DocumentNumber" class="form-label">Número do Documento</label>
+                <input type="text" class="form-control" id="DocumentNumber" name="DocumentNumber" value="@Model.DocumentNumber" maxlength="20">
+                <span asp-validation-for="DocumentNumber" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="Email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" maxlength="100">
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="Phone" class="form-label">Telefone</label>
+                <input type="text" class="form-control" id="Phone" name="Phone" value="@Model.Phone" maxlength="20">
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="IsActive" name="IsActive" value="true" checked="@Model.IsActive">
+            <input type="hidden" name="IsActive" value="false">
+            <label class="form-check-label" for="IsActive">
+                Fornecedor ativo
+            </label>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="suppliersManager.salvarNovoSupplier(document.getElementById('supplierCreateForm'))">
+            <i class="bi bi-check"></i> Salvar
+        </button>
+    </div>
+</form>
+
+<script>
+$(document).ready(function() {
+    // Máscara para telefone
+    $('#Phone').mask('(00) 00000-0000');
+    
+    // Máscara para documento baseada no tipo
+    $('#DocumentType').change(function() {
+        var docType = $(this).val();
+        var docInput = $('#DocumentNumber');
+        
+        docInput.unmask();
+        
+        if (docType === 'CPF') {
+            docInput.mask('000.000.000-00');
+        } else if (docType === 'CNPJ') {
+            docInput.mask('00.000.000/0000-00');
+        }
+    });
+    
+    // Aplicar máscara inicial se já tiver tipo selecionado
+    $('#DocumentType').trigger('change');
+});
+</script> 

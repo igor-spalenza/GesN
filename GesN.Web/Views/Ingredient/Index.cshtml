@@ -1,0 +1,83 @@
+@using GesN.Web.Models.ViewModels.Production
+@model IngredientIndexViewModel
+
+@{
+    ViewData["Title"] = "Ingredientes";
+}
+
+<div class="venda-main">
+
+    <div class="container-fluid venda-lateral-fixa">
+        <h1>Ingredientes</h1><br />
+
+        <button type="button" class="btn btn-sales mb-3" onclick="ingredientsManager.novoIngredientModal()">
+            Novo Ingrediente
+        </button><br />
+
+        <h3 class="text-lg font-semibold mb-2">Lembretes</h3>
+        <p class="text-sm">Sem lembretes no momento.</p>
+    </div> 
+    
+    <div class="venda-conteudo-dinamico">
+
+        <!-- Abas de Navegação -->
+        <ul class="nav nav-tabs" id="ingredientsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#lista-ingredients" type="button" role="tab">
+                    Página Inicial
+                </button>
+            </li>
+        </ul>
+
+        <!-- Conteúdo das Abas -->
+        <div class="tab-content" id="ingredientTabsContent">
+            <div class="tab-pane fade show active" id="lista-ingredients" role="tabpanel">
+                <div class="container-fluid mt-3">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <h2>Todos os Ingredientes</h2>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="lista-ingredients-container">
+                                <!-- Conteúdo carregado via AJAX -->
+                                @if (Model.Ingredients.Any())
+                                {
+                                    @await Html.PartialAsync("_Grid", Model.Ingredients.ToDetailsViewModels())
+                                }
+                                else
+                                {
+                                    <div class="d-flex justify-content-center my-5">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Carregando...</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="ingredientModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Ingrediente</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body"> </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="~/js/Ingredient.js" asp-append-version="true"></script>
+} 

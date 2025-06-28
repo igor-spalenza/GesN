@@ -1,0 +1,160 @@
+@using GesN.Web.Models.ViewModels.Production
+@model ProductIndexViewModel
+@{
+    ViewData["Title"] = "Produtos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-boxes"></i> Produtos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Estatísticas -->
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body p-2">
+                                    <h4 id="total-produtos" class="mb-0">@Model.Statistics.TotalProducts</h4>
+                                    <small>Total</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-success text-white">
+                                <div class="card-body p-2">
+                                    <h4 id="produtos-ativos" class="mb-0">@Model.Statistics.ActiveProducts</h4>
+                                    <small>Ativos</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <div class="card bg-info text-white">
+                                <div class="card-body p-2">
+                                    <h5 id="produtos-simples" class="mb-0">@Model.Statistics.SimpleProducts</h5>
+                                    <small>Simples</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body p-2">
+                                    <h5 id="produtos-compostos" class="mb-0">@Model.Statistics.CompositeProducts</h5>
+                                    <small>Compostos</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card bg-secondary text-white">
+                                <div class="card-body p-2">
+                                    <h5 id="grupos-produtos" class="mb-0">@Model.Statistics.GroupProducts</h5>
+                                    <small>Grupos</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botão Novo Produto -->
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-primary" onclick="productManager.novoProduct()">
+                            <i class="fas fa-plus"></i> Novo Produto
+                        </button>
+                    </div>
+
+                    <!-- Filtros Rápidos -->
+                    <div class="mt-3">
+                        <h6>Filtros Rápidos</h6>
+                        <div class="d-grid gap-1">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="productManager.filtrarPorStatus('todos')">
+                                Todos (@Model.Statistics.TotalProducts)
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" onclick="productManager.filtrarPorStatus('ativo')">
+                                Ativos (@Model.Statistics.ActiveProducts)
+                            </button>
+                            <button class="btn btn-sm btn-outline-info" onclick="productManager.filtrarPorTipo('Simple')">
+                                Simples (@Model.Statistics.SimpleProducts)
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="productManager.filtrarPorTipo('Composite')">
+                                Compostos (@Model.Statistics.CompositeProducts)
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="productManager.filtrarPorTipo('Group')">
+                                Grupos (@Model.Statistics.GroupProducts)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <!-- Navegação por Abas -->
+                    <ul class="nav nav-tabs card-header-tabs" id="productTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="tab-lista-produtos" data-bs-toggle="tab" data-bs-target="#lista-produtos" type="button" role="tab">
+                                <i class="fas fa-list"></i> Lista de Produtos
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btnHomeProdutos" title="Início">
+                                    <i class="fas fa-home"></i>
+                                </button>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <!-- Conteúdo das Abas -->
+                    <div class="tab-content" id="productTabsContent">
+                        <!-- Aba Lista de Produtos -->
+                        <div class="tab-pane fade show active" id="lista-produtos" role="tabpanel">
+                            <div id="lista-produtos-container">
+                                <!-- Conteúdo carregado via AJAX -->
+                                @if (Model.Products.Any())
+                                {
+                                    @await Html.PartialAsync("_Grid", Model.Products)
+                                }
+                                else
+                                {
+                                    <div class="d-flex justify-content-center my-5">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Carregando...</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <!-- Abas de edição dinâmicas serão adicionadas aqui via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Formulários (usado apenas para criação e detalhes) -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Produto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Conteúdo carregado via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/Product.js"></script>
+} 

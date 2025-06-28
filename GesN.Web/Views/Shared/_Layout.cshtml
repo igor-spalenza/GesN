@@ -36,17 +36,38 @@
                                 @ViewData["App"]
                                 @* <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a> *@
                             </li>
-                            <li class="nav-item">
+                            @* <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Cliente" asp-action="Index">Cliente</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Pedido" asp-action="Index">Pedido</a>
-                            </li>
+                            </li> *@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="Index">Customer</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">Order</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Produtos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Ingredient" asp-action="Index">Ingredientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductCategory" asp-action="Index">Categorias</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductComponent" asp-action="Index">Componentes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductGroup" asp-action="Index">Grupos de Produto</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Supplier" asp-action="Index">Fornecedores</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductionOrder" asp-action="Index">Ordens de Produção</a>
                             </li>
                         </ul>
                         <partial name="_LoginPartial" />
@@ -67,6 +88,8 @@
         </footer>
         <script src="~/lib/jquery/dist/jquery.min.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+        <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
         <script src="~/lib/select2/js/select2.min.js"></script>
         <script src="~/lib/select2/js/i18n/pt-br.min.js"></script>
         <script src="~/lib/autocomplete.js/autocomplete.min.js"></script>
@@ -81,6 +104,21 @@
         <div class="modal fade" id="modalContainer" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Produtos -->
+        <div class="modal fade" id="modalProduct" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Conteúdo será carregado via AJAX -->
+                    </div>
                 </div>
             </div>
         </div>
