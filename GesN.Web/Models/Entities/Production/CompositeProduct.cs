@@ -25,9 +25,9 @@ namespace GesN.Web.Models.Entities.Production
         /// <summary>
         /// Construtor com dados básicos
         /// </summary>
-        public CompositeProduct(string name, decimal unitPrice) : base(name, unitPrice)
+        public CompositeProduct(string name, decimal price) : base(name, price)
         {
-            // Define o tipo do produto como Composite
+            ProductType = ProductType.Composite;
         }
 
         /// <summary>
@@ -46,40 +46,66 @@ namespace GesN.Web.Models.Entities.Production
             return Components?.All(c => c.IsAvailable()) ?? true;
         }
 
-        /// <summary>
-        /// Verifica se o estoque está baixo (usa campos herdados MinStock e CurrentStock)
-        /// </summary>
-        public bool IsLowStock()
-        {
-            return CurrentStock <= MinStock;
-        }
+
 
         /// <summary>
-        /// Obtém o tempo de montagem formatado (usa campo herdado AssemblyTime)
+        /// Obtém informações resumidas do produto composto
         /// </summary>
-        public string GetFormattedAssemblyTime()
+        public string GetCompositeInfo()
         {
-            if (AssemblyTime <= 0)
-                return "Não informado";
-
-            var hours = AssemblyTime / 60;
-            var minutes = AssemblyTime % 60;
-
-            if (hours > 0)
-                return $"{hours}h {minutes}min";
-
-            return $"{minutes}min";
-        }
-
-        /// <summary>
-        /// Obtém informações do estoque
-        /// </summary>
-        public string GetStockInfo()
-        {
-            var info = $"{CurrentStock} {Unit}";
-            if (IsLowStock())
-                info += " ⚠️ Estoque baixo";
+            var info = GetDisplayName();
+            
+            if (Components?.Any() == true)
+                info += $" ({Components.Count} componentes)";
+                
             return info;
+        }
+
+        /// <summary>
+        /// Verifica se o produto tem todos os componentes básicos
+        /// </summary>
+        public bool HasMinimumComponents()
+        {
+            return Components?.Count() >= 1;
+        }
+
+        /// <summary>
+        /// Obtém o total de componentes
+        /// </summary>
+        public int GetComponentsCount()
+        {
+            return Components?.Count() ?? 0;
+        }
+
+        /// <summary>
+        /// Calcula tempo total de montagem incluindo componentes
+        /// </summary>
+        public int CalculateTotalAssemblyTime()
+        {
+            var baseTime = AssemblyTime;
+            var componentsTime = Components?.Sum(c => c.ComponentProduct?.AssemblyTime ?? 0) ?? 0;
+            return baseTime + componentsTime;
+        }
+
+        /// <summary>
+        /// Obtém informações completas de montagem
+        /// </summary>
+        public string GetCompleteAssemblyInfo()
+        {
+            var totalTime = CalculateTotalAssemblyTime();
+            
+            if (totalTime <= 0)
+                return "Produto não requer montagem";
+                
+            var hours = totalTime / 60;
+            var minutes = totalTime % 60;
+            
+            var timeInfo = hours > 0 ? $"{hours}h {minutes}min" : $"{minutes}min";
+            
+            if (!string.IsNullOrWhiteSpace(AssemblyInstructions))
+                timeInfo += " - Com instruções detalhadas";
+                
+            return timeInfo;
         }
 
         /// <summary>
@@ -87,14 +113,9 @@ namespace GesN.Web.Models.Entities.Production
         /// </summary>
         public override bool HasCompleteData()
         {
-            return base.HasCompleteData() && Components.Any();
+            return base.HasCompleteData() && HasMinimumComponents();
         }
 
-        /// <summary>
-        /// Tempo de montagem em minutos
-        /// </summary>
-        [Display(Name = "Tempo de Montagem (min)")]
-        [Range(0, int.MaxValue, ErrorMessage = "O tempo de montagem deve ser maior ou igual a 0")]
-        public int? AssemblyTime { get; set; }
+
     }
 } 

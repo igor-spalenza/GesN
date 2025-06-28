@@ -3,6 +3,7 @@ using GesN.Web.Infrastructure.Data;
 using GesN.Web.Interfaces.Repositories;
 using GesN.Web.Models.Entities.Production;
 using GesN.Web.Models.Enumerators;
+using GesN.Web.Models.DTOs;
 
 namespace GesN.Web.Data.Repositories
 {
@@ -21,13 +22,15 @@ namespace GesN.Web.Data.Repositories
             
             const string sql = @"
                 SELECT * FROM Product 
-                WHERE StateCode = @StateCode
+                WHERE StateCode = @StateCode 
                 ORDER BY Name";
 
-            var products = await connection.QueryAsync<Product>(sql, 
+            var productDtos = await connection.QueryAsync<ProductDto>(sql, 
                 new { StateCode = (int)ObjectState.Active });
 
-            return ConvertToSpecificTypes(products);
+
+
+            return ProductMapper.ToEntities(productDtos);
         }
 
         public async Task<Product?> GetByIdAsync(string id)
@@ -35,9 +38,11 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = "SELECT * FROM Product WHERE Id = @Id";
-            var product = await connection.QuerySingleOrDefaultAsync<Product>(sql, new { Id = id });
+            var productDto = await connection.QuerySingleOrDefaultAsync<ProductDto>(sql, new { Id = id });
             
-            return ConvertToSpecificType(product);
+
+            
+            return ProductMapper.ToEntity(productDto);
         }
 
         public async Task<IEnumerable<Product>> GetByTypeAsync(ProductType productType)
@@ -49,10 +54,10 @@ namespace GesN.Web.Data.Repositories
                 WHERE ProductType = @ProductType AND StateCode = @StateCode
                 ORDER BY Name";
 
-            var products = await connection.QueryAsync<Product>(sql, 
-                new { ProductType = productType.ToString(), StateCode = (int)ObjectState.Active });
+            var productDtos = await connection.QueryAsync<ProductDto>(sql, 
+                new { ProductType = productType, StateCode = (int)ObjectState.Active });
 
-            return ConvertToSpecificTypes(products);
+            return ProductMapper.ToEntities(productDtos);
         }
 
         public async Task<IEnumerable<Product>> GetActiveProductsAsync()
@@ -64,10 +69,10 @@ namespace GesN.Web.Data.Repositories
                 WHERE StateCode = @StateCode
                 ORDER BY Name";
 
-            var products = await connection.QueryAsync<Product>(sql, 
+            var productDtos = await connection.QueryAsync<ProductDto>(sql, 
                 new { StateCode = (int)ObjectState.Active });
 
-            return ConvertToSpecificTypes(products);
+            return ProductMapper.ToEntities(productDtos);
         }
 
         public async Task<IEnumerable<Product>> GetByCategoryAsync(string categoryId)
@@ -79,10 +84,10 @@ namespace GesN.Web.Data.Repositories
                 WHERE CategoryId = @CategoryId AND StateCode = @StateCode
                 ORDER BY Name";
 
-            var products = await connection.QueryAsync<Product>(sql, 
+            var productDtos = await connection.QueryAsync<ProductDto>(sql, 
                 new { CategoryId = categoryId, StateCode = (int)ObjectState.Active });
 
-            return ConvertToSpecificTypes(products);
+            return ProductMapper.ToEntities(productDtos);
         }
 
         public async Task<IEnumerable<Product>> SearchAsync(string searchTerm)
@@ -92,14 +97,14 @@ namespace GesN.Web.Data.Repositories
             const string sql = @"
                 SELECT * FROM Product 
                 WHERE StateCode = @StateCode
-                  AND (Name LIKE @SearchTerm OR Description LIKE @SearchTerm)
+                  AND (Name LIKE @SearchTerm OR Description LIKE @SearchTerm OR SKU LIKE @SearchTerm)
                 ORDER BY Name";
 
             var searchPattern = $"%{searchTerm}%";
-            var products = await connection.QueryAsync<Product>(sql, 
+            var productDtos = await connection.QueryAsync<ProductDto>(sql, 
                 new { StateCode = (int)ObjectState.Active, SearchTerm = searchPattern });
 
-            return ConvertToSpecificTypes(products);
+            return ProductMapper.ToEntities(productDtos);
         }
 
         public async Task<IEnumerable<Product>> GetPagedAsync(int page, int pageSize)
@@ -113,10 +118,10 @@ namespace GesN.Web.Data.Repositories
                 LIMIT @PageSize OFFSET @Offset";
 
             var offset = (page - 1) * pageSize;
-            var products = await connection.QueryAsync<Product>(sql, 
+            var productDtos = await connection.QueryAsync<ProductDto>(sql, 
                 new { StateCode = (int)ObjectState.Active, PageSize = pageSize, Offset = offset });
 
-            return ConvertToSpecificTypes(products);
+            return ProductMapper.ToEntities(productDtos);
         }
 
         public async Task<string> CreateAsync(Product product)
@@ -125,15 +130,41 @@ namespace GesN.Web.Data.Repositories
             
             const string sql = @"
                 INSERT INTO Product (
-                    Id, Code, Name, Description, UnitPrice, Cost, CategoryId, ProductType, Unit, SupplierId,
+                    Id, Name, Description, Price, QuantityPrice, UnitPrice, CategoryId, Category, SKU,
+                    ImageUrl, Note, Cost, AssemblyTime, AssemblyInstructions, ProductType, 
                     StateCode, CreatedAt, CreatedBy, LastModifiedAt, LastModifiedBy
                 )
                 VALUES (
-                    @Id, @Code, @Name, @Description, @UnitPrice, @Cost, @CategoryId, @ProductType, @Unit, @SupplierId,
+                    @Id, @Name, @Description, @Price, @QuantityPrice, @UnitPrice, @CategoryId, @Category, @SKU,
+                    @ImageUrl, @Note, @Cost, @AssemblyTime, @AssemblyInstructions, @ProductType, 
                     @StateCode, @CreatedAt, @CreatedBy, @LastModifiedAt, @LastModifiedBy
                 )";
             
-            await connection.ExecuteAsync(sql, product);
+            var parameters = new
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                QuantityPrice = product.QuantityPrice,
+                UnitPrice = product.UnitPrice,
+                CategoryId = product.CategoryId,
+                Category = product.Category,
+                SKU = product.SKU,
+                ImageUrl = product.ImageUrl,
+                Note = product.Note,
+                Cost = product.Cost,
+                AssemblyTime = product.AssemblyTime,
+                AssemblyInstructions = product.AssemblyInstructions,
+                ProductType = product.ProductType, // Dapper converte automaticamente
+                StateCode = (int)product.StateCode,
+                CreatedAt = product.CreatedAt,
+                CreatedBy = product.CreatedBy,
+                LastModifiedAt = product.LastModifiedAt,
+                LastModifiedBy = product.LastModifiedBy
+            };
+            
+            await connection.ExecuteAsync(sql, parameters);
             return product.Id;
         }
 
@@ -143,20 +174,46 @@ namespace GesN.Web.Data.Repositories
             
             const string sql = @"
                 UPDATE Product SET 
-                    Code = @Code,
                     Name = @Name,
                     Description = @Description,
+                    Price = @Price,
+                    QuantityPrice = @QuantityPrice,
                     UnitPrice = @UnitPrice,
-                    Cost = @Cost,
                     CategoryId = @CategoryId,
-                    Unit = @Unit,
-                    SupplierId = @SupplierId,
+                    Category = @Category,
+                    SKU = @SKU,
+                    ImageUrl = @ImageUrl,
+                    Note = @Note,
+                    Cost = @Cost,
+                    AssemblyTime = @AssemblyTime,
+                    AssemblyInstructions = @AssemblyInstructions,
                     StateCode = @StateCode,
                     LastModifiedAt = @LastModifiedAt,
                     LastModifiedBy = @LastModifiedBy
                 WHERE Id = @Id";
             
-            var rowsAffected = await connection.ExecuteAsync(sql, product);
+            var parameters = new
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                QuantityPrice = product.QuantityPrice,
+                UnitPrice = product.UnitPrice,
+                CategoryId = product.CategoryId,
+                Category = product.Category,
+                SKU = product.SKU,
+                ImageUrl = product.ImageUrl,
+                Note = product.Note,
+                Cost = product.Cost,
+                AssemblyTime = product.AssemblyTime,
+                AssemblyInstructions = product.AssemblyInstructions,
+                StateCode = (int)product.StateCode,
+                LastModifiedAt = product.LastModifiedAt,
+                LastModifiedBy = product.LastModifiedBy
+            };
+            
+            var rowsAffected = await connection.ExecuteAsync(sql, parameters);
             return rowsAffected > 0;
         }
 
@@ -183,70 +240,6 @@ namespace GesN.Web.Data.Repositories
             return await connection.QuerySingleAsync<int>(sql, new { StateCode = (int)ObjectState.Active });
         }
 
-        private Product? ConvertToSpecificType(Product? product)
-        {
-            if (product == null) return null;
 
-            return product.ProductType switch
-            {
-                ProductType.Simple => new SimpleProduct
-                {
-                    Id = product.Id,
-                    Code = product.Code,
-                    Name = product.Name,
-                    Description = product.Description,
-                    UnitPrice = product.UnitPrice,
-                    Cost = product.Cost,
-                    CategoryId = product.CategoryId,
-                    Unit = product.Unit,
-                    SupplierId = product.SupplierId,
-                    StateCode = product.StateCode,
-                    CreatedAt = product.CreatedAt,
-                    CreatedBy = product.CreatedBy,
-                    LastModifiedAt = product.LastModifiedAt,
-                    LastModifiedBy = product.LastModifiedBy
-                },
-                ProductType.Composite => new CompositeProduct
-                {
-                    Id = product.Id,
-                    Code = product.Code,
-                    Name = product.Name,
-                    Description = product.Description,
-                    UnitPrice = product.UnitPrice,
-                    Cost = product.Cost,
-                    CategoryId = product.CategoryId,
-                    Unit = product.Unit,
-                    SupplierId = product.SupplierId,
-                    StateCode = product.StateCode,
-                    CreatedAt = product.CreatedAt,
-                    CreatedBy = product.CreatedBy,
-                    LastModifiedAt = product.LastModifiedAt,
-                    LastModifiedBy = product.LastModifiedBy
-                },
-                ProductType.Group => new ProductGroup
-                {
-                    Id = product.Id,
-                    Code = product.Code,
-                    Name = product.Name,
-                    Description = product.Description,
-                    UnitPrice = product.UnitPrice,
-                    Cost = product.Cost,
-                    CategoryId = product.CategoryId,
-                    Unit = product.Unit,
-                    SupplierId = product.SupplierId,
-                    StateCode = product.StateCode,
-                    CreatedAt = product.CreatedAt,
-                    CreatedBy = product.CreatedBy,
-                    LastModifiedAt = product.LastModifiedAt,
-                    LastModifiedBy = product.LastModifiedBy
-                },
-                _ => product
-            };
-        }
-
-        private IEnumerable<Product> ConvertToSpecificTypes(IEnumerable<Product> products)
-        {
-            return products.Select(p => ConvertToSpecificType(p)!);
-        }
     }
 } 

@@ -204,25 +204,28 @@ namespace GesN.Web.Data.Migrations
                     StateCode INTEGER NOT NULL DEFAULT 1,
                     Name TEXT NOT NULL,
                     Description TEXT,
-                    SKU TEXT,
-                    CategoryId TEXT,
-                    ProductType TEXT NOT NULL CHECK (ProductType IN ('Simple', 'Composite', 'Group')),
+                    Price REAL NOT NULL DEFAULT 0,
+                    QuantityPrice INTEGER NOT NULL DEFAULT 0,
                     UnitPrice REAL NOT NULL DEFAULT 0,
+                    CategoryId TEXT,
+                    Category TEXT,
+                    SKU TEXT,
+                    ImageUrl TEXT,
+                    Note TEXT,
                     Cost REAL NOT NULL DEFAULT 0,
-                    IsActive INTEGER NOT NULL DEFAULT 1,
-                    MinStock INTEGER DEFAULT 0,
+                    AssemblyTime INTEGER DEFAULT 0,
+                    AssemblyInstructions TEXT,
+                    ProductType TEXT NOT NULL CHECK (ProductType IN ('Simple', 'Composite', 'Group')),
+                    PRIMARY KEY(Id),
+                    FOREIGN KEY(CategoryId) REFERENCES ProductCategory(Id)
+                );";
+                    /*MinStock INTEGER DEFAULT 0,
                     CurrentStock INTEGER DEFAULT 0,
-                    Unit TEXT DEFAULT 'UN',
                     SupplierId TEXT,
                     AllowCustomization INTEGER DEFAULT 0,
                     MinItemsRequired INTEGER DEFAULT 1,
                     MaxItemsAllowed INTEGER,
-                    AssemblyTime INTEGER DEFAULT 0,
-                    AssemblyInstructions TEXT,
-                    PRIMARY KEY(Id),
-                    FOREIGN KEY(CategoryId) REFERENCES ProductCategory(Id),
-                    FOREIGN KEY(SupplierId) REFERENCES Supplier(Id)
-                );";
+                    */
 
                 var createProductGroupItemTable = @"
                 CREATE TABLE IF NOT EXISTS ProductGroupItem (

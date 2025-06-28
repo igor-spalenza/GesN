@@ -8,8 +8,8 @@ namespace GesN.Web.Models.ViewModels.Production
     {
         public string? Id { get; set; }
 
-        [Display(Name = "Código")]
-        public string Code { get; set; } = string.Empty;
+        [Display(Name = "SKU")]
+        public string? SKU { get; set; } = string.Empty;
 
         [Display(Name = "Nome")]
         public string Name { get; set; } = string.Empty;
@@ -28,29 +28,30 @@ namespace GesN.Web.Models.ViewModels.Production
 
         [Display(Name = "Preço")]
         [DataType(DataType.Currency)]
-        public decimal? Price { get; set; }
+        public decimal Price { get; set; }
+
+        [Display(Name = "Preço por Quantidade")]
+        public int QuantityPrice { get; set; } = 0;
+
+        [Display(Name = "Preço Unitário")]
+        [DataType(DataType.Currency)]
+        public decimal UnitPrice { get; set; }
 
         [Display(Name = "Custo")]
         [DataType(DataType.Currency)]
-        public decimal? Cost { get; set; }
+        public decimal Cost { get; set; }
 
-        [Display(Name = "Unidade")]
-        public string? Unit { get; set; }
+        [Display(Name = "Imagem")]
+        public string? ImageUrl { get; set; }
 
-        [Display(Name = "Estoque Atual")]
-        public int? CurrentStock { get; set; }
-
-        [Display(Name = "Estoque Mínimo")]
-        public int? MinStock { get; set; }
+        [Display(Name = "Observações")]
+        public string? Note { get; set; }
 
         [Display(Name = "Tempo de Montagem (min)")]
-        public int? AssemblyTime { get; set; }
+        public int AssemblyTime { get; set; } = 0;
 
-        [Display(Name = "Min. Itens Obrigatórios")]
-        public int? MinItemsRequired { get; set; }
-
-        [Display(Name = "Max. Itens Permitidos")]
-        public int? MaxItemsAllowed { get; set; }
+        [Display(Name = "Instruções de Montagem")]
+        public string? AssemblyInstructions { get; set; }
 
         [Display(Name = "Status")]
         public int StateCode { get; set; } = 1;
@@ -74,11 +75,29 @@ namespace GesN.Web.Models.ViewModels.Production
         [Display(Name = "Status")]
         public string StateCodeDisplay => StateCode == 1 ? "Ativo" : "Inativo";
 
-        [Display(Name = "Estoque")]
-        public string StockDisplay => CurrentStock?.ToString() ?? "N/A";
-
         [Display(Name = "Preço")]
-        public string PriceDisplay => Price?.ToString("C") ?? "N/A";
+        public string PriceDisplay => Price.ToString("C");
+
+        [Display(Name = "Preço Unitário")]
+        public string UnitPriceDisplay => UnitPrice.ToString("C");
+
+        [Display(Name = "Tempo de Montagem")]
+        public string AssemblyTimeDisplay
+        {
+            get
+            {
+                if (AssemblyTime <= 0)
+                    return "Sem montagem";
+                
+                var hours = AssemblyTime / 60;
+                var minutes = AssemblyTime % 60;
+                
+                if (hours > 0)
+                    return $"{hours}h {minutes}min";
+                
+                return $"{minutes}min";
+            }
+        }
 
         [Display(Name = "Data de Criação")]
         public string FormattedCreatedAt => CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
@@ -89,10 +108,9 @@ namespace GesN.Web.Models.ViewModels.Production
 
     public class CreateProductViewModel
     {
-        [Required(ErrorMessage = "O código é obrigatório")]
-        [StringLength(50, ErrorMessage = "O código deve ter no máximo {1} caracteres")]
-        [Display(Name = "Código")]
-        public string Code { get; set; } = string.Empty;
+        [StringLength(50, ErrorMessage = "O SKU deve ter no máximo {1} caracteres")]
+        [Display(Name = "SKU")]
+        public string? SKU { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "O nome é obrigatório")]
         [StringLength(200, ErrorMessage = "O nome deve ter no máximo {1} caracteres")]
@@ -113,36 +131,36 @@ namespace GesN.Web.Models.ViewModels.Production
         [Range(0, double.MaxValue, ErrorMessage = "O preço deve ser maior ou igual a zero")]
         [Display(Name = "Preço")]
         [DataType(DataType.Currency)]
-        public decimal? Price { get; set; }
+        public decimal Price { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "O preço por quantidade deve ser maior ou igual a zero")]
+        [Display(Name = "Preço por Quantidade")]
+        public int QuantityPrice { get; set; } = 0;
+
+        [Range(0, double.MaxValue, ErrorMessage = "O preço unitário deve ser maior ou igual a zero")]
+        [Display(Name = "Preço Unitário")]
+        [DataType(DataType.Currency)]
+        public decimal UnitPrice { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "O custo deve ser maior ou igual a zero")]
         [Display(Name = "Custo")]
         [DataType(DataType.Currency)]
-        public decimal? Cost { get; set; }
+        public decimal Cost { get; set; }
 
-        [StringLength(20, ErrorMessage = "A unidade deve ter no máximo {1} caracteres")]
-        [Display(Name = "Unidade")]
-        public string? Unit { get; set; }
+        [Display(Name = "URL da Imagem")]
+        public string? ImageUrl { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = "O estoque atual deve ser maior ou igual a zero")]
-        [Display(Name = "Estoque Atual")]
-        public int? CurrentStock { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "O estoque mínimo deve ser maior ou igual a zero")]
-        [Display(Name = "Estoque Mínimo")]
-        public int? MinStock { get; set; }
+        [StringLength(1000, ErrorMessage = "As observações devem ter no máximo {1} caracteres")]
+        [Display(Name = "Observações")]
+        public string? Note { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "O tempo de montagem deve ser maior ou igual a zero")]
         [Display(Name = "Tempo de Montagem (min)")]
-        public int? AssemblyTime { get; set; }
+        public int AssemblyTime { get; set; } = 0;
 
-        [Range(0, int.MaxValue, ErrorMessage = "O mínimo de itens deve ser maior ou igual a zero")]
-        [Display(Name = "Min. Itens Obrigatórios")]
-        public int? MinItemsRequired { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "O máximo de itens deve ser maior ou igual a zero")]
-        [Display(Name = "Max. Itens Permitidos")]
-        public int? MaxItemsAllowed { get; set; }
+        [StringLength(2000, ErrorMessage = "As instruções de montagem devem ter no máximo {1} caracteres")]
+        [Display(Name = "Instruções de Montagem")]
+        public string? AssemblyInstructions { get; set; }
 
         [Display(Name = "Tipos de Produto Disponíveis")]
         public List<ProductTypeSelectionViewModel> AvailableProductTypes { get; set; } = new()
@@ -161,10 +179,9 @@ namespace GesN.Web.Models.ViewModels.Production
         [Required]
         public string Id { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "O código é obrigatório")]
-        [StringLength(50, ErrorMessage = "O código deve ter no máximo {1} caracteres")]
-        [Display(Name = "Código")]
-        public string Code { get; set; } = string.Empty;
+        [StringLength(50, ErrorMessage = "O SKU deve ter no máximo {1} caracteres")]
+        [Display(Name = "SKU")]
+        public string? SKU { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "O nome é obrigatório")]
         [StringLength(200, ErrorMessage = "O nome deve ter no máximo {1} caracteres")]
@@ -185,42 +202,46 @@ namespace GesN.Web.Models.ViewModels.Production
         [Range(0, double.MaxValue, ErrorMessage = "O preço deve ser maior ou igual a zero")]
         [Display(Name = "Preço")]
         [DataType(DataType.Currency)]
-        public decimal? Price { get; set; }
+        public decimal Price { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "O preço por quantidade deve ser maior ou igual a zero")]
+        [Display(Name = "Preço por Quantidade")]
+        public int QuantityPrice { get; set; } = 0;
+
+        [Range(0, double.MaxValue, ErrorMessage = "O preço unitário deve ser maior ou igual a zero")]
+        [Display(Name = "Preço Unitário")]
+        [DataType(DataType.Currency)]
+        public decimal UnitPrice { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "O custo deve ser maior ou igual a zero")]
         [Display(Name = "Custo")]
         [DataType(DataType.Currency)]
-        public decimal? Cost { get; set; }
+        public decimal Cost { get; set; }
 
-        [StringLength(20, ErrorMessage = "A unidade deve ter no máximo {1} caracteres")]
-        [Display(Name = "Unidade")]
-        public string? Unit { get; set; }
+        [Display(Name = "URL da Imagem")]
+        public string? ImageUrl { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = "O estoque atual deve ser maior ou igual a zero")]
-        [Display(Name = "Estoque Atual")]
-        public int? CurrentStock { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "O estoque mínimo deve ser maior ou igual a zero")]
-        [Display(Name = "Estoque Mínimo")]
-        public int? MinStock { get; set; }
+        [StringLength(1000, ErrorMessage = "As observações devem ter no máximo {1} caracteres")]
+        [Display(Name = "Observações")]
+        public string? Note { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "O tempo de montagem deve ser maior ou igual a zero")]
         [Display(Name = "Tempo de Montagem (min)")]
-        public int? AssemblyTime { get; set; }
+        public int AssemblyTime { get; set; } = 0;
 
-        [Range(0, int.MaxValue, ErrorMessage = "O mínimo de itens deve ser maior ou igual a zero")]
-        [Display(Name = "Min. Itens Obrigatórios")]
-        public int? MinItemsRequired { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "O máximo de itens deve ser maior ou igual a zero")]
-        [Display(Name = "Max. Itens Permitidos")]
-        public int? MaxItemsAllowed { get; set; }
+        [StringLength(2000, ErrorMessage = "As instruções de montagem devem ter no máximo {1} caracteres")]
+        [Display(Name = "Instruções de Montagem")]
+        public string? AssemblyInstructions { get; set; }
 
         [Display(Name = "Status")]
         public int StateCode { get; set; } = 1;
 
         [Display(Name = "Ativo")]
-        public bool IsActive => StateCode == 1;
+        public bool IsActive 
+        { 
+            get => StateCode == 1; 
+            set => StateCode = value ? 1 : 0; 
+        }
 
         [Display(Name = "Data de Criação")]
         public DateTime? CreatedAt { get; set; }
@@ -241,12 +262,9 @@ namespace GesN.Web.Models.ViewModels.Production
         {
             get
             {
-                if (Price.HasValue && Cost.HasValue && Cost.Value > 0)
-                {
-                    var margin = ((Price.Value - Cost.Value) / Cost.Value) * 100;
-                    return $"{margin:F1}%";
-                }
-                return "N/A";
+                if (Cost <= 0 || Price <= 0) return "N/A";
+                var margin = ((Price - Cost) / Cost) * 100;
+                return $"{margin:F1}%";
             }
         }
 
@@ -265,20 +283,20 @@ namespace GesN.Web.Models.ViewModels.Production
     public class ProductDetailsViewModel
     {
         public string Id { get; set; } = string.Empty;
-        public string Code { get; set; } = string.Empty;
+        public string? SKU { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public ProductType ProductType { get; set; }
         public string? CategoryId { get; set; }
         public string? CategoryName { get; set; }
-        public decimal? Price { get; set; }
-        public decimal? Cost { get; set; }
-        public string? Unit { get; set; }
-        public int? CurrentStock { get; set; }
-        public int? MinStock { get; set; }
-        public int? AssemblyTime { get; set; }
-        public int? MinItemsRequired { get; set; }
-        public int? MaxItemsAllowed { get; set; }
+        public decimal Price { get; set; }
+        public int QuantityPrice { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal Cost { get; set; }
+        public string? ImageUrl { get; set; }
+        public string? Note { get; set; }
+        public int AssemblyTime { get; set; }
+        public string? AssemblyInstructions { get; set; }
         public int StateCode { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? ModifiedAt { get; set; }
@@ -293,10 +311,25 @@ namespace GesN.Web.Models.ViewModels.Production
         };
 
         public string StateCodeDisplay => StateCode == 1 ? "Ativo" : "Inativo";
-        public string StockDisplay => CurrentStock?.ToString() ?? "N/A";
-        public string PriceDisplay => Price?.ToString("C") ?? "N/A";
-        public string CostDisplay => Cost?.ToString("C") ?? "N/A";
-        public string AssemblyTimeDisplay => AssemblyTime?.ToString() + " min" ?? "N/A";
+        public string PriceDisplay => Price.ToString("C");
+        public string UnitPriceDisplay => UnitPrice.ToString("C");
+        public string CostDisplay => Cost.ToString("C");
+        public string AssemblyTimeDisplay
+        {
+            get
+            {
+                if (AssemblyTime <= 0)
+                    return "Sem montagem";
+                
+                var hours = AssemblyTime / 60;
+                var minutes = AssemblyTime % 60;
+                
+                if (hours > 0)
+                    return $"{hours}h {minutes}min";
+                
+                return $"{minutes}min";
+            }
+        }
         public string FormattedCreatedAt => CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
         public string FormattedModifiedAt => ModifiedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
     }
@@ -320,8 +353,6 @@ namespace GesN.Web.Models.ViewModels.Production
         public int SimpleProducts { get; set; }
         public int CompositeProducts { get; set; }
         public int GroupProducts { get; set; }
-        public int ProductGroups { get; set; }
-        public int LowStockProducts { get; set; }
         public decimal TotalInventoryValue { get; set; }
         public int NewProductsThisMonth { get; set; }
         public DateTime LastUpdate { get; set; } = DateTime.Now;
@@ -345,10 +376,10 @@ namespace GesN.Web.Models.ViewModels.Production
         {
             return new List<ProductTypeSelectionViewModel>
             {
-                new() { Value = null, Text = "Todos os Tipos", IsSelected = true },
-                new() { Value = Models.Enumerators.ProductType.Simple, Text = "Produto Simples", IsSelected = false },
-                new() { Value = Models.Enumerators.ProductType.Composite, Text = "Produto Composto", IsSelected = false },
-                new() { Value = Models.Enumerators.ProductType.Group, Text = "Grupo de Produtos", IsSelected = false }
+                new() { Value = null, Text = "Todos os tipos", IsSelected = !ProductType.HasValue },
+                new() { Value = Models.Enumerators.ProductType.Simple, Text = "Produto Simples", IsSelected = ProductType == Models.Enumerators.ProductType.Simple },
+                new() { Value = Models.Enumerators.ProductType.Composite, Text = "Produto Composto", IsSelected = ProductType == Models.Enumerators.ProductType.Composite },
+                new() { Value = Models.Enumerators.ProductType.Group, Text = "Grupo de Produtos", IsSelected = ProductType == Models.Enumerators.ProductType.Group }
             };
         }
 
@@ -356,9 +387,9 @@ namespace GesN.Web.Models.ViewModels.Production
         {
             return new List<StateSelectionViewModel>
             {
-                new() { Value = null, Text = "Todos os Status", IsSelected = true },
-                new() { Value = 1, Text = "Ativo", IsSelected = false },
-                new() { Value = 0, Text = "Inativo", IsSelected = false }
+                new() { Value = null, Text = "Todos os status", IsSelected = !StateCode.HasValue },
+                new() { Value = 1, Text = "Ativo", IsSelected = StateCode == 1 },
+                new() { Value = 0, Text = "Inativo", IsSelected = StateCode == 0 }
             };
         }
     }

@@ -31,17 +31,23 @@ namespace GesN.Web.Models.Entities.Production
         public string? Description { get; set; }
 
         /// <summary>
-        /// Código/SKU do produto
+        /// Preço do produto
         /// </summary>
-        [StringLength(50)]
-        [Display(Name = "Código")]
-        public string? Code { get; set; }
+        [Display(Name = "Preço")]
+        [Range(0, double.MaxValue, ErrorMessage = "O preço deve ser maior ou igual a zero")]
+        public decimal Price { get; set; }
+
+        /// <summary>
+        /// Preço baseado em quantidade
+        /// </summary>
+        [Display(Name = "Preço por Quantidade")]
+        public int QuantityPrice { get; set; } = 0;
 
         /// <summary>
         /// Preço unitário do produto
         /// </summary>
-        [Display(Name = "Preço")]
-        [Range(0, double.MaxValue, ErrorMessage = "O preço deve ser maior ou igual a zero")]
+        [Display(Name = "Preço Unitário")]
+        [Range(0, double.MaxValue, ErrorMessage = "O preço unitário deve ser maior ou igual a zero")]
         public decimal UnitPrice { get; set; }
 
         /// <summary>
@@ -52,53 +58,35 @@ namespace GesN.Web.Models.Entities.Production
         public decimal Cost { get; set; }
 
         /// <summary>
-        /// Categoria do produto
+        /// ID da categoria do produto
         /// </summary>
         [Display(Name = "Categoria")]
         public string? CategoryId { get; set; }
 
         /// <summary>
-        /// Fornecedor do produto
+        /// Nome da categoria do produto
         /// </summary>
-        [Display(Name = "Fornecedor")]
-        public string? SupplierId { get; set; }
+        [Display(Name = "Nome da Categoria")]
+        public string? Category { get; set; }
 
         /// <summary>
-        /// Estoque mínimo
+        /// Código SKU do produto
         /// </summary>
-        [Display(Name = "Estoque Mínimo")]
-        public int MinStock { get; set; } = 0;
+        [StringLength(50)]
+        [Display(Name = "SKU")]
+        public string? SKU { get; set; }
 
         /// <summary>
-        /// Estoque atual
+        /// URL da imagem do produto
         /// </summary>
-        [Display(Name = "Estoque Atual")]
-        public int CurrentStock { get; set; } = 0;
+        [Display(Name = "Imagem")]
+        public string? ImageUrl { get; set; }
 
         /// <summary>
-        /// Unidade de medida
+        /// Notas sobre o produto
         /// </summary>
-        [Display(Name = "Unidade")]
-        [MaxLength(10)]
-        public string Unit { get; set; } = "UN";
-
-        /// <summary>
-        /// Permite customização
-        /// </summary>
-        [Display(Name = "Permite Customização")]
-        public bool AllowCustomization { get; set; } = false;
-
-        /// <summary>
-        /// Quantidade mínima de itens necessários (para ProductGroup)
-        /// </summary>
-        [Display(Name = "Itens Mínimos Necessários")]
-        public int MinItemsRequired { get; set; } = 1;
-
-        /// <summary>
-        /// Quantidade máxima de itens permitidos (para ProductGroup)
-        /// </summary>
-        [Display(Name = "Itens Máximos Permitidos")]
-        public int? MaxItemsAllowed { get; set; }
+        [Display(Name = "Observações")]
+        public string? Note { get; set; }
 
         /// <summary>
         /// Tempo de montagem em minutos
@@ -115,12 +103,7 @@ namespace GesN.Web.Models.Entities.Production
         /// <summary>
         /// Propriedade navegacional para categoria
         /// </summary>
-        public ProductCategory? Category { get; set; }
-
-        /// <summary>
-        /// Propriedade navegacional para fornecedor
-        /// </summary>
-        public Supplier? Supplier { get; set; }
+        public ProductCategory? CategoryNavigation { get; set; }
 
         /// <summary>
         /// Construtor padrão
@@ -132,10 +115,10 @@ namespace GesN.Web.Models.Entities.Production
         /// <summary>
         /// Construtor com dados básicos
         /// </summary>
-        public Product(string name, decimal unitPrice)
+        public Product(string name, decimal price)
         {
             Name = name;
-            UnitPrice = unitPrice;
+            Price = price;
         }
 
         /// <summary>
@@ -151,7 +134,40 @@ namespace GesN.Web.Models.Entities.Production
         /// </summary>
         public string GetPriceInfo()
         {
+            return $"R$ {Price:N2}";
+        }
+
+        /// <summary>
+        /// Obtém informações de preço unitário formatadas
+        /// </summary>
+        public string GetUnitPriceInfo()
+        {
             return $"R$ {UnitPrice:N2}";
+        }
+
+        /// <summary>
+        /// Obtém informações do tempo de montagem formatadas
+        /// </summary>
+        public string GetAssemblyTimeInfo()
+        {
+            if (AssemblyTime <= 0)
+                return "Sem montagem";
+            
+            var hours = AssemblyTime / 60;
+            var minutes = AssemblyTime % 60;
+            
+            if (hours > 0)
+                return $"{hours}h {minutes}min";
+            
+            return $"{minutes}min";
+        }
+
+        /// <summary>
+        /// Verifica se o produto requer montagem
+        /// </summary>
+        public bool RequiresAssembly()
+        {
+            return AssemblyTime > 0;
         }
 
         /// <summary>
@@ -159,7 +175,7 @@ namespace GesN.Web.Models.Entities.Production
         /// </summary>
         public virtual bool HasCompleteData()
         {
-            return !string.IsNullOrWhiteSpace(Name) && UnitPrice >= 0;
+            return !string.IsNullOrWhiteSpace(Name) && Price >= 0;
         }
 
         /// <summary>

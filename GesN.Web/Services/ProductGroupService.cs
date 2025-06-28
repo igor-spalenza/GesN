@@ -96,12 +96,7 @@ namespace GesN.Web.Services
             if (productGroup.UnitPrice < 0)
                 return false;
 
-            if (productGroup.MinItemsRequired.HasValue && productGroup.MinItemsRequired < 0)
-                return false;
-
-            if (productGroup.MaxItemsAllowed.HasValue && productGroup.MaxItemsAllowed > 0 && 
-                productGroup.MinItemsRequired.HasValue && productGroup.MaxItemsAllowed < productGroup.MinItemsRequired)
-                return false;
+            // Validações específicas de ProductGroup - campos MinItemsRequired e MaxItemsAllowed foram removidos
 
             return true;
         }
@@ -173,14 +168,16 @@ namespace GesN.Web.Services
 
         public async Task<int> GetMinimumItemsRequiredAsync(string productGroupId)
         {
-            var productGroup = await GetByIdAsync(productGroupId);
-            return productGroup?.MinItemsRequired ?? 0;
+            // Campo removido - retorna 0 por padrão
+            await Task.CompletedTask;
+            return 0;
         }
 
         public async Task<int> GetMaximumItemsAllowedAsync(string productGroupId)
         {
-            var productGroup = await GetByIdAsync(productGroupId);
-            return productGroup?.MaxItemsAllowed ?? int.MaxValue;
+            // Campo removido - retorna ilimitado por padrão
+            await Task.CompletedTask;
+            return int.MaxValue;
         }
 
         // Consultas específicas
@@ -211,18 +208,9 @@ namespace GesN.Web.Services
         // Configuração de grupo
         public async Task<bool> ConfigureGroupLimitsAsync(string productGroupId, int minItems, int maxItems)
         {
-            var productGroup = await GetByIdAsync(productGroupId);
-            if (productGroup == null)
-                return false;
-
-            if (minItems < 0 || (maxItems > 0 && maxItems < minItems))
-                return false;
-
-            productGroup.MinItemsRequired = minItems;
-            productGroup.MaxItemsAllowed = maxItems;
-            productGroup.LastModifiedAt = DateTime.UtcNow;
-
-            return await _productRepository.UpdateAsync(productGroup);
+            // Método mantido para compatibilidade, mas os campos MinItemsRequired e MaxItemsAllowed foram removidos
+            await Task.CompletedTask;
+            return true;
         }
 
         public async Task<bool> UpdateGroupStatusAsync(string productGroupId, bool isActive)

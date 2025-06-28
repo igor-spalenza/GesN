@@ -19,16 +19,28 @@ const productManager = {
     // Eventos principais
     bindEvents: function() {
         // Botão novo produto
-        $('#btnNovoProduct').on('click', () => this.novoProduct());
+        if ($('#btnNovoProduct').length) {
+            $('#btnNovoProduct').on('click', () => this.novoProduct());
+        }
         
-        // Filtros
-        $('#filterProductType').on('change', () => this.aplicarFiltros());
-        $('#filterCategory').on('change', () => this.aplicarFiltros());
-        $('#filterStatus').on('change', () => this.aplicarFiltros());
-        $('#searchProduct').on('input', debounce(() => this.aplicarFiltros(), 300));
+        // Filtros - apenas vincula se existirem
+        if ($('#filterProductType').length) {
+            $('#filterProductType').on('change', () => this.aplicarFiltros());
+        }
+        if ($('#filterCategory').length) {
+            $('#filterCategory').on('change', () => this.aplicarFiltros());
+        }
+        if ($('#filterStatus').length) {
+            $('#filterStatus').on('change', () => this.aplicarFiltros());
+        }
+        if ($('#searchProduct').length) {
+            $('#searchProduct').on('input', debounce(() => this.aplicarFiltros(), 300));
+        }
         
         // Botão limpar filtros
-        $('#btnLimparFiltros').on('click', () => this.limparFiltros());
+        if ($('#btnLimparFiltros').length) {
+            $('#btnLimparFiltros').on('click', () => this.limparFiltros());
+        }
     },
 
     // Carregar grid principal
@@ -38,7 +50,7 @@ const productManager = {
             type: 'GET',
             data: this.getFilterData(),
             success: (data) => {
-                $('#gridContainer').html(data);
+                $('#lista-produtos-container').html(data);
                 this.initializeDataTable();
             },
             error: (xhr) => {
@@ -74,12 +86,13 @@ const productManager = {
             url: `${this.config.baseUrl}/Statistics`,
             type: 'GET',
             success: (data) => {
-                $('#totalProducts').text(data.totalProducts);
-                $('#activeProducts').text(data.activeProducts);
-                $('#lowStockProducts').text(data.lowStockProducts);
-                $('#totalValue').text(data.totalValue);
+                $('#total-produtos').text(data.totalProducts);
+                $('#produtos-ativos').text(data.activeProducts);
+                $('#produtos-simples').text(data.simpleProducts);
+                $('#produtos-compostos').text(data.compositeProducts);
+                $('#grupos-produtos').text(data.groupProducts);
                 
-                // Atualizar badges de alerta
+                // Atualizar badges de alerta se existirem
                 if (data.lowStockProducts > 0) {
                     $('#lowStockBadge').removeClass('d-none').text(data.lowStockProducts);
                 } else {
@@ -95,10 +108,10 @@ const productManager = {
     // Obter dados dos filtros
     getFilterData: function() {
         return {
-            productType: $('#filterProductType').val(),
-            categoryId: $('#filterCategory').val(),
-            status: $('#filterStatus').val(),
-            search: $('#searchProduct').val()
+            productType: $('#filterProductType').length ? $('#filterProductType').val() : null,
+            categoryId: $('#filterCategory').length ? $('#filterCategory').val() : null,
+            status: $('#filterStatus').length ? $('#filterStatus').val() : null,
+            search: $('#searchProduct').length ? $('#searchProduct').val() : null
         };
     },
 
@@ -110,10 +123,10 @@ const productManager = {
 
     // Limpar filtros
     limparFiltros: function() {
-        $('#filterProductType').val('');
-        $('#filterCategory').val('');
-        $('#filterStatus').val('');
-        $('#searchProduct').val('');
+        if ($('#filterProductType').length) $('#filterProductType').val('');
+        if ($('#filterCategory').length) $('#filterCategory').val('');
+        if ($('#filterStatus').length) $('#filterStatus').val('');
+        if ($('#searchProduct').length) $('#searchProduct').val('');
         this.aplicarFiltros();
     },
 
@@ -128,6 +141,15 @@ const productManager = {
                 $(this.config.modalId + ' .modal-title').html('<i class="fas fa-plus"></i> Novo Produto');
                 $(this.config.modalId + ' .modal-body').html(data);
                 $(this.config.modalId + ' .modal-dialog').removeClass('modal-xl').addClass('modal-lg');
+                
+                // Inicializar floating labels após carregar o conteúdo
+                setTimeout(() => {
+                    const formContainer = document.getElementById('formNovoProduct');
+                    if (formContainer && this.forms) {
+                        this.forms.initFloatingLabels(formContainer);
+                    }
+                }, 100);
+                
                 $(this.config.modalId).modal('show');
             },
             error: (xhr) => {
@@ -162,6 +184,11 @@ const productManager = {
                     $(this.config.modalId).modal('hide');
                     this.loadGrid();
                     this.loadStatistics();
+                    
+                    // Limpar o formulário para próximas criações
+                    if (this.forms) {
+                        this.forms.resetFormState(form[0]);
+                    }
                     
                     // Se for produto composto ou grupo, abrir para edição
                     if (response.productType !== 0) { // 0 = Simple
@@ -199,30 +226,144 @@ const productManager = {
         });
     },
 
-    // Editar produto
+    // Editar produto - abrir como aba
     editarProduct: function(productId) {
+        // Verificar se já existe uma aba para este produto
+        const existingTabId = `product-${productId}`;
+        const existingTab = $(`#${existingTabId}-tab`);
+        
+        if (existingTab.length > 0) {
+            // Se a aba já existe, apenas ativa ela
+            const tabTrigger = new bootstrap.Tab(document.getElementById(`${existingTabId}-tab`));
+            tabTrigger.show();
+            toastr.info('Produto já está aberto em outra aba');
+            return;
+        }
+
+        // Se não existe, cria nova aba
+        const tabId = existingTabId;
         this.config.currentProductId = productId;
         this.config.currentEditMode = 'edit';
         
-        $.ajax({
-            url: `${this.config.baseUrl}/FormularioEdicao/${productId}`,
-            type: 'GET',
-            success: (data) => {
-                $(this.config.modalId + ' .modal-title').html('<i class="fas fa-edit"></i> Editar Produto');
-                $(this.config.modalId + ' .modal-body').html(data);
-                $(this.config.modalId + ' .modal-dialog').removeClass('modal-lg').addClass('modal-xl');
-                $(this.config.modalId).modal('show');
-            },
-            error: (xhr) => {
-                console.error('Erro ao abrir edição:', xhr);
-                toastr.error('Erro ao abrir formulário de edição');
+        // Cria a aba com nome temporário que será atualizado
+        const novaAba = `
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="${tabId}-tab" data-bs-toggle="tab" data-bs-target="#${tabId}" type="button" role="tab" data-product-id="${productId}">
+                    <i class="fas fa-edit"></i> Carregando...
+                    <span class="btn-close ms-2" onclick="productManager.fecharAba('${tabId}')"></span>
+                </button>
+            </li>`;
+        $('#productTabs').append(novaAba);
+        
+        const novoConteudo = `
+            <div class="tab-pane fade" id="${tabId}" role="tabpanel">
+                <div id="conteudo-${tabId}">
+                    <div class="d-flex justify-content-center my-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        $('#productTabsContent').append(novoConteudo);
+        
+        // Carrega o conteúdo da aba
+        $.get(`${this.config.baseUrl}/FormularioEdicao/${productId}`)
+            .done((data) => {
+                $(`#conteudo-${tabId}`).html(data);
+                
+                // Extrai o nome do produto do conteúdo carregado para atualizar o título da aba
+                const productNameElement = $(`#conteudo-${tabId}`).find('input[name="Name"]');
+                if (productNameElement.length > 0) {
+                    const productName = productNameElement.val();
+                    $(`#${tabId}-tab`).html(`<i class="fas fa-edit"></i> ${productName} <span class="btn-close ms-2" onclick="productManager.fecharAba('${tabId}')"></span>`);
+                }
+                
+                // Inicializar gerenciamento de sub-abas e floating labels
+                setTimeout(() => {
+                    this.initializeEditTabs(productId, tabId);
+                    // Inicializar floating labels no conteúdo carregado
+                    const container = document.getElementById(`conteudo-${tabId}`);
+                    if (container) {
+                        this.forms.initFloatingLabels(container);
+                    }
+                }, 100);
+            })
+            .fail(() => {
+                $(`#conteudo-${tabId}`).html('<div class="alert alert-danger">Erro ao carregar produto. Tente novamente.</div>');
+            });
+            
+        // Ativa a nova aba
+        const tabTrigger = new bootstrap.Tab(document.getElementById(`${tabId}-tab`));
+        tabTrigger.show();
+    },
+
+    // Fechar aba
+    fecharAba: function(tabId) {
+        // Remove a aba e seu conteúdo
+        $(`#${tabId}-tab`).parent().remove();
+        $(`#${tabId}`).remove();
+        
+        // Volta para a aba principal de lista
+        const mainTab = new bootstrap.Tab(document.getElementById('tab-lista-produtos'));
+        mainTab.show();
+        
+        // Limpar referências
+        this.config.currentProductId = null;
+        this.config.currentEditMode = null;
+    },
+
+    // Inicializar gerenciamento de sub-abas do formulário de edição
+    initializeEditTabs: function(productId, tabId) {
+        const containerSelector = `#conteudo-${tabId}`;
+        
+        // Remover eventos anteriores para evitar duplicatas
+        $(`${containerSelector} #productEditTabs button[data-bs-toggle="tab"]`).off('shown.bs.tab.productEdit');
+        
+        // Configurar carregamento lazy das sub-abas
+        $(`${containerSelector} #productEditTabs button[data-bs-toggle="tab"]`).on('shown.bs.tab.productEdit', (e) => {
+            const targetTab = $(e.target).attr('data-bs-target');
+            
+            switch(targetTab) {
+                case '#components-tab-pane':
+                    if ($(`${containerSelector} #componentsContainer .spinner-border`).length > 0) {
+                        this.components.carregarComponentes(productId);
+                    }
+                    break;
+                case '#group-items-tab-pane':
+                    if ($(`${containerSelector} #groupItemsContainer .spinner-border`).length > 0) {
+                        this.groupItems.carregarItens(productId);
+                    }
+                    break;
+                case '#group-options-tab-pane':
+                    if ($(`${containerSelector} #groupOptionsContainer .spinner-border`).length > 0) {
+                        this.groupOptions.carregarOpcoes(productId);
+                    }
+                    break;
+                case '#exchange-rules-tab-pane':
+                    if ($(`${containerSelector} #exchangeRulesContainer .spinner-border`).length > 0) {
+                        this.exchangeRules.carregarRegras(productId);
+                    }
+                    break;
             }
         });
     },
 
     // Salvar edição
     salvarEdicao: function() {
-        const form = $('#formEditProduct');
+        const currentProductId = this.config.currentProductId;
+        if (!currentProductId) {
+            toastr.error('Nenhum produto selecionado para edição');
+            return;
+        }
+
+        const tabId = `product-${currentProductId}`;
+        const form = $(`#conteudo-${tabId} #formEditProduct`);
+        if (form.length === 0) {
+            toastr.error('Formulário de edição não encontrado');
+            return;
+        }
+
         const formData = form.serialize();
 
         if (!this.validateForm(form)) {
@@ -230,7 +371,7 @@ const productManager = {
         }
 
         $.ajax({
-            url: `${this.config.baseUrl}/SalvarEdicaoProduct/${this.config.currentProductId}`,
+            url: `${this.config.baseUrl}/SalvarEdicaoProduct/${currentProductId}`,
             type: 'POST',
             data: formData,
             success: (response) => {
@@ -238,9 +379,12 @@ const productManager = {
                     toastr.success('Produto atualizado com sucesso!');
                     this.loadGrid();
                     this.loadStatistics();
+                    
+                    // Opcional: fechar aba após salvar
+                    // this.fecharAba(tabId);
                 } else {
                     toastr.error(response.message || 'Erro ao atualizar produto');
-                    this.showValidationErrors(response.errors);
+                    this.showValidationErrors(response.errors, tabId);
                 }
             },
             error: (xhr) => {
@@ -252,7 +396,11 @@ const productManager = {
 
     // Cancelar edição
     cancelarEdicao: function() {
-        $(this.config.modalId).modal('hide');
+        const currentProductId = this.config.currentProductId;
+        if (currentProductId) {
+            const tabId = `product-${currentProductId}`;
+            this.fecharAba(tabId);
+        }
     },
 
     // Excluir produto
@@ -291,6 +439,12 @@ const productManager = {
 
     // Validação de formulário
     validateForm: function(form) {
+        // Se o formulário tem floating labels, use o sistema de validação específico
+        if (form.find('.floating-input, .floating-select, .floating-textarea').length > 0) {
+            return this.forms.validateForm(form[0]);
+        }
+        
+        // Fallback para validação tradicional
         let isValid = true;
         
         // Limpar erros anteriores
@@ -316,14 +470,30 @@ const productManager = {
         return isValid;
     },
 
-    // Mostrar erros de validação
-    showValidationErrors: function(errors) {
+    // Mostrar erros de validação para aba específica
+    showValidationErrors: function(errors, tabId = null) {
         if (errors) {
+            // Determinar o container correto
+            let container = '';
+            if (tabId) {
+                container = `#conteudo-${tabId}`;
+            } else if (this.config.currentEditMode === 'create') {
+                container = '#formNovoProduct';
+            }
+            
             Object.keys(errors).forEach(key => {
-                const field = $(`[name="${key}"]`);
+                const field = $(`${container} [name="${key}"]`);
                 if (field.length) {
-                    field.addClass('is-invalid');
-                    field.siblings('.text-danger').text(errors[key][0]);
+                    // Se está usando floating labels, use o sistema específico
+                    if (field.hasClass('floating-input') || field.hasClass('floating-select') || field.hasClass('floating-textarea')) {
+                        if (this.forms) {
+                            this.forms.showValidation(field, errors[key][0]);
+                        }
+                    } else {
+                        // Fallback para validação tradicional
+                        field.addClass('is-invalid');
+                        field.siblings('.text-danger').text(errors[key][0]);
+                    }
                 }
             });
         }
@@ -331,18 +501,22 @@ const productManager = {
 
     // Filtros rápidos
     filtrarPorStatus: function(status) {
-        if (status === 'todos') {
-            $('#filterStatus').val('');
-        } else if (status === 'ativo') {
-            $('#filterStatus').val('1');
-        } else {
-            $('#filterStatus').val('0');
+        if ($('#filterStatus').length) {
+            if (status === 'todos') {
+                $('#filterStatus').val('');
+            } else if (status === 'ativo') {
+                $('#filterStatus').val('1');
+            } else {
+                $('#filterStatus').val('0');
+            }
         }
         this.aplicarFiltros();
     },
 
     filtrarPorTipo: function(tipo) {
-        $('#filterProductType').val(tipo);
+        if ($('#filterProductType').length) {
+            $('#filterProductType').val(tipo);
+        }
         this.aplicarFiltros();
     },
 
@@ -447,6 +621,325 @@ const productManager = {
                 error: (xhr) => {
                     console.error('Erro ao carregar regras:', xhr);
                     $('#exchangeRulesContainer').html('<div class="alert alert-danger">Erro ao carregar regras de troca</div>');
+                }
+            });
+        }
+    },
+
+    // Namespace para gerenciamento de formulários com floating labels
+    forms: {
+        // Inicializar floating labels
+        initFloatingLabels: function(container = document) {
+            this.setupFloatingLabels(container);
+            this.setupFormValidation(container);
+            this.setupCalculations(container);
+            this.setupAccessibility(container);
+            
+            // Force initial state for special cases
+            this.forceInitialStates(container);
+        },
+        
+        // Force initial states for edge cases
+        forceInitialStates: function(container) {
+            // Ensure all addon inputs maintain floating state
+            $(container).find('.floating-input-group-addon .floating-input').addClass('has-value');
+            
+            // Ensure all textareas maintain floating state
+            $(container).find('.floating-textarea').addClass('has-value');
+            
+            // Ensure selects with values maintain floating state
+            $(container).find('.floating-select').each(function() {
+                const $select = $(this);
+                if ($select.val() && $select.val() !== '') {
+                    $select.addClass('has-value');
+                }
+            });
+            
+            // Force number inputs with values to maintain floating state
+            $(container).find('.floating-input[type="number"]').each(function() {
+                const $input = $(this);
+                productManager.forms.checkInputValue($input);
+            });
+            
+            // Ensure disabled/readonly inputs maintain floating state
+            $(container).find('.floating-input:disabled, .floating-input[readonly]').addClass('has-value');
+        },
+
+        // Setup floating label behavior
+        setupFloatingLabels: function(container) {
+            // Handle floating inputs (excluding those with addons which are always floating)
+            $(container).find('.floating-input, .floating-select, .floating-textarea').each(function() {
+                const $input = $(this);
+                const $parent = $input.closest('.floating-input-group');
+                
+                // Skip inputs with addons as they are always in floating state
+                if ($parent.hasClass('floating-input-group-addon')) {
+                    // For addon inputs, always ensure they have the floating state
+                    $input.addClass('has-value');
+                    return;
+                }
+                
+                // Textareas should always have floating labels
+                if ($input.hasClass('floating-textarea')) {
+                    $input.addClass('has-value');
+                    // Still add event listeners for validation and other behaviors
+                    $input.on('focus blur input change', function() {
+                        // Don't remove has-value class for textareas, but check for other behaviors
+                        if (!$(this).hasClass('has-value')) {
+                            $(this).addClass('has-value');
+                        }
+                    });
+                    return;
+                }
+                
+                // Check initial value and add class if needed for regular inputs
+                productManager.forms.checkInputValue($input);
+                
+                // Add event listeners for regular inputs
+                $input.on('focus blur input change', function() {
+                    productManager.forms.checkInputValue($(this));
+                });
+            });
+            
+            // Special handling for selects
+            $(container).find('.floating-select').on('change', function() {
+                const $select = $(this);
+                if ($select.val() && $select.val() !== '') {
+                    $select.addClass('has-value');
+                } else {
+                    $select.removeClass('has-value');
+                }
+            });
+        },
+
+        // Check if input has value and toggle floating state
+        checkInputValue: function($input) {
+            const value = $input.val();
+            const inputType = $input.attr('type');
+            let hasValue = false;
+            
+            // For number inputs, treat 0 as a valid value
+            if (inputType === 'number') {
+                hasValue = value !== null && value !== undefined && value !== '';
+            } else {
+                // For text inputs, check for non-empty trimmed value
+                hasValue = value && value.trim() !== '';
+            }
+            
+            if (hasValue) {
+                $input.addClass('has-value');
+            } else {
+                $input.removeClass('has-value');
+            }
+        },
+
+        // Setup form validation
+        setupFormValidation: function(container) {
+            // Real-time validation
+            $(container).find('.floating-input, .floating-select, .floating-textarea').on('blur', function() {
+                const $input = $(this);
+                productManager.forms.validateField($input);
+            });
+
+            // Clear validation on input
+            $(container).find('.floating-input, .floating-select, .floating-textarea').on('input change', function() {
+                const $input = $(this);
+                if ($input.hasClass('is-invalid')) {
+                    productManager.forms.clearValidation($input);
+                }
+            });
+        },
+
+        // Validate individual field
+        validateField: function($input) {
+            const value = $input.val();
+            const isRequired = $input.prop('required') || $input.data('required');
+            let isValid = true;
+            let errorMessage = '';
+
+            // Required validation
+            if (isRequired && (!value || value.trim() === '')) {
+                isValid = false;
+                errorMessage = 'Este campo é obrigatório';
+            }
+
+            // Email validation
+            if (value && $input.attr('type') === 'email') {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(value)) {
+                    isValid = false;
+                    errorMessage = 'Por favor, insira um email válido';
+                }
+            }
+
+            // URL validation
+            if (value && $input.attr('type') === 'url') {
+                try {
+                    new URL(value);
+                } catch {
+                    isValid = false;
+                    errorMessage = 'Por favor, insira uma URL válida';
+                }
+            }
+
+            // Number validation
+            if (value && $input.attr('type') === 'number') {
+                const numValue = parseFloat(value);
+                const min = parseFloat($input.attr('min'));
+                const max = parseFloat($input.attr('max'));
+
+                if (isNaN(numValue)) {
+                    isValid = false;
+                    errorMessage = 'Por favor, insira um número válido';
+                } else if (!isNaN(min) && numValue < min) {
+                    isValid = false;
+                    errorMessage = `O valor deve ser maior ou igual a ${min}`;
+                } else if (!isNaN(max) && numValue > max) {
+                    isValid = false;
+                    errorMessage = `O valor deve ser menor ou igual a ${max}`;
+                }
+            }
+
+            // Apply validation state
+            if (isValid) {
+                this.clearValidation($input);
+            } else {
+                this.showValidation($input, errorMessage);
+            }
+
+            return isValid;
+        },
+
+        // Show validation error
+        showValidation: function($input, message) {
+            $input.addClass('is-invalid');
+            
+            let $errorContainer = $input.siblings('.text-danger');
+            if ($errorContainer.length === 0) {
+                $errorContainer = $('<span class="text-danger"></span>');
+                $input.parent().append($errorContainer);
+            }
+            
+            $errorContainer.text(message);
+        },
+
+        // Clear validation error
+        clearValidation: function($input) {
+            $input.removeClass('is-invalid');
+            $input.siblings('.text-danger').text('');
+        },
+
+        // Setup automatic calculations
+        setupCalculations: function(container) {
+            // Profit margin calculation
+            $(container).find('#Price, #Cost').on('input', function() {
+                productManager.forms.calculateProfitMargin();
+            });
+        },
+
+        // Calculate profit margin
+        calculateProfitMargin: function() {
+            const price = parseFloat($('#Price').val()) || 0;
+            const cost = parseFloat($('#Cost').val()) || 0;
+            
+            // Find margin display element (could be in create or edit form)
+            const $marginDisplay = $('#marginDisplay');
+            const $marginSection = $('#marginSection');
+            
+            if (price > 0 && cost > 0) {
+                const margin = ((price - cost) / cost) * 100;
+                $marginDisplay.text(margin.toFixed(1) + '%');
+                
+                // Show margin section (for create form)
+                if ($marginSection.length > 0) {
+                    $marginSection.show();
+                }
+                
+                // Show margin parent (for edit form)
+                $marginDisplay.parent().removeClass('d-none').show();
+                
+                // Add color coding
+                const $alertContainer = $marginDisplay.parent();
+                if (margin < 10) {
+                    $alertContainer.removeClass('alert-info alert-success').addClass('alert-warning');
+                } else if (margin < 20) {
+                    $alertContainer.removeClass('alert-warning alert-success').addClass('alert-info');
+                } else {
+                    $alertContainer.removeClass('alert-warning alert-info').addClass('alert-success');
+                }
+            } else {
+                // Hide margin displays
+                if ($marginSection.length > 0) {
+                    $marginSection.hide();
+                }
+                $marginDisplay.parent().hide();
+            }
+        },
+
+        // Validate entire form
+        validateForm: function(container) {
+            let isValid = true;
+            
+            $(container).find('.floating-input, .floating-select, .floating-textarea').each(function() {
+                if (!productManager.forms.validateField($(this))) {
+                    isValid = false;
+                }
+            });
+
+            // Custom business logic validations
+            const price = parseFloat($(container).find('#Price').val()) || 0;
+            const cost = parseFloat($(container).find('#Cost').val()) || 0;
+            
+            if (price > 0 && cost > 0 && price <= cost) {
+                toastr.warning('Atenção: O preço de venda está menor ou igual ao custo!');
+            }
+
+            return isValid;
+        },
+
+        // Reset form to initial state
+        resetFormState: function(container) {
+            $(container).find('.floating-input, .floating-select, .floating-textarea').each(function() {
+                const $input = $(this);
+                $input.removeClass('has-value is-invalid');
+                productManager.forms.clearValidation($input);
+            });
+            
+            $(container).find('#marginDisplay').parent().hide();
+        },
+
+        // Accessibility improvements
+        setupAccessibility: function(container) {
+            // Add ARIA attributes
+            $(container).find('.floating-input, .floating-select, .floating-textarea').each(function() {
+                const $input = $(this);
+                const $label = $input.siblings('.floating-label');
+                
+                if ($label.length > 0) {
+                    const labelText = $label.text();
+                    $input.attr('aria-label', labelText);
+                    
+                    // Link label with input
+                    const inputId = $input.attr('id') || 'input_' + Math.random().toString(36).substr(2, 9);
+                    const labelId = 'label_' + inputId;
+                    
+                    $input.attr('id', inputId).attr('aria-labelledby', labelId);
+                    $label.attr('id', labelId);
+                }
+            });
+
+            // Keyboard navigation improvements
+            $(container).find('.floating-input, .floating-select, .floating-textarea').on('keydown', function(e) {
+                // Enter key should move to next field (except textarea)
+                if (e.key === 'Enter' && !$(this).is('textarea')) {
+                    e.preventDefault();
+                    const $inputs = $(container).find('.floating-input, .floating-select, .floating-textarea');
+                    const currentIndex = $inputs.index(this);
+                    const $nextInput = $inputs.eq(currentIndex + 1);
+                    
+                    if ($nextInput.length > 0) {
+                        $nextInput.focus();
+                    }
                 }
             });
         }

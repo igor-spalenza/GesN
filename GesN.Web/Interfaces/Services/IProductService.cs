@@ -23,14 +23,9 @@ namespace GesN.Web.Interfaces.Services
         
         // Business Logic
         Task<bool> ExistsAsync(string id);
-        Task<bool> IsCodeUniqueAsync(string code, string? excludeId = null);
+        Task<bool> IsSKUUniqueAsync(string sku, string? excludeId = null);
         Task<decimal> CalculateProductCostAsync(string productId);
         Task<int> GetEstimatedAssemblyTimeAsync(string productId);
-        
-        // Stock Management
-        Task<bool> UpdateStockAsync(string productId, int quantity);
-        Task<bool> CheckStockAvailabilityAsync(string productId, int requiredQuantity);
-        Task<IEnumerable<Product>> GetLowStockProductsAsync();
         
         // Product Relationships
         Task<IEnumerable<Product>> GetAvailableComponentsAsync(string? excludeProductId = null);

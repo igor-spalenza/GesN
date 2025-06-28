@@ -89,12 +89,6 @@
                             <button class="btn btn-sm btn-outline-secondary" onclick="productManager.filtrarPorTipo('Group')">
                                 Grupos (@Model.Statistics.GroupProducts)
                             </button>
-                            @if (Model.Statistics.LowStockProducts > 0)
-                            {
-                                <button class="btn btn-sm btn-outline-danger" onclick="productManager.filtrarEstoqueBaixo()">
-                                    <i class="fas fa-exclamation-triangle"></i> Estoque Baixo (@Model.Statistics.LowStockProducts)
-                                </button>
-                            }
                         </div>
                     </div>
                 </div>
@@ -138,7 +132,7 @@
                                 }
                             </div>
                         </div>
-                        <!-- Abas dinâmicas serão adicionadas aqui via JavaScript -->
+                        <!-- Abas de edição dinâmicas serão adicionadas aqui via JavaScript -->
                     </div>
                 </div>
             </div>
@@ -146,7 +140,7 @@
     </div>
 </div>
 
-<!-- Modal para Formulários -->
+<!-- Modal para Formulários (usado apenas para criação e detalhes) -->
 <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">

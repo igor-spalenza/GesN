@@ -59,10 +59,10 @@ namespace GesN.Web.Services
                 throw new InvalidOperationException($"Erros de validação: {string.Join(", ", validationErrors)}");
             }
 
-            // Verificar se o código é único
-            if (!await IsCodeUniqueAsync(product.Code))
+            // Verificar se o SKU é único
+            if (!string.IsNullOrEmpty(product.SKU) && !await IsSKUUniqueAsync(product.SKU))
             {
-                throw new InvalidOperationException("Já existe um produto com este código.");
+                throw new InvalidOperationException("Já existe um produto com este SKU.");
             }
 
             // Definir valores padrão
@@ -84,10 +84,10 @@ namespace GesN.Web.Services
                 throw new InvalidOperationException($"Erros de validação: {string.Join(", ", validationErrors)}");
             }
 
-            // Verificar se o código é único (excluindo o próprio produto)
-            if (!await IsCodeUniqueAsync(product.Code, product.Id))
+            // Verificar se o SKU é único (excluindo o próprio produto)
+            if (!string.IsNullOrEmpty(product.SKU) && !await IsSKUUniqueAsync(product.SKU, product.Id))
             {
-                throw new InvalidOperationException("Já existe um produto com este código.");
+                throw new InvalidOperationException("Já existe um produto com este SKU.");
             }
 
             product.LastModifiedAt = DateTime.UtcNow;
@@ -151,10 +151,10 @@ namespace GesN.Web.Services
             return await _productRepository.ExistsAsync(id);
         }
 
-        public async Task<bool> IsCodeUniqueAsync(string code, string? excludeId = null)
+        public async Task<bool> IsSKUUniqueAsync(string sku, string? excludeId = null)
         {
-            var products = await _productRepository.SearchAsync(code);
-            var existingProduct = products.FirstOrDefault(p => p.Code == code);
+            var products = await _productRepository.SearchAsync(sku);
+            var existingProduct = products.FirstOrDefault(p => p.SKU == sku);
             
             if (existingProduct == null) return true;
             if (!string.IsNullOrEmpty(excludeId) && existingProduct.Id == excludeId) return true;
@@ -202,12 +202,7 @@ namespace GesN.Web.Services
             if (product == null)
                 return 0;
 
-            int totalTime = 0;
-            
-            if (product is CompositeProduct composite)
-            {
-                totalTime = composite.AssemblyTime ?? 0;
-            }
+            int totalTime = product.AssemblyTime;
 
             // Para produtos compostos, somar o tempo de montagem dos componentes
             if (product.ProductType == ProductType.Composite)
@@ -216,9 +211,9 @@ namespace GesN.Web.Services
                 foreach (var component in components)
                 {
                     var componentProduct = await _productRepository.GetByIdAsync(component.ComponentProductId);
-                    if (componentProduct != null && componentProduct is CompositeProduct compComponent)
+                    if (componentProduct != null)
                     {
-                        totalTime += (compComponent.AssemblyTime ?? 0) * (int)component.Quantity;
+                        totalTime += componentProduct.AssemblyTime * (int)component.Quantity;
                     }
                 }
             }
@@ -226,28 +221,7 @@ namespace GesN.Web.Services
             return totalTime;
         }
 
-        // Stock Management - Implementações simples
-        public async Task<bool> UpdateStockAsync(string productId, int quantity)
-        {
-            var product = await _productRepository.GetByIdAsync(productId);
-            if (product == null) return false;
-            
-            product.CurrentStock = quantity;
-            product.LastModifiedAt = DateTime.UtcNow;
-            return await _productRepository.UpdateAsync(product);
-        }
-
-        public async Task<bool> CheckStockAvailabilityAsync(string productId, int requiredQuantity)
-        {
-            var product = await _productRepository.GetByIdAsync(productId);
-            return product != null && product.CurrentStock >= requiredQuantity;
-        }
-
-        public async Task<IEnumerable<Product>> GetLowStockProductsAsync()
-        {
-            var allProducts = await _productRepository.GetActiveProductsAsync();
-            return allProducts.Where(p => p.CurrentStock <= p.MinStock);
-        }
+        // Stock Management - Removido pois não há mais controle de estoque direto
 
         // Product Relationships
         public async Task<IEnumerable<Product>> GetAvailableComponentsAsync(string? excludeProductId = null)
@@ -299,8 +273,7 @@ namespace GesN.Web.Services
             if (string.IsNullOrWhiteSpace(product.Name))
                 errors.Add("Nome é obrigatório.");
 
-            if (string.IsNullOrWhiteSpace(product.Code))
-                errors.Add("Código é obrigatório.");
+            // SKU é opcional na nova estrutura
 
             if (product.UnitPrice < 0)
                 errors.Add("Preço não pode ser negativo.");
@@ -312,22 +285,12 @@ namespace GesN.Web.Services
             switch (product.ProductType)
             {
                 case ProductType.Group:
-                    if (product is ProductGroup group)
-                    {
-                        if (group.MinItemsRequired.HasValue && group.MaxItemsAllowed.HasValue)
-                        {
-                            if (group.MinItemsRequired > group.MaxItemsAllowed)
-                                errors.Add("Mínimo de itens não pode ser maior que o máximo.");
-                        }
-                    }
+                    // Validações básicas de grupo - campos específicos foram removidos
                     break;
 
                 case ProductType.Composite:
-                    if (product is CompositeProduct composite)
-                    {
-                        if (composite.AssemblyTime.HasValue && composite.AssemblyTime < 0)
-                            errors.Add("Tempo de montagem não pode ser negativo.");
-                    }
+                    if (product.AssemblyTime < 0)
+                        errors.Add("Tempo de montagem não pode ser negativo.");
                     break;
             }
 

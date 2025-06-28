@@ -406,9 +406,9 @@ namespace GesN.Web.Services
         private async Task<decimal> EstimateProductionTimeAsync(string productId, decimal quantity)
         {
             var product = await _productRepository.GetByIdAsync(productId);
-            if (product is CompositeProduct composite && composite.AssemblyTime.HasValue)
+            if (product != null && product.AssemblyTime > 0)
             {
-                return composite.AssemblyTime.Value * quantity;
+                return product.AssemblyTime * quantity;
             }
 
             return 1; // Tempo padrão de 1 hora

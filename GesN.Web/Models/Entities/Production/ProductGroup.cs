@@ -35,25 +35,9 @@ namespace GesN.Web.Models.Entities.Production
         /// <summary>
         /// Construtor com dados básicos
         /// </summary>
-        public ProductGroup(string name, decimal unitPrice) : base(name, unitPrice)
+        public ProductGroup(string name, decimal price) : base(name, price)
         {
-            // Define o tipo do produto como Group
-        }
-
-        /// <summary>
-        /// Obtém a quantidade mínima de itens (usa campo herdado MinItemsRequired)
-        /// </summary>
-        public int GetMinSelection()
-        {
-            return MinItemsRequired ?? 0;
-        }
-
-        /// <summary>
-        /// Obtém a quantidade máxima de itens (usa campo herdado MaxItemsAllowed)
-        /// </summary>
-        public int? GetMaxSelection()
-        {
-            return MaxItemsAllowed;
+            ProductType = ProductType.Group;
         }
 
         /// <summary>
@@ -63,7 +47,7 @@ namespace GesN.Web.Models.Entities.Production
         {
             // Se não há itens selecionados, retorna o preço base
             if (!selectedItems?.Any() == true)
-                return UnitPrice;
+                return Price;
 
             var totalPrice = selectedItems.Sum(item => item.GetEffectivePrice() * item.Quantity);
             
@@ -71,41 +55,11 @@ namespace GesN.Web.Models.Entities.Production
         }
 
         /// <summary>
-        /// Verifica se uma seleção de itens é válida
-        /// </summary>
-        public bool IsValidSelection(IEnumerable<ProductGroupItem> selectedItems)
-        {
-            var count = selectedItems?.Count() ?? 0;
-            
-            if (count < GetMinSelection())
-                return false;
-
-            if (MaxItemsAllowed.HasValue && count > MaxItemsAllowed.Value)
-                return false;
-
-            return selectedItems?.All(item => GroupItems.Contains(item)) ?? true;
-        }
-
-        /// <summary>
         /// Obtém os itens disponíveis para seleção
         /// </summary>
         public IEnumerable<ProductGroupItem> GetAvailableItems()
         {
-            return GroupItems.Where(item => !item.IsOptional || item.Product?.IsActive == true);
-        }
-
-        /// <summary>
-        /// Obtém a descrição do tipo de seleção
-        /// </summary>
-        public string GetSelectionDescription()
-        {
-            if (!MaxItemsAllowed.HasValue)
-                return $"Selecione pelo menos {GetMinSelection()} {(GetMinSelection() == 1 ? "item" : "itens")}";
-
-            if (GetMinSelection() == MaxItemsAllowed.Value)
-                return $"Selecione {GetMinSelection()} {(GetMinSelection() == 1 ? "item" : "itens")}";
-
-            return $"Selecione entre {GetMinSelection()} e {MaxItemsAllowed.Value} itens";
+            return GroupItems.Where(item => !item.IsOptional || item.Product?.StateCode == ObjectState.Active);
         }
 
         /// <summary>
@@ -113,7 +67,7 @@ namespace GesN.Web.Models.Entities.Production
         /// </summary>
         public bool AreAllItemsAvailable()
         {
-            return GroupItems.All(item => item.Product?.IsActive == true);
+            return GroupItems.All(item => item.Product?.StateCode == ObjectState.Active);
         }
 
         /// <summary>
@@ -121,7 +75,7 @@ namespace GesN.Web.Models.Entities.Production
         /// </summary>
         public string GetAvailabilityInfo()
         {
-            if (!IsActive)
+            if (StateCode != ObjectState.Active)
                 return "❌ Indisponível para venda";
 
             var availableCount = GetAvailableItems().Count();
@@ -137,21 +91,40 @@ namespace GesN.Web.Models.Entities.Production
         }
 
         /// <summary>
+        /// Obtém informações resumidas do grupo
+        /// </summary>
+        public string GetGroupInfo()
+        {
+            var info = GetDisplayName();
+            
+            if (GroupItems?.Any() == true)
+                info += $" ({GroupItems.Count} itens)";
+                
+            return info;
+        }
+
+        /// <summary>
+        /// Verifica se o grupo tem itens mínimos
+        /// </summary>
+        public bool HasMinimumItems()
+        {
+            return GroupItems?.Count() >= 1;
+        }
+
+        /// <summary>
+        /// Obtém o total de itens no grupo
+        /// </summary>
+        public int GetItemsCount()
+        {
+            return GroupItems?.Count() ?? 0;
+        }
+
+        /// <summary>
         /// Override do método HasCompleteData
         /// </summary>
         public override bool HasCompleteData()
         {
-            return base.HasCompleteData() && 
-                   GroupItems.Any() && 
-                   GetMinSelection() > 0 &&
-                   (!MaxItemsAllowed.HasValue || GetMinSelection() <= MaxItemsAllowed.Value);
+            return base.HasCompleteData() && HasMinimumItems();
         }
-
-        /// <summary>
-        /// Número mínimo de itens obrigatórios
-        /// </summary>
-        [Display(Name = "Min. Itens Obrigatórios")]
-        [Range(0, int.MaxValue, ErrorMessage = "O número mínimo deve ser maior ou igual a 0")]
-        public int? MinItemsRequired { get; set; }
     }
 } 

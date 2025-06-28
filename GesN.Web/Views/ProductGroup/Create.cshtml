@@ -23,9 +23,9 @@
 
                     <div class="row mb-3">
                         <div class="col-md-4">
-                            <label asp-for="Code" class="form-label">Código *</label>
-                            <input asp-for="Code" class="form-control" />
-                            <span asp-validation-for="Code" class="text-danger"></span>
+                            <label asp-for="SKU" class="form-label">SKU</label>
+                            <input asp-for="SKU" class="form-control" />
+                            <span asp-validation-for="SKU" class="text-danger"></span>
                         </div>
                         <div class="col-md-8">
                             <label asp-for="Name" class="form-label">Nome *</label>
@@ -41,50 +41,31 @@
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label asp-for="CategoryId" class="form-label">Categoria</label>
                             <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories">
                                 <option value="">Selecione uma categoria</option>
                             </select>
                             <span asp-validation-for="CategoryId" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6">
-                            <label asp-for="Unit" class="form-label">Unidade</label>
-                            <select asp-for="Unit" class="form-select">
-                                <option value="">Selecione uma unidade</option>
-                                <option value="un">Unidade</option>
-                                <option value="kg">Quilograma</option>
-                                <option value="g">Grama</option>
-                                <option value="l">Litro</option>
-                                <option value="ml">Mililitro</option>
-                                <option value="m">Metro</option>
-                                <option value="cm">Centímetro</option>
-                                <option value="pct">Pacote</option>
-                                <option value="cx">Caixa</option>
-                            </select>
-                            <span asp-validation-for="Unit" class="text-danger"></span>
-                        </div>
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label asp-for="UnitPrice" class="form-label">Preço Base</label>
+                        <div class="col-md-6">
+                            <label asp-for="Price" class="form-label">Preço</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input asp-for="Price" class="form-control" step="0.01" />
+                            </div>
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="UnitPrice" class="form-label">Preço Unitário</label>
                             <div class="input-group">
                                 <span class="input-group-text">R$</span>
                                 <input asp-for="UnitPrice" class="form-control" step="0.01" />
                             </div>
                             <span asp-validation-for="UnitPrice" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-4">
-                            <label asp-for="MinItemsRequired" class="form-label">Mín. Itens Obrigatórios</label>
-                            <input asp-for="MinItemsRequired" class="form-control" type="number" min="0" />
-                            <span asp-validation-for="MinItemsRequired" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-4">
-                            <label asp-for="MaxItemsAllowed" class="form-label">Máx. Itens Permitidos</label>
-                            <input asp-for="MaxItemsAllowed" class="form-control" type="number" min="1" />
-                            <span asp-validation-for="MaxItemsAllowed" class="text-danger"></span>
-                            <div class="form-text">Deixe vazio para ilimitado</div>
                         </div>
                     </div>
 
@@ -149,20 +130,9 @@
     
     <script>
         $(document).ready(function() {
-            // Máscara para preço
+            // Máscara para preços
+            $('#Price').mask('000.000.000,00', {reverse: true});
             $('#UnitPrice').mask('000.000.000,00', {reverse: true});
-            
-            // Validação customizada
-            $('form').on('submit', function(e) {
-                var minItems = parseInt($('#MinItemsRequired').val()) || 0;
-                var maxItems = parseInt($('#MaxItemsAllowed').val()) || 0;
-                
-                if (maxItems > 0 && minItems > maxItems) {
-                    e.preventDefault();
-                    alert('O mínimo de itens não pode ser maior que o máximo.');
-                    return false;
-                }
-            });
         });
     </script>
 } 

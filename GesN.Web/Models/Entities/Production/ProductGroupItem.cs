@@ -132,18 +132,15 @@ namespace GesN.Web.Models.Entities.Production
         }
 
         /// <summary>
-        /// Obtém o status de disponibilidade baseado no estoque
+        /// Obtém o status de disponibilidade baseado no estado do produto
         /// </summary>
         public string GetAvailabilityStatus()
         {
             if (Product == null)
                 return "❌ Produto não encontrado";
 
-            if (Product.CurrentStock <= 0)
-                return "❌ Sem estoque";
-
-            if (Product.CurrentStock < Product.MinStock)
-                return "⚠️ Estoque baixo";
+            if (Product.StateCode != ObjectState.Active)
+                return "❌ Produto inativo";
 
             return "✅ Disponível";
         }

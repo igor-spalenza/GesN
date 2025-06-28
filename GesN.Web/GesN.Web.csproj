@@ -8,9 +8,10 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <!-- Configuração para resolver conflitos de assets -->
     <StaticWebAssetsEnabled>true</StaticWebAssetsEnabled>
-    <GenerateStaticWebAssetsManifest>true</GenerateStaticWebAssetsManifest>
+    <GenerateStaticWebAssetsManifest>false</GenerateStaticWebAssetsManifest>
     <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
     <StaticWebAssetsCompression>false</StaticWebAssetsCompression>
+    <StaticWebAssetsDisableProjectBuildPropsFileGeneration>true</StaticWebAssetsDisableProjectBuildPropsFileGeneration>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,6 +37,7 @@
     <Folder Include="Data\Database\" />
     <Folder Include="Models\Entities\Financial\" />
     <Folder Include="Models\Entities\Production\" />
+    <Folder Include="Models\DTOs\" />
     <Folder Include="Models\ViewModels\Financial\" />
     <Folder Include="Models\ViewModels\Production\" />
   </ItemGroup>

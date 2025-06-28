@@ -53,17 +53,20 @@ namespace GesN.Web.Controllers
                 var productViewModels = products.Select(p => new ProductViewModel
                 {
                     Id = p.Id,
-                    Code = p.Code,
+                    SKU = p.SKU,
                     Name = p.Name,
                     Description = p.Description,
                     ProductType = p.ProductType,
                     CategoryId = p.CategoryId,
-                    CategoryName = p.Category?.Name,
-                    Price = p.UnitPrice,
+                    CategoryName = p.Category,
+                    Price = p.Price,
+                    QuantityPrice = p.QuantityPrice,
+                    UnitPrice = p.UnitPrice,
                     Cost = p.Cost,
-                    Unit = p.Unit,
-                    CurrentStock = null, // Product base não tem estoque
-                    MinStock = null, // Product base não tem estoque
+                    ImageUrl = p.ImageUrl,
+                    Note = p.Note,
+                    AssemblyTime = p.AssemblyTime,
+                    AssemblyInstructions = p.AssemblyInstructions,
                     StateCode = (int)p.StateCode,
                     CreatedAt = p.CreatedAt,
                     ModifiedAt = p.LastModifiedAt
@@ -80,8 +83,8 @@ namespace GesN.Web.Controllers
                         SimpleProducts = products.Count(p => p.ProductType == ProductType.Simple),
                         CompositeProducts = products.Count(p => p.ProductType == ProductType.Composite),
                         GroupProducts = products.Count(p => p.ProductType == ProductType.Group),
-                        ProductGroups = products.Count(p => p.ProductType == ProductType.Group),
-                        LowStockProducts = 0, // Será calculado quando implementarmos estoque
+                        TotalInventoryValue = products.Sum(p => p.Price),
+                        NewProductsThisMonth = products.Count(p => p.CreatedAt >= DateTime.Now.AddMonths(-1)),
                         LastUpdate = DateTime.Now
                     }
                 };
@@ -134,6 +137,67 @@ namespace GesN.Web.Controllers
         {
             try
             {
+                _logger.LogInformation("Iniciando FormularioEdicao para produto ID: {ProductId}", id);
+                
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    _logger.LogWarning("ID do produto é nulo ou vazio");
+                    return BadRequest("ID do produto é obrigatório");
+                }
+
+                _logger.LogInformation("Buscando produto no serviço...");
+                var product = await _productService.GetByIdAsync(id);
+                if (product == null)
+                {
+                    _logger.LogWarning("Produto não encontrado para ID: {ProductId}", id);
+                    return NotFound("Produto não encontrado");
+                }
+                
+                _logger.LogInformation("Produto encontrado: {ProductName}, Tipo: {ProductType}", product.Name, product.ProductType);
+
+                _logger.LogInformation("Carregando dropdowns...");
+                await PopulateDropdownsAsync();
+                _logger.LogInformation("Dropdowns carregados com sucesso");
+
+                _logger.LogInformation("Criando ViewModel...");
+                var viewModel = new EditProductViewModel
+                {
+                    Id = product.Id,
+                    SKU = product.SKU,
+                    Name = product.Name,
+                    Description = product.Description,
+                    ProductType = product.ProductType,
+                    CategoryId = product.CategoryId,
+                    Price = product.Price,
+                    QuantityPrice = product.QuantityPrice,
+                    UnitPrice = product.UnitPrice,
+                    Cost = product.Cost,
+                    ImageUrl = product.ImageUrl,
+                    Note = product.Note,
+                    AssemblyTime = product.AssemblyTime,
+                    AssemblyInstructions = product.AssemblyInstructions,
+                    StateCode = (int)product.StateCode,
+                    CreatedAt = product.CreatedAt,
+                    ModifiedAt = product.LastModifiedAt,
+                    AvailableCategories = new List<CategorySelectionViewModel>()
+                };
+                
+                _logger.LogInformation("ViewModel criado com sucesso. Retornando PartialView");
+                return PartialView("_Edit", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar formulário de edição do produto: {ProductId}. Erro: {Error}", id, ex.Message);
+                return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
+            }
+        }
+
+        // GET: Product/GetProductInfo/5
+        [HttpGet]
+        public async Task<IActionResult> GetProductInfo(string id)
+        {
+            try
+            {
                 if (string.IsNullOrWhiteSpace(id))
                 {
                     return BadRequest("ID do produto é obrigatório");
@@ -145,28 +209,46 @@ namespace GesN.Web.Controllers
                     return NotFound("Produto não encontrado");
                 }
 
-                await PopulateDropdownsAsync();
-
-                var viewModel = new EditProductViewModel
-                {
-                    Id = product.Id,
-                    Code = product.Code,
-                    Name = product.Name,
-                    Description = product.Description,
-                    ProductType = product.ProductType,
-                    CategoryId = product.CategoryId,
-                    Price = product.UnitPrice,
-                    Cost = product.Cost,
-                    Unit = product.Unit,
-                    StateCode = (int)product.StateCode,
-                    AvailableCategories = new List<CategorySelectionViewModel>()
-                };
-
-                return PartialView("_Edit", viewModel);
+                return Json(new { 
+                    id = product.Id,
+                    name = product.Name,
+                    sku = product.SKU,
+                    productType = product.ProductType.ToString()
+                });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar formulário de edição do produto: {ProductId}", id);
+                _logger.LogError(ex, "Erro ao obter informações do produto: {ProductId}", id);
+                return StatusCode(500, "Erro interno do servidor");
+            }
+        }
+
+        // GET: Product/Statistics
+        [HttpGet]
+        public async Task<IActionResult> Statistics()
+        {
+            try
+            {
+                var products = await _productService.GetAllAsync();
+
+                var statistics = new
+                {
+                    totalProducts = products.Count(),
+                    activeProducts = products.Count(p => p.StateCode == ObjectState.Active),
+                    inactiveProducts = products.Count(p => p.StateCode == ObjectState.Inactive),
+                    simpleProducts = products.Count(p => p.ProductType == ProductType.Simple),
+                    compositeProducts = products.Count(p => p.ProductType == ProductType.Composite),
+                    groupProducts = products.Count(p => p.ProductType == ProductType.Group),
+                    totalInventoryValue = products.Sum(p => p.Price),
+                    newProductsThisMonth = products.Count(p => p.CreatedAt >= DateTime.Now.AddMonths(-1)),
+                    lowStockProducts = 0 // Campo para compatibilidade, pode ser implementado futuramente
+                };
+
+                return Json(statistics);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter estatísticas dos produtos");
                 return StatusCode(500, "Erro interno do servidor");
             }
         }
@@ -191,15 +273,20 @@ namespace GesN.Web.Controllers
                 var viewModel = new ProductDetailsViewModel
                 {
                     Id = product.Id,
-                    Code = product.Code,
+                    SKU = product.SKU,
                     Name = product.Name,
                     Description = product.Description,
                     ProductType = product.ProductType,
                     CategoryId = product.CategoryId,
-                    CategoryName = product.Category?.Name,
-                    Price = product.UnitPrice,
+                    CategoryName = product.Category,
+                    Price = product.Price,
+                    QuantityPrice = product.QuantityPrice,
+                    UnitPrice = product.UnitPrice,
                     Cost = product.Cost,
-                    Unit = product.Unit,
+                    ImageUrl = product.ImageUrl,
+                    Note = product.Note,
+                    AssemblyTime = product.AssemblyTime,
+                    AssemblyInstructions = product.AssemblyInstructions,
                     StateCode = (int)product.StateCode,
                     CreatedAt = product.CreatedAt,
                     ModifiedAt = product.LastModifiedAt
@@ -233,13 +320,18 @@ namespace GesN.Web.Controllers
                 {
                     ProductType.Simple => new SimpleProduct
                     {
-                        Code = viewModel.Code,
+                        SKU = viewModel.SKU,
                         Name = viewModel.Name,
                         Description = viewModel.Description,
                         CategoryId = viewModel.CategoryId,
-                        UnitPrice = viewModel.Price ?? 0,
-                        Cost = viewModel.Cost ?? 0,
-                        Unit = viewModel.Unit,
+                        Price = viewModel.Price,
+                        QuantityPrice = viewModel.QuantityPrice,
+                        UnitPrice = viewModel.UnitPrice,
+                        Cost = viewModel.Cost,
+                        ImageUrl = viewModel.ImageUrl,
+                        Note = viewModel.Note,
+                        AssemblyTime = viewModel.AssemblyTime,
+                        AssemblyInstructions = viewModel.AssemblyInstructions,
                         StateCode = ObjectState.Active,
                         CreatedBy = userId,
                         CreatedAt = DateTime.UtcNow,
@@ -248,13 +340,18 @@ namespace GesN.Web.Controllers
                     },
                     ProductType.Composite => new CompositeProduct
                     {
-                        Code = viewModel.Code,
+                        SKU = viewModel.SKU,
                         Name = viewModel.Name,
                         Description = viewModel.Description,
                         CategoryId = viewModel.CategoryId,
-                        UnitPrice = viewModel.Price ?? 0,
-                        Cost = viewModel.Cost ?? 0,
-                        Unit = viewModel.Unit,
+                        Price = viewModel.Price,
+                        QuantityPrice = viewModel.QuantityPrice,
+                        UnitPrice = viewModel.UnitPrice,
+                        Cost = viewModel.Cost,
+                        ImageUrl = viewModel.ImageUrl,
+                        Note = viewModel.Note,
+                        AssemblyTime = viewModel.AssemblyTime,
+                        AssemblyInstructions = viewModel.AssemblyInstructions,
                         StateCode = ObjectState.Active,
                         CreatedBy = userId,
                         CreatedAt = DateTime.UtcNow,
@@ -263,13 +360,18 @@ namespace GesN.Web.Controllers
                     },
                     ProductType.Group => new ProductGroup
                     {
-                        Code = viewModel.Code,
+                        SKU = viewModel.SKU,
                         Name = viewModel.Name,
                         Description = viewModel.Description,
                         CategoryId = viewModel.CategoryId,
-                        UnitPrice = viewModel.Price ?? 0,
-                        Cost = viewModel.Cost ?? 0,
-                        Unit = viewModel.Unit,
+                        Price = viewModel.Price,
+                        QuantityPrice = viewModel.QuantityPrice,
+                        UnitPrice = viewModel.UnitPrice,
+                        Cost = viewModel.Cost,
+                        ImageUrl = viewModel.ImageUrl,
+                        Note = viewModel.Note,
+                        AssemblyTime = viewModel.AssemblyTime,
+                        AssemblyInstructions = viewModel.AssemblyInstructions,
                         StateCode = ObjectState.Active,
                         CreatedBy = userId,
                         CreatedAt = DateTime.UtcNow,
@@ -327,13 +429,18 @@ namespace GesN.Web.Controllers
                 }
 
                 // Atualizar propriedades
-                existingProduct.Code = viewModel.Code;
+                existingProduct.SKU = viewModel.SKU;
                 existingProduct.Name = viewModel.Name;
                 existingProduct.Description = viewModel.Description;
                 existingProduct.CategoryId = viewModel.CategoryId;
-                existingProduct.UnitPrice = viewModel.Price ?? 0;
-                existingProduct.Cost = viewModel.Cost ?? 0;
-                existingProduct.Unit = viewModel.Unit;
+                existingProduct.Price = viewModel.Price;
+                existingProduct.QuantityPrice = viewModel.QuantityPrice;
+                existingProduct.UnitPrice = viewModel.UnitPrice;
+                existingProduct.Cost = viewModel.Cost;
+                existingProduct.ImageUrl = viewModel.ImageUrl;
+                existingProduct.Note = viewModel.Note;
+                existingProduct.AssemblyTime = viewModel.AssemblyTime;
+                existingProduct.AssemblyInstructions = viewModel.AssemblyInstructions;
                 existingProduct.StateCode = (ObjectState)viewModel.StateCode;
                 existingProduct.LastModifiedBy = userId;
                 existingProduct.LastModifiedAt = DateTime.UtcNow;
@@ -401,7 +508,7 @@ namespace GesN.Web.Controllers
                 {
                     products = products.Where(p => 
                         p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                        p.Code.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(p.SKU) && p.SKU.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
                         (p.Description?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false));
                 }
 
@@ -444,14 +551,16 @@ namespace GesN.Web.Controllers
                 var result = products.Select(p => new
                 {
                     id = p.Id,
-                    code = p.Code,
+                    sku = p.SKU,
                     name = p.Name,
                     description = p.Description,
-                    price = p.UnitPrice,
+                    price = p.Price,
+                    unitPrice = p.UnitPrice,
                     cost = p.Cost,
-                    unit = p.Unit,
+                    imageUrl = p.ImageUrl,
+                    assemblyTime = p.AssemblyTime,
                     productType = p.ProductType.ToString(),
-                    categoryName = p.Category?.Name,
+                    categoryName = p.Category,
                     isActive = p.StateCode == ObjectState.Active
                 }).ToList();
 
@@ -480,10 +589,11 @@ namespace GesN.Web.Controllers
                 {
                     id = p.Id,
                     value = p.Name,
-                    label = $"{p.Code} - {p.Name}",
-                    code = p.Code,
-                    price = p.UnitPrice,
-                    unit = p.Unit
+                    label = $"{p.SKU} - {p.Name}",
+                    sku = p.SKU,
+                    price = p.Price,
+                    unitPrice = p.UnitPrice,
+                    assemblyTime = p.AssemblyTime
                 }).ToList();
 
                 return Json(result);
@@ -508,7 +618,7 @@ namespace GesN.Web.Controllers
                 {
                     products = products.Where(p => 
                         p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                        p.Code.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(p.SKU) && p.SKU.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
                         (p.Description?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false));
                 }
 

@@ -100,7 +100,7 @@ namespace GesN.Web.Models.Entities.Production
             // Verifica se o produto de troca está disponível
             if (ExchangeProduct != null)
             {
-                return ExchangeProduct.IsActive && ExchangeProduct.CurrentStock > 0;
+                return ExchangeProduct.IsActive;
             }
 
             return false;

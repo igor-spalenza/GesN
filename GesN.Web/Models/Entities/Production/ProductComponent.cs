@@ -103,8 +103,8 @@ namespace GesN.Web.Models.Entities.Production
         {
             if (ComponentProduct == null) return false;
             
-            // Verifica estoque baseado nos campos MinStock/CurrentStock da tabela Product
-            return ComponentProduct.CurrentStock >= Quantity;
+            // Sem controle de estoque direto na nova estrutura - assume sempre disponível
+            return ComponentProduct.StateCode == ObjectState.Active;
         }
 
         /// <summary>

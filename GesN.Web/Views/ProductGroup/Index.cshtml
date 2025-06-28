@@ -46,12 +46,11 @@
             <table class="table table-hover" id="groupsTable">
                 <thead class="table-dark">
                     <tr>
-                        <th>Código</th>
+                        <th>SKU</th>
                         <th>Nome</th>
                         <th>Categoria</th>
-                        <th>Preço Base</th>
-                        <th>Min. Itens</th>
-                        <th>Max. Itens</th>
+                        <th>Preço</th>
+                        <th>Preço Unit.</th>
                         <th>Status</th>
                         <th>Ações</th>
                     </tr>
@@ -61,7 +60,14 @@
                     {
                         <tr>
                             <td>
-                                <code>@group.Code</code>
+                                @if (!string.IsNullOrEmpty(group.SKU))
+                                {
+                                    <code>@group.SKU</code>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
                             </td>
                             <td>
                                 <div>
@@ -77,20 +83,23 @@
                                 {
                                     <span class="badge bg-secondary">@group.CategoryId</span>
                                 }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
                             </td>
                             <td>
                                 <span class="fw-bold text-success">
+                                    @(group.Price.ToString("C"))
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-info">
                                     @(group.UnitPrice.ToString("C"))
                                 </span>
                             </td>
                             <td>
-                                <span class="badge bg-info">@(group.MinItemsRequired)</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-warning">@(group.MaxItemsAllowed?.ToString() ?? "∞")</span>
-                            </td>
-                            <td>
-                                @if ((int)group.StateCode == 1)
+                                @if (group.StateCode == ObjectState.Active)
                                 {
                                     <span class="badge bg-success">Ativo</span>
                                 }
@@ -164,10 +173,10 @@
             $('#statusFilter').on('change', function() {
                 var value = this.value;
                 if (value === '') {
-                    table.column(6).search('').draw();
+                    table.column(5).search('').draw();
                 } else {
                     var statusText = value === '1' ? 'Ativo' : 'Inativo';
-                    table.column(6).search(statusText).draw();
+                    table.column(5).search(statusText).draw();
                 }
             });
 

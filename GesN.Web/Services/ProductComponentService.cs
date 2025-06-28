@@ -163,10 +163,10 @@ namespace GesN.Web.Services
             foreach (var component in components)
             {
                 var componentProduct = await _productRepository.GetByIdAsync(component.ComponentProductId);
-                if (componentProduct != null && componentProduct is CompositeProduct composite)
+                if (componentProduct != null)
                 {
                     // Tempo de montagem baseado no tempo de produção do componente
-                    totalTime += (composite.AssemblyTime ?? 0) * component.Quantity;
+                    totalTime += componentProduct.AssemblyTime * component.Quantity;
                 }
             }
 
