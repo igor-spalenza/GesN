@@ -199,6 +199,9 @@ namespace GesN.Web.Models.ViewModels.Production
         [Display(Name = "Categoria")]
         public string? CategoryId { get; set; }
 
+        [Display(Name = "Nome da Categoria")]
+        public string? Category { get; set; }
+
         [Range(0, double.MaxValue, ErrorMessage = "O preço deve ser maior ou igual a zero")]
         [Display(Name = "Preço")]
         [DataType(DataType.Currency)]
@@ -423,5 +426,34 @@ namespace GesN.Web.Models.ViewModels.Production
         public int? Value { get; set; }
         public string Text { get; set; } = string.Empty;
         public bool IsSelected { get; set; }
+    }
+
+    /// <summary>
+    /// ViewModel expandido para edição de produtos que inclui dados de ProductGroup
+    /// para renderização direta das partial views sem necessidade de AJAX
+    /// </summary>
+    public class EditProductWithGroupsViewModel : EditProductViewModel
+    {
+        [Display(Name = "Itens do Grupo")]
+        public List<ProductGroupItemViewModel> GroupItems { get; set; } = new();
+
+        [Display(Name = "Opções do Grupo")]
+        public List<ProductGroupOptionViewModel> GroupOptions { get; set; } = new();
+
+        [Display(Name = "Regras de Troca")]
+        public List<ProductGroupExchangeRuleViewModel> ExchangeRules { get; set; } = new();
+
+        [Display(Name = "Componentes")]
+        public ProductComponentIndexViewModel? ComponentIndexViewModel { get; set; }
+
+        /// <summary>
+        /// Indica se o produto é do tipo Group e deve exibir as abas relacionadas
+        /// </summary>
+        public bool IsGroup => ProductType == ProductType.Group;
+
+        /// <summary>
+        /// Indica se o produto é do tipo Composite e deve exibir a aba de componentes
+        /// </summary>
+        public bool IsComposite => ProductType == ProductType.Composite;
     }
 } 

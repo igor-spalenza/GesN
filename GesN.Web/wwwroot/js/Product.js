@@ -41,6 +41,54 @@ const productManager = {
         if ($('#btnLimparFiltros').length) {
             $('#btnLimparFiltros').on('click', () => this.limparFiltros());
         }
+        
+        // Event handlers globais para modals e abas
+        this.setupGlobalEventHandlers();
+    },
+
+    // Setup global event handlers for modals and tabs
+    setupGlobalEventHandlers: function() {
+        // Inicializar componentes quando modal é mostrado
+        $(document).off('shown.bs.modal.productManager').on('shown.bs.modal.productManager', '.modal', (e) => {
+            this.initializeForm(e.target);
+        });
+        
+        // Limpeza quando modal é fechado
+        $(document).off('hidden.bs.modal.productManager').on('hidden.bs.modal.productManager', '.modal', (e) => {
+            this.cleanupForm(e.target);
+        });
+        
+        // Inicializar componentes quando abas são mostradas (para o _Edit.cshtml)
+        $(document).off('shown.bs.tab.productManager').on('shown.bs.tab.productManager', 'button[data-bs-toggle="tab"]', (e) => {
+            const targetPane = $(e.target.getAttribute('data-bs-target'));
+            if (targetPane.length) {
+                // Delay para garantir que o conteúdo foi carregado
+                setTimeout(() => {
+                    this.initializeForm(targetPane[0]);
+                }, 150);
+
+                // As abas ProductGroup agora são renderizadas diretamente via @await Html.PartialAsync()
+                // Não precisamos mais das chamadas AJAX para loadGroupItems, loadGroupOptions, loadGroupExchangeRules
+                // Apenas inicializar floating labels nos forms que podem ter sido renderizados
+                const tabId = e.target.id;
+                if (tabId === 'group-items-tab' || tabId === 'group-options-tab' || tabId === 'exchange-rules-tab') {
+                    setTimeout(() => {
+                        if (this.forms) {
+                            this.forms.initFloatingLabels(targetPane[0]);
+                        }
+                    }, 200);
+                }
+            }
+        });
+        
+        // Detectar quando conteúdo AJAX é inserido no DOM (para abas de edição)
+        $(document).off('DOMNodeInserted.productManager').on('DOMNodeInserted.productManager', (e) => {
+            if ($(e.target).find('.select2-category, input[name="Price"], input[name="Cost"]').length) {
+                setTimeout(() => {
+                    this.initializeForm(e.target);
+                }, 100);
+            }
+        });
     },
 
     // Carregar grid principal
@@ -67,9 +115,9 @@ const productManager = {
         }
 
         $(this.config.gridId).DataTable({
-            language: {
-                url: '/lib/datatables.net/pt-BR.json'
-            },
+            //language: {
+            //    url: '/lib/datatables.net/pt-.json'
+            //},
             responsive: true,
             pageLength: 25,
             order: [[1, 'asc']], // Ordenar por nome
@@ -89,7 +137,7 @@ const productManager = {
                 $('#total-produtos').text(data.totalProducts);
                 $('#produtos-ativos').text(data.activeProducts);
                 $('#produtos-simples').text(data.simpleProducts);
-                $('#produtos-compostos').text(data.compositeProducts);
+                // CompositeProduct statistics handled in CompositeProduct.js
                 $('#grupos-produtos').text(data.groupProducts);
                 
                 // Atualizar badges de alerta se existirem
@@ -142,13 +190,13 @@ const productManager = {
                 $(this.config.modalId + ' .modal-body').html(data);
                 $(this.config.modalId + ' .modal-dialog').removeClass('modal-xl').addClass('modal-lg');
                 
-                // Inicializar floating labels após carregar o conteúdo
+                // Inicializar componentes do formulário (Select2, cálculos, etc.)
                 setTimeout(() => {
                     const formContainer = document.getElementById('formNovoProduct');
-                    if (formContainer && this.forms) {
-                        this.forms.initFloatingLabels(formContainer);
+                    if (formContainer) {
+                        this.initializeForm(formContainer);
                     }
-                }, 100);
+                }, 150);
                 
                 $(this.config.modalId).modal('show');
             },
@@ -168,42 +216,50 @@ const productManager = {
     // Salvar novo produto
     salvarNovoProduct: function() {
         const form = $('#formNovoProduct');
-        const formData = form.serialize();
+        if (form.length === 0) {
+            return;
+        }
 
         if (!this.validateForm(form)) {
             return;
         }
 
-        $.ajax({
+        const formData = new FormData(form[0]);
+
+        // Desabilita o botão de submit para evitar múltiplos envios
+        const submitButton = form.find('button[type="button"]');
+        const buttonText = submitButton.text();
+        submitButton.prop('disabled', true).text('Salvando...');
+
+        return $.ajax({
             url: `${this.config.baseUrl}/SalvarNovo`,
             type: 'POST',
             data: formData,
+            processData: false,
+            contentType: false,
             success: (response) => {
                 if (response.success) {
-                    toastr.success('Produto criado com sucesso!');
                     $(this.config.modalId).modal('hide');
+                    toastr.success(response.message || 'Produto criado com sucesso!');
                     this.loadGrid();
                     this.loadStatistics();
                     
-                    // Limpar o formulário para próximas criações
-                    if (this.forms) {
-                        this.forms.resetFormState(form[0]);
-                    }
-                    
-                    // Se for produto composto ou grupo, abrir para edição
-                    if (response.productType !== 0) { // 0 = Simple
-                        setTimeout(() => {
-                            this.editarProduct(response.productId);
-                        }, 500);
+                    if (response.productId) {
+                        // Chama o método de edição diretamente
+                        this.editarProduct(response.productId);
                     }
                 } else {
-                    toastr.error(response.message || 'Erro ao criar produto');
+                    toastr.error(response.message || 'Não foi possível criar o produto');
                     this.showValidationErrors(response.errors);
                 }
             },
-            error: (xhr) => {
-                console.error('Erro ao salvar produto:', xhr);
-                toastr.error('Erro ao salvar produto');
+            error: (xhr, status, error) => {
+                const errorMessage = xhr.responseJSON?.message || 'Ocorreu um erro ao salvar o produto. Por favor, tente novamente.';
+                toastr.error(errorMessage);
+            },
+            complete: () => {
+                // Reabilita o botão
+                submitButton.prop('disabled', false).text(buttonText);
             }
         });
     },
@@ -227,7 +283,7 @@ const productManager = {
     },
 
     // Editar produto - abrir como aba
-    editarProduct: function(productId) {
+    editarProduct: function(productId, productName = null) {
         // Verificar se já existe uma aba para este produto
         const existingTabId = `product-${productId}`;
         const existingTab = $(`#${existingTabId}-tab`);
@@ -245,11 +301,13 @@ const productManager = {
         this.config.currentProductId = productId;
         this.config.currentEditMode = 'edit';
         
-        // Cria a aba com nome temporário que será atualizado
+        // Se productName não foi fornecido, usa um placeholder que será atualizado
+        const tabTitle = productName || 'Carregando...';
+        
         const novaAba = `
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="${tabId}-tab" data-bs-toggle="tab" data-bs-target="#${tabId}" type="button" role="tab" data-product-id="${productId}">
-                    <i class="fas fa-edit"></i> Carregando...
+                    <i class="fas fa-edit"></i> ${tabTitle}
                     <span class="btn-close ms-2" onclick="productManager.fecharAba('${tabId}')"></span>
                 </button>
             </li>`;
@@ -272,22 +330,25 @@ const productManager = {
             .done((data) => {
                 $(`#conteudo-${tabId}`).html(data);
                 
-                // Extrai o nome do produto do conteúdo carregado para atualizar o título da aba
-                const productNameElement = $(`#conteudo-${tabId}`).find('input[name="Name"]');
-                if (productNameElement.length > 0) {
-                    const productName = productNameElement.val();
-                    $(`#${tabId}-tab`).html(`<i class="fas fa-edit"></i> ${productName} <span class="btn-close ms-2" onclick="productManager.fecharAba('${tabId}')"></span>`);
+                // Se productName não foi fornecido, extrai do conteúdo carregado
+                if (!productName) {
+                    const productNameElement = $(`#conteudo-${tabId}`).find('input[name="Name"]');
+                    if (productNameElement.length > 0) {
+                        const extractedProductName = productNameElement.val();
+                        if (extractedProductName) {
+                            $(`#${tabId}-tab`).html(`<i class="fas fa-edit"></i> ${extractedProductName} <span class="btn-close ms-2" onclick="productManager.fecharAba('${tabId}')"></span>`);
+                        }
+                    }
                 }
                 
-                // Inicializar gerenciamento de sub-abas e floating labels
+                // Inicializar gerenciamento de sub-abas e componentes do formulário
                 setTimeout(() => {
                     this.initializeEditTabs(productId, tabId);
-                    // Inicializar floating labels no conteúdo carregado
                     const container = document.getElementById(`conteudo-${tabId}`);
                     if (container) {
-                        this.forms.initFloatingLabels(container);
+                        this.initializeForm(container);
                     }
-                }, 100);
+                }, 150);
             })
             .fail(() => {
                 $(`#conteudo-${tabId}`).html('<div class="alert alert-danger">Erro ao carregar produto. Tente novamente.</div>');
@@ -327,23 +388,15 @@ const productManager = {
             switch(targetTab) {
                 case '#components-tab-pane':
                     if ($(`${containerSelector} #componentsContainer .spinner-border`).length > 0) {
-                        this.components.carregarComponentes(productId);
+                        // TODO: Implementar carregamento de componentes
+                        console.log('Carregamento de componentes não implementado ainda');
                     }
                     break;
                 case '#group-items-tab-pane':
-                    if ($(`${containerSelector} #groupItemsContainer .spinner-border`).length > 0) {
-                        this.groupItems.carregarItens(productId);
-                    }
-                    break;
                 case '#group-options-tab-pane':
-                    if ($(`${containerSelector} #groupOptionsContainer .spinner-border`).length > 0) {
-                        this.groupOptions.carregarOpcoes(productId);
-                    }
-                    break;
                 case '#exchange-rules-tab-pane':
-                    if ($(`${containerSelector} #exchangeRulesContainer .spinner-border`).length > 0) {
-                        this.exchangeRules.carregarRegras(productId);
-                    }
+                    // As abas ProductGroup agora são renderizadas diretamente via @await Html.PartialAsync()
+                    // Não precisamos recarregar via AJAX
                     break;
             }
         });
@@ -432,10 +485,7 @@ const productManager = {
         this.components.abrirGerenciamento(productId);
     },
 
-    // Gerenciar grupo (para grupos de produtos)
-    gerenciarGrupo: function(productId) {
-        this.groupItems.abrirGerenciamento(productId);
-    },
+
 
     // Validação de formulário
     validateForm: function(form) {
@@ -470,13 +520,18 @@ const productManager = {
         return isValid;
     },
 
-    // Mostrar erros de validação para aba específica
+    // Mostrar erros de validação para aba específica ou modal
     showValidationErrors: function(errors, tabId = null) {
         if (errors) {
             // Determinar o container correto
             let container = '';
             if (tabId) {
-                container = `#conteudo-${tabId}`;
+                // Check if it's a modal
+                if (tabId.includes('Modal')) {
+                    container = `#${tabId}`;
+                } else {
+                    container = `#conteudo-${tabId}`;
+                }
             } else if (this.config.currentEditMode === 'create') {
                 container = '#formNovoProduct';
             }
@@ -527,104 +582,10 @@ const productManager = {
         this.aplicarFiltros();
     },
 
-    // Namespace para gerenciamento de componentes
-    components: {
-        // Carregar componentes
-        carregarComponentes: function(productId) {
-            $.ajax({
-                url: `/ProductComponent/List/${productId}`,
-                type: 'GET',
-                success: (data) => {
-                    $('#componentsContainer').html(data);
-                },
-                error: (xhr) => {
-                    console.error('Erro ao carregar componentes:', xhr);
-                    $('#componentsContainer').html('<div class="alert alert-danger">Erro ao carregar componentes</div>');
-                }
-            });
-        },
+    // CompositeProduct functionality moved to CompositeProduct.js
+    // Include CompositeProduct.js in your view to use Component methods
 
-        // Abrir gerenciamento de componentes
-        abrirGerenciamento: function(productId) {
-            // Implementar modal específico para componentes
-            console.log('Gerenciar componentes do produto:', productId);
-        },
 
-        // Adicionar componente
-        adicionarComponente: function(productId) {
-            // Implementar adição de componente
-        },
-
-        // Editar componente
-        editarComponente: function(componentId) {
-            // Implementar edição de componente
-        },
-
-        // Remover componente
-        removerComponente: function(componentId) {
-            // Implementar remoção de componente
-        }
-    },
-
-    // Namespace para gerenciamento de itens do grupo
-    groupItems: {
-        // Carregar itens do grupo
-        carregarItens: function(productId) {
-            $.ajax({
-                url: `/ProductGroup/Items/${productId}`,
-                type: 'GET',
-                success: (data) => {
-                    $('#groupItemsContainer').html(data);
-                },
-                error: (xhr) => {
-                    console.error('Erro ao carregar itens do grupo:', xhr);
-                    $('#groupItemsContainer').html('<div class="alert alert-danger">Erro ao carregar itens do grupo</div>');
-                }
-            });
-        },
-
-        // Abrir gerenciamento de grupo
-        abrirGerenciamento: function(productId) {
-            // Implementar modal específico para grupo
-            console.log('Gerenciar grupo do produto:', productId);
-        }
-    },
-
-    // Namespace para gerenciamento de opções do grupo
-    groupOptions: {
-        // Carregar opções
-        carregarOpcoes: function(productId) {
-            $.ajax({
-                url: `/ProductGroup/Options/${productId}`,
-                type: 'GET',
-                success: (data) => {
-                    $('#groupOptionsContainer').html(data);
-                },
-                error: (xhr) => {
-                    console.error('Erro ao carregar opções:', xhr);
-                    $('#groupOptionsContainer').html('<div class="alert alert-danger">Erro ao carregar opções</div>');
-                }
-            });
-        }
-    },
-
-    // Namespace para gerenciamento de regras de troca
-    exchangeRules: {
-        // Carregar regras de troca
-        carregarRegras: function(productId) {
-            $.ajax({
-                url: `/ProductGroup/ExchangeRules/${productId}`,
-                type: 'GET',
-                success: (data) => {
-                    $('#exchangeRulesContainer').html(data);
-                },
-                error: (xhr) => {
-                    console.error('Erro ao carregar regras:', xhr);
-                    $('#exchangeRulesContainer').html('<div class="alert alert-danger">Erro ao carregar regras de troca</div>');
-                }
-            });
-        }
-    },
 
     // Namespace para gerenciamento de formulários com floating labels
     forms: {
@@ -644,8 +605,11 @@ const productManager = {
             // Ensure all addon inputs maintain floating state
             $(container).find('.floating-input-group-addon .floating-input').addClass('has-value');
             
-            // Ensure all textareas maintain floating state
-            $(container).find('.floating-textarea').addClass('has-value');
+            // Check textareas for initial values (don't force floating)
+            $(container).find('.floating-textarea').each(function() {
+                const $textarea = $(this);
+                productManager.forms.checkInputValue($textarea);
+            });
             
             // Ensure selects with values maintain floating state
             $(container).find('.floating-select').each(function() {
@@ -679,15 +643,14 @@ const productManager = {
                     return;
                 }
                 
-                // Textareas should always have floating labels
+                // Textareas should behave like regular inputs
                 if ($input.hasClass('floating-textarea')) {
-                    $input.addClass('has-value');
-                    // Still add event listeners for validation and other behaviors
+                    // Check initial value and add class if needed
+                    productManager.forms.checkInputValue($input);
+                    
+                    // Add event listeners for textareas
                     $input.on('focus blur input change', function() {
-                        // Don't remove has-value class for textareas, but check for other behaviors
-                        if (!$(this).hasClass('has-value')) {
-                            $(this).addClass('has-value');
-                        }
+                        productManager.forms.checkInputValue($(this));
                     });
                     return;
                 }
@@ -943,8 +906,252 @@ const productManager = {
                 }
             });
         }
-    }
+    },
+
+    // Select2 Management for Category Fields
+    select2: {
+        // Initialize all Select2 instances in container
+        initializeAll: function(container) {
+            const $container = container ? $(container) : $(document);
+            
+            // Initialize category selects
+            $container.find('.select2-category').each(function() {
+                productManager.select2.initializeCategorySelect($(this));
+            });
+        },
+
+        // Initialize a single category select
+        initializeCategorySelect: function($select) {
+            if (!$select.length) return;
+            
+            // Generate unique ID if not present
+            const selectId = $select.attr('id') || 'select2-category-' + Math.random().toString(36).substr(2, 9);
+            $select.attr('id', selectId);
+            
+            // Skip if already initialized and working
+            if ($select.hasClass('select2-hidden-accessible') && $select.next('.select2-container').length) {
+                return;
+            }
+            
+            // Destroy previous instance
+            if ($select.hasClass('select2-hidden-accessible')) {
+                $select.select2('destroy');
+            }
+            
+            // Find correct dropdown parent (modal if exists, otherwise body)
+            const $modal = $select.closest('.modal');
+            const dropdownParent = $modal.length ? $modal : $('body');
+            
+            $select.select2({
+                placeholder: 'Selecione uma categoria',
+                allowClear: true,
+                language: 'pt-BR',
+                dropdownParent: dropdownParent,
+                width: '100%',
+                ajax: {
+                    url: '/ProductCategory/BuscaProductCategoryAutocomplete',
+                    dataType: 'json',
+                    delay: 300,
+                    data: function (params) {
+                        return {
+                            termo: params.term || ''
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.map(function(item) {
+                                return {
+                                    id: item.id,
+                                    text: item.text,
+                                    description: item.description
+                                };
+                            })
+                        };
+                    },
+                    cache: true
+                },
+                templateResult: function(category) {
+                    if (category.loading) {
+                        return 'Buscando...';
+                    }
+                    
+                    if (!category.id) {
+                        return category.text;
+                    }
+                    
+                    const $result = $(
+                        '<div class="select2-result-category">' +
+                            '<div class="select2-result-category__title">' + category.text + '</div>' +
+                            (category.description ? '<div class="select2-result-category__description">' + category.description + '</div>' : '') +
+                        '</div>'
+                    );
+                    
+                    return $result;
+                },
+                templateSelection: function(category) {
+                    return category.text || category.id;
+                },
+                minimumInputLength: 0
+            });
+            
+            // Handle floating label integration
+            $select.on('select2:open select2:close select2:select select2:unselect', function() {
+                const $container = $(this).next('.select2-container');
+                if ($(this).val()) {
+                    $container.addClass('has-value');
+                } else {
+                    $container.removeClass('has-value');
+                }
+            });
+            
+            // Set initial state for floating label
+            if ($select.val()) {
+                $select.next('.select2-container').addClass('has-value');
+            }
+        },
+
+        // Destroy all Select2 instances in container
+        destroyAll: function(container) {
+            const $container = container ? $(container) : $(document);
+            $container.find('.select2-hidden-accessible').each(function() {
+                const $select = $(this);
+                if ($select.data('select2')) {
+                    $select.select2('destroy');
+                }
+            });
+        }
+    },
+
+    // Form initialization and setup
+    initializeForm: function(container) {
+        const $container = $(container);
+        
+        // Initialize Select2 components
+        this.select2.initializeAll($container);
+        
+        // Setup form calculations
+        this.setupFormCalculations($container);
+        
+        // Initialize floating labels if forms module exists
+        if (this.forms) {
+            this.forms.initFloatingLabels(container);
+        }
+    },
+
+    // Setup form calculations (margin, etc.)
+    setupFormCalculations: function(container) {
+        const $container = $(container);
+        
+        // Setup margin calculation for price/cost fields
+        $container.find('input[name="Price"], input[name="Cost"]').off('input.marginCalc').on('input.marginCalc', function() {
+            productManager.calculateMargin($container);
+        });
+        
+        // Calculate initial margin
+        setTimeout(() => {
+            productManager.calculateMargin($container);
+        }, 100);
+    },
+
+    // Calculate profit margin
+    calculateMargin: function(container) {
+        const $container = $(container);
+        const $priceInput = $container.find('input[name="Price"]');
+        const $costInput = $container.find('input[name="Cost"]');
+        const $marginDisplay = $container.find('#marginDisplay');
+        const $marginSection = $container.find('#marginSection');
+        
+        if (!$priceInput.length || !$costInput.length || !$marginDisplay.length) {
+            return;
+        }
+        
+        const price = parseFloat($priceInput.val()) || 0;
+        const cost = parseFloat($costInput.val()) || 0;
+        
+        if (price > 0 && cost > 0) {
+            const margin = ((price - cost) / price * 100);
+            $marginDisplay.text(margin.toFixed(2) + '%');
+            
+            // Show margin section (for create form)
+            if ($marginSection.length) {
+                $marginSection.show();
+            }
+            
+            // Show margin parent (for edit form)
+            const $marginParent = $marginDisplay.parent();
+            $marginParent.removeClass('d-none').show();
+            
+            // Add color coding based on margin percentage
+            if (margin < 10) {
+                $marginParent.removeClass('alert-info alert-success').addClass('alert-warning');
+            } else if (margin < 30) {
+                $marginParent.removeClass('alert-warning alert-success').addClass('alert-info');
+            } else {
+                $marginParent.removeClass('alert-warning alert-info').addClass('alert-success');
+            }
+        } else {
+            // Hide margin displays when no valid calculation
+            if ($marginSection.length) {
+                $marginSection.hide();
+            }
+            $marginDisplay.parent().hide();
+        }
+    },
+
+    // Clean up form when modal is closed
+    cleanupForm: function(container) {
+        const $container = $(container);
+        
+        // Destroy Select2 instances
+        this.select2.destroyAll($container);
+        
+        // Remove event handlers
+        $container.find('input[name="Price"], input[name="Cost"]').off('input.marginCalc');
+    },
+
+    // Get current product ID (for editing context)
+    getCurrentProductId: function() {
+        // First try to get from global config (most reliable in tab context)
+        if (this.config.currentProductId) {
+            return this.config.currentProductId;
+        }
+
+        // Try to get from current edit form
+        const editForm = $('form[id*="EditProduct"], form[id*="editProduct"]');
+        if (editForm.length) {
+            const productId = editForm.find('input[name="Id"]').val();
+            if (productId) return productId;
+        }
+
+        // Try to get from product-edit-container data attribute
+        const productContainer = $('.product-edit-container');
+        if (productContainer.length) {
+            const productId = productContainer.data('product-id') || productContainer.attr('data-product-id');
+            if (productId) return productId;
+        }
+
+        // Try to get from active tab data attribute
+        const activeTab = $('.nav-link.active[data-product-id]');
+        if (activeTab.length) {
+            const productId = activeTab.data('product-id');
+            if (productId) return productId;
+        }
+
+        // Try to get from URL if we're on edit page
+        const urlParts = window.location.pathname.split('/');
+        const editIndex = urlParts.indexOf('FormularioEdicao');
+        if (editIndex > -1 && urlParts.length > editIndex + 1) {
+            return urlParts[editIndex + 1];
+        }
+
+        return null;
+    },
+
+    // ProductGroup functionality moved to ProductGroup.js
+    // Include ProductGroup.js in your view to use ProductGroup methods
 };
+
+// ProductGroup functions now available in ProductGroup.js
 
 // Função utilitária para debounce
 function debounce(func, wait) {
@@ -960,8 +1167,6 @@ function debounce(func, wait) {
 }
 
 // Inicializar quando o documento estiver pronto
-$(document).ready(function() {
+$(function() {
     productManager.init();
-    console.log('ProductManager inicializado:', productManager);
-    console.log('Função novoProduct disponível:', typeof productManager.novoProduct);
 }); 

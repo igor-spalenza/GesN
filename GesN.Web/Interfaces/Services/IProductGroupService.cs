@@ -36,18 +36,21 @@ namespace GesN.Web.Interfaces.Services
 
         // Gerenciamento de itens do grupo
         Task<IEnumerable<ProductGroupItem>> GetGroupItemsAsync(string productGroupId);
+        Task<ProductGroupItem?> GetGroupItemByIdAsync(string itemId);
         Task<bool> AddGroupItemAsync(ProductGroupItem item);
         Task<bool> UpdateGroupItemAsync(ProductGroupItem item);
         Task<bool> RemoveGroupItemAsync(string itemId);
 
         // Gerenciamento de opções do grupo
         Task<IEnumerable<ProductGroupOption>> GetGroupOptionsAsync(string productGroupId);
+        Task<ProductGroupOption?> GetGroupOptionByIdAsync(string optionId);
         Task<bool> AddGroupOptionAsync(ProductGroupOption option);
         Task<bool> UpdateGroupOptionAsync(ProductGroupOption option);
         Task<bool> RemoveGroupOptionAsync(string optionId);
 
         // Gerenciamento de regras de troca
         Task<IEnumerable<ProductGroupExchangeRule>> GetExchangeRulesAsync(string productGroupId);
+        Task<ProductGroupExchangeRule?> GetExchangeRuleByIdAsync(string ruleId);
         Task<bool> AddExchangeRuleAsync(ProductGroupExchangeRule rule);
         Task<bool> UpdateExchangeRuleAsync(ProductGroupExchangeRule rule);
         Task<bool> RemoveExchangeRuleAsync(string ruleId);

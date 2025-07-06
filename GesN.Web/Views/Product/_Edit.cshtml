@@ -1,6 +1,6 @@
 @using GesN.Web.Models.ViewModels.Production
 @using GesN.Web.Models.Enumerators
-@model EditProductViewModel
+@model EditProductWithGroupsViewModel
 
 @{
     // Verificações defensivas
@@ -9,15 +9,18 @@
         throw new ArgumentNullException(nameof(Model), "O modelo não pode ser nulo");
     }
     
-    var isComposite = Model.ProductType == ProductType.Composite;
-    var isGroup = Model.ProductType == ProductType.Group;
+    var isComposite = Model.IsComposite;
+    var isGroup = Model.IsGroup;
     var productTypeValue = Model.ProductType;
 }
 
 @* Incluir CSS dos floating labels *@
 <link href="~/css/product-form.css" rel="stylesheet" />
 
-<div class="container-fluid">
+@* Incluir token de antiforgery para chamadas AJAX *@
+@Html.AntiForgeryToken()
+
+<div class="container-fluid product-edit-container" data-product-id="@ViewBag.ProductId">
     <div class="row">
         <!-- Navegação por Abas -->
         <div class="col-12">
@@ -30,15 +33,21 @@
                 </li>
                 
                 @if (isComposite)
+
                 {
+
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="components-tab" data-bs-toggle="tab" 
-                                data-bs-target="#components-tab-pane" type="button" role="tab">
+                        data-bs-target="#components-tab-pane" type="button" role="tab">
                             <i class="fas fa-cogs"></i> Componentes
                         </button>
                     </li>
+                    @section Scripts { <script src="~/js/CompositeProduct.js" asp-append-version="true"></script> }
+
+
+
                 }
-                
+
                 @if (isGroup)
                 {
                     <li class="nav-item" role="presentation">
@@ -81,13 +90,18 @@
                 {
                     <div class="tab-pane fade" id="components-tab-pane" role="tabpanel">
                         <div id="componentsContainer">
-                            <!-- Será carregado via AJAX quando a aba for clicada -->
-                            <div class="text-center py-4">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
+                            <!-- Carrega os componentes do produto composto -->
+                            @if (Model.ComponentIndexViewModel != null)
+                            {
+                                @await Html.PartialAsync("~/Views/ProductComponent/_List.cshtml", Model.ComponentIndexViewModel)
+                            }
+                            else
+                            {
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    Nenhum componente encontrado para este produto.
                                 </div>
-                                <p class="mt-2">Carregando componentes...</p>
-                            </div>
+                            }
                         </div>
                     </div>
                 }
@@ -97,37 +111,19 @@
                 {
                     <div class="tab-pane fade" id="group-items-tab-pane" role="tabpanel">
                         <div id="groupItemsContainer">
-                            <!-- Será carregado via AJAX quando a aba for clicada -->
-                            <div class="text-center py-4">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
-                                </div>
-                                <p class="mt-2">Carregando itens do grupo...</p>
-                            </div>
+                            @await Html.PartialAsync("_ProductGroupItems", Model.GroupItems)
                         </div>
                     </div>
                     
                     <div class="tab-pane fade" id="group-options-tab-pane" role="tabpanel">
                         <div id="groupOptionsContainer">
-                            <!-- Será carregado via AJAX quando a aba for clicada -->
-                            <div class="text-center py-4">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
-                                </div>
-                                <p class="mt-2">Carregando opções...</p>
-                            </div>
+                            @await Html.PartialAsync("_ProductGroupOptions", Model.GroupOptions)
                         </div>
                     </div>
                     
                     <div class="tab-pane fade" id="exchange-rules-tab-pane" role="tabpanel">
                         <div id="exchangeRulesContainer">
-                            <!-- Será carregado via AJAX quando a aba for clicada -->
-                            <div class="text-center py-4">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
-                                </div>
-                                <p class="mt-2">Carregando regras de troca...</p>
-                            </div>
+                            @await Html.PartialAsync("_ProductGroupExchangeRules", Model.ExchangeRules)
                         </div>
                     </div>
                 }

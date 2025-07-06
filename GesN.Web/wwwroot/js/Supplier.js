@@ -330,7 +330,7 @@ var suppliersManager = {
 };
 
 // Inicializar quando o documento estiver pronto
-$(document).ready(function() {
+$(function() {
     if (typeof suppliersManager !== 'undefined') {
         suppliersManager.init();
     }

@@ -418,4 +418,132 @@ namespace GesN.Web.Models.ViewModels.Production
         public int ActiveExchangeRules { get; set; }
         public decimal EstimatedBasePrice { get; set; }
     }
+
+    // ProductGroup Main ViewModels
+    public class ProductGroupViewModel
+    {
+        public string? Id { get; set; }
+
+        [Display(Name = "Nome")]
+        public string Name { get; set; } = string.Empty;
+
+        [Display(Name = "Descrição")]
+        public string? Description { get; set; }
+
+        [Display(Name = "Preço Base")]
+        [DataType(DataType.Currency)]
+        public decimal BasePrice { get; set; }
+
+        [Display(Name = "Ativo")]
+        public bool IsActive { get; set; }
+
+        [Display(Name = "Data de Criação")]
+        public DateTime CreatedAt { get; set; }
+
+        [Display(Name = "Última Modificação")]
+        public DateTime? LastModifiedAt { get; set; }
+        
+        [Display(Name = "SKU")]
+        public string? SKU { get; set; }
+        
+        [Display(Name = "Categoria")]
+        public string? CategoryId { get; set; }
+        
+        [Display(Name = "Preço")]
+        [DataType(DataType.Currency)]
+        public decimal Price { get; set; }
+        
+        [Display(Name = "Preço Unitário")]
+        [DataType(DataType.Currency)]
+        public decimal UnitPrice { get; set; }
+        
+        [Display(Name = "Estado")]
+        public ObjectState StateCode { get; set; } = ObjectState.Active;
+
+        // Propriedades calculadas
+        [Display(Name = "Status")]
+        public string StatusDisplay => IsActive ? "Ativo" : "Inativo";
+
+        [Display(Name = "Data de Criação")]
+        public string FormattedCreatedAt => CreatedAt.ToString("dd/MM/yyyy HH:mm");
+
+        [Display(Name = "Última Modificação")]
+        public string FormattedLastModifiedAt => LastModifiedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
+    }
+
+    public class ProductGroupIndexViewModel
+    {
+        public List<ProductGroupViewModel> ProductGroups { get; set; } = new();
+        public List<ProductGroupViewModel> Groups { get; set; } = new();
+        public ProductGroupStatisticsViewModel Statistics { get; set; } = new();
+        public int TotalGroups { get; set; }
+    }
+
+    public class CreateProductGroupViewModel
+    {
+        [Required(ErrorMessage = "O nome é obrigatório")]
+        [StringLength(100, ErrorMessage = "O nome deve ter no máximo {1} caracteres")]
+        [Display(Name = "Nome")]
+        public string Name { get; set; } = string.Empty;
+
+        [StringLength(500, ErrorMessage = "A descrição deve ter no máximo {1} caracteres")]
+        [Display(Name = "Descrição")]
+        public string? Description { get; set; }
+
+        [Required(ErrorMessage = "O preço base é obrigatório")]
+        [Range(0, double.MaxValue, ErrorMessage = "O preço base deve ser maior ou igual a zero")]
+        [Display(Name = "Preço Base")]
+        [DataType(DataType.Currency)]
+        public decimal BasePrice { get; set; }
+
+        [Display(Name = "Ativo")]
+        public bool IsActive { get; set; } = true;
+        
+        [Display(Name = "SKU")]
+        public string? SKU { get; set; }
+        
+        [Display(Name = "Categoria")]
+        public string? CategoryId { get; set; }
+        
+        [Display(Name = "Preço")]
+        [DataType(DataType.Currency)]
+        public decimal Price { get; set; }
+        
+        [Display(Name = "Preço Unitário")]
+        [DataType(DataType.Currency)]
+        public decimal UnitPrice { get; set; }
+        
+        [Display(Name = "Estado")]
+        public ObjectState StateCode { get; set; } = ObjectState.Active;
+    }
+
+    public class EditProductGroupViewModel
+    {
+        [Required]
+        public string Id { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "O nome é obrigatório")]
+        [StringLength(100, ErrorMessage = "O nome deve ter no máximo {1} caracteres")]
+        [Display(Name = "Nome")]
+        public string Name { get; set; } = string.Empty;
+
+        [StringLength(500, ErrorMessage = "A descrição deve ter no máximo {1} caracteres")]
+        [Display(Name = "Descrição")]
+        public string? Description { get; set; }
+
+        [Required(ErrorMessage = "O preço base é obrigatório")]
+        [Range(0, double.MaxValue, ErrorMessage = "O preço base deve ser maior ou igual a zero")]
+        [Display(Name = "Preço Base")]
+        [DataType(DataType.Currency)]
+        public decimal BasePrice { get; set; }
+
+        [Display(Name = "Ativo")]
+        public bool IsActive { get; set; }
+
+        [Display(Name = "Data de Criação")]
+        public DateTime CreatedAt { get; set; }
+
+        [Display(Name = "Última Modificação")]
+        public DateTime? LastModifiedAt { get; set; }
+    }
 } 

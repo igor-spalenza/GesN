@@ -85,7 +85,7 @@
 /* Floating Textarea */
 .floating-textarea {
     width: 100%;
-    padding: 16px 16px 8px 16px;
+    padding: 12px 16px 8px 16px;
     border: 1px solid #ddd;
     border-radius: 8px;
     font-size: 16px;
@@ -101,29 +101,19 @@
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
-.floating-textarea + .floating-label,
+/* Textarea should behave like inputs - only float when focused or has value */
+.floating-textarea.has-value,
+.floating-textarea:focus {
+    padding-top: 16px;
+    padding-bottom: 4px;
+}
+
 .floating-textarea:focus + .floating-label,
 .floating-textarea.has-value + .floating-label {
     top: 4px;
     font-size: 12px;
     color: #0d6efd;
     font-weight: 500;
-}
-
-/* Ensure textareas always show floating labels */
-.floating-textarea {
-    padding: 16px 16px 8px 16px !important;
-}
-
-.floating-textarea + .floating-label {
-    top: 4px !important;
-    font-size: 12px !important;
-    color: #6c757d;
-    font-weight: 500;
-}
-
-.floating-textarea:focus + .floating-label {
-    color: #0d6efd !important;
 }
 
 /* Input Groups with Floating Labels */
@@ -184,36 +174,193 @@
 
 /* Alternative layout for suffix addons (like "min") */
 .floating-input-group-addon.suffix {
-    flex-direction: row-reverse;
+    display: flex;
+    align-items: stretch;
+    position: relative;
 }
 
 .floating-input-group-addon.suffix .floating-input {
     border-radius: 8px 0 0 8px;
     border-right: none;
-    border-left: 1px solid #ddd;
     padding: 16px 16px 4px 16px; /* Always floating */
+    flex: 1;
 }
 
 .floating-input-group-addon.suffix .input-group-text {
-    border-radius: 0 8px 8px 0;
+    border: 1px solid #ddd;
     border-left: none;
-    border-right: 1px solid #ddd;
+    border-radius: 0 8px 8px 0;
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    padding: 12px 12px;
+    white-space: nowrap;
+    min-width: 50px;
 }
 
 .floating-input-group-addon.suffix .floating-label {
-    left: 16px; /* Normal position for suffix */
+    position: absolute;
+    left: 16px;
     top: 4px;
     font-size: 12px;
     color: #6c757d;
     font-weight: 500;
+    z-index: 3;
+    background-color: transparent;
+    pointer-events: none;
+    transition: all 0.3s ease;
 }
 
-.floating-input-group-addon.suffix .floating-input:focus + .floating-label {
+.floating-input-group-addon.suffix .floating-input:focus {
+    border-color: #0d6efd;
+    z-index: 2;
+}
+
+.floating-input-group-addon.suffix .floating-input:focus + .input-group-text {
+    border-color: #0d6efd;
+}
+
+.floating-input-group-addon.suffix .floating-input:focus ~ .floating-label {
     color: #0d6efd;
 }
 
-.floating-input-group-addon.suffix .floating-input:focus ~ .input-group-text {
-    border-color: #0d6efd;
+/* Ensure validation messages are properly positioned for suffix addons */
+.floating-input-group-addon.suffix .text-danger {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+}
+
+/* Select2 Integration with Floating Labels */
+.floating-input-group .select2-container {
+    width: 100% !important;
+}
+
+.floating-input-group .select2-selection {
+    height: 48px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    padding: 16px 16px 4px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.floating-input-group .select2-selection.select2-selection--single {
+    height: 48px !important;
+    line-height: 1.5 !important;
+}
+
+.floating-input-group .select2-selection__rendered {
+    padding: 0 !important;
+    color: #495057;
+    line-height: 1.5;
+}
+
+.floating-input-group .select2-selection__arrow {
+    height: 46px !important;
+    top: 1px !important;
+    right: 10px !important;
+}
+
+.floating-input-group .select2-container--default.select2-container--focus .select2-selection {
+    border-color: #0d6efd !important;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* Force floating state when Select2 has value */
+.floating-input-group .select2-container.has-value + .floating-label,
+.floating-input-group .select2-container--default.select2-container--focus + .floating-label {
+    top: 4px !important;
+    font-size: 12px !important;
+    color: #0d6efd !important;
+    font-weight: 500 !important;
+}
+
+/* Always show floating label for Select2 */
+.floating-input-group .select2-container + .floating-label {
+    top: 4px !important;
+    font-size: 12px !important;
+    color: #6c757d !important;
+    font-weight: 500 !important;
+    z-index: 1000;
+}
+
+.floating-input-group .select2-container--default.select2-container--focus + .floating-label {
+    color: #0d6efd !important;
+}
+
+/* Custom dropdown styling */
+.select2-dropdown {
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+    background-color: #fff !important;
+}
+
+.select2-results__option {
+    padding: 10px 14px !important;
+    background-color: #fff !important;
+    color: #333 !important;
+}
+
+.select2-results__option--highlighted {
+    background-color: #f8f9fa !important;
+    color: #0d6efd !important;
+    border-left: 3px solid #0d6efd !important;
+}
+
+.select2-results__option:hover {
+    background-color: #f8f9fa !important;
+    color: #0d6efd !important;
+}
+
+.select2-search--dropdown .select2-search__field {
+    border: 1px solid #ddd !important;
+    border-radius: 6px !important;
+    padding: 8px 12px !important;
+}
+
+.select2-results__option[data-select2-id] {
+    cursor: pointer !important;
+}
+
+/* Loading state */
+.select2-results__option.loading-results {
+    color: #6c757d !important;
+    font-style: italic !important;
+}
+
+/* Custom result templates */
+.select2-result-category {
+    padding: 8px 0 !important;
+    background-color: #fff !important;
+}
+
+.select2-result-category__title {
+    font-weight: 600 !important;
+    color: #333 !important;
+    margin-bottom: 3px !important;
+    font-size: 14px !important;
+}
+
+.select2-result-category__description {
+    font-size: 12px !important;
+    color: #6c757d !important;
+    opacity: 0.8 !important;
+}
+
+/* Fix highlighted category text visibility */
+.select2-results__option--highlighted .select2-result-category__title {
+    color: #0d6efd !important;
+    font-weight: 600 !important;
+}
+
+.select2-results__option--highlighted .select2-result-category__description {
+    color: #0d6efd !important;
+    opacity: 0.7 !important;
 }
 
 /* Modern Card Style */
@@ -351,4 +498,181 @@
         top: 12px;
         font-size: 16px;
     }
+}
+
+/* Product Group Sections Styling */
+.product-group-section {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.product-group-section .section-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-group-section .section-title {
+    margin: 0;
+    font-weight: 600;
+    color: #495057;
+    font-size: 1.1rem;
+}
+
+.product-group-section .section-title i {
+    margin-right: 0.5rem;
+    color: #6c757d;
+}
+
+.product-group-section .section-content {
+    padding: 1.25rem;
+}
+
+.product-group-section .empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.product-group-section .empty-state i {
+    opacity: 0.5;
+    margin-bottom: 1rem;
+    color: #adb5bd;
+}
+
+.product-group-section .empty-state h6 {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.product-group-section .empty-state p {
+    color: #6c757d;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Table styling within product group sections */
+.product-group-section .table {
+    margin-bottom: 0;
+}
+
+.product-group-section .table thead th {
+    border-top: none;
+    background-color: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.75rem;
+}
+
+.product-group-section .table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.product-group-section .table tbody td {
+    padding: 0.75rem;
+    vertical-align: middle;
+}
+
+/* Badge styling */
+.product-group-section .badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem;
+}
+
+/* Button group styling */
+.product-group-section .btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+.product-group-section .btn-group-sm .btn i {
+    font-size: 0.7rem;
+}
+
+/* Loading state */
+.product-group-section .loading-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #6c757d;
+}
+
+.product-group-section .loading-state .spinner-border {
+    margin-bottom: 1rem;
+}
+
+/* Alert styling within sections */
+.product-group-section .alert {
+    margin-bottom: 0;
+    border-radius: 0.375rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-group-section .section-header {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+        padding: 0.75rem 1rem;
+    }
+    
+    .product-group-section .section-header .btn {
+        width: 100%;
+    }
+
+    .product-group-section .section-content {
+        padding: 1rem;
+    }
+
+    .product-group-section .table-responsive {
+        border: none;
+    }
+
+    .product-group-section .btn-group-sm {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .product-group-section .btn-group-sm .btn {
+        width: 100%;
+        font-size: 0.75rem;
+    }
+}
+
+/* Component Management Styles */
+.stats-card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+}
+
+.component-table .table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.component-management .btn-group .btn {
+    border-radius: 4px;
+}
+
+.component-management .btn-group .btn:not(:last-child) {
+    margin-right: 4px;
+}
+
+.component-management .text-truncate {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 } 

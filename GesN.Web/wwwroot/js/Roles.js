@@ -647,6 +647,6 @@ var rolesManager = {
 };
 
 // Inicializar quando o documento estiver pronto
-$(document).ready(function() {
+$(function() {
     rolesManager.init();
 }); 

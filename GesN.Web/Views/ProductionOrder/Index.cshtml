@@ -1,4 +1,4 @@
-@model IEnumerable<GesN.Web.Models.Entities.Production.ProductionOrder>
+@model GesN.Web.Models.ViewModels.Production.ProductionOrderIndexViewModel
 
 @{
     ViewData["Title"] = "Ordens de Produção";
@@ -113,7 +113,7 @@
                         </div>
                     </div>
 
-                    @if (Model.Any())
+                    @if (Model.Orders.Any())
                     {
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped" id="ordersTable">
@@ -130,14 +130,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var order in Model)
+                                    @foreach (var order in Model.Orders)
                                     {
                                         <tr class="@(order.Status == ProductionOrderStatus.Failed ? "table-danger" : order.Status == ProductionOrderStatus.Completed ? "table-success" : "")">
                                             <td>
                                                 <small class="text-muted">#@order.Id.Substring(0, 8)</small>
                                             </td>
                                             <td>
-                                                <strong>@order.Product?.Name</strong>
+                                                <strong>@order.ProductName</strong>
                                                 @if (!string.IsNullOrEmpty(order.OrderId))
                                                 {
                                                     <br><small class="text-muted">Pedido: #@order.OrderId</small>

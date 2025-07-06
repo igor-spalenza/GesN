@@ -1,0 +1,114 @@
+@using GesN.Web.Models.ViewModels.Production
+@model List<ProductGroupOptionViewModel>
+
+<div class="product-group-section">
+    <div class="section-header">
+        <h6 class="section-title">
+            <i class="fas fa-sliders-h"></i> Opções de Configuração
+        </h6>
+        <button type="button" class="btn btn-primary btn-sm" onclick="ProductGroup.showCreateOptionModal('@ViewBag.ProductId')">
+            <i class="fas fa-plus"></i> Adicionar Opção
+        </button>
+    </div>
+
+    <div class="section-content">
+        @if (Model?.Any() == true)
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>Descrição</th>
+                            <th>Tipo</th>
+                            <th>Ordem</th>
+                            <th>Obrigatória</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var option in Model.OrderBy(o => o.DisplayOrder))
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@option.Name</strong>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(option.Description))
+                                    {
+                                        <span class="text-muted">@option.Description</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">--</span>
+                                    }
+                                </td>
+                                <td>
+                                    @switch (option.OptionType)
+                                    {
+                                        case "Single":
+                                            <span class="badge bg-info">Seleção Única</span>
+                                            break;
+                                        case "Multiple":
+                                            <span class="badge bg-warning">Seleção Múltipla</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@option.OptionType</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @if (option.DisplayOrder.HasValue)
+                                    {
+                                        <span class="badge bg-light text-dark">@option.DisplayOrder</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">--</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (option.IsRequired)
+                                    {
+                                        <span class="badge bg-danger">Obrigatória</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Opcional</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-primary" 
+                                                onclick="ProductGroup.showEditOptionModal('@option.Id')"
+                                                title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                onclick="ProductGroup.confirmDeleteOption('@option.Id', '@option.Name')"
+                                                title="Excluir">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="text-center py-4">
+                    <i class="fas fa-sliders-h fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">Nenhuma opção configurada</h6>
+                    <p class="text-muted">Adicione opções de configuração para personalizar este grupo de produtos.</p>
+                    <button type="button" class="btn btn-primary" onclick="ProductGroup.showCreateOptionModal('@ViewBag.ProductId')">
+                        <i class="fas fa-plus"></i> Adicionar Primeira Opção
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div> 

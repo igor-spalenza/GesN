@@ -527,7 +527,7 @@ const ordersManager = {
     }
 };
 
-$(document).ready(function() {
+$(function() {
     ordersManager.carregarListaOrders();
 
     $('#orderModal').on('hidden.bs.modal', function () {

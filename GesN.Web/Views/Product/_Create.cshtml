@@ -57,7 +57,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="floating-input-group">
-                        <select asp-for="CategoryId" class="floating-select" placeholder=" ">
+                        <select asp-for="CategoryId" class="form-select select2-category" placeholder=" ">
                             <option value=""></option>
                             @foreach (var category in Model.AvailableCategories)
                             {
@@ -154,7 +154,10 @@
                         <span asp-validation-for="AssemblyTime" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="col-md-8">
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
                     <div class="floating-input-group">
                         <textarea asp-for="AssemblyInstructions" class="floating-textarea" placeholder=" " rows="4"></textarea>
                         <label asp-for="AssemblyInstructions" class="floating-label">Instruções de Montagem</label>
@@ -179,4 +182,6 @@
             <i class="fas fa-save"></i> Criar Produto
         </button>
     </div>
-</form> 
+</form>
+
+ 

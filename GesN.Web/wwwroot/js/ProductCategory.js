@@ -285,7 +285,7 @@ const productCategoriesManager = {
     }
 };
 
-$(document).ready(function() {
+$(function() {
     productCategoriesManager.carregarListaCategorias();
 
     $('#categoriaModal').on('hidden.bs.modal', function () {

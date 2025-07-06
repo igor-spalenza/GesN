@@ -40,7 +40,7 @@ const clientesManager = {
      * Inicializa DataTable para a tabela de clientes
      */
     inicializarDataTable: function() {
-        $(document).ready(function() {
+        $(function() {
             if ($('#customersTable').length) {
                 $('#customersTable').DataTable({
                     "language": {
@@ -448,7 +448,7 @@ const clientesManager = {
 window.clientesManager = clientesManager;
 
 // Auto-inicialização quando o DOM estiver pronto
-$(document).ready(function() {
+$(function() {
     // Debug: verificar se o objeto clientesManager existe
     console.log('clientesManager carregado:', typeof clientesManager);
     console.log('novoClienteModal função existe:', typeof clientesManager.novoClienteModal);

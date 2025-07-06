@@ -68,7 +68,7 @@ namespace GesN.Web.Data.Migrations
                     PRIMARY KEY(Id)
                 );";
 
-                // ========== DOMÍNIO DE VENDAS ==========
+                // ========== DOMï¿½NIO DE VENDAS ==========
                 var createCustomerTable = @"
                 CREATE TABLE IF NOT EXISTS Customer (
                     Id TEXT NOT NULL UNIQUE,
@@ -159,7 +159,7 @@ namespace GesN.Web.Data.Migrations
                     FOREIGN KEY(OrderId) REFERENCES OrderEntry(Id)
                 );";
 
-                // ========== DOMÍNIO DE PRODUÇÃO ==========
+                // ========== DOMï¿½NIO DE PRODUï¿½ï¿½O ==========
                 var createProductCategoryTable = @"
                 CREATE TABLE IF NOT EXISTS ProductCategory (
                     Id TEXT NOT NULL UNIQUE,
@@ -259,9 +259,9 @@ namespace GesN.Web.Data.Migrations
                     CompositeProductId TEXT NOT NULL,
                     ComponentProductId TEXT NOT NULL,
                     Quantity REAL NOT NULL DEFAULT 1,
-                    Unit TEXT DEFAULT 'UN',
+                    Unit INTEGER NOT NULL DEFAULT 0,
                     IsOptional INTEGER NOT NULL DEFAULT 0,
-                    AssemblyOrder INTEGER DEFAULT 1,
+                    AssemblyOrder INTEGER DEFAULT 0,
                     Notes TEXT,
                     PRIMARY KEY(Id),
                     FOREIGN KEY(CompositeProductId) REFERENCES Product(Id),
@@ -374,7 +374,7 @@ namespace GesN.Web.Data.Migrations
                     FOREIGN KEY(ProductId) REFERENCES Product(Id)
                 );";
 
-                // ========== DOMÍNIO FINANCEIRO ==========
+                // ========== DOMï¿½NIO FINANCEIRO ==========
                 var createTransactionCategoryTable = @"
                 CREATE TABLE IF NOT EXISTS TransactionCategory (
                     Id TEXT NOT NULL UNIQUE,
@@ -424,34 +424,85 @@ namespace GesN.Web.Data.Migrations
                     FOREIGN KEY(OrderId) REFERENCES OrderEntry(Id)
                 );";
 
-                // ========== EXECUÇÃO DAS MIGRATIONS ==========
+                // ========== MIGRATIONS DE ATUALIZAï¿½ï¿½O ==========
+                // MigraÃ§Ã£o para corrigir o campo Unit da tabela ProductComponent
+                var updateProductComponentUnitField = @"
+                -- Criar tabela temporÃ¡ria com a estrutura correta
+                CREATE TABLE IF NOT EXISTS ProductComponent_temp (
+                    Id TEXT NOT NULL UNIQUE,
+                    CreatedAt TEXT NOT NULL,
+                    CreatedBy TEXT NOT NULL,
+                    LastModifiedAt TEXT,
+                    LastModifiedBy TEXT,
+                    StateCode INTEGER NOT NULL DEFAULT 1,
+                    CompositeProductId TEXT NOT NULL,
+                    ComponentProductId TEXT NOT NULL,
+                    Quantity REAL NOT NULL DEFAULT 1,
+                    Unit INTEGER NOT NULL DEFAULT 0,
+                    IsOptional INTEGER NOT NULL DEFAULT 0,
+                    AssemblyOrder INTEGER DEFAULT 0,
+                    Notes TEXT,
+                    PRIMARY KEY(Id),
+                    FOREIGN KEY(CompositeProductId) REFERENCES Product(Id),
+                    FOREIGN KEY(ComponentProductId) REFERENCES Product(Id)
+                );
+
+                -- Copiar dados existentes (se houver), convertendo Unit para INTEGER
+                INSERT OR IGNORE INTO ProductComponent_temp 
+                SELECT Id, CreatedAt, CreatedBy, LastModifiedAt, LastModifiedBy, StateCode,
+                       CompositeProductId, ComponentProductId, Quantity,
+                       CASE 
+                           WHEN Unit = 'UN' OR Unit = 'Unidades' THEN 0
+                           WHEN Unit = 'KG' OR Unit = 'Quilogramas' THEN 1
+                           WHEN Unit = 'G' OR Unit = 'Gramas' THEN 2
+                           WHEN Unit = 'L' OR Unit = 'Litros' THEN 3
+                           WHEN Unit = 'ML' OR Unit = 'Mililitros' THEN 4
+                           WHEN Unit = 'M' OR Unit = 'Metros' THEN 5
+                           WHEN Unit = 'CM' OR Unit = 'Centimetros' THEN 6
+                           WHEN Unit = 'PC' OR Unit = 'Pecas' THEN 7
+                           ELSE 0
+                       END as Unit,
+                       IsOptional, AssemblyOrder, Notes
+                FROM ProductComponent WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='ProductComponent');
+
+                -- Remover tabela antiga
+                DROP TABLE IF EXISTS ProductComponent;
+
+                -- Renomear tabela temporÃ¡ria
+                ALTER TABLE ProductComponent_temp RENAME TO ProductComponent;";
+
+                // ========== EXECUï¿½ï¿½O DAS MIGRATIONS ==========
                 // Tabelas legadas
                 connection.Execute(createClienteTable);
                 connection.Execute(createPedidoTable);
 
-                // Value Objects (executados primeiro devido às dependências)
+                // Value Objects (executados primeiro devido ï¿½s dependï¿½ncias)
                 connection.Execute(createAddressTable);
                 connection.Execute(createFiscalDataTable);
 
-                // Domínio de Vendas
+                // Domï¿½nio de Vendas
                 connection.Execute(createCustomerTable);
                 connection.Execute(createOrderTable);
                 connection.Execute(createOrderItemTable);
                 connection.Execute(createContractTable);
 
-                // Domínio de Produção
+                // Domï¿½nio de Produï¿½ï¿½o
                 connection.Execute(createProductCategoryTable);
                 connection.Execute(createSupplierTable);
                 connection.Execute(createProductTable);
                 connection.Execute(createProductGroupItemTable);
                 connection.Execute(createProductComponentTable);
+                
+                // Executar migraÃ§Ã£o de atualizaÃ§Ã£o da tabela ProductComponent
+                connection.Execute(updateProductComponentUnitField);
+                
                 connection.Execute(createIngredientTable);
                 connection.Execute(createProductIngredientTable);
                 connection.Execute(createProductGroupExchangeRuleTable);
                 connection.Execute(createProductGroupOptionTable);
                 connection.Execute(createProductionOrderTable);
 
-                // Domínio Financeiro
+                // Domï¿½nio Financeiro
                 connection.Execute(createTransactionCategoryTable);
                 connection.Execute(createPaymentMethodTable);
                 connection.Execute(createFinancialTransactionTable);

@@ -1,0 +1,250 @@
+@model GesN.Web.Models.ViewModels.Production.ProductComponentIndexViewModel
+
+@Html.AntiForgeryToken()
+
+<div class="container-fluid">
+    <!-- Cabeçalho da Seção -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">
+                        <i class="fas fa-puzzle-piece text-primary"></i>
+                        Componentes do Produto
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Gerencie os componentes que compõem este produto
+                    </p>
+                </div>
+                <div class="text-end">
+                    <button type="button" class="btn btn-primary btn-sm" id="btnAddComponent">
+                        <i class="fas fa-plus"></i>
+                        Adicionar Componente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Resumidas -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="fas fa-cubes fa-2x text-primary"></i>
+                    </div>
+                    <h5 class="mb-0 text-primary" id="totalComponents">@Model.Statistics.TotalComponents</h5>
+                    <small class="text-muted">Total de Componentes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                    </div>
+                    <h5 class="mb-0 text-success" id="requiredComponents">@Model.Statistics.RequiredComponents</h5>
+                    <small class="text-muted">Componentes Obrigatórios</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="fas fa-question-circle fa-2x text-info"></i>
+                    </div>
+                    <h5 class="mb-0 text-info" id="optionalComponents">@Model.Statistics.OptionalComponents</h5>
+                    <small class="text-muted">Componentes Opcionais</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="fas fa-dollar-sign fa-2x text-success"></i>
+                    </div>
+                    <h5 class="mb-0 text-success" id="totalCost">R$ @Model.Statistics.EstimatedTotalCost.ToString("N2")</h5>
+                    <small class="text-muted">Custo Total</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Componentes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-list text-primary"></i>
+                            Lista de Componentes
+                        </h6>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btnRefreshComponents">
+                                <i class="fas fa-sync"></i>
+                                Atualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.Components != null && Model.Components.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="componentsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="5%">
+                                            <i class="fas fa-sort-numeric-down"></i>
+                                            Ordem
+                                        </th>
+                                        <th width="25%">
+                                            <i class="fas fa-box"></i>
+                                            Produto Componente
+                                        </th>
+                                        <th width="10%">
+                                            <i class="fas fa-calculator"></i>
+                                            Quantidade
+                                        </th>
+                                        <th width="10%">
+                                            <i class="fas fa-balance-scale"></i>
+                                            Unidade
+                                        </th>
+                                        <th width="10%">
+                                            <i class="fas fa-question-circle"></i>
+                                            Tipo
+                                        </th>
+                                        <th width="15%">
+                                            <i class="fas fa-dollar-sign"></i>
+                                            Custo Total
+                                        </th>
+                                        <th width="15%">
+                                            <i class="fas fa-sticky-note"></i>
+                                            Observações
+                                        </th>
+                                        <th width="10%">
+                                            <i class="fas fa-cogs"></i>
+                                            Ações
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="componentsTableBody">
+                                    @foreach (var component in Model.Components.OrderBy(c => c.AssemblyOrder))
+                                    {
+                                        <tr data-component-id="@component.Id">
+                                            <td>
+                                                <span class="badge bg-secondary">
+                                                    @component.AssemblyOrder
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2">
+                                                        <i class="fas fa-box text-primary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold">@component.ComponentProductName</div>
+                                                        <small class="text-muted">SKU: @component.ComponentProductSKU</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold">@component.Quantity</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-light text-dark">
+                                                    @component.Unit
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (component.IsOptional)
+                                                {
+                                                    <span class="badge bg-info">
+                                                        <i class="fas fa-question-circle"></i>
+                                                        Opcional
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check-circle"></i>
+                                                        Obrigatório
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold text-success">
+                                                    R$ @component.TotalCost.ToString("N2")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(component.Notes))
+                                                {
+                                                    <span class="text-truncate d-inline-block" style="max-width: 150px;" title="@component.Notes">
+                                                        @component.Notes
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">
+                                                        <i class="fas fa-minus"></i>
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                            onclick="editarComponente('@component.Id')" 
+                                                            title="Editar">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                            onclick="removerComponente('@component.Id')" 
+                                                            title="Remover">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-puzzle-piece fa-3x text-muted"></i>
+                            </div>
+                            <h6 class="text-muted">Nenhum componente adicionado</h6>
+                            <p class="text-muted">
+                                Este produto ainda não possui componentes configurados.
+                                <br>
+                                Clique no botão "Adicionar Componente" para começar.
+                            </p>
+                            <button type="button" class="btn btn-primary" id="btnAddFirstComponent">
+                                <i class="fas fa-plus"></i>
+                                Adicionar Primeiro Componente
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Inicializar lista de componentes
+    if (typeof CompositeProduct !== 'undefined') {
+        CompositeProduct.initializeComponentsList();
+    }
+});
+</script> 

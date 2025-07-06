@@ -346,7 +346,7 @@ var ingredientsManager = {
 };
 
 // Inicializar quando o documento estiver pronto
-$(document).ready(function() {
+$(function() {
     if (typeof ingredientsManager !== 'undefined') {
         ingredientsManager.init();
     }

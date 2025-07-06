@@ -19,8 +19,11 @@ namespace GesN.Web.Models.ViewModels.Production
         [Display(Name = "Nome do Componente")]
         public string? ComponentProductName { get; set; }
 
+        [Display(Name = "SKU do Componente")]
+        public string? ComponentProductSKU { get; set; }
+
         [Display(Name = "Quantidade")]
-        public int Quantity { get; set; }
+        public decimal Quantity { get; set; }
 
         [Display(Name = "Unidade")]
         public string? Unit { get; set; }
@@ -29,7 +32,7 @@ namespace GesN.Web.Models.ViewModels.Production
         public bool IsOptional { get; set; }
 
         [Display(Name = "Ordem de Montagem")]
-        public int? AssemblyOrder { get; set; }
+        public int AssemblyOrder { get; set; }
 
         [Display(Name = "Observações")]
         public string? Notes { get; set; }
@@ -39,6 +42,9 @@ namespace GesN.Web.Models.ViewModels.Production
 
         [Display(Name = "Última Modificação")]
         public DateTime? ModifiedAt { get; set; }
+
+        [Display(Name = "Custo Total")]
+        public decimal TotalCost { get; set; }
 
         // Propriedades calculadas
         [Display(Name = "Tipo")]
@@ -62,20 +68,20 @@ namespace GesN.Web.Models.ViewModels.Production
         public string ComponentProductId { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "A quantidade é obrigatória")]
-        [Range(1, int.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
+        [Range(0.001, double.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
         [Display(Name = "Quantidade")]
-        public int Quantity { get; set; } = 1;
+        public decimal Quantity { get; set; } = 1;
 
-        [StringLength(20, ErrorMessage = "A unidade deve ter no máximo {1} caracteres")]
+        [Required(ErrorMessage = "A unidade é obrigatória")]
         [Display(Name = "Unidade")]
-        public string? Unit { get; set; }
+        public string Unit { get; set; } = "Unidades";
 
         [Display(Name = "Componente Opcional")]
         public bool IsOptional { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "A ordem deve ser maior que zero")]
+        [Range(0, int.MaxValue, ErrorMessage = "A ordem deve ser maior ou igual a zero")]
         [Display(Name = "Ordem de Montagem")]
-        public int? AssemblyOrder { get; set; }
+        public int AssemblyOrder { get; set; }
 
         [StringLength(500, ErrorMessage = "As observações devem ter no máximo {1} caracteres")]
         [Display(Name = "Observações")]
@@ -102,20 +108,20 @@ namespace GesN.Web.Models.ViewModels.Production
         public string ComponentProductId { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "A quantidade é obrigatória")]
-        [Range(1, int.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
+        [Range(0.001, double.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
         [Display(Name = "Quantidade")]
-        public int Quantity { get; set; } = 1;
+        public decimal Quantity { get; set; } = 1;
 
-        [StringLength(20, ErrorMessage = "A unidade deve ter no máximo {1} caracteres")]
+        [Required(ErrorMessage = "A unidade é obrigatória")]
         [Display(Name = "Unidade")]
-        public string? Unit { get; set; }
+        public string Unit { get; set; } = "Unidades";
 
         [Display(Name = "Componente Opcional")]
         public bool IsOptional { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "A ordem deve ser maior que zero")]
+        [Range(0, int.MaxValue, ErrorMessage = "A ordem deve ser maior ou igual a zero")]
         [Display(Name = "Ordem de Montagem")]
-        public int? AssemblyOrder { get; set; }
+        public int AssemblyOrder { get; set; }
 
         [StringLength(500, ErrorMessage = "As observações devem ter no máximo {1} caracteres")]
         [Display(Name = "Observações")]
@@ -126,6 +132,23 @@ namespace GesN.Web.Models.ViewModels.Production
 
         [Display(Name = "Última Modificação")]
         public DateTime? ModifiedAt { get; set; }
+        
+        [Display(Name = "Última Modificação")]
+        public DateTime? LastModifiedAt { get; set; }
+        
+        [Display(Name = "Criado Por")]
+        public string? CreatedBy { get; set; }
+        
+        [Display(Name = "Estado")]
+        public string? StateCode { get; set; }
+        
+        [Display(Name = "Produto Componente")]
+        public string? ComponentProduct { get; set; }
+        
+        public decimal CalculateTotalCost()
+        {
+            return 0; // Placeholder - será implementado quando necessário
+        }
 
         [Display(Name = "Componentes Disponíveis")]
         public List<ComponentSelectionViewModel> AvailableComponents { get; set; } = new();
@@ -138,17 +161,17 @@ namespace GesN.Web.Models.ViewModels.Production
         public string? CompositeProductName { get; set; }
         public string ComponentProductId { get; set; } = string.Empty;
         public string? ComponentProductName { get; set; }
-        public int Quantity { get; set; }
+        public decimal Quantity { get; set; }
         public string? Unit { get; set; }
         public bool IsOptional { get; set; }
-        public int? AssemblyOrder { get; set; }
+        public int AssemblyOrder { get; set; }
         public string? Notes { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? ModifiedAt { get; set; }
 
         // Propriedades calculadas
         public string OptionalDisplay => IsOptional ? "Opcional" : "Obrigatório";
-        public string AssemblyOrderDisplay => AssemblyOrder?.ToString() ?? "N/A";
+        public string AssemblyOrderDisplay => AssemblyOrder.ToString();
         public string FormattedCreatedAt => CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
         public string FormattedModifiedAt => ModifiedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
     }
@@ -167,7 +190,6 @@ namespace GesN.Web.Models.ViewModels.Production
         public int OptionalComponents { get; set; }
         public int RequiredComponents { get; set; }
         public decimal EstimatedTotalCost { get; set; }
-        public int EstimatedAssemblyTime { get; set; }
     }
 
     public class ComponentSelectionViewModel

@@ -1,4 +1,4 @@
-@model IEnumerable<GesN.Web.Models.Entities.Production.ProductComponent>
+@model GesN.Web.Models.ViewModels.Production.ProductComponentIndexViewModel
 
 @{
     ViewData["Title"] = "Componentes de Produtos";
@@ -17,7 +17,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    @if (Model.Any())
+                    @if (Model.Components.Any())
                     {
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped" id="componentsTable">
@@ -33,11 +33,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var component in Model)
+                                    @foreach (var component in Model.Components)
                                     {
                                         <tr>
-                                            <td>@component.CompositeProduct?.Name</td>
-                                            <td>@component.ComponentProduct?.Name</td>
+                                            <td>@component.CompositeProductName</td>
+                                            <td>@component.ComponentProductName</td>
                                             <td>@component.Quantity.ToString("N2")</td>
                                             <td>@component.Unit</td>
                                             <td>

@@ -8,8 +8,8 @@
                 <th>Nome</th>
                 <th>Tipo</th>
                 <th>Categoria</th>
-                <th>Preço</th>
-                <th>Preço Unit.</th>
+                @* <th>Preço</th>
+                <th>Preço Unit.</th> *@
                 <th>Status</th>
                 <th width="180px">Ações</th>
             </tr>
@@ -59,7 +59,7 @@
                             <span class="text-muted">-</span>
                         }
                     </td>
-                    <td>
+                    @* <td>
                         @if (product.Price > 0)
                         {
                             <span class="fw-bold text-success">@product.PriceDisplay</span>
@@ -78,7 +78,7 @@
                         {
                             <span class="text-muted">N/A</span>
                         }
-                    </td>
+                    </td> *@
                     <td>
                         @if (product.StateCode == 1)
                         {

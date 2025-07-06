@@ -236,6 +236,11 @@ namespace GesN.Web.Services
             return await _groupItemRepository.GetByProductGroupIdAsync(productGroupId);
         }
 
+        public async Task<ProductGroupItem?> GetGroupItemByIdAsync(string itemId)
+        {
+            return await _groupItemRepository.GetByIdAsync(itemId);
+        }
+
         public async Task<bool> AddGroupItemAsync(ProductGroupItem item)
         {
             try
@@ -282,6 +287,11 @@ namespace GesN.Web.Services
             return await _groupOptionRepository.GetByProductGroupIdAsync(productGroupId);
         }
 
+        public async Task<ProductGroupOption?> GetGroupOptionByIdAsync(string optionId)
+        {
+            return await _groupOptionRepository.GetByIdAsync(optionId);
+        }
+
         public async Task<bool> AddGroupOptionAsync(ProductGroupOption option)
         {
             try
@@ -326,6 +336,11 @@ namespace GesN.Web.Services
         public async Task<IEnumerable<ProductGroupExchangeRule>> GetExchangeRulesAsync(string productGroupId)
         {
             return await _exchangeRuleRepository.GetByProductGroupIdAsync(productGroupId);
+        }
+
+        public async Task<ProductGroupExchangeRule?> GetExchangeRuleByIdAsync(string ruleId)
+        {
+            return await _exchangeRuleRepository.GetByIdAsync(ruleId);
         }
 
         public async Task<bool> AddExchangeRuleAsync(ProductGroupExchangeRule rule)

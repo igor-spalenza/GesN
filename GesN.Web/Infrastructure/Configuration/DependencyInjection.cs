@@ -53,10 +53,15 @@ namespace GesN.Web.Infrastructure.Configuration
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IProductComponentRepository, ProductComponentRepository>();
             services.AddScoped<IProductComponentService, ProductComponentService>();
+            services.AddScoped<IProductGroupRepository, ProductGroupRepository>();
             services.AddScoped<IProductGroupItemRepository, ProductGroupItemRepository>();
+            services.AddScoped<IProductGroupItemService, ProductGroupItemService>();
             services.AddScoped<IProductGroupOptionRepository, ProductGroupOptionRepository>();
+            services.AddScoped<IProductGroupOptionService, ProductGroupOptionService>();
             services.AddScoped<IProductGroupExchangeRuleRepository, ProductGroupExchangeRuleRepository>();
+            services.AddScoped<IProductGroupExchangeRuleService, ProductGroupExchangeRuleService>();
             services.AddScoped<IProductGroupService, ProductGroupService>();
+            services.AddScoped<IOrderItemService, OrderItemService>();
             services.AddScoped<IProductionOrderRepository, ProductionOrderRepository>();
             services.AddScoped<IProductionOrderService, ProductionOrderService>();
 

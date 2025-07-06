@@ -80,10 +80,27 @@ namespace GesN.Web.Models.DTOs
         public string? AssemblyInstructions { get; set; }
 
         /// <summary>
-        /// Tipo do produto (Dapper converte automaticamente string ↔ enum)
-        /// Valores no banco: 'Simple', 'Composite', 'Group'
+        /// Tipo do produto como string (valor do banco de dados)
+        /// Valores possíveis: 'Simple', 'Composite', 'Group'
         /// </summary>
-        public ProductType ProductType { get; set; } = ProductType.Simple;
+        public string ProductTypeString { get; set; } = "Simple";
+        
+        /// <summary>
+        /// Tipo do produto como enum (conversão automática da string)
+        /// </summary>
+        public ProductType ProductType 
+        { 
+            get 
+            {
+                return ProductTypeString switch
+                {
+                    "Simple" => ProductType.Simple,
+                    "Composite" => ProductType.Composite,
+                    "Group" => ProductType.Group,
+                    _ => ProductType.Simple
+                };
+            }
+        }
 
         /// <summary>
         /// Código do estado do objeto (ativo/inativo)

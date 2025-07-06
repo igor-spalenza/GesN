@@ -21,7 +21,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT * FROM Product 
+                SELECT *, ProductType as ProductTypeString FROM Product 
                 WHERE StateCode = @StateCode 
                 ORDER BY Name";
 
@@ -37,7 +37,7 @@ namespace GesN.Web.Data.Repositories
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
-            const string sql = "SELECT * FROM Product WHERE Id = @Id";
+            const string sql = "SELECT *, ProductType as ProductTypeString FROM Product WHERE Id = @Id";
             var productDto = await connection.QuerySingleOrDefaultAsync<ProductDto>(sql, new { Id = id });
             
 
@@ -50,12 +50,12 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT * FROM Product 
+                SELECT *, ProductType as ProductTypeString FROM Product 
                 WHERE ProductType = @ProductType AND StateCode = @StateCode
                 ORDER BY Name";
 
             var productDtos = await connection.QueryAsync<ProductDto>(sql, 
-                new { ProductType = productType, StateCode = (int)ObjectState.Active });
+                new { ProductType = productType.ToString(), StateCode = (int)ObjectState.Active });
 
             return ProductMapper.ToEntities(productDtos);
         }
@@ -65,7 +65,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT * FROM Product 
+                SELECT *, ProductType as ProductTypeString FROM Product 
                 WHERE StateCode = @StateCode
                 ORDER BY Name";
 
@@ -80,7 +80,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT * FROM Product 
+                SELECT *, ProductType as ProductTypeString FROM Product 
                 WHERE CategoryId = @CategoryId AND StateCode = @StateCode
                 ORDER BY Name";
 
@@ -95,7 +95,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT * FROM Product 
+                SELECT *, ProductType as ProductTypeString FROM Product 
                 WHERE StateCode = @StateCode
                   AND (Name LIKE @SearchTerm OR Description LIKE @SearchTerm OR SKU LIKE @SearchTerm)
                 ORDER BY Name";
@@ -112,7 +112,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT * FROM Product 
+                SELECT *, ProductType as ProductTypeString FROM Product 
                 WHERE StateCode = @StateCode
                 ORDER BY Name
                 LIMIT @PageSize OFFSET @Offset";
@@ -156,7 +156,7 @@ namespace GesN.Web.Data.Repositories
                 Cost = product.Cost,
                 AssemblyTime = product.AssemblyTime,
                 AssemblyInstructions = product.AssemblyInstructions,
-                ProductType = product.ProductType, // Dapper converte automaticamente
+                ProductType = product.ProductType.ToString(), // Forçar conversão para string
                 StateCode = (int)product.StateCode,
                 CreatedAt = product.CreatedAt,
                 CreatedBy = product.CreatedBy,
