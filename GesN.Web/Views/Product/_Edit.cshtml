@@ -20,7 +20,7 @@
 @* Incluir token de antiforgery para chamadas AJAX *@
 @Html.AntiForgeryToken()
 
-<div class="container-fluid product-edit-container" data-product-id="@ViewBag.ProductId">
+<div class="container-fluid product-edit-container" data-product-id="@ViewBag.ProductId" data-is-composite="@isComposite.ToString().ToLower()" data-is-group="@isGroup.ToString().ToLower()">
     <div class="row">
         <!-- Navegação por Abas -->
         <div class="col-12">
@@ -33,19 +33,13 @@
                 </li>
                 
                 @if (isComposite)
-
                 {
-
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="components-tab" data-bs-toggle="tab" 
                         data-bs-target="#components-tab-pane" type="button" role="tab">
                             <i class="fas fa-cogs"></i> Componentes
                         </button>
                     </li>
-                    @section Scripts { <script src="~/js/CompositeProduct.js" asp-append-version="true"></script> }
-
-
-
                 }
 
                 @if (isGroup)
@@ -100,6 +94,9 @@
                                 <div class="alert alert-info">
                                     <i class="fas fa-info-circle"></i>
                                     Nenhum componente encontrado para este produto.
+                                    <button type="button" class="btn btn-primary btn-sm ms-2" onclick="compositeProductManager.components.adicionarComponente('@ViewBag.ProductId')">
+                                        <i class="fas fa-plus"></i> Adicionar Componente
+                                    </button>
                                 </div>
                             }
                         </div>
@@ -142,4 +139,14 @@
     </button>
 </div>
 
- 
+@* Scripts necessários para produtos do tipo Group *@
+@if (isGroup)
+{
+    <script src="~/js/ProductGroup.js" asp-append-version="true"></script>
+}
+
+@* Scripts necessários para produtos do tipo Composite *@
+@if (isComposite)
+{
+    <script src="~/js/CompositeProduct.js" asp-append-version="true"></script>
+}

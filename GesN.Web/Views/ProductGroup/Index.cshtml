@@ -146,46 +146,5 @@
 </div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function() {
-            // Inicializar DataTable
-            var table = $('#groupsTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
-                },
-                responsive: true,
-                order: [[1, 'asc']],
-                columnDefs: [
-                    { orderable: false, targets: -1 }
-                ]
-            });
-
-            // Pesquisa personalizada
-            $('#searchInput').on('keyup', function() {
-                table.search(this.value).draw();
-            });
-
-            $('#searchBtn').on('click', function() {
-                table.search($('#searchInput').val()).draw();
-            });
-
-            // Filtros
-            $('#statusFilter').on('change', function() {
-                var value = this.value;
-                if (value === '') {
-                    table.column(5).search('').draw();
-                } else {
-                    var statusText = value === '1' ? 'Ativo' : 'Inativo';
-                    table.column(5).search(statusText).draw();
-                }
-            });
-
-            $('#categoryFilter').on('change', function() {
-                table.column(2).search(this.value).draw();
-            });
-
-            // Tooltip
-            $('[title]').tooltip();
-        });
-    </script>
+    <script src="~/js/ProductGroup.js"></script>
 } 

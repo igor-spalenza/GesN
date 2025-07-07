@@ -127,12 +127,5 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    
-    <script>
-        $(document).ready(function() {
-            // Máscara para preços
-            $('#Price').mask('000.000.000,00', {reverse: true});
-            $('#UnitPrice').mask('000.000.000,00', {reverse: true});
-        });
-    </script>
+    <script src="~/js/ProductGroup.js"></script>
 } 

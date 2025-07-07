@@ -99,37 +99,4 @@
             <i class="bi bi-check"></i> Salvar
         </button>
     </div>
-</form>
-
-<script>
-$(document).ready(function() {
-    // Carregar fornecedores
-    $.ajax({
-        url: '/Supplier/BuscaSupplierAutocomplete',
-        type: 'GET',
-        data: { termo: '' },
-        success: function(data) {
-            var select = $('#SupplierId');
-            data.forEach(function(supplier) {
-                select.append('<option value="' + supplier.id + '">' + supplier.text + '</option>');
-            });
-        }
-    });
-
-    // Formatação de moeda
-    $('#CostPerUnit').on('blur', function() {
-        var value = parseFloat($(this).val());
-        if (!isNaN(value)) {
-            $(this).val(value.toFixed(2));
-        }
-    });
-
-    // Validação de estoque
-    $('#MinStock, #CurrentStock').on('blur', function() {
-        var value = parseFloat($(this).val());
-        if (!isNaN(value)) {
-            $(this).val(value.toFixed(2));
-        }
-    });
-});
-</script> 
+</form> 

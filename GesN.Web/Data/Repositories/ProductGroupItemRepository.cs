@@ -20,7 +20,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*, p.*
                 FROM ProductGroupItem pgi
                 LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.StateCode = @StateCode
@@ -44,7 +44,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*, p.*
                 FROM ProductGroupItem pgi
                 LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.Id = @Id";
@@ -67,7 +67,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*, p.*
                 FROM ProductGroupItem pgi
                 LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
@@ -108,7 +108,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*, p.*
                 FROM ProductGroupItem pgi
                 LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
@@ -134,7 +134,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*, p.*
                 FROM ProductGroupItem pgi
                 LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
@@ -160,7 +160,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*, p.*
                 FROM ProductGroupItem pgi
                 LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
@@ -184,7 +184,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*, p.*
                 FROM ProductGroupItem pgi
                 LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
@@ -216,7 +216,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*, p.*
                 FROM ProductGroupItem pgi
                 LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
@@ -429,7 +429,7 @@ namespace GesN.Web.Data.Repositories
             
             const string sql = @"
                 SELECT pgi.*, 
-                       p.* as Product
+                       p.*
                 FROM ProductGroupItem pgi
                 LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
@@ -463,7 +463,7 @@ namespace GesN.Web.Data.Repositories
             
             const string sql = @"
                 SELECT pgi.*, 
-                       p.* as Product
+                       p.*
                 FROM ProductGroupItem pgi
                 LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 

@@ -649,4 +649,27 @@ var rolesManager = {
 // Inicializar quando o documento estiver pronto
 $(function() {
     rolesManager.init();
+    
+    // Inicializar select múltiplo com Select2 para a página principal
+    $('.form-select[multiple]').select2({
+        theme: 'bootstrap-5',
+        language: 'pt-BR',
+        placeholder: 'Selecione as opções...',
+        allowClear: true
+    });
+
+    // Implementar busca instantânea
+    $('#searchInput').on('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        $('.role-row').each(function() {
+            const roleName = $(this).find('td:first').text().toLowerCase();
+            const roleDesc = $(this).find('td:nth-child(2)').text().toLowerCase();
+            
+            if (roleName.includes(searchTerm) || roleDesc.includes(searchTerm)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
 }); 

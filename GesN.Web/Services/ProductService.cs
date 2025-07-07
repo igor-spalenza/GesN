@@ -96,10 +96,10 @@ namespace GesN.Web.Services
 
         public async Task<bool> DeleteAsync(string id)
         {
-            if (!await CanDeleteAsync(id))
-            {
-                throw new InvalidOperationException("Este produto não pode ser excluído pois está sendo usado em outros registros.");
-            }
+            //if (!await CanDeleteAsync(id))
+            //{
+            //    throw new InvalidOperationException("Este produto não pode ser excluído pois está sendo usado em outros registros.");
+            //}
 
             return await _productRepository.DeleteAsync(id);
         }

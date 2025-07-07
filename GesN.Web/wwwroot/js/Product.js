@@ -14,6 +14,7 @@ const productManager = {
         this.bindEvents();
         this.loadGrid();
         this.loadStatistics();
+        this.checkForCompositeProducts();
     },
 
     // Eventos principais
@@ -81,14 +82,46 @@ const productManager = {
             }
         });
         
-        // Detectar quando conteúdo AJAX é inserido no DOM (para abas de edição)
+        // Detectar quando conteúdo de edição é inserido no DOM (via AJAX)
         $(document).off('DOMNodeInserted.productManager').on('DOMNodeInserted.productManager', (e) => {
-            if ($(e.target).find('.select2-category, input[name="Price"], input[name="Cost"]').length) {
+            // Verificar se é o container de edição de produto
+            if ($(e.target).hasClass('product-edit-container') || $(e.target).find('.product-edit-container').length) {
+                setTimeout(() => {
+                    this.initializeForm(e.target);
+                    this.checkForCompositeProducts();
+                }, 100);
+            }
+            // Verificar se há componentes que precisam de inicialização
+            else if ($(e.target).find('.select2-category, input[name="Price"], input[name="Cost"]').length) {
                 setTimeout(() => {
                     this.initializeForm(e.target);
                 }, 100);
             }
         });
+        
+        // Fallback usando MutationObserver para browsers modernos
+        if (typeof MutationObserver !== 'undefined') {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === 1) { // Element node
+                            const $node = $(node);
+                            if ($node.hasClass('product-edit-container') || $node.find('.product-edit-container').length) {
+                                setTimeout(() => {
+                                    this.initializeForm(node);
+                                    this.checkForCompositeProducts();
+                                }, 100);
+                            }
+                        }
+                    });
+                });
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
     },
 
     // Carregar grid principal
@@ -485,8 +518,6 @@ const productManager = {
         this.components.abrirGerenciamento(productId);
     },
 
-
-
     // Validação de formulário
     validateForm: function(form) {
         // Se o formulário tem floating labels, use o sistema de validação específico
@@ -582,10 +613,32 @@ const productManager = {
         this.aplicarFiltros();
     },
 
-    // CompositeProduct functionality moved to CompositeProduct.js
-    // Include CompositeProduct.js in your view to use Component methods
-
-
+    // Verificar se há produtos compostos e carregar CompositeProduct.js dinamicamente
+    checkForCompositeProducts: function() {
+        // Verificar se há container de produto composto na página
+        const compositeContainer = $('.product-edit-container[data-is-composite="true"]');
+        
+        if (compositeContainer.length > 0) {
+            // Verificar se CompositeProduct.js já foi carregado
+            if (typeof compositeProductManager === 'undefined') {
+                // Carregar CompositeProduct.js dinamicamente
+                const script = document.createElement('script');
+                script.src = '/js/CompositeProduct.js?v=' + new Date().getTime();
+                script.onload = function() {
+                    // Aguardar um pouco para garantir que o script foi processado
+                    setTimeout(function() {
+                        // Inicializar componentes se necessário
+                        if (typeof compositeProductManager !== 'undefined') {
+                            compositeProductManager.init();
+                        }
+                    }, 100);
+                };
+                document.head.appendChild(script);
+            } else {
+                compositeProductManager.init();
+            }
+        }
+    },
 
     // Namespace para gerenciamento de formulários com floating labels
     forms: {

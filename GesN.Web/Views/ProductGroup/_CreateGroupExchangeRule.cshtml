@@ -1,0 +1,68 @@
+@using GesN.Web.Models.ViewModels.Production
+@model CreateProductGroupExchangeRuleViewModel
+
+<form id="formCreateGroupExchangeRule" enctype="application/x-www-form-urlencoded">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ProductGroupId)
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="floating-input-group">
+                <select asp-for="OriginalProductId" class="form-select select2-product" required>
+                    <option value=""></option>
+                </select>
+                <label asp-for="OriginalProductId" class="floating-label">Produto Original</label>
+                <span asp-validation-for="OriginalProductId" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="floating-input-group">
+                <select asp-for="ExchangeProductId" class="form-select select2-product" required>
+                    <option value=""></option>
+                </select>
+                <label asp-for="ExchangeProductId" class="floating-label">Produto de Troca</label>
+                <span asp-validation-for="ExchangeProductId" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="floating-input-group">
+                <input asp-for="ExchangeRatio" type="number" step="0.01" min="0.01" class="floating-input" placeholder=" " required />
+                <label asp-for="ExchangeRatio" class="floating-label">Proporção de Troca</label>
+                <span asp-validation-for="ExchangeRatio" class="text-danger"></span>
+                <small class="form-text text-muted">Ex: 1.5 significa 1 produto original = 1.5 produtos de troca</small>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="floating-input-group floating-input-group-addon">
+                <span class="input-group-text">R$</span>
+                <input asp-for="AdditionalCost" type="number" step="0.01" min="0" class="floating-input" placeholder=" " />
+                <label asp-for="AdditionalCost" class="floating-label">Custo Adicional</label>
+                <span asp-validation-for="AdditionalCost" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-check">
+                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                <label asp-for="IsActive" class="form-check-label">
+                    Regra Ativa
+                </label>
+                <small class="form-text text-muted">Se marcado, esta regra estará disponível para uso</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-info">
+        <h6><i class="fas fa-info-circle"></i> Informações sobre regras de troca:</h6>
+        <ul class="mb-0">
+            <li><strong>Proporção:</strong> Define quantos produtos de troca equivalem a 1 produto original</li>
+            <li><strong>Custo Adicional:</strong> Valor extra cobrado na troca (opcional)</li>
+            <li><strong>Status:</strong> Apenas regras ativas ficam disponíveis para o cliente</li>
+        </ul>
+    </div>
+</form> 

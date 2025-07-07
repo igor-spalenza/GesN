@@ -1,5 +1,88 @@
 // CompositeProduct and ProductComponent Management JavaScript
 const compositeProductManager = {
+    // Initialize composite product functionality
+    init: function() {
+        this.bindEvents();
+        this.initializeComponentsList();
+    },
+
+    // Bind global events
+    bindEvents: function() {
+        // Bind events for component management
+        $(document).off('click.compositeProduct', '#btnAddComponent').on('click.compositeProduct', '#btnAddComponent', () => {
+            const productId = $('.product-edit-container').data('product-id');
+            if (productId) {
+                this.components.adicionarComponente(productId);
+            }
+        });
+
+        $(document).off('click.compositeProduct', '#btnAddFirstComponent').on('click.compositeProduct', '#btnAddFirstComponent', () => {
+            const productId = $('.product-edit-container').data('product-id');
+            if (productId) {
+                this.components.adicionarComponente(productId);
+            }
+        });
+
+        $(document).off('click.compositeProduct', '#btnRefreshComponents').on('click.compositeProduct', '#btnRefreshComponents', () => {
+            const productId = $('.product-edit-container').data('product-id');
+            if (productId) {
+                this.components.carregarComponentes(productId);
+            }
+        });
+
+        // Global functions for onclick events in views
+        window.editarComponente = (componentId) => {
+            this.components.editarComponente(componentId);
+        };
+
+        window.removerComponente = (componentId) => {
+            this.components.removerComponente(componentId);
+        };
+    },
+
+    // Initialize components list (DataTable, etc.)
+    initializeComponentsList: function() {
+        // Initialize DataTable if components table exists
+        const componentsTable = $('#componentsTable');
+        
+        if (componentsTable.length > 0) {
+            // Verificar se DataTable já foi inicializado
+            if ($.fn.DataTable.isDataTable('#componentsTable')) {
+                componentsTable.DataTable().destroy();
+            }
+            
+            componentsTable.DataTable({
+                responsive: true,
+                pageLength: 25,
+                order: [[0, 'asc']], // Order by assembly order
+                columnDefs: [
+                    { targets: [-1], orderable: false }, // Actions column not orderable
+                    { targets: [5], className: 'text-end' } // Cost column right-aligned
+                ]
+            });
+        }
+
+        // Initialize any other components-related functionality
+        this.initializeComponentsStatistics();
+    },
+
+    // Initialize components statistics
+    initializeComponentsStatistics: function() {
+        // Update statistics if needed
+        this.statistics.loadCompositeStatistics();
+    },
+
+    // Initialize components index page
+    initializeComponentsIndex: function() {
+        $('#componentsTable').DataTable({
+            "language": {
+                "url": "/lib/datatables.net/pt-br.json"
+            },
+            "order": [[0, "asc"]],
+            "pageLength": 25
+        });
+    },
+
     // Configuration
     config: {
         baseUrl: '/Product',
@@ -40,9 +123,13 @@ const compositeProductManager = {
                 type: 'GET',
                 success: (data) => {
                     $('#componentsContainer').html(data);
+                    
+                    // Reinicializar DataTable após carregar novos componentes
+                    setTimeout(() => {
+                        this.initializeComponentsList();
+                    }, 100);
                 },
                 error: (xhr) => {
-                    console.error('Erro ao carregar componentes:', xhr);
                     $('#componentsContainer').html('<div class="alert alert-danger">Erro ao carregar componentes</div>');
                 }
             });
@@ -85,7 +172,6 @@ const compositeProductManager = {
                     });
                 },
                 error: function(xhr) {
-                    console.error('Erro ao abrir gerenciamento de componentes:', xhr);
                     toastr.error('Erro ao abrir gerenciamento de componentes');
                 }
             });
@@ -136,7 +222,6 @@ const compositeProductManager = {
                     });
                 },
                 error: function(xhr) {
-                    console.error('Erro ao abrir formulário de componente:', xhr);
                     toastr.error('Erro ao abrir formulário de componente');
                 }
             });
@@ -187,7 +272,6 @@ const compositeProductManager = {
                     });
                 },
                 error: function(xhr) {
-                    console.error('Erro ao abrir formulário de edição:', xhr);
                     toastr.error('Erro ao abrir formulário de edição');
                 }
             });
@@ -233,7 +317,6 @@ const compositeProductManager = {
                     }
                 },
                 error: function(xhr) {
-                    console.error('Erro ao salvar componente:', xhr);
                     const errorMsg = xhr.responseJSON?.message || 'Erro ao salvar componente';
                     toastr.error(errorMsg);
                 },
@@ -271,7 +354,6 @@ const compositeProductManager = {
                     }
                 },
                 error: function(xhr) {
-                    console.error('Erro ao salvar edição:', xhr);
                     toastr.error('Erro ao salvar alterações do componente');
                 }
             });
@@ -286,36 +368,31 @@ const compositeProductManager = {
 
         // Remover componente
         removerComponente: function(componentId) {
-            // Get antiforgery token
-            const token = $('input[name="__RequestVerificationToken"]').val();
-            if (!token) {
-                toastr.error('Token de segurança não encontrado');
-                return;
-            }
-
-            $.ajax({
-                url: `/ProductComponent/ExcluirComponente/${componentId}`,
-                type: 'POST',
-                data: { __RequestVerificationToken: token },
-                success: function(response) {
-                    if (response.success) {
-                        toastr.success(response.message);
-                        
-                        // Recarregar lista de componentes
-                        const productId = response.productId;
-                        if (productId) {
-                            compositeProductManager.components.carregarComponentes(productId);
+            if (confirm('Tem certeza que deseja remover este componente?')) {
+                $.ajax({
+                    url: `/ProductComponent/RemoverComponente/${componentId}`,
+                    type: 'DELETE',
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message || 'Componente removido com sucesso');
+                            
+                            // Atualizar lista de componentes
+                            const productId = $('.product-edit-container').data('product-id');
+                            if (productId) {
+                                compositeProductManager.components.carregarComponentes(productId);
+                            }
+                            
+                            // Atualizar estatísticas
+                            compositeProductManager.statistics.loadCompositeStatistics();
+                        } else {
+                            toastr.error(response.message || 'Erro ao remover componente');
                         }
-                    } else {
-                        toastr.error(response.message || 'Erro ao remover componente');
+                    },
+                    error: function(xhr) {
+                        toastr.error('Erro ao remover componente');
                     }
-                },
-                error: function(xhr) {
-                    console.error('Erro ao remover componente:', xhr);
-                    const errorMsg = xhr.responseJSON?.message || 'Erro ao remover componente';
-                    toastr.error(errorMsg);
-                }
-            });
+                });
+            }
         },
 
         // Calcular total de componentes
@@ -417,33 +494,11 @@ const compositeProductManager = {
                     },
                     error: function() {
                         $('#componentCostInfo').addClass('d-none');
-                        console.log('Erro ao carregar custo do produto');
                     }
                 });
             } else {
                 $('#componentCostInfo').addClass('d-none');
             }
-        },
-
-        // Inicializar lista de componentes
-        initializeComponentsList: function() {
-            // Inicializar controles
-            compositeProductManager.components.initializeComponentsTable();
-            
-            // Event handlers para botões
-            $('#btnAddComponent, #btnAddFirstComponent').on('click', function() {
-                const productId = $('.product-edit-container').data('product-id');
-                if (productId) {
-                    compositeProductManager.components.adicionarComponente(productId);
-                }
-            });
-            
-            $('#btnRefreshComponents').on('click', function() {
-                const productId = $('.product-edit-container').data('product-id');
-                if (productId) {
-                    compositeProductManager.components.carregarComponentes(productId);
-                }
-            });
         },
 
         // Inicializar DataTable de componentes
@@ -536,4 +591,49 @@ window.initializeComponentsTable = function() {
 // Export for use in Product.js (for productManager.components compatibility)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = compositeProductManager;
-} 
+}
+
+// Auto-inicialização quando o DOM estiver pronto
+$(function() {
+    // Auto-detectar e inicializar tabela de componentes (página de índice)
+    if ($('#componentsTable').length > 0) {
+        compositeProductManager.components.initializeComponentsTable();
+    }
+    
+    // Auto-detectar se há produtos compostos na página de edição
+    if ($('.product-edit-container[data-is-composite="true"]').length > 0) {
+        compositeProductManager.init();
+    }
+    
+    // Detectar quando produtos compostos são adicionados dinamicamente
+    if (typeof MutationObserver !== 'undefined') {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1) { // Element node
+                        const $node = $(node);
+                        // Verificar se é um produto composto
+                        if ($node.hasClass('product-edit-container') && $node.data('is-composite') === true) {
+                            compositeProductManager.init();
+                        }
+                        // Verificar se contém um produto composto
+                        else if ($node.find('.product-edit-container[data-is-composite="true"]').length > 0) {
+                            compositeProductManager.init();
+                        }
+                        // Verificar se é uma tabela de componentes
+                        else if ($node.find('#componentsTable').length > 0) {
+                            setTimeout(() => {
+                                compositeProductManager.initializeComponentsList();
+                            }, 100);
+                        }
+                    }
+                });
+            });
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+}); 

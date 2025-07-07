@@ -1,0 +1,66 @@
+@using GesN.Web.Models.ViewModels.Production
+@using GesN.Web.Models.Enumerators
+@model CreateProductGroupOptionViewModel
+
+<form id="formCreateGroupOption" enctype="application/x-www-form-urlencoded">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ProductGroupId)
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="floating-input-group">
+                <input asp-for="Name" class="floating-input" placeholder=" " required maxlength="100" />
+                <label asp-for="Name" class="floating-label">Nome da Opção</label>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="floating-input-group">
+                <input asp-for="DisplayOrder" type="number" min="1" class="floating-input" placeholder=" " />
+                <label asp-for="DisplayOrder" class="floating-label">Ordem de Exibição</label>
+                <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="floating-input-group">
+                <textarea asp-for="Description" class="floating-textarea" placeholder=" " rows="3" maxlength="500"></textarea>
+                <label asp-for="Description" class="floating-label">Descrição</label>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="floating-input-group">
+                <select asp-for="OptionType" class="form-select" required>
+                    <option value="">Selecione o tipo</option>
+                    <option value="Single">Seleção Única</option>
+                    <option value="Multiple">Seleção Múltipla</option>
+                </select>
+                <label asp-for="OptionType" class="floating-label">Tipo de Opção</label>
+                <span asp-validation-for="OptionType" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-check mt-3">
+                <input asp-for="IsRequired" class="form-check-input" type="checkbox" />
+                <label asp-for="IsRequired" class="form-check-label">
+                    Opção Obrigatória
+                </label>
+                <small class="form-text text-muted">Se marcado, esta opção será obrigatória na configuração do grupo</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-info">
+        <h6><i class="fas fa-info-circle"></i> Informações sobre tipos de opção:</h6>
+        <ul class="mb-0">
+            <li><strong>Seleção Única:</strong> Permite que o cliente escolha apenas uma opção</li>
+            <li><strong>Seleção Múltipla:</strong> Permite que o cliente escolha várias opções simultaneamente</li>
+        </ul>
+    </div>
+</form> 

@@ -134,33 +134,5 @@
         var availableClaimTypes = @Html.Raw(JsonSerializer.Serialize(availableClaimTypes));
     </script>
     <script src="~/js/Roles.js" asp-append-version="true"></script>
-    <script>
-        $(document).ready(function() {
-            rolesManager.init();
-
-            // Inicializar select múltiplo com Select2
-            $('.form-select[multiple]').select2({
-                theme: 'bootstrap-5',
-                language: 'pt-BR',
-                placeholder: 'Selecione as opções...',
-                allowClear: true
-            });
-
-            // Implementar busca instantânea (apenas para demonstração)
-            $('#searchInput').on('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                $('.role-row').each(function() {
-                    const roleName = $(this).find('td:first').text().toLowerCase();
-                    const roleDesc = $(this).find('td:nth-child(2)').text().toLowerCase();
-                    
-                    if (roleName.includes(searchTerm) || roleDesc.includes(searchTerm)) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
-                });
-            });
-        });
-    </script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 } 

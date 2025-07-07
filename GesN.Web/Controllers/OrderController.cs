@@ -35,7 +35,41 @@ namespace GesN.Web.Controllers
             try
             {
                 var orders = await _orderService.GetActiveOrdersAsync();
-                return View(orders);
+                
+                // Converte as entidades para ViewModels
+                var orderViewModels = orders.Select(o => new OrderEntryViewModel
+                {
+                    Id = o.Id,
+                    NumberSequence = o.NumberSequence,
+                    CustomerId = o.CustomerId,
+                    CustomerName = o.Customer?.FullName,
+                    OrderDate = o.OrderDate,
+                    DeliveryDate = o.DeliveryDate ?? DateTime.Today.AddDays(1),
+                    Type = o.Type,
+                    Status = o.Status,
+                    PrintStatus = o.PrintStatus,
+                    Subtotal = o.Subtotal,
+                    DiscountAmount = o.DiscountAmount,
+                    TaxAmount = o.TaxAmount,
+                    TotalAmount = o.TotalAmount,
+                    Notes = o.Notes,
+                    CreatedAt = o.CreatedAt,
+                    LastModifiedAt = o.LastModifiedAt
+                }).ToList();
+
+                // Cria o ViewModel para a página Index
+                var indexViewModel = new OrderEntryIndexViewModel
+                {
+                    Orders = orderViewModels,
+                    Statistics = await _orderService.GetOrderStatisticsAsync(),
+                    Search = new OrderEntrySearchViewModel(),
+                    TotalOrders = orderViewModels.Count,
+                    CurrentPage = 1,
+                    PageSize = 50,
+                    TotalPages = 1
+                };
+
+                return View(indexViewModel);
             }
             catch (Exception ex)
             {
@@ -51,7 +85,7 @@ namespace GesN.Web.Controllers
             try
             {
                 var orders = await _orderService.GetActiveOrdersAsync();
-                var orderViewModels = orders.Select(o => new OrderViewModel
+                var orderViewModels = orders.Select(o => new OrderEntryViewModel
                 {
                     Id = o.Id,
                     NumberSequence = o.NumberSequence,
@@ -114,7 +148,7 @@ namespace GesN.Web.Controllers
                 if (order == null)
                     return NotFound();
 
-                var detailsViewModel = new OrderDetailsViewModel
+                var detailsViewModel = new OrderEntryDetailsViewModel
                 {
                     Id = order.Id,
                     NumberSequence = order.NumberSequence,
@@ -132,7 +166,7 @@ namespace GesN.Web.Controllers
                     Notes = order.Notes,
                     CreatedAt = order.CreatedAt,
                     LastModifiedAt = order.LastModifiedAt,
-                    Items = order.Items?.Select(i => new OrderItemViewModel
+                    Items = order.Items?.Select(i => new OrderEntryItemViewModel
                     {
                         Id = i.Id,
                         ProductId = i.ProductId,
@@ -142,7 +176,7 @@ namespace GesN.Web.Controllers
                         DiscountAmount = i.DiscountAmount,
                         TaxAmount = i.TaxAmount,
                         Notes = i.Notes
-                    }).ToList() ?? new List<OrderItemViewModel>()
+                    }).ToList() ?? new List<OrderEntryItemViewModel>()
                 };
 
                 return PartialView("_Details", detailsViewModel);
@@ -162,7 +196,7 @@ namespace GesN.Web.Controllers
         // POST: Order/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateOrderViewModel orderViewModel)
+        public async Task<IActionResult> Create(CreateOrderEntryViewModel orderViewModel)
         {
             try
             {
@@ -187,7 +221,7 @@ namespace GesN.Web.Controllers
         // POST: Order/SalvarNovo
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SalvarNovo([FromForm] CreateOrderViewModel orderViewModel)
+        public async Task<IActionResult> SalvarNovo([FromForm] CreateOrderEntryViewModel orderViewModel)
         {
             try
             {
@@ -287,7 +321,7 @@ namespace GesN.Web.Controllers
                 if (order == null)
                     return NotFound();
 
-                var editViewModel = new EditOrderViewModel
+                var editViewModel = new EditOrderEntryViewModel
                 {
                     Id = order.Id,
                     NumberSequence = order.NumberSequence,
@@ -305,7 +339,7 @@ namespace GesN.Web.Controllers
                     Notes = order.Notes,
                     CreatedAt = order.CreatedAt,
                     LastModifiedAt = order.LastModifiedAt,
-                    Items = order.Items?.Select(i => new OrderItemViewModel
+                    Items = order.Items?.Select(i => new OrderEntryItemViewModel
                     {
                         Id = i.Id,
                         ProductId = i.ProductId,
@@ -315,7 +349,7 @@ namespace GesN.Web.Controllers
                         DiscountAmount = i.DiscountAmount,
                         TaxAmount = i.TaxAmount,
                         Notes = i.Notes
-                    }).ToList() ?? new List<OrderItemViewModel>()
+                    }).ToList() ?? new List<OrderEntryItemViewModel>()
                 };
 
                 return PartialView("_Edit", editViewModel);

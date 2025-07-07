@@ -1,11 +1,60 @@
 // ProductGroup Management JavaScript
 const productGroupManager = {
+    // Index page initialization
+    initializeIndex: function() {
+        // Inicializar DataTable
+        var table = $('#groupsTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
+            },
+            responsive: true,
+            order: [[1, 'asc']],
+            columnDefs: [
+                { orderable: false, targets: -1 }
+            ]
+        });
+
+        // Pesquisa personalizada
+        $('#searchInput').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+
+        $('#searchBtn').on('click', function() {
+            table.search($('#searchInput').val()).draw();
+        });
+
+        // Filtros
+        $('#statusFilter').on('change', function() {
+            var value = this.value;
+            if (value === '') {
+                table.column(5).search('').draw();
+            } else {
+                var statusText = value === '1' ? 'Ativo' : 'Inativo';
+                table.column(5).search(statusText).draw();
+            }
+        });
+
+        $('#categoryFilter').on('change', function() {
+            table.column(2).search(this.value).draw();
+        });
+
+        // Tooltip
+        $('[title]').tooltip();
+    },
+
+    // Create page initialization
+    initializeCreate: function() {
+        // Máscara para preços
+        $('#Price').mask('000.000.000,00', {reverse: true});
+        $('#UnitPrice').mask('000.000.000,00', {reverse: true});
+    },
+
     // Product Group Item Management
     items: {
         // Show create item modal
         showCreateModal: function(productGroupId) {
             $.ajax({
-                url: `/Product/FormularioGroupItem/${productGroupId}`,
+                url: `/ProductGroup/FormularioGroupItem/${productGroupId}`,
                 type: 'GET',
                 success: function(data) {
                     const modalHtml = `
@@ -52,7 +101,7 @@ const productGroupManager = {
         // Show edit item modal
         showEditModal: function(itemId) {
             $.ajax({
-                url: `/Product/FormularioEdicaoGroupItem/${itemId}`,
+                url: `/ProductGroup/FormularioEdicaoGroupItem/${itemId}`,
                 type: 'GET',
                 success: function(data) {
                     const modalHtml = `
@@ -112,7 +161,7 @@ const productGroupManager = {
             submitBtn.prop('disabled', true).text('Salvando...');
 
             $.ajax({
-                url: '/Product/SalvarGroupItem',
+                url: '/ProductGroup/SalvarGroupItem',
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -150,7 +199,7 @@ const productGroupManager = {
             const itemId = $('#formEditGroupItem input[name="Id"]').val();
 
             $.ajax({
-                url: `/Product/SalvarEdicaoGroupItem/${itemId}`,
+                url: `/ProductGroup/SalvarEdicaoGroupItem/${itemId}`,
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -189,7 +238,7 @@ const productGroupManager = {
             }
 
             $.ajax({
-                url: `/Product/ExcluirGroupItem/${itemId}`,
+                url: `/ProductGroup/ExcluirGroupItem/${itemId}`,
                 type: 'POST',
                 data: { __RequestVerificationToken: token },
                 success: function(response) {
@@ -278,7 +327,7 @@ const productGroupManager = {
         // Show create option modal
         showCreateModal: function(productGroupId) {
             $.ajax({
-                url: `/Product/FormularioGroupOption/${productGroupId}`,
+                url: `/ProductGroup/FormularioGroupOption/${productGroupId}`,
                 type: 'GET',
                 success: function(data) {
                     const modalHtml = `
@@ -325,7 +374,7 @@ const productGroupManager = {
         // Show edit option modal
         showEditModal: function(optionId) {
             $.ajax({
-                url: `/Product/FormularioEdicaoGroupOption/${optionId}`,
+                url: `/ProductGroup/FormularioEdicaoGroupOption/${optionId}`,
                 type: 'GET',
                 success: function(data) {
                     const modalHtml = `
@@ -375,7 +424,7 @@ const productGroupManager = {
             const formData = new FormData(form);
 
             $.ajax({
-                url: '/Product/SalvarGroupOption',
+                url: '/ProductGroup/SalvarGroupOption',
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -404,7 +453,7 @@ const productGroupManager = {
             const optionId = $('#formEditGroupOption input[name="Id"]').val();
 
             $.ajax({
-                url: `/Product/SalvarEdicaoGroupOption/${optionId}`,
+                url: `/ProductGroup/SalvarEdicaoGroupOption/${optionId}`,
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -443,7 +492,7 @@ const productGroupManager = {
             }
 
             $.ajax({
-                url: `/Product/ExcluirGroupOption/${optionId}`,
+                url: `/ProductGroup/ExcluirGroupOption/${optionId}`,
                 type: 'POST',
                 data: { __RequestVerificationToken: token },
                 success: function(response) {
@@ -479,7 +528,7 @@ const productGroupManager = {
         // Show create exchange rule modal
         showCreateModal: function(productGroupId) {
             $.ajax({
-                url: `/Product/FormularioGroupExchangeRule/${productGroupId}`,
+                url: `/ProductGroup/FormularioGroupExchangeRule/${productGroupId}`,
                 type: 'GET',
                 success: function(data) {
                     const modalHtml = `
@@ -526,7 +575,7 @@ const productGroupManager = {
         // Show edit exchange rule modal
         showEditModal: function(ruleId) {
             $.ajax({
-                url: `/Product/FormularioEdicaoGroupExchangeRule/${ruleId}`,
+                url: `/ProductGroup/FormularioEdicaoGroupExchangeRule/${ruleId}`,
                 type: 'GET',
                 success: function(data) {
                     const modalHtml = `
@@ -576,7 +625,7 @@ const productGroupManager = {
             const formData = new FormData(form);
 
             $.ajax({
-                url: '/Product/SalvarGroupExchangeRule',
+                url: '/ProductGroup/SalvarGroupExchangeRule',
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -605,7 +654,7 @@ const productGroupManager = {
             const ruleId = $('#formEditGroupExchangeRule input[name="Id"]').val();
 
             $.ajax({
-                url: `/Product/SalvarEdicaoGroupExchangeRule/${ruleId}`,
+                url: `/ProductGroup/SalvarEdicaoGroupExchangeRule/${ruleId}`,
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -644,7 +693,7 @@ const productGroupManager = {
             }
 
             $.ajax({
-                url: `/Product/ExcluirGroupExchangeRule/${ruleId}`,
+                url: `/ProductGroup/ExcluirGroupExchangeRule/${ruleId}`,
                 type: 'POST',
                 data: { __RequestVerificationToken: token },
                 success: function(response) {
@@ -668,7 +717,7 @@ const productGroupManager = {
         toggleStatus: function(ruleId, isActive) {
             // This would require a new endpoint in the controller
             console.log(`Toggle exchange rule ${ruleId} to ${isActive ? 'active' : 'inactive'}`);
-            toastr.info('Funcionalidade de ativar/desativar regra será implementada em breve');
+            toastr.info('Funcionalidade de ativar/desativar em desenvolvimento');
         },
 
         // Initialize Exchange Rule Create Form
@@ -793,6 +842,12 @@ const productGroupManager = {
 
 // Global aliases for backward compatibility
 window.ProductGroup = {
+    // Index
+    initializeIndex: () => productGroupManager.initializeIndex(),
+    
+    // Create
+    initializeCreate: () => productGroupManager.initializeCreate(),
+    
     // Items
     showCreateItemModal: (id) => productGroupManager.items.showCreateModal(id),
     showEditItemModal: (id) => productGroupManager.items.showEditModal(id),
@@ -828,4 +883,17 @@ window.ProductGroup = {
 // Export for use in Product.js (for productManager.productGroup compatibility)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = productGroupManager;
-} 
+}
+
+// Auto-inicialização quando o DOM estiver pronto
+$(function() {
+    // Auto-detectar e inicializar tabela de índice
+    if ($('#groupsTable').length > 0) {
+        productGroupManager.initializeIndex();
+    }
+    
+    // Auto-detectar e inicializar formulário de criação
+    if ($('#Price').length > 0 && $('#UnitPrice').length > 0) {
+        productGroupManager.initializeCreate();
+    }
+}); 

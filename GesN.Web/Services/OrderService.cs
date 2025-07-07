@@ -187,7 +187,7 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<string> CreateOrderAsync(CreateOrderViewModel orderViewModel)
+        public async Task<string> CreateOrderAsync(CreateOrderEntryViewModel orderViewModel)
         {
             try
             {
@@ -198,25 +198,31 @@ namespace GesN.Web.Services
                 // Converte ViewModel para Entity
                 var order = new OrderEntry
                 {
+                    Id = Guid.NewGuid().ToString(),
                     CustomerId = orderViewModel.CustomerId,
                     Type = orderViewModel.Type,
                     OrderDate = DateTime.Now,
-                    DeliveryDate = DateTime.Now.AddDays(1),
+                    DeliveryDate = DateTime.Now.AddDays(1), // Data padrão
                     Status = OrderStatus.Draft,
                     PrintStatus = PrintStatus.NotPrinted,
                     Subtotal = 0,
                     DiscountAmount = 0,
                     TaxAmount = 0,
-                    TotalAmount = 0
+                    TotalAmount = 0,
+                    Notes = null,
+                    CreatedAt = DateTime.Now,
+                    LastModifiedAt = DateTime.Now,
+                    CreatedBy = null,
+                    LastModifiedBy = null
                 };
 
                 // Gera número sequencial
                 order.NumberSequence = await _orderRepository.GetNextNumberSequenceAsync();
 
                 // Cria o pedido
-                var orderId = await _orderRepository.CreateAsync(order);
+                await _orderRepository.CreateAsync(order);
 
-                return orderId;
+                return order.Id;
             }
             catch (Exception ex)
             {
@@ -360,13 +366,13 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<OrderStatisticsViewModel> GetOrderStatisticsAsync()
+        public async Task<OrderEntryStatisticsViewModel> GetOrderStatisticsAsync()
         {
             try
             {
                 var allOrders = await _orderRepository.GetAllAsync();
-                var stats = new OrderStatisticsViewModel();
-
+                var stats = new OrderEntryStatisticsViewModel();
+                
                 stats.TotalOrders = allOrders.Count();
                 stats.DraftOrders = allOrders.Count(o => o.Status == OrderStatus.Draft);
                 stats.ConfirmedOrders = allOrders.Count(o => o.Status == OrderStatus.Confirmed);
@@ -378,7 +384,7 @@ namespace GesN.Web.Services
                 var thisMonth = DateTime.Now.Month;
                 var thisYear = DateTime.Now.Year;
                 stats.NewOrdersThisMonth = allOrders.Count(o => o.CreatedAt.Month == thisMonth && o.CreatedAt.Year == thisYear);
-
+                
                 return stats;
             }
             catch (Exception ex)
@@ -388,36 +394,39 @@ namespace GesN.Web.Services
             }
         }
 
-        public OrderViewModel ConvertToViewModel(OrderEntry order)
+        public OrderEntryViewModel ConvertToViewModel(OrderEntry order)
         {
-            return new OrderViewModel
+            return new OrderEntryViewModel
             {
                 Id = order.Id,
                 NumberSequence = order.NumberSequence,
                 CustomerId = order.CustomerId,
-                CustomerName = order.Customer?.FirstName + " " + order.Customer?.LastName,
+                CustomerName = order.Customer?.FullName,
                 OrderDate = order.OrderDate,
-                DeliveryDate = order.DeliveryDate ?? DateTime.Today,
+                DeliveryDate = order.DeliveryDate ?? DateTime.Today.AddDays(1),
                 Type = order.Type,
                 Status = order.Status,
                 PrintStatus = order.PrintStatus,
                 Subtotal = order.Subtotal,
                 DiscountAmount = order.DiscountAmount,
                 TaxAmount = order.TaxAmount,
-                TotalAmount = order.TotalAmount
+                TotalAmount = order.TotalAmount,
+                Notes = order.Notes,
+                CreatedAt = order.CreatedAt,
+                LastModifiedAt = order.LastModifiedAt
             };
         }
 
-        public OrderDetailsViewModel ConvertToDetailsViewModel(OrderEntry order)
+        public OrderEntryDetailsViewModel ConvertToDetailsViewModel(OrderEntry order)
         {
-            var detailsViewModel = new OrderDetailsViewModel
+            var detailsViewModel = new OrderEntryDetailsViewModel
             {
                 Id = order.Id,
                 NumberSequence = order.NumberSequence,
                 CustomerId = order.CustomerId,
-                CustomerName = order.Customer?.FirstName + " " + order.Customer?.LastName,
+                CustomerName = order.Customer?.FullName,
                 OrderDate = order.OrderDate,
-                DeliveryDate = order.DeliveryDate ?? DateTime.Today,
+                DeliveryDate = order.DeliveryDate ?? DateTime.Today.AddDays(1),
                 Type = order.Type,
                 Status = order.Status,
                 PrintStatus = order.PrintStatus,
@@ -430,15 +439,14 @@ namespace GesN.Web.Services
                 LastModifiedAt = order.LastModifiedAt
             };
 
-            // Converte itens se existirem
-            if (order.Items?.Any() == true)
+            // Mapeia os itens do pedido
+            if (order.Items != null)
             {
-                detailsViewModel.Items = order.Items.Select(item => new OrderItemViewModel
+                detailsViewModel.Items = order.Items.Select(item => new OrderEntryItemViewModel
                 {
                     Id = item.Id,
-                    OrderId = item.OrderId,
                     ProductId = item.ProductId,
-                    ProductName = item.Product?.Name ?? "Produto não encontrado",
+                    ProductName = item.Product?.Name,
                     Quantity = item.Quantity,
                     UnitPrice = item.UnitPrice,
                     DiscountAmount = item.DiscountAmount,
@@ -450,16 +458,16 @@ namespace GesN.Web.Services
             return detailsViewModel;
         }
 
-        public EditOrderViewModel ConvertToEditViewModel(OrderEntry order)
+        public EditOrderEntryViewModel ConvertToEditViewModel(OrderEntry order)
         {
-            var editViewModel = new EditOrderViewModel
+            var editViewModel = new EditOrderEntryViewModel
             {
                 Id = order.Id,
                 NumberSequence = order.NumberSequence,
                 CustomerId = order.CustomerId,
-                CustomerName = order.Customer?.FirstName + " " + order.Customer?.LastName,
+                CustomerName = order.Customer?.FullName,
                 OrderDate = order.OrderDate,
-                DeliveryDate = order.DeliveryDate ?? DateTime.Today,
+                DeliveryDate = order.DeliveryDate ?? DateTime.Today.AddDays(1),
                 Type = order.Type,
                 Status = order.Status,
                 PrintStatus = order.PrintStatus,
@@ -472,22 +480,21 @@ namespace GesN.Web.Services
                 LastModifiedAt = order.LastModifiedAt
             };
 
-            // Define tipos disponíveis
-            editViewModel.AvailableOrderTypes = new List<OrderTypeSelectionViewModel>
+            // Mapeia tipos de pedido disponíveis
+            editViewModel.AvailableOrderTypes = new List<OrderEntryTypeSelectionViewModel>
             {
-                new() { Value = OrderType.Order, Text = "Pedido", IsSelected = order.Type == OrderType.Order },
-                new() { Value = OrderType.Event, Text = "Evento", IsSelected = order.Type == OrderType.Event }
+                new OrderEntryTypeSelectionViewModel { Value = OrderType.Order, Text = "Pedido", IsSelected = order.Type == OrderType.Order },
+                new OrderEntryTypeSelectionViewModel { Value = OrderType.Event, Text = "Evento", IsSelected = order.Type == OrderType.Event }
             };
 
-            // Converte itens se existirem
-            if (order.Items?.Any() == true)
+            // Mapeia os itens do pedido
+            if (order.Items != null)
             {
-                editViewModel.Items = order.Items.Select(item => new OrderItemViewModel
+                editViewModel.Items = order.Items.Select(item => new OrderEntryItemViewModel
                 {
                     Id = item.Id,
-                    OrderId = item.OrderId,
                     ProductId = item.ProductId,
-                    ProductName = item.Product?.Name ?? "Produto não encontrado",
+                    ProductName = item.Product?.Name,
                     Quantity = item.Quantity,
                     UnitPrice = item.UnitPrice,
                     DiscountAmount = item.DiscountAmount,
@@ -538,19 +545,14 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<bool> ValidateCreateOrderDataAsync(CreateOrderViewModel order)
+        public async Task<bool> ValidateCreateOrderDataAsync(CreateOrderEntryViewModel order)
         {
             try
             {
-                if (order == null)
-                {
-                    _logger.LogWarning("Dados do pedido nulos fornecidos para validação");
-                    return false;
-                }
-
+                // Validações básicas
                 if (string.IsNullOrEmpty(order.CustomerId))
                 {
-                    _logger.LogWarning("Cliente não informado no pedido");
+                    _logger.LogWarning("ID do cliente não fornecido");
                     return false;
                 }
 
@@ -562,11 +564,18 @@ namespace GesN.Web.Services
                     return false;
                 }
 
+                // Verifica se o cliente está ativo
+                if (!customer.IsActive)
+                {
+                    _logger.LogWarning("Cliente inativo: {CustomerId}", order.CustomerId);
+                    return false;
+                }
+
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao validar dados de criação do pedido");
+                _logger.LogError(ex, "Erro ao validar dados do pedido");
                 return false;
             }
         }
