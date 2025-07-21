@@ -21,5 +21,12 @@ namespace GesN.Web.Interfaces.Repositories
         Task<IEnumerable<ProductGroupItem>> GetByProductGroupPagedAsync(string productGroupId, int page, int pageSize);
         Task<bool> ItemExistsInGroupAsync(string productGroupId, string productId);
         Task<decimal> CalculateGroupTotalPriceAsync(string productGroupId, IEnumerable<string> selectedItemIds);
+        
+        // Métodos específicos para ProductCategory
+        Task<IEnumerable<ProductGroupItem>> GetByProductCategoryIdAsync(string productCategoryId);
+        Task<ProductGroupItem?> GetByProductGroupAndCategoryAsync(string productGroupId, string productCategoryId);
+        Task<bool> CategoryItemExistsInGroupAsync(string productGroupId, string productCategoryId);
+        Task<IEnumerable<ProductGroupItem>> GetCategoryItemsByGroupAsync(string productGroupId);
+        Task<IEnumerable<ProductGroupItem>> GetProductItemsByGroupAsync(string productGroupId);
     }
 } 

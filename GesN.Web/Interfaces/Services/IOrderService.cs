@@ -57,7 +57,7 @@ namespace GesN.Web.Interfaces.Services
         /// <summary>
         /// Cria um novo pedido
         /// </summary>
-        Task<string> CreateOrderAsync(CreateOrderEntryViewModel order);
+        Task<string> CreateOrderAsync(CreateOrderEntryViewModel order, string userId);
 
         /// <summary>
         /// Atualiza um pedido existente

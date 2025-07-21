@@ -1,68 +1,256 @@
 @using GesN.Web.Models.ViewModels.Production
 @model CreateProductGroupExchangeRuleViewModel
 
-<form id="formCreateGroupExchangeRule" enctype="application/x-www-form-urlencoded">
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.ProductGroupId)
+<div class="modal fade" id="createGroupExchangeRuleModal" tabindex="-1" role="dialog" aria-labelledby="createGroupExchangeRuleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createGroupExchangeRuleModalLabel">
+                    <i class="fas fa-plus"></i> Adicionar Regra de Troca
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCreateGroupExchangeRule" enctype="application/x-www-form-urlencoded">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ProductGroupId" value="@Model.ProductGroupId" />
+                    @* <input type="hidden" id="ProductGroupId" name="ProductGroupId" value="@ViewBag.ProductId" /> *@
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="SourceGroupItemId" type="hidden" />
+                                @if (ViewBag.IsSourceItemPredefined == true)
+                                {
+                                    <input id="SourceGroupItemName" type="text" class="floating-input has-value" value="@ViewBag.SourceGroupItemName" readonly placeholder=" " />
+                                    <label for="SourceGroupItemName" class="floating-label">Item Original (Predefinido)</label>
+                                }
+                                else
+                                {
+                                    <input id="SourceGroupItemName" type="text" class="floating-input" placeholder=" " required autocomplete="off" />
+                                    <label for="SourceGroupItemName" class="floating-label">Item Original</label>
+                                }
+                                <span asp-validation-for="SourceGroupItemId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="TargetGroupItemId" type="hidden" />
+                                <input id="TargetGroupItemName" type="text" class="floating-input" placeholder=" " required autocomplete="off" />
+                                <label for="TargetGroupItemName" class="floating-label">Item de Troca</label>
+                                <span asp-validation-for="TargetGroupItemId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="SourceGroupItemWeight" type="number" min="1" class="floating-input has-value" placeholder=" " required />
+                                <label asp-for="SourceGroupItemWeight" class="floating-label">Peso do Item Original</label>
+                                <span asp-validation-for="SourceGroupItemWeight" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="TargetGroupItemWeight" type="number" min="1" class="floating-input has-value" placeholder=" " required />
+                                <label asp-for="TargetGroupItemWeight" class="floating-label">Peso do Item de Troca</label>
+                                <span asp-validation-for="TargetGroupItemWeight" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="ExchangeRatio" type="number" step="0.01" min="0.01" class="floating-input" placeholder=" " required />
+                                <label asp-for="ExchangeRatio" class="floating-label">Proporção de Troca</label>
+                                <span asp-validation-for="ExchangeRatio" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- Space for additional fields if needed -->
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                <label asp-for="IsActive" class="form-check-label">
+                                    Regra Ativa
+                                </label>
+                                <small class="form-text text-muted">Se marcado, esta regra estará disponível para uso</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Informações sobre regras de troca:</h6>
+                        <ul class="mb-0">
+                            <li><strong>Proporção:</strong> Define quantos produtos de troca equivalem a 1 produto original</li>
+                            <li><strong>Custo Adicional:</strong> Valor extra cobrado na troca (opcional)</li>
+                            <li><strong>Status:</strong> Apenas regras ativas ficam disponíveis para o cliente</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSaveGroupExchangeRule">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Initialize autocomplete for SourceGroupItemName field (only if not readonly)
+    const sourceGroupItemNameField = $('#SourceGroupItemName');
+    const sourceGroupItemIdField = $('#SourceGroupItemId');
     
-    <div class="row">
-        <div class="col-md-6">
-            <div class="floating-input-group">
-                <select asp-for="OriginalProductId" class="form-select select2-product" required>
-                    <option value=""></option>
-                </select>
-                <label asp-for="OriginalProductId" class="floating-label">Produto Original</label>
-                <span asp-validation-for="OriginalProductId" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="floating-input-group">
-                <select asp-for="ExchangeProductId" class="form-select select2-product" required>
-                    <option value=""></option>
-                </select>
-                <label asp-for="ExchangeProductId" class="floating-label">Produto de Troca</label>
-                <span asp-validation-for="ExchangeProductId" class="text-danger"></span>
-            </div>
-        </div>
-    </div>
+    if (sourceGroupItemNameField.length && !sourceGroupItemNameField.prop('readonly')) {
+        // Remove previous instance if exists
+        if (sourceGroupItemNameField.data('aaAutocomplete')) {
+            sourceGroupItemNameField.autocomplete.destroy();
+        }
 
-    <div class="row">
-        <div class="col-md-6">
-            <div class="floating-input-group">
-                <input asp-for="ExchangeRatio" type="number" step="0.01" min="0.01" class="floating-input" placeholder=" " required />
-                <label asp-for="ExchangeRatio" class="floating-label">Proporção de Troca</label>
-                <span asp-validation-for="ExchangeRatio" class="text-danger"></span>
-                <small class="form-text text-muted">Ex: 1.5 significa 1 produto original = 1.5 produtos de troca</small>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="floating-input-group floating-input-group-addon">
-                <span class="input-group-text">R$</span>
-                <input asp-for="AdditionalCost" type="number" step="0.01" min="0" class="floating-input" placeholder=" " />
-                <label asp-for="AdditionalCost" class="floating-label">Custo Adicional</label>
-                <span asp-validation-for="AdditionalCost" class="text-danger"></span>
-            </div>
-        </div>
-    </div>
+        // Initialize Algolia Autocomplete.js for Source Item
+        const sourceAutocompleteInstance = autocomplete(sourceGroupItemNameField[0], {
+            hint: false,
+            debug: false,
+            minLength: 2,
+            openOnFocus: false,
+            autoselect: true,
+            appendTo: sourceGroupItemNameField.closest('.modal-body, .tab-pane, body')[0]
+        }, [{
+            source: function(query, callback) {
+                const productGroupId = $('#ProductGroupId').val();
+                $.ajax({
+                    url: '/ProductGroup/BuscaGroupItemAutocomplete',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { termo: query, productGroupId: productGroupId },
+                    success: function(data) {
+                        const suggestions = $.map(data, function(item) {
+                            return {
+                                label: item.label,
+                                value: item.value,
+                                id: item.id,
+                                data: item
+                            };
+                        });
+                        callback(suggestions);
+                    },
+                    error: function() {
+                        callback([]);
+                    }
+                });
+            },
+            displayKey: 'label',
+            templates: {
+                suggestion: function(suggestion) {
+                    return '<div class="autocomplete-suggestion">' +
+                           '<div class="suggestion-title">' + suggestion.data.productName + '</div>' +
+                           (suggestion.data.productSKU ? '<div class="suggestion-subtitle">SKU: ' + suggestion.data.productSKU + '</div>' : '') +
+                           '<div class="suggestion-subtitle">Quantidade: ' + suggestion.data.weight + '</div>' +
+                           '</div>';
+                }
+            }
+        }]);
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="form-check">
-                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
-                <label asp-for="IsActive" class="form-check-label">
-                    Regra Ativa
-                </label>
-                <small class="form-text text-muted">Se marcado, esta regra estará disponível para uso</small>
-            </div>
-        </div>
-    </div>
+        // Handle selection for Source Item
+        sourceAutocompleteInstance.on('autocomplete:selected', function(event, suggestion, dataset) {
+            if (suggestion && suggestion.id) {
+                sourceGroupItemIdField.val(suggestion.id);
+                sourceGroupItemNameField.addClass('has-value');
+                sourceGroupItemNameField.trigger('change');
+            }
+        });
 
-    <div class="alert alert-info">
-        <h6><i class="fas fa-info-circle"></i> Informações sobre regras de troca:</h6>
-        <ul class="mb-0">
-            <li><strong>Proporção:</strong> Define quantos produtos de troca equivalem a 1 produto original</li>
-            <li><strong>Custo Adicional:</strong> Valor extra cobrado na troca (opcional)</li>
-            <li><strong>Status:</strong> Apenas regras ativas ficam disponíveis para o cliente</li>
-        </ul>
-    </div>
-</form> 
+        // Clear hidden field when input is cleared
+        sourceGroupItemNameField.on('input', function() {
+            if ($(this).val().trim() === '') {
+                sourceGroupItemIdField.val('');
+                $(this).removeClass('has-value');
+            }
+        });
+    }
+
+    // Initialize autocomplete for TargetGroupItemName field
+    const targetGroupItemNameField = $('#TargetGroupItemName');
+    const targetGroupItemIdField = $('#TargetGroupItemId');
+    
+    if (targetGroupItemNameField.length) {
+        // Remove previous instance if exists
+        if (targetGroupItemNameField.data('aaAutocomplete')) {
+            targetGroupItemNameField.autocomplete.destroy();
+        }
+
+        // Initialize Algolia Autocomplete.js for Target Item
+        const targetAutocompleteInstance = autocomplete(targetGroupItemNameField[0], {
+            hint: false,
+            debug: false,
+            minLength: 2,
+            openOnFocus: false,
+            autoselect: true,
+            appendTo: targetGroupItemNameField.closest('.modal-body, .tab-pane, body')[0]
+        }, [{
+            source: function(query, callback) {
+                const productGroupId = $('#ProductGroupId').val();
+                $.ajax({
+                    url: '/ProductGroup/BuscaGroupItemAutocomplete',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { termo: query, productGroupId: productGroupId },
+                    success: function(data) {
+                        const suggestions = $.map(data, function(item) {
+                            return {
+                                label: item.label,
+                                value: item.value,
+                                id: item.id,
+                                data: item
+                            };
+                        });
+                        callback(suggestions);
+                    },
+                    error: function() {
+                        callback([]);
+                    }
+                });
+            },
+            displayKey: 'label',
+            templates: {
+                suggestion: function(suggestion) {
+                    return '<div class="autocomplete-suggestion">' +
+                           '<div class="suggestion-title">' + suggestion.data.productName + '</div>' +
+                           (suggestion.data.productSKU ? '<div class="suggestion-subtitle">SKU: ' + suggestion.data.productSKU + '</div>' : '') +
+                           '<div class="suggestion-subtitle">Quantidade: ' + suggestion.data.weight + '</div>' +
+                           '</div>';
+                }
+            }
+        }]);
+
+        // Handle selection for Target Item
+        targetAutocompleteInstance.on('autocomplete:selected', function(event, suggestion, dataset) {
+            if (suggestion && suggestion.id) {
+                targetGroupItemIdField.val(suggestion.id);
+                targetGroupItemNameField.addClass('has-value');
+                targetGroupItemNameField.trigger('change');
+            }
+        });
+
+        // Clear hidden field when input is cleared
+        targetGroupItemNameField.on('input', function() {
+            if ($(this).val().trim() === '') {
+                targetGroupItemIdField.val('');
+                $(this).removeClass('has-value');
+            }
+        });
+    }
+});
+</script> 

@@ -187,7 +187,7 @@ namespace GesN.Web.Services
             }
         }
 
-        public async Task<string> CreateOrderAsync(CreateOrderEntryViewModel orderViewModel)
+        public async Task<string> CreateOrderAsync(CreateOrderEntryViewModel orderViewModel, string userId)
         {
             try
             {
@@ -212,8 +212,8 @@ namespace GesN.Web.Services
                     Notes = null,
                     CreatedAt = DateTime.Now,
                     LastModifiedAt = DateTime.Now,
-                    CreatedBy = null,
-                    LastModifiedBy = null
+                    CreatedBy = userId,
+                    LastModifiedBy = userId
                 };
 
                 // Gera número sequencial

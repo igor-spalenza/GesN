@@ -50,18 +50,6 @@
                             <i class="fas fa-list"></i> Itens do Grupo
                         </button>
                     </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="group-options-tab" data-bs-toggle="tab" 
-                                data-bs-target="#group-options-tab-pane" type="button" role="tab">
-                            <i class="fas fa-sliders-h"></i> Opções
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="exchange-rules-tab" data-bs-toggle="tab" 
-                                data-bs-target="#exchange-rules-tab-pane" type="button" role="tab">
-                            <i class="fas fa-exchange-alt"></i> Regras de Troca
-                        </button>
-                    </li>
                 }
             </ul>
         </div>
@@ -108,19 +96,10 @@
                 {
                     <div class="tab-pane fade" id="group-items-tab-pane" role="tabpanel">
                         <div id="groupItemsContainer">
+                            @{
+                                ViewBag.ProductId = ViewBag.ProductId ?? Model.Id;
+                            }
                             @await Html.PartialAsync("_ProductGroupItems", Model.GroupItems)
-                        </div>
-                    </div>
-                    
-                    <div class="tab-pane fade" id="group-options-tab-pane" role="tabpanel">
-                        <div id="groupOptionsContainer">
-                            @await Html.PartialAsync("_ProductGroupOptions", Model.GroupOptions)
-                        </div>
-                    </div>
-                    
-                    <div class="tab-pane fade" id="exchange-rules-tab-pane" role="tabpanel">
-                        <div id="exchangeRulesContainer">
-                            @await Html.PartialAsync("_ProductGroupExchangeRules", Model.ExchangeRules)
                         </div>
                     </div>
                 }

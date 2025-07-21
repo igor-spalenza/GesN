@@ -8,12 +8,41 @@
     
     <div class="row">
         <div class="col-md-12">
+            <div class="form-check-group mb-3">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="itemType" id="itemTypeProduct" value="Produto" @((!string.IsNullOrWhiteSpace(Model.ProductId)) ? "checked" : "") />
+                    <label class="form-check-label" for="itemTypeProduct">
+                        Produto Específico
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="itemType" id="itemTypeCategory" value="Categoria" @((!string.IsNullOrWhiteSpace(Model.ProductCategoryId)) ? "checked" : "") />
+                    <label class="form-check-label" for="itemTypeCategory">
+                        Categoria de Produtos
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="productSelection" @(string.IsNullOrWhiteSpace(Model.ProductId) ? "style=display:none;" : "")>
+        <div class="col-md-12">
             <div class="floating-input-group">
-                <select asp-for="ProductId" class="form-select select2-product" required>
-                    <option value="@Model.ProductId">Produto Selecionado</option>
-                </select>
-                <label asp-for="ProductId" class="floating-label">Produto</label>
+                <input asp-for="ProductId" type="hidden" />
+                <input id="ProductName" type="text" class="floating-input has-value" placeholder=" " autocomplete="off" value="@Model.ProductName" />
+                <label for="ProductName" class="floating-label">Produto</label>
                 <span asp-validation-for="ProductId" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="categorySelection" @(string.IsNullOrWhiteSpace(Model.ProductCategoryId) ? "style=display:none;" : "")>
+        <div class="col-md-12">
+            <div class="floating-input-group">
+                <input asp-for="ProductCategoryId" type="hidden" />
+                <input id="ProductCategoryName" type="text" class="floating-input has-value" placeholder=" " autocomplete="off" value="@Model.ProductCategoryName" />
+                <label for="ProductCategoryName" class="floating-label">Categoria de Produto</label>
+                <span asp-validation-for="ProductCategoryId" class="text-danger"></span>
             </div>
         </div>
     </div>
@@ -21,21 +50,21 @@
     <div class="row">
         <div class="col-md-4">
             <div class="floating-input-group">
-                <input asp-for="Quantity" type="number" min="1" class="floating-input" placeholder=" " required />
+                <input asp-for="Quantity" type="number" min="1" class="floating-input has-value" placeholder=" " required />
                 <label asp-for="Quantity" class="floating-label">Quantidade</label>
                 <span asp-validation-for="Quantity" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-4">
             <div class="floating-input-group">
-                <input asp-for="MinQuantity" type="number" min="1" class="floating-input" placeholder=" " required />
+                <input asp-for="MinQuantity" type="number" min="0" class="floating-input has-value" placeholder=" " />
                 <label asp-for="MinQuantity" class="floating-label">Quantidade Mínima</label>
                 <span asp-validation-for="MinQuantity" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-4">
             <div class="floating-input-group">
-                <input asp-for="MaxQuantity" type="number" min="1" class="floating-input" placeholder=" " />
+                <input asp-for="MaxQuantity" type="number" min="0" class="floating-input has-value" placeholder=" " />
                 <label asp-for="MaxQuantity" class="floating-label">Quantidade Máxima</label>
                 <span asp-validation-for="MaxQuantity" class="text-danger"></span>
                 <small class="form-text text-muted">Deixe vazio para ilimitado</small>
@@ -46,7 +75,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="floating-input-group">
-                <input asp-for="DefaultQuantity" type="number" min="1" class="floating-input" placeholder=" " required />
+                <input asp-for="DefaultQuantity" type="number" min="0" class="floating-input has-value" placeholder=" " />
                 <label asp-for="DefaultQuantity" class="floating-label">Quantidade Padrão</label>
                 <span asp-validation-for="DefaultQuantity" class="text-danger"></span>
             </div>
@@ -54,7 +83,7 @@
         <div class="col-md-6">
             <div class="floating-input-group floating-input-group-addon">
                 <span class="input-group-text">R$</span>
-                <input asp-for="ExtraPrice" type="number" step="0.01" min="0" class="floating-input" placeholder=" " />
+                <input asp-for="ExtraPrice" type="number" step="0.01" min="0" class="floating-input has-value" placeholder=" " />
                 <label asp-for="ExtraPrice" class="floating-label">Preço Extra</label>
                 <span asp-validation-for="ExtraPrice" class="text-danger"></span>
             </div>
@@ -72,4 +101,90 @@
             </div>
         </div>
     </div>
-</form> 
+</form>
+
+<script>
+$(document).ready(function() {
+    // Handle item type change
+    $('input[name="itemType"]').on('change', function() {
+        const selectedType = $(this).val();
+        
+        if (selectedType === 'Produto') {
+            $('#productSelection').show();
+            $('#categorySelection').hide();
+            $('#ProductCategoryId').val('');
+            $('#ProductCategoryName').val('').removeClass('has-value');
+        } else if (selectedType === 'Categoria') {
+            $('#productSelection').hide();
+            $('#categorySelection').show();
+            $('#ProductId').val('');
+            $('#ProductName').val('').removeClass('has-value');
+        }
+    });
+
+    // Initialize ProductCategory autocomplete
+    const categoryNameField = $('#ProductCategoryName');
+    const categoryIdField = $('#ProductCategoryId');
+    
+    if (categoryNameField.length) {
+        // Initialize Algolia Autocomplete.js for Product Category
+        const categoryAutocompleteInstance = autocomplete(categoryNameField[0], {
+            hint: false,
+            debug: false,
+            minLength: 2,
+            openOnFocus: false,
+            autoselect: true,
+            appendTo: categoryNameField.closest('.modal-body, .tab-pane, body')[0]
+        }, [{
+            source: function(query, callback) {
+                $.ajax({
+                    url: '/ProductCategory/BuscaProductCategoryAutocomplete',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { termo: query },
+                    success: function(data) {
+                        const suggestions = $.map(data, function(item) {
+                            return {
+                                label: item.name || item.label,
+                                value: item.name || item.label,
+                                id: item.id,
+                                data: item
+                            };
+                        });
+                        callback(suggestions);
+                    },
+                    error: function() {
+                        callback([]);
+                    }
+                });
+            },
+            displayKey: 'label',
+            templates: {
+                suggestion: function(suggestion) {
+                    return '<div class="autocomplete-suggestion">' +
+                           '<div class="suggestion-title">' + (suggestion.data.name || suggestion.label) + '</div>' +
+                           (suggestion.data.description ? '<div class="suggestion-subtitle">' + suggestion.data.description + '</div>' : '') +
+                           '</div>';
+                }
+            }
+        }]);
+
+        // Handle selection for Category
+        categoryAutocompleteInstance.on('autocomplete:selected', function(event, suggestion, dataset) {
+            if (suggestion && suggestion.id) {
+                categoryIdField.val(suggestion.id);
+                categoryNameField.addClass('has-value');
+                categoryNameField.trigger('change');
+            }
+        });
+
+        // Clear hidden field when input is cleared
+        categoryNameField.on('input', function() {
+            if ($(this).val().trim() === '') {
+                categoryIdField.val('');
+                $(this).removeClass('has-value');
+            }
+        });
+    }
+});
+</script> 

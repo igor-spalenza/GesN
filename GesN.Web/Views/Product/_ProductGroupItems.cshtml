@@ -23,6 +23,7 @@
                             <th>Min/Max</th>
                             <th>Preço Extra</th>
                             <th>Opcional</th>
+                            <th>Regras de Troca</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -71,16 +72,31 @@
                                     }
                                 </td>
                                 <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div id="exchange-rules-info-@item.Id" class="flex-grow-1">
+                                            <!-- Informações sobre regras de troca serão carregadas aqui -->
+                                            <small class="text-muted">
+                                                <i class="fas fa-spinner fa-spin"></i> Carregando...
+                                            </small>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-info btn-sm" 
+                                                onclick="ProductGroup.showItemExchangeRulesModal('@ViewBag.ProductId', '@item.Id')"
+                                                title="Gerenciar Regras de Troca">
+                                            <i class="fas fa-exchange-alt"></i> Regras
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
                                     <div class="btn-group btn-group-sm" role="group">
                                         <button type="button" class="btn btn-outline-primary" 
                                                 onclick="ProductGroup.showEditItemModal('@item.Id')"
                                                 title="Editar">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="bi bi-pencil"></i>
                                         </button>
                                         <button type="button" class="btn btn-outline-danger" 
                                                 onclick="ProductGroup.confirmDeleteItem('@item.Id', '@item.ProductName')"
                                                 title="Excluir">
-                                            <i class="fas fa-trash"></i>
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -104,4 +120,19 @@
             </div>
         }
     </div>
-</div> 
+</div>
+
+<script>
+$(document).ready(function() {
+    // Load exchange rules info for each item
+    @if (Model?.Any() == true)
+    {
+        @foreach (var item in Model)
+        {
+            <text>
+            ProductGroup.loadExchangeRulesInfo('@item.Id');
+            </text>
+        }
+    }
+});
+</script> 

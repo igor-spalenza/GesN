@@ -56,8 +56,6 @@ namespace GesN.Web.Infrastructure.Configuration
             services.AddScoped<IProductGroupRepository, ProductGroupRepository>();
             services.AddScoped<IProductGroupItemRepository, ProductGroupItemRepository>();
             services.AddScoped<IProductGroupItemService, ProductGroupItemService>();
-            services.AddScoped<IProductGroupOptionRepository, ProductGroupOptionRepository>();
-            services.AddScoped<IProductGroupOptionService, ProductGroupOptionService>();
             services.AddScoped<IProductGroupExchangeRuleRepository, ProductGroupExchangeRuleRepository>();
             services.AddScoped<IProductGroupExchangeRuleService, ProductGroupExchangeRuleService>();
             services.AddScoped<IProductGroupService, ProductGroupService>();

@@ -41,10 +41,10 @@
                         @{
                             var typeClass = product.ProductType switch
                             {
-                                ProductType.Simple => "badge-primary",
-                                ProductType.Composite => "badge-info", 
-                                ProductType.Group => "badge-success",
-                                _ => "badge-secondary"
+                                ProductType.Simple => "bg-primary",
+                                ProductType.Composite => "bg-info", 
+                                ProductType.Group => "bg-success",
+                                _ => "bg-secondary"
                             };
                         }
                         <span class="badge @typeClass">@product.ProductTypeDisplay</span>

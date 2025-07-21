@@ -218,49 +218,34 @@ namespace GesN.Web.Controllers
                         });
                     }
 
-                    // Carregar GroupOptions
-                    var groupOptions = await _productGroupService.GetGroupOptionsAsync(id);
-                    foreach (var option in groupOptions)
-                    {
-                        viewModel.GroupOptions.Add(new ProductGroupOptionViewModel
-                        {
-                            Id = option.Id,
-                            ProductGroupId = option.ProductGroupId,
-                            Name = option.Name,
-                            Description = option.Description,
-                            OptionType = option.OptionType.ToString(), // Converter enum para string
-                            IsRequired = option.IsRequired,
-                            DisplayOrder = option.DisplayOrder,
-                            CreatedAt = option.CreatedAt,
-                            ModifiedAt = option.LastModifiedAt
-                        });
-                    }
+
 
                     // Carregar ExchangeRules
                     var exchangeRules = await _productGroupService.GetExchangeRulesAsync(id);
                     foreach (var rule in exchangeRules)
                     {
-                        var originalProduct = await _productService.GetByIdAsync(rule.OriginalProductId);
-                        var exchangeProduct = await _productService.GetByIdAsync(rule.ExchangeProductId);
+                        var sourceItemName = rule.SourceGroupItem?.Product?.Name ?? "Item origem não encontrado";
+                        var targetItemName = rule.TargetGroupItem?.Product?.Name ?? "Item destino não encontrado";
                         
                         viewModel.ExchangeRules.Add(new ProductGroupExchangeRuleViewModel
                         {
                             Id = rule.Id,
                             ProductGroupId = rule.ProductGroupId,
-                            OriginalProductId = rule.OriginalProductId,
-                            OriginalProductName = originalProduct?.Name ?? "Produto não encontrado",
-                            ExchangeProductId = rule.ExchangeProductId,
-                            ExchangeProductName = exchangeProduct?.Name ?? "Produto não encontrado",
+                            SourceGroupItemId = rule.SourceGroupItemId,
+                            SourceGroupItemName = sourceItemName,
+                            SourceGroupItemWeight = rule.SourceGroupItemWeight,
+                            TargetGroupItemId = rule.TargetGroupItemId,
+                            TargetGroupItemName = targetItemName,
+                            TargetGroupItemWeight = rule.TargetGroupItemWeight,
                             ExchangeRatio = rule.ExchangeRatio,
-                            AdditionalCost = rule.AdditionalCost,
                             IsActive = rule.IsActive,
                             CreatedAt = rule.CreatedAt,
                             ModifiedAt = rule.LastModifiedAt
                         });
                     }
 
-                    _logger.LogInformation("Dados de ProductGroup carregados: {GroupItems} itens, {GroupOptions} opções, {ExchangeRules} regras", 
-                        viewModel.GroupItems.Count, viewModel.GroupOptions.Count, viewModel.ExchangeRules.Count);
+                                        _logger.LogInformation("Dados de ProductGroup carregados: {GroupItems} itens, {ExchangeRules} regras",
+                        viewModel.GroupItems.Count, viewModel.ExchangeRules.Count);
                 }
 
                 // Se for um produto do tipo Composite, carregar componentes

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using GesN.Web.Interfaces.Services;
+using GesN.Web.Interfaces.Repositories;
 using GesN.Web.Models.Entities.Production;
 using Microsoft.AspNetCore.Authorization;
 using GesN.Web.Models.Enumerators;
@@ -14,17 +15,20 @@ namespace GesN.Web.Controllers
         private readonly IProductGroupService _productGroupService;
         private readonly IProductService _productService;
         private readonly IProductCategoryService _productCategoryService;
+        private readonly IProductRepository _productRepository;
         private readonly ILogger<ProductGroupController> _logger;
 
         public ProductGroupController(
             IProductGroupService productGroupService,
             IProductService productService,
             IProductCategoryService productCategoryService,
+            IProductRepository productRepository,
             ILogger<ProductGroupController> logger)
         {
             _productGroupService = productGroupService;
             _productService = productService;
             _productCategoryService = productCategoryService;
+            _productRepository = productRepository;
             _logger = logger;
         }
 
@@ -45,13 +49,11 @@ namespace GesN.Web.Controllers
             if (group == null)
                 return NotFound();
 
-            // Carregar itens, opções e regras de troca
+            // Carregar itens e regras de troca
             var groupItems = await _productGroupService.GetGroupItemsAsync(id);
-            var groupOptions = await _productGroupService.GetGroupOptionsAsync(id);
             var exchangeRules = await _productGroupService.GetExchangeRulesAsync(id);
 
             ViewBag.GroupItems = groupItems;
-            ViewBag.GroupOptions = groupOptions;
             ViewBag.ExchangeRules = exchangeRules;
 
             return View(group);
@@ -259,80 +261,11 @@ namespace GesN.Web.Controllers
             }
         }
 
-        // GET: ProductGroup/ManageOptions/5
-        public async Task<IActionResult> ManageOptions(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-                return NotFound();
+        // ManageOptions method removed - ProductGroupOptions were removed from the system
 
-            var group = await _productService.GetByIdAsync(id) as ProductGroup;
-            if (group == null)
-                return NotFound();
 
-            var groupOptions = await _productGroupService.GetGroupOptionsAsync(id);
-            ViewBag.Group = group;
 
-            return View(groupOptions);
-        }
 
-        // POST: ProductGroup/AddOption
-        [HttpPost]
-        public async Task<IActionResult> AddOption(ProductGroupOption option)
-        {
-            try
-            {
-                await _productGroupService.AddGroupOptionAsync(option);
-                return Json(new { success = true, message = "Opção adicionada ao grupo com sucesso!" });
-            }
-            catch (Exception)
-            {
-                return Json(new { success = false, message = "Erro interno do servidor." });
-            }
-        }
-
-        // POST: ProductGroup/UpdateOption
-        [HttpPost]
-        public async Task<IActionResult> UpdateOption(ProductGroupOption option)
-        {
-            try
-            {
-                var success = await _productGroupService.UpdateGroupOptionAsync(option);
-                if (success)
-                {
-                    return Json(new { success = true, message = "Opção atualizada com sucesso!" });
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Opção não encontrada." });
-                }
-            }
-            catch (Exception)
-            {
-                return Json(new { success = false, message = "Erro interno do servidor." });
-            }
-        }
-
-        // POST: ProductGroup/RemoveOption
-        [HttpPost]
-        public async Task<IActionResult> RemoveOption(string id)
-        {
-            try
-            {
-                var success = await _productGroupService.RemoveGroupOptionAsync(id);
-                if (success)
-                {
-                    return Json(new { success = true, message = "Opção removida do grupo com sucesso!" });
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Opção não encontrada." });
-                }
-            }
-            catch (Exception)
-            {
-                return Json(new { success = false, message = "Erro interno do servidor." });
-            }
-        }
 
         // GET: ProductGroup/ManageExchangeRules/5
         public async Task<IActionResult> ManageExchangeRules(string id)
@@ -503,13 +436,12 @@ namespace GesN.Web.Controllers
                 
                 foreach (var item in groupItems)
                 {
-                    var product = await _productService.GetByIdAsync(item.ProductId);
-                    viewModels.Add(new ProductGroupItemViewModel
+                    var viewModel = new ProductGroupItemViewModel
                     {
                         Id = item.Id,
                         ProductGroupId = item.ProductGroupId,
                         ProductId = item.ProductId,
-                        ProductName = product?.Name ?? "Produto não encontrado",
+                        ProductCategoryId = item.ProductCategoryId,
                         Quantity = item.Quantity,
                         MinQuantity = item.MinQuantity,
                         MaxQuantity = item.MaxQuantity,
@@ -518,11 +450,25 @@ namespace GesN.Web.Controllers
                         ExtraPrice = item.ExtraPrice,
                         CreatedAt = item.CreatedAt,
                         ModifiedAt = item.LastModifiedAt
-                    });
+                    };
+
+                    // Populate product or category data
+                    if (!string.IsNullOrWhiteSpace(item.ProductId))
+                    {
+                        var product = await _productService.GetByIdAsync(item.ProductId);
+                        viewModel.ProductName = product?.Name ?? "Produto não encontrado";
+                    }
+                    else if (!string.IsNullOrWhiteSpace(item.ProductCategoryId))
+                    {
+                        var category = await _productCategoryService.GetCategoryByIdAsync(item.ProductCategoryId);
+                        viewModel.ProductCategoryName = category?.Name ?? "Categoria não encontrada";
+                    }
+
+                    viewModels.Add(viewModel);
                 }
 
                 ViewBag.ProductId = productId;
-                return PartialView("_ProductGroupItems", viewModels);
+                return PartialView("~/Views/ProductGroup/_ProductGroupItems.cshtml", viewModels);
             }
             catch (Exception ex)
             {
@@ -533,13 +479,24 @@ namespace GesN.Web.Controllers
 
         // GET: ProductGroup/FormularioGroupItem/5
         [HttpGet]
-        public IActionResult FormularioGroupItem(string productId)
+        public IActionResult FormularioGroupItem(string id)
         {
+            _logger.LogInformation("FormularioGroupItem called with id: {Id}", id);
+            
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                _logger.LogWarning("Id is null or empty in FormularioGroupItem");
+                return BadRequest("ProductId é obrigatório");
+            }
+            
             var viewModel = new CreateProductGroupItemViewModel
             {
-                ProductGroupId = productId
+                ProductGroupId = id
             };
-            return PartialView("_CreateGroupItem", viewModel);
+            
+            _logger.LogInformation("ViewModel created with ProductGroupId: {ProductGroupId}", viewModel.ProductGroupId);
+            
+            return PartialView("~/Views/ProductGroup/_CreateGroupItem.cshtml", viewModel);
         }
 
         // GET: ProductGroup/FormularioEdicaoGroupItem/5
@@ -554,13 +511,11 @@ namespace GesN.Web.Controllers
                 }
 
                 var item = await _productGroupService.GetGroupItemByIdAsync(id);
-
                 if (item == null)
                 {
                     return NotFound("Item não encontrado");
                 }
 
-                var product = await _productService.GetByIdAsync(item.ProductId);
                 var productGroup = await _productService.GetByIdAsync(item.ProductGroupId);
 
                 var viewModel = new EditProductGroupItemViewModel
@@ -569,6 +524,7 @@ namespace GesN.Web.Controllers
                     ProductGroupId = item.ProductGroupId,
                     ProductGroupName = productGroup?.Name ?? "Grupo não encontrado",
                     ProductId = item.ProductId,
+                    ProductCategoryId = item.ProductCategoryId,
                     Quantity = item.Quantity,
                     MinQuantity = item.MinQuantity,
                     MaxQuantity = item.MaxQuantity,
@@ -577,7 +533,21 @@ namespace GesN.Web.Controllers
                     ExtraPrice = item.ExtraPrice
                 };
 
-                return PartialView("_EditGroupItem", viewModel);
+                // Populate product or category name based on what's set
+                if (!string.IsNullOrWhiteSpace(item.ProductId))
+                {
+                    var product = await _productService.GetByIdAsync(item.ProductId);
+                    viewModel.ProductName = product?.Name + (product?.SKU != null ? " - " + product.SKU : "");
+                    viewModel.ItemType = "Produto";
+                }
+                else if (!string.IsNullOrWhiteSpace(item.ProductCategoryId))
+                {
+                    var category = await _productCategoryService.GetCategoryByIdAsync(item.ProductCategoryId);
+                    viewModel.ProductCategoryName = category?.Name;
+                    viewModel.ItemType = "Categoria";
+                }
+
+                return PartialView("~/Views/ProductGroup/_EditGroupItem.cshtml", viewModel);
             }
             catch (Exception ex)
             {
@@ -595,7 +565,14 @@ namespace GesN.Web.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return Json(new { success = false, message = "Dados inválidos", errors = ModelState });
+                    var errors = ModelState
+                        .Where(x => x.Value.Errors.Count > 0)
+                        .ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        );
+
+                    return Json(new { success = false, message = "Dados inválidos", errors = errors });
                 }
 
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
@@ -604,6 +581,7 @@ namespace GesN.Web.Controllers
                 {
                     ProductGroupId = viewModel.ProductGroupId,
                     ProductId = viewModel.ProductId,
+                    ProductCategoryId = viewModel.ProductCategoryId,
                     Quantity = viewModel.Quantity,
                     MinQuantity = viewModel.MinQuantity ?? 1,
                     MaxQuantity = viewModel.MaxQuantity ?? 0,
@@ -644,7 +622,14 @@ namespace GesN.Web.Controllers
 
                 if (!ModelState.IsValid)
                 {
-                    return Json(new { success = false, message = "Dados inválidos", errors = ModelState });
+                    var errors = ModelState
+                        .Where(x => x.Value.Errors.Count > 0)
+                        .ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        );
+
+                    return Json(new { success = false, message = "Dados inválidos", errors = errors });
                 }
 
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
@@ -654,6 +639,7 @@ namespace GesN.Web.Controllers
                     Id = viewModel.Id,
                     ProductGroupId = viewModel.ProductGroupId,
                     ProductId = viewModel.ProductId,
+                    ProductCategoryId = viewModel.ProductCategoryId,
                     Quantity = viewModel.Quantity,
                     MinQuantity = viewModel.MinQuantity ?? 1,
                     MaxQuantity = viewModel.MaxQuantity ?? 0,
@@ -710,213 +696,189 @@ namespace GesN.Web.Controllers
 
         #endregion
 
-        #region ProductGroup Options Management
+        #region ProductGroup Items Autocomplete
 
-        // GET: ProductGroup/ProductGroupOptions/5
+        // GET: ProductGroup/BuscaGroupItemAutocomplete
         [HttpGet]
-        public async Task<IActionResult> ProductGroupOptions(string productId)
+        public async Task<IActionResult> BuscaGroupItemAutocomplete(string termo, string productGroupId)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(productId))
+                if (string.IsNullOrWhiteSpace(termo) || string.IsNullOrWhiteSpace(productGroupId))
                 {
-                    return BadRequest("ID do produto é obrigatório");
+                    return Json(new List<object>());
                 }
 
-                var groupOptions = await _productGroupService.GetGroupOptionsAsync(productId);
-                var viewModels = groupOptions.Select(option => new ProductGroupOptionViewModel
-                {
-                    Id = option.Id,
-                    ProductGroupId = option.ProductGroupId,
-                    Name = option.Name,
-                    Description = option.Description,
-                    OptionType = option.OptionType.ToString(),
-                    IsRequired = option.IsRequired,
-                    DisplayOrder = option.DisplayOrder,
-                    CreatedAt = option.CreatedAt,
-                    ModifiedAt = option.LastModifiedAt
-                }).ToList();
-
-                ViewBag.ProductId = productId;
-                return PartialView("_ProductGroupOptions", viewModels);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao carregar opções do grupo: {ProductId}", productId);
-                return StatusCode(500, "Erro interno do servidor");
-            }
-        }
-
-        // GET: ProductGroup/FormularioGroupOption/5
-        [HttpGet]
-        public IActionResult FormularioGroupOption(string productId)
-        {
-            var viewModel = new CreateProductGroupOptionViewModel
-            {
-                ProductGroupId = productId
-            };
-            return PartialView("_CreateGroupOption", viewModel);
-        }
-
-        // GET: ProductGroup/FormularioEdicaoGroupOption/5
-        [HttpGet]
-        public async Task<IActionResult> FormularioEdicaoGroupOption(string id)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(id))
-                {
-                    return BadRequest("ID da opção é obrigatório");
-                }
-
-                var option = await _productGroupService.GetGroupOptionByIdAsync(id);
-
-                if (option == null)
-                {
-                    return NotFound("Opção não encontrada");
-                }
-
-                var viewModel = new EditProductGroupOptionViewModel
-                {
-                    Id = option.Id,
-                    ProductGroupId = option.ProductGroupId,
-                    Name = option.Name,
-                    Description = option.Description,
-                    OptionType = option.OptionType.ToString(),
-                    IsRequired = option.IsRequired,
-                    DisplayOrder = option.DisplayOrder
-                };
-
-                return PartialView("_EditGroupOption", viewModel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao carregar formulário de edição da opção: {Id}", id);
-                return StatusCode(500, "Erro interno do servidor");
-            }
-        }
-
-        // POST: ProductGroup/SalvarGroupOption
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SalvarGroupOption(CreateProductGroupOptionViewModel viewModel)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return Json(new { success = false, message = "Dados inválidos", errors = ModelState });
-                }
-
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
+                var groupItems = await _productGroupService.GetGroupItemsWithProductDataAsync(productGroupId);
                 
-                var option = new ProductGroupOption
-                {
-                    ProductGroupId = viewModel.ProductGroupId,
-                    Name = viewModel.Name,
-                    Description = viewModel.Description,
-                    OptionType = Enum.Parse<ProductGroupOptionType>(viewModel.OptionType ?? "Single"),
-                    IsRequired = viewModel.IsRequired,
-                    DisplayOrder = viewModel.DisplayOrder ?? 1,
-                    CreatedBy = userId,
-                    CreatedAt = DateTime.UtcNow
-                };
+                var filteredItems = groupItems
+                    .Where(item => item.Product != null && 
+                                  (item.Product.Name.Contains(termo, StringComparison.OrdinalIgnoreCase) ||
+                                  (item.Product.SKU != null && item.Product.SKU.Contains(termo, StringComparison.OrdinalIgnoreCase))))
+                    .Select(item => new
+                    {
+                        id = item.Id,
+                        label = item.Product!.Name + (string.IsNullOrWhiteSpace(item.Product.SKU) ? "" : $" - {item.Product.SKU}"),
+                        value = item.Product!.Name + (string.IsNullOrWhiteSpace(item.Product.SKU) ? "" : $" - {item.Product.SKU}"),
+                        productName = item.Product!.Name,
+                        productSKU = item.Product.SKU,
+                        weight = item.Quantity,
+                        unitPrice = item.GetEffectivePrice()
+                    })
+                    .Take(10)
+                    .ToList();
 
-                var success = await _productGroupService.AddGroupOptionAsync(option);
-
-                if (success)
-                {
-                    return Json(new { success = true, message = "Opção adicionada com sucesso!" });
-                }
-
-                return Json(new { success = false, message = "Erro ao adicionar opção" });
+                return Json(filteredItems);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao salvar opção do grupo");
-                return Json(new { success = false, message = "Erro interno do servidor" });
-            }
-        }
-
-        // POST: ProductGroup/SalvarEdicaoGroupOption/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SalvarEdicaoGroupOption(string id, EditProductGroupOptionViewModel viewModel)
-        {
-            try
-            {
-                if (id != viewModel.Id)
-                {
-                    return Json(new { success = false, message = "ID inconsistente" });
-                }
-
-                if (!ModelState.IsValid)
-                {
-                    return Json(new { success = false, message = "Dados inválidos", errors = ModelState });
-                }
-
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
-                
-                var option = new ProductGroupOption
-                {
-                    Id = viewModel.Id,
-                    ProductGroupId = viewModel.ProductGroupId,
-                    Name = viewModel.Name,
-                    Description = viewModel.Description,
-                    OptionType = Enum.Parse<ProductGroupOptionType>(viewModel.OptionType ?? "Single"),
-                    IsRequired = viewModel.IsRequired,
-                    DisplayOrder = viewModel.DisplayOrder ?? 1,
-                    LastModifiedBy = userId,
-                    LastModifiedAt = DateTime.UtcNow
-                };
-
-                var success = await _productGroupService.UpdateGroupOptionAsync(option);
-
-                if (success)
-                {
-                    return Json(new { success = true, message = "Opção atualizada com sucesso!" });
-                }
-
-                return Json(new { success = false, message = "Erro ao atualizar opção" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao atualizar opção do grupo: {Id}", id);
-                return Json(new { success = false, message = "Erro interno do servidor" });
-            }
-        }
-
-        // POST: ProductGroup/ExcluirGroupOption/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ExcluirGroupOption(string id)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(id))
-                {
-                    return Json(new { success = false, message = "ID da opção é obrigatório" });
-                }
-
-                var success = await _productGroupService.RemoveGroupOptionAsync(id);
-
-                if (success)
-                {
-                    return Json(new { success = true, message = "Opção removida com sucesso!" });
-                }
-
-                return Json(new { success = false, message = "Opção não encontrada" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao excluir opção do grupo: {Id}", id);
-                return Json(new { success = false, message = "Erro interno do servidor" });
+                _logger.LogError(ex, "Erro ao buscar itens do grupo para autocomplete: {Termo}", termo);
+                return Json(new List<object>());
             }
         }
 
         #endregion
 
         #region ProductGroup Exchange Rules Management
+
+        // GET: ProductGroup/ItemExchangeRules/{productGroupId}/{itemId}
+        [HttpGet]
+        [Route("ProductGroup/ItemExchangeRules/{productGroupId}/{itemId}")]
+        public async Task<IActionResult> ItemExchangeRules(string productGroupId, string itemId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(productGroupId) || string.IsNullOrWhiteSpace(itemId))
+                {
+                    return BadRequest("ProductGroupId e ItemId são obrigatórios");
+                }
+
+                // Obter informações do item
+                var item = await _productGroupService.GetGroupItemByIdAsync(itemId);
+                if (item == null)
+                {
+                    return NotFound("Item não encontrado");
+                }
+
+                var product = await _productService.GetByIdAsync(item.ProductId);
+                var itemName = product?.Name ?? "Item não encontrado";
+
+                // Obter regras onde este item é origem
+                var sourceRules = await _productGroupService.GetExchangeRulesAsync(productGroupId);
+                var sourceRulesList = sourceRules.Where(r => r.SourceGroupItemId == itemId).ToList();
+
+                // Obter regras onde este item é destino
+                var targetRulesList = sourceRules.Where(r => r.TargetGroupItemId == itemId).ToList();
+
+                // Converter para ViewModels
+                var sourceRulesViewModels = new List<ProductGroupExchangeRuleViewModel>();
+                var targetRulesViewModels = new List<ProductGroupExchangeRuleViewModel>();
+
+                foreach (var rule in sourceRulesList)
+                {
+                    var targetItem = await _productGroupService.GetGroupItemByIdAsync(rule.TargetGroupItemId);
+                    var targetProduct = targetItem != null ? await _productService.GetByIdAsync(targetItem.ProductId) : null;
+                    
+                    sourceRulesViewModels.Add(new ProductGroupExchangeRuleViewModel
+                    {
+                        Id = rule.Id,
+                        ProductGroupId = rule.ProductGroupId,
+                        SourceGroupItemId = rule.SourceGroupItemId,
+                        SourceGroupItemName = itemName,
+                        SourceGroupItemWeight = rule.SourceGroupItemWeight,
+                        TargetGroupItemId = rule.TargetGroupItemId,
+                        TargetGroupItemName = targetProduct?.Name ?? "Item não encontrado",
+                        TargetGroupItemWeight = rule.TargetGroupItemWeight,
+                        ExchangeRatio = rule.ExchangeRatio,
+                        IsActive = rule.IsActive,
+                        CreatedAt = rule.CreatedAt,
+                        ModifiedAt = rule.LastModifiedAt
+                    });
+                }
+
+                foreach (var rule in targetRulesList)
+                {
+                    var sourceItem = await _productGroupService.GetGroupItemByIdAsync(rule.SourceGroupItemId);
+                    var sourceProduct = sourceItem != null ? await _productService.GetByIdAsync(sourceItem.ProductId) : null;
+                    
+                    targetRulesViewModels.Add(new ProductGroupExchangeRuleViewModel
+                    {
+                        Id = rule.Id,
+                        ProductGroupId = rule.ProductGroupId,
+                        SourceGroupItemId = rule.SourceGroupItemId,
+                        SourceGroupItemName = sourceProduct?.Name ?? "Item não encontrado",
+                        SourceGroupItemWeight = rule.SourceGroupItemWeight,
+                        TargetGroupItemId = rule.TargetGroupItemId,
+                        TargetGroupItemName = itemName,
+                        TargetGroupItemWeight = rule.TargetGroupItemWeight,
+                        ExchangeRatio = rule.ExchangeRatio,
+                        IsActive = rule.IsActive,
+                        CreatedAt = rule.CreatedAt,
+                        ModifiedAt = rule.LastModifiedAt
+                    });
+                }
+
+                // Combinando as regras para usar a view existente
+                var allRules = new List<ProductGroupExchangeRuleViewModel>();
+                allRules.AddRange(sourceRulesViewModels);
+                allRules.AddRange(targetRulesViewModels);
+                
+                ViewBag.ProductId = productGroupId;
+                ViewBag.ItemId = itemId;
+                ViewBag.ItemName = itemName;
+                ViewBag.IsItemSpecific = true;
+                
+                return PartialView("~/Views/ProductGroup/_ProductGroupExchangeRules.cshtml", allRules);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar regras de troca do item: {ProductGroupId}/{ItemId}", productGroupId, itemId);
+                return StatusCode(500, "Erro interno do servidor");
+            }
+        }
+
+        // GET: ProductGroup/ExchangeRulesInfo/{itemId}
+        [HttpGet]
+        [Route("ProductGroup/ExchangeRulesInfo/{itemId}")]
+        public async Task<IActionResult> ExchangeRulesInfo(string itemId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(itemId))
+                {
+                    return BadRequest("ItemId é obrigatório");
+                }
+
+                var item = await _productGroupService.GetGroupItemByIdAsync(itemId);
+                if (item == null)
+                {
+                    return Json(new { success = false, message = "Item não encontrado" });
+                }
+
+                var allRules = await _productGroupService.GetExchangeRulesAsync(item.ProductGroupId);
+                var sourceRulesCount = allRules.Count(r => r.SourceGroupItemId == itemId && r.IsActive);
+                var targetRulesCount = allRules.Count(r => r.TargetGroupItemId == itemId && r.IsActive);
+                var totalRules = sourceRulesCount + targetRulesCount;
+
+                var info = new
+                {
+                    success = true,
+                    totalRules = totalRules,
+                    sourceRulesCount = sourceRulesCount,
+                    targetRulesCount = targetRulesCount,
+                    html = totalRules > 0 
+                        ? $"<span class='badge bg-success'>{totalRules} ativa{(totalRules > 1 ? "s" : "")}</span>"
+                        : "<span class='text-muted'>Sem regras</span>"
+                };
+
+                return Json(info);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter informações de regras de troca: {ItemId}", itemId);
+                return Json(new { success = false, message = "Erro interno do servidor" });
+            }
+        }
 
         // GET: ProductGroup/ProductGroupExchangeRules/5
         [HttpGet]
@@ -934,19 +896,20 @@ namespace GesN.Web.Controllers
                 
                 foreach (var rule in exchangeRules)
                 {
-                    var originalProduct = await _productService.GetByIdAsync(rule.OriginalProductId);
-                    var exchangeProduct = await _productService.GetByIdAsync(rule.ExchangeProductId);
+                    var sourceItemName = rule.SourceGroupItem?.Product?.Name ?? "Item origem não encontrado";
+                    var targetItemName = rule.TargetGroupItem?.Product?.Name ?? "Item destino não encontrado";
                     
                     viewModels.Add(new ProductGroupExchangeRuleViewModel
                     {
                         Id = rule.Id,
                         ProductGroupId = rule.ProductGroupId,
-                        OriginalProductId = rule.OriginalProductId,
-                        OriginalProductName = originalProduct?.Name ?? "Produto não encontrado",
-                        ExchangeProductId = rule.ExchangeProductId,
-                        ExchangeProductName = exchangeProduct?.Name ?? "Produto não encontrado",
+                        SourceGroupItemId = rule.SourceGroupItemId,
+                        SourceGroupItemName = sourceItemName,
+                        SourceGroupItemWeight = rule.SourceGroupItemWeight,
+                        TargetGroupItemId = rule.TargetGroupItemId,
+                        TargetGroupItemName = targetItemName,
+                        TargetGroupItemWeight = rule.TargetGroupItemWeight,
                         ExchangeRatio = rule.ExchangeRatio,
-                        AdditionalCost = rule.AdditionalCost,
                         IsActive = rule.IsActive,
                         CreatedAt = rule.CreatedAt,
                         ModifiedAt = rule.LastModifiedAt
@@ -954,7 +917,7 @@ namespace GesN.Web.Controllers
                 }
 
                 ViewBag.ProductId = productId;
-                return PartialView("_ProductGroupExchangeRules", viewModels);
+                return PartialView("~/Views/ProductGroup/_ProductGroupExchangeRules.cshtml", viewModels);
             }
             catch (Exception ex)
             {
@@ -963,15 +926,44 @@ namespace GesN.Web.Controllers
             }
         }
 
-        // GET: ProductGroup/FormularioGroupExchangeRule/5
+        // GET: ProductGroup/FormularioGroupExchangeRule/{productGroupId}/{sourceItemId?}
         [HttpGet]
-        public IActionResult FormularioGroupExchangeRule(string productId)
+        public async Task<IActionResult> FormularioGroupExchangeRule(string id, string sourceItemId = null)
         {
-            var viewModel = new CreateProductGroupExchangeRuleViewModel
+            try
             {
-                ProductGroupId = productId
-            };
-            return PartialView("_CreateGroupExchangeRule", viewModel);
+                var viewModel = new CreateProductGroupExchangeRuleViewModel
+                {
+                    ProductGroupId = id
+                };
+
+                // Se foi especificado um item de origem, carregar seus dados
+                if (!string.IsNullOrWhiteSpace(sourceItemId))
+                {
+                    var sourceItem = await _productGroupService.GetGroupItemByIdAsync(sourceItemId);
+                    if (sourceItem != null)
+                    {
+                        // Carregar dados do produto relacionado
+                        var product = await _productRepository.GetByIdAsync(sourceItem.ProductId);
+                        if (product != null)
+                        {
+                            viewModel.SourceGroupItemId = sourceItem.Id;
+                            viewModel.SourceGroupItemWeight = sourceItem.Quantity;
+                            
+                            // Adicionar dados para exibição
+                            ViewBag.SourceGroupItemName = product.Name + (string.IsNullOrWhiteSpace(product.SKU) ? "" : $" - {product.SKU}");
+                            ViewBag.IsSourceItemPredefined = true;
+                        }
+                    }
+                }
+
+                return PartialView("~/Views/ProductGroup/_CreateGroupExchangeRule.cshtml", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar formulário de criação de regra: {ProductGroupId}/{SourceItemId}", id, sourceItemId);
+                return StatusCode(500, "Erro interno do servidor");
+            }
         }
 
         // GET: ProductGroup/FormularioEdicaoGroupExchangeRule/5
@@ -996,14 +988,15 @@ namespace GesN.Web.Controllers
                 {
                     Id = rule.Id,
                     ProductGroupId = rule.ProductGroupId,
-                    OriginalProductId = rule.OriginalProductId,
-                    ExchangeProductId = rule.ExchangeProductId,
+                    SourceGroupItemId = rule.SourceGroupItemId,
+                    SourceGroupItemWeight = rule.SourceGroupItemWeight,
+                    TargetGroupItemId = rule.TargetGroupItemId,
+                    TargetGroupItemWeight = rule.TargetGroupItemWeight,
                     ExchangeRatio = rule.ExchangeRatio,
-                    AdditionalCost = rule.AdditionalCost,
                     IsActive = rule.IsActive
                 };
 
-                return PartialView("_EditGroupExchangeRule", viewModel);
+                return PartialView("~/Views/ProductGroup/_EditGroupExchangeRule.cshtml", viewModel);
             }
             catch (Exception ex)
             {
@@ -1029,10 +1022,11 @@ namespace GesN.Web.Controllers
                 var rule = new ProductGroupExchangeRule
                 {
                     ProductGroupId = viewModel.ProductGroupId,
-                    OriginalProductId = viewModel.OriginalProductId,
-                    ExchangeProductId = viewModel.ExchangeProductId,
+                    SourceGroupItemId = viewModel.SourceGroupItemId,
+                    SourceGroupItemWeight = viewModel.SourceGroupItemWeight,
+                    TargetGroupItemId = viewModel.TargetGroupItemId,
+                    TargetGroupItemWeight = viewModel.TargetGroupItemWeight,
                     ExchangeRatio = viewModel.ExchangeRatio,
-                    AdditionalCost = viewModel.AdditionalCost ?? 0m,
                     IsActive = viewModel.IsActive,
                     CreatedBy = userId,
                     CreatedAt = DateTime.UtcNow
@@ -1077,10 +1071,11 @@ namespace GesN.Web.Controllers
                 {
                     Id = viewModel.Id,
                     ProductGroupId = viewModel.ProductGroupId,
-                    OriginalProductId = viewModel.OriginalProductId,
-                    ExchangeProductId = viewModel.ExchangeProductId,
+                    SourceGroupItemId = viewModel.SourceGroupItemId,
+                    SourceGroupItemWeight = viewModel.SourceGroupItemWeight,
+                    TargetGroupItemId = viewModel.TargetGroupItemId,
+                    TargetGroupItemWeight = viewModel.TargetGroupItemWeight,
                     ExchangeRatio = viewModel.ExchangeRatio,
-                    AdditionalCost = viewModel.AdditionalCost ?? 0m,
                     IsActive = viewModel.IsActive,
                     LastModifiedBy = userId,
                     LastModifiedAt = DateTime.UtcNow

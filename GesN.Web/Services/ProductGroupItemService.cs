@@ -11,17 +11,20 @@ namespace GesN.Web.Services
         private readonly IProductGroupItemRepository _productGroupItemRepository;
         private readonly IProductRepository _productRepository;
         private readonly IProductGroupRepository _productGroupRepository;
+        private readonly IProductCategoryRepository _productCategoryRepository;
         private readonly ILogger<ProductGroupItemService> _logger;
 
         public ProductGroupItemService(
             IProductGroupItemRepository productGroupItemRepository,
             IProductRepository productRepository,
             IProductGroupRepository productGroupRepository,
+            IProductCategoryRepository productCategoryRepository,
             ILogger<ProductGroupItemService> logger)
         {
             _productGroupItemRepository = productGroupItemRepository;
             _productRepository = productRepository;
             _productGroupRepository = productGroupRepository;
+            _productCategoryRepository = productCategoryRepository;
             _logger = logger;
         }
 
@@ -108,9 +111,16 @@ namespace GesN.Web.Services
                 }
 
                 // Verificar se o item já existe no grupo
-                if (await ItemExistsInGroupAsync(groupItem.ProductGroupId, groupItem.ProductId))
+                if (!string.IsNullOrWhiteSpace(groupItem.ProductId) && 
+                    await ItemExistsInGroupAsync(groupItem.ProductGroupId, groupItem.ProductId))
                 {
                     throw new InvalidOperationException("Este produto já está no grupo");
+                }
+
+                if (!string.IsNullOrWhiteSpace(groupItem.ProductCategoryId) && 
+                    await CategoryItemExistsInGroupAsync(groupItem.ProductGroupId, groupItem.ProductCategoryId))
+                {
+                    throw new InvalidOperationException("Esta categoria já está no grupo");
                 }
 
                 // Definir valores padrão
@@ -250,6 +260,19 @@ namespace GesN.Web.Services
             }
         }
 
+        public async Task<bool> CategoryItemExistsInGroupAsync(string productGroupId, string productCategoryId)
+        {
+            try
+            {
+                return await _productGroupItemRepository.CategoryItemExistsInGroupAsync(productGroupId, productCategoryId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao verificar se categoria existe no grupo: {GroupId}, {CategoryId}", productGroupId, productCategoryId);
+                throw;
+            }
+        }
+
         public async Task<decimal> CalculateGroupTotalPriceAsync(string productGroupId, IEnumerable<string> selectedItemIds)
         {
             try
@@ -350,9 +373,17 @@ namespace GesN.Web.Services
                     errors.Add("ID do grupo é obrigatório");
                 }
 
-                if (string.IsNullOrEmpty(groupItem.ProductId))
+                // Verificar se tem ProductId OU ProductCategoryId (mas não ambos)
+                var hasProductId = !string.IsNullOrWhiteSpace(groupItem.ProductId);
+                var hasCategoryId = !string.IsNullOrWhiteSpace(groupItem.ProductCategoryId);
+
+                if (!hasProductId && !hasCategoryId)
                 {
-                    errors.Add("ID do produto é obrigatório");
+                    errors.Add("Deve ser especificado um produto ou uma categoria");
+                }
+                else if (hasProductId && hasCategoryId)
+                {
+                    errors.Add("Não é possível especificar produto e categoria ao mesmo tempo");
                 }
 
                 if (groupItem.Quantity <= 0)
@@ -386,6 +417,20 @@ namespace GesN.Web.Services
                     else if (product.StateCode != ObjectState.Active)
                     {
                         errors.Add("Produto não está ativo");
+                    }
+                }
+
+                // Validar se a categoria de produto existe
+                if (!string.IsNullOrEmpty(groupItem.ProductCategoryId))
+                {
+                    var category = await _productCategoryRepository.GetByIdAsync(groupItem.ProductCategoryId);
+                    if (category == null)
+                    {
+                        errors.Add("Categoria de produto não encontrada");
+                    }
+                    else if (category.StateCode != ObjectState.Active)
+                    {
+                        errors.Add("Categoria de produto não está ativa");
                     }
                 }
 
@@ -468,6 +513,64 @@ namespace GesN.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao criar itens do grupo em lote");
+                throw;
+            }
+        }
+
+        // Métodos específicos para ProductCategory
+        public async Task<IEnumerable<ProductGroupItem>> GetByProductCategoryIdAsync(string productCategoryId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(productCategoryId))
+                {
+                    _logger.LogWarning("ID da categoria não fornecido");
+                    return Enumerable.Empty<ProductGroupItem>();
+                }
+
+                return await _productGroupItemRepository.GetByProductCategoryIdAsync(productCategoryId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar itens por categoria: {CategoryId}", productCategoryId);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ProductGroupItem>> GetCategoryItemsByGroupAsync(string productGroupId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(productGroupId))
+                {
+                    _logger.LogWarning("ID do grupo não fornecido");
+                    return Enumerable.Empty<ProductGroupItem>();
+                }
+
+                return await _productGroupItemRepository.GetCategoryItemsByGroupAsync(productGroupId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar itens de categoria do grupo: {GroupId}", productGroupId);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ProductGroupItem>> GetProductItemsByGroupAsync(string productGroupId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(productGroupId))
+                {
+                    _logger.LogWarning("ID do grupo não fornecido");
+                    return Enumerable.Empty<ProductGroupItem>();
+                }
+
+                return await _productGroupItemRepository.GetProductItemsByGroupAsync(productGroupId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar itens de produto do grupo: {GroupId}", productGroupId);
                 throw;
             }
         }

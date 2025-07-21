@@ -11,7 +11,6 @@ namespace GesN.Web.Interfaces.Repositories
         Task<IEnumerable<ProductGroup>> SearchAsync(string searchTerm);
         Task<IEnumerable<ProductGroup>> GetPagedAsync(int page, int pageSize);
         Task<ProductGroup?> GetWithItemsAsync(string id);
-        Task<ProductGroup?> GetWithOptionsAsync(string id);
         Task<ProductGroup?> GetWithExchangeRulesAsync(string id);
         Task<ProductGroup?> GetCompleteAsync(string id);
         Task<string> CreateAsync(ProductGroup productGroup);
@@ -20,7 +19,6 @@ namespace GesN.Web.Interfaces.Repositories
         Task<bool> ExistsAsync(string id);
         Task<int> CountAsync();
         Task<bool> HasItemsAsync(string id);
-        Task<bool> HasOptionsAsync(string id);
         Task<bool> HasExchangeRulesAsync(string id);
         Task<decimal> CalculateGroupPriceAsync(string id, IEnumerable<string> selectedItemIds);
     }

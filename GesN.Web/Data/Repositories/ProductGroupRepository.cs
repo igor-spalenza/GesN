@@ -151,42 +151,7 @@ namespace GesN.Web.Data.Repositories
             return productGroupDict.Values.FirstOrDefault();
         }
 
-        public async Task<ProductGroup?> GetWithOptionsAsync(string id)
-        {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            
-            const string sql = @"
-                SELECT p.*, p.ProductType as ProductTypeString,
-                       go.*
-                FROM Product p
-                LEFT JOIN ProductGroupOption go ON p.Id = go.ProductGroupId
-                WHERE p.Id = @Id AND p.ProductType = 'Group'";
 
-            var productGroupDict = new Dictionary<string, ProductGroup>();
-
-            await connection.QueryAsync<ProductDto, ProductGroupOption, ProductGroup>(
-                sql,
-                (productDto, groupOption) =>
-                {
-                    if (!productGroupDict.TryGetValue(productDto.Id, out var productGroup))
-                    {
-                        productGroup = (ProductGroup)ProductMapper.ToEntity(productDto)!;
-                        productGroupDict[productDto.Id] = productGroup;
-                    }
-
-                    if (groupOption != null)
-                    {
-                        productGroup.GroupOptions.Add(groupOption);
-                    }
-
-                    return productGroup;
-                },
-                new { Id = id },
-                splitOn: "Id"
-            );
-
-            return productGroupDict.Values.FirstOrDefault();
-        }
 
         public async Task<ProductGroup?> GetWithExchangeRulesAsync(string id)
         {
@@ -217,14 +182,7 @@ namespace GesN.Web.Data.Repositories
 
                     if (exchangeRule != null)
                     {
-                        if (fromProductDto != null)
-                        {
-                            exchangeRule.OriginalProduct = ProductMapper.ToEntity(fromProductDto);
-                        }
-                        if (toProductDto != null)
-                        {
-                            exchangeRule.ExchangeProduct = ProductMapper.ToEntity(toProductDto);
-                        }
+                        // Exchange rules now use SourceGroupItem and TargetGroupItem instead of direct products
                         productGroup.ExchangeRules.Add(exchangeRule);
                     }
 
@@ -245,14 +203,12 @@ namespace GesN.Web.Data.Repositories
                 SELECT p.*, p.ProductType as ProductTypeString,
                        gi.*, 
                        cp.*, cp.ProductType as ProductTypeString,
-                       go.*,
                        er.*, 
                        fp.*, fp.ProductType as ProductTypeString,
                        tp.*, tp.ProductType as ProductTypeString
                 FROM Product p
                 LEFT JOIN ProductGroupItem gi ON p.Id = gi.ProductGroupId
                 LEFT JOIN Product cp ON gi.ProductId = cp.Id
-                LEFT JOIN ProductGroupOption go ON p.Id = go.ProductGroupId
                 LEFT JOIN ProductGroupExchangeRule er ON p.Id = er.ProductGroupId
                 LEFT JOIN Product fp ON er.OriginalProductId = fp.Id
                 LEFT JOIN Product tp ON er.ExchangeProductId = tp.Id
@@ -260,9 +216,9 @@ namespace GesN.Web.Data.Repositories
 
             var productGroupDict = new Dictionary<string, ProductGroup>();
 
-            await connection.QueryAsync<ProductDto, ProductGroupItem, ProductDto, ProductGroupOption, ProductGroupExchangeRule, ProductDto, ProductDto, ProductGroup>(
+            await connection.QueryAsync<ProductDto, ProductGroupItem, ProductDto, ProductGroupExchangeRule, ProductDto, ProductDto, ProductGroup>(
                 sql,
-                (productDto, groupItem, componentDto, groupOption, exchangeRule, fromProductDto, toProductDto) =>
+                (productDto, groupItem, componentDto, exchangeRule, fromProductDto, toProductDto) =>
                 {
                     if (!productGroupDict.TryGetValue(productDto.Id, out var productGroup))
                     {
@@ -279,28 +235,16 @@ namespace GesN.Web.Data.Repositories
                         productGroup.GroupItems.Add(groupItem);
                     }
 
-                    if (groupOption != null && !productGroup.GroupOptions.Any(go => go.Id == groupOption.Id))
-                    {
-                        productGroup.GroupOptions.Add(groupOption);
-                    }
-
                     if (exchangeRule != null && !productGroup.ExchangeRules.Any(er => er.Id == exchangeRule.Id))
                     {
-                        if (fromProductDto != null)
-                        {
-                            exchangeRule.OriginalProduct = ProductMapper.ToEntity(fromProductDto);
-                        }
-                        if (toProductDto != null)
-                        {
-                            exchangeRule.ExchangeProduct = ProductMapper.ToEntity(toProductDto);
-                        }
+                        // Exchange rules now use SourceGroupItem and TargetGroupItem instead of direct products
                         productGroup.ExchangeRules.Add(exchangeRule);
                     }
 
                     return productGroup;
                 },
                 new { Id = id },
-                splitOn: "Id,Id,Id,Id,Id,Id"
+                splitOn: "Id,Id,Id,Id,Id"
             );
 
             return productGroupDict.Values.FirstOrDefault();
@@ -465,22 +409,7 @@ namespace GesN.Web.Data.Repositories
             return count > 0;
         }
 
-        public async Task<bool> HasOptionsAsync(string id)
-        {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            
-            const string sql = @"
-                SELECT COUNT(1) FROM ProductGroupOption 
-                WHERE ProductGroupId = @Id AND StateCode = @StateCode";
-            
-            var count = await connection.QuerySingleAsync<int>(sql, new 
-            { 
-                Id = id, 
-                StateCode = (int)ObjectState.Active 
-            });
-            
-            return count > 0;
-        }
+
 
         public async Task<bool> HasExchangeRulesAsync(string id)
         {

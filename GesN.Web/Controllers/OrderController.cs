@@ -205,8 +205,11 @@ namespace GesN.Web.Controllers
                     return View(orderViewModel);
                 }
 
+                // Obter ID do usuário logado
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
+
                 // Cria o pedido
-                var orderId = await _orderService.CreateOrderAsync(orderViewModel);
+                var orderId = await _orderService.CreateOrderAsync(orderViewModel, userId);
                 TempData["SuccessMessage"] = "Pedido criado com sucesso!";
                 return RedirectToAction(nameof(Details), new { id = orderId });
             }
@@ -247,8 +250,11 @@ namespace GesN.Web.Controllers
                         errors = errors 
                     });
                 }
+
+                // Obter ID do usuário logado
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
                 
-                var orderId = await _orderService.CreateOrderAsync(orderViewModel);
+                var orderId = await _orderService.CreateOrderAsync(orderViewModel, userId);
                 
                 // Busca o pedido criado para obter o NumberSequence
                 var createdOrder = await _orderService.GetOrderByIdAsync(orderId);
@@ -396,7 +402,7 @@ namespace GesN.Web.Controllers
                 }
 
                 // Define dados de auditoria
-                order.LastModifiedBy = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                order.LastModifiedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
                 order.CreatedBy = existingOrder.CreatedBy;
                 order.CreatedAt = existingOrder.CreatedAt;
                 order.Status = existingOrder.Status;
@@ -483,7 +489,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Confirma o pedido
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Confirmed, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Confirmed, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao confirmar pedido. Por favor, tente novamente.";
@@ -517,7 +523,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Cancela o pedido
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Cancelled, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Cancelled, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao cancelar pedido. Por favor, tente novamente.";
@@ -551,7 +557,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Inicia produção
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.InProduction, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.InProduction, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao iniciar produção do pedido. Por favor, tente novamente.";
@@ -585,7 +591,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Marca para entrega
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.ReadyForDelivery, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.ReadyForDelivery, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao marcar pedido para entrega. Por favor, tente novamente.";
@@ -619,7 +625,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Inicia entrega
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.InDelivery, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.InDelivery, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao iniciar entrega do pedido. Por favor, tente novamente.";
@@ -653,7 +659,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Marca como entregue
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Delivered, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Delivered, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao marcar pedido como entregue. Por favor, tente novamente.";
@@ -687,7 +693,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Marca como concluído
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Completed, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Completed, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao marcar pedido como concluído. Por favor, tente novamente.";

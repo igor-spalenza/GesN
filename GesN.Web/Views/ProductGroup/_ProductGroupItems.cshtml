@@ -18,7 +18,8 @@
                 <table class="table table-hover">
                     <thead class="table-light">
                         <tr>
-                            <th>Produto</th>
+                            <th>Item</th>
+                            <th>Tipo</th>
                             <th>Quantidade</th>
                             <th>Min/Max</th>
                             <th>Preço Extra</th>
@@ -33,10 +34,22 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div>
-                                            <strong>@(item.ProductName ?? "Produto não identificado")</strong>
-                                            <br><small class="text-muted">ID: @item.ProductId</small>
+                                            <strong>@item.ItemName</strong>
+                                            @if (!string.IsNullOrWhiteSpace(item.ProductId))
+                                            {
+                                                <br><small class="text-muted">ID Produto: @item.ProductId</small>
+                                            }
+                                            else if (!string.IsNullOrWhiteSpace(item.ProductCategoryId))
+                                            {
+                                                <br><small class="text-muted">ID Categoria: @item.ProductCategoryId</small>
+                                            }
                                         </div>
                                     </div>
+                                </td>
+                                <td>
+                                    <span class="badge @(item.ItemType == "Produto" ? "bg-primary" : "bg-info")">
+                                        @item.ItemType
+                                    </span>
                                 </td>
                                 <td>
                                     <span class="badge bg-info">@item.Quantity</span>
@@ -75,12 +88,12 @@
                                         <button type="button" class="btn btn-outline-primary" 
                                                 onclick="ProductGroup.showEditItemModal('@item.Id')"
                                                 title="Editar">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="bi bi-pencil"></i>
                                         </button>
                                         <button type="button" class="btn btn-outline-danger" 
                                                 onclick="ProductGroup.confirmDeleteItem('@item.Id', '@item.ProductName')"
                                                 title="Excluir">
-                                            <i class="fas fa-trash"></i>
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
                                 </td>

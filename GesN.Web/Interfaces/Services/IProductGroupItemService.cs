@@ -19,8 +19,14 @@ namespace GesN.Web.Interfaces.Services
         Task<IEnumerable<ProductGroupItem>> GetOptionalByGroupAsync(string productGroupId);
         Task<int> CountByProductGroupAsync(string productGroupId);
         Task<bool> ItemExistsInGroupAsync(string productGroupId, string productId);
+        Task<bool> CategoryItemExistsInGroupAsync(string productGroupId, string productCategoryId);
         Task<decimal> CalculateGroupTotalPriceAsync(string productGroupId, IEnumerable<string> selectedItemIds);
         Task<bool> CanDeleteAsync(string id);
+        
+        // Métodos específicos para ProductCategory
+        Task<IEnumerable<ProductGroupItem>> GetByProductCategoryIdAsync(string productCategoryId);
+        Task<IEnumerable<ProductGroupItem>> GetCategoryItemsByGroupAsync(string productGroupId);
+        Task<IEnumerable<ProductGroupItem>> GetProductItemsByGroupAsync(string productGroupId);
         
         // Search and Filter
         Task<IEnumerable<ProductGroupItem>> SearchAsync(string searchTerm);

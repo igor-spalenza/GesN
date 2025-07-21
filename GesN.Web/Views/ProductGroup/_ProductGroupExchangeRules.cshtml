@@ -5,10 +5,23 @@
     <div class="section-header">
         <h6 class="section-title">
             <i class="fas fa-exchange-alt"></i> Regras de Troca
+            @if (ViewBag.IsItemSpecific == true)
+            {
+                <span class="text-muted"> - @ViewBag.ItemName</span>
+            }
         </h6>
-        <button type="button" class="btn btn-primary btn-sm" onclick="ProductGroup.showCreateExchangeRuleModal('@ViewBag.ProductId')">
-            <i class="fas fa-plus"></i> Adicionar Regra
-        </button>
+        @if (ViewBag.IsItemSpecific == true)
+        {
+            <button type="button" class="btn btn-primary btn-sm" onclick="ProductGroup.showCreateExchangeRuleModal('@ViewBag.ProductId', '@ViewBag.ItemId')">
+                <i class="fas fa-plus"></i> Adicionar Regra
+            </button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-primary btn-sm" onclick="ProductGroup.showCreateExchangeRuleModal('@ViewBag.ProductId')">
+                <i class="fas fa-plus"></i> Adicionar Regra
+            </button>
+        }
     </div>
 
     <div class="section-content">
@@ -18,10 +31,10 @@
                 <table class="table table-hover">
                     <thead class="table-light">
                         <tr>
-                            <th>Produto Original</th>
-                            <th>Produto de Troca</th>
+                            <th>Item Original</th>
+                            <th>Item de Troca</th>
                             <th>Proporção</th>
-                            <th>Custo Adicional</th>
+                            <th>Razão Efetiva</th>
                             <th>Status</th>
                             <th>Ações</th>
                         </tr>
@@ -33,16 +46,16 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div>
-                                            <strong>@(rule.OriginalProductName ?? "Produto não identificado")</strong>
-                                            <br><small class="text-muted">ID: @rule.OriginalProductId</small>
+                                            <strong>@(rule.SourceGroupItemName ?? "Item não identificado")</strong>
+                                            <br><small class="text-muted">Peso: @rule.SourceGroupItemWeight</small>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div>
-                                            <strong>@(rule.ExchangeProductName ?? "Produto não identificado")</strong>
-                                            <br><small class="text-muted">ID: @rule.ExchangeProductId</small>
+                                            <strong>@(rule.TargetGroupItemName ?? "Item não identificado")</strong>
+                                            <br><small class="text-muted">Peso: @rule.TargetGroupItemWeight</small>
                                         </div>
                                     </div>
                                 </td>
@@ -58,14 +71,12 @@
                                     }
                                 </td>
                                 <td>
-                                    @if (rule.AdditionalCost.HasValue && rule.AdditionalCost > 0)
-                                    {
-                                        <span class="text-warning">+ @rule.AdditionalCost.Value.ToString("C")</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">--</span>
-                                    }
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-secondary">
+                                            @rule.RatioDisplay
+                                        </span>
+                                        <br><small class="text-muted">@rule.ExchangeDescription</small>
+                                    </div>
                                 </td>
                                 <td>
                                     @if (rule.IsActive)
@@ -82,14 +93,14 @@
                                         <button type="button" class="btn btn-outline-primary" 
                                                 onclick="ProductGroup.showEditExchangeRuleModal('@rule.Id')"
                                                 title="Editar">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="bi bi-pencil"></i>
                                         </button>
                                         @if (rule.IsActive)
                                         {
                                             <button type="button" class="btn btn-outline-warning" 
                                                     onclick="ProductGroup.toggleExchangeRuleStatus('@rule.Id', false)"
                                                     title="Desativar">
-                                                <i class="fas fa-pause"></i>
+                                                <i class="bi bi-pause"></i>
                                             </button>
                                         }
                                         else
@@ -97,13 +108,13 @@
                                             <button type="button" class="btn btn-outline-success" 
                                                     onclick="ProductGroup.toggleExchangeRuleStatus('@rule.Id', true)"
                                                     title="Ativar">
-                                                <i class="fas fa-play"></i>
+                                                <i class="bi bi-play"></i>
                                             </button>
                                         }
                                         <button type="button" class="btn btn-outline-danger" 
-                                                onclick="ProductGroup.confirmDeleteExchangeRule('@rule.Id', '@rule.OriginalProductName', '@rule.ExchangeProductName')"
+                                                onclick="ProductGroup.confirmDeleteExchangeRule('@rule.Id', '@rule.SourceGroupItemName', '@rule.TargetGroupItemName')"
                                                 title="Excluir">
-                                            <i class="fas fa-trash"></i>
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
                                 </td>

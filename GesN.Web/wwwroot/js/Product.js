@@ -47,69 +47,43 @@ const productManager = {
         this.setupGlobalEventHandlers();
     },
 
-    // Setup global event handlers for modals and tabs
+    // Configurar monitoramento de mudanças no DOM
     setupGlobalEventHandlers: function() {
-        // Inicializar componentes quando modal é mostrado
-        $(document).off('shown.bs.modal.productManager').on('shown.bs.modal.productManager', '.modal', (e) => {
-            this.initializeForm(e.target);
-        });
-        
-        // Limpeza quando modal é fechado
-        $(document).off('hidden.bs.modal.productManager').on('hidden.bs.modal.productManager', '.modal', (e) => {
-            this.cleanupForm(e.target);
-        });
-        
-        // Inicializar componentes quando abas são mostradas (para o _Edit.cshtml)
-        $(document).off('shown.bs.tab.productManager').on('shown.bs.tab.productManager', 'button[data-bs-toggle="tab"]', (e) => {
-            const targetPane = $(e.target.getAttribute('data-bs-target'));
-            if (targetPane.length) {
-                // Delay para garantir que o conteúdo foi carregado
-                setTimeout(() => {
-                    this.initializeForm(targetPane[0]);
-                }, 150);
-
-                // As abas ProductGroup agora são renderizadas diretamente via @await Html.PartialAsync()
-                // Não precisamos mais das chamadas AJAX para loadGroupItems, loadGroupOptions, loadGroupExchangeRules
-                // Apenas inicializar floating labels nos forms que podem ter sido renderizados
-                const tabId = e.target.id;
-                if (tabId === 'group-items-tab' || tabId === 'group-options-tab' || tabId === 'exchange-rules-tab') {
-                    setTimeout(() => {
-                        if (this.forms) {
-                            this.forms.initFloatingLabels(targetPane[0]);
-                        }
-                    }, 200);
+        // Aplicar validação em tempo real nos formulários
+        $(document).on('input', 'input[name="Price"], input[name="Cost"]', function() {
+            const input = $(this);
+            const value = input.val();
+            
+            // Debounced validation
+            clearTimeout(this.validationTimeout);
+            this.validationTimeout = setTimeout(() => {
+                if (value && isNaN(parseFloat(value))) {
+                    input.addClass('is-invalid');
+                } else {
+                    input.removeClass('is-invalid');
                 }
-            }
+            }, 200);
         });
         
-        // Detectar quando conteúdo de edição é inserido no DOM (via AJAX)
-        $(document).off('DOMNodeInserted.productManager').on('DOMNodeInserted.productManager', (e) => {
-            // Verificar se é o container de edição de produto
-            if ($(e.target).hasClass('product-edit-container') || $(e.target).find('.product-edit-container').length) {
-                setTimeout(() => {
-                    this.initializeForm(e.target);
-                    this.checkForCompositeProducts();
-                }, 100);
-            }
-            // Verificar se há componentes que precisam de inicialização
-            else if ($(e.target).find('.select2-category, input[name="Price"], input[name="Cost"]').length) {
-                setTimeout(() => {
-                    this.initializeForm(e.target);
-                }, 100);
-            }
-        });
-        
-        // Fallback usando MutationObserver para browsers modernos
+        // Remover evento DOMNodeInserted depreciado - usar apenas MutationObserver
+        // Configurar MutationObserver para navegadores modernos
         if (typeof MutationObserver !== 'undefined') {
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
                     mutation.addedNodes.forEach((node) => {
                         if (node.nodeType === 1) { // Element node
                             const $node = $(node);
+                            // Verificar se é o container de edição de produto
                             if ($node.hasClass('product-edit-container') || $node.find('.product-edit-container').length) {
                                 setTimeout(() => {
                                     this.initializeForm(node);
                                     this.checkForCompositeProducts();
+                                }, 100);
+                            }
+                            // Verificar se há componentes que precisam de inicialização
+                            else if ($node.find('.select2-category, input[name="Price"], input[name="Cost"]').length) {
+                                setTimeout(() => {
+                                    this.initializeForm(node);
                                 }, 100);
                             }
                         }

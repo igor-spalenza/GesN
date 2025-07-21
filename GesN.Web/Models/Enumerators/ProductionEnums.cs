@@ -38,15 +38,7 @@ namespace GesN.Web.Models.Enumerators
         Urgent      // Urgente
     }
 
-    /// <summary>
-    /// Tipo de opção em grupo de produtos
-    /// Valores como TEXT no banco de dados
-    /// </summary>
-    public enum ProductGroupOptionType
-    {
-        Single,     // Seleção única
-        Multiple    // Seleção múltipla
-    }
+
 
     /// <summary>
     /// Unidades de medida para produtos e ingredientes

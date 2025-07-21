@@ -437,9 +437,6 @@ namespace GesN.Web.Models.ViewModels.Production
         [Display(Name = "Itens do Grupo")]
         public List<ProductGroupItemViewModel> GroupItems { get; set; } = new();
 
-        [Display(Name = "Opções do Grupo")]
-        public List<ProductGroupOptionViewModel> GroupOptions { get; set; } = new();
-
         [Display(Name = "Regras de Troca")]
         public List<ProductGroupExchangeRuleViewModel> ExchangeRules { get; set; } = new();
 
