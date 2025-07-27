@@ -41,6 +41,19 @@ namespace GesN.Web.Models.Enumerators
 
 
     /// <summary>
+    /// Status da demanda de produção
+    /// Valores como TEXT no banco de dados
+    /// </summary>
+    public enum DemandStatus
+    {
+        Pending,        // Pendente
+        Confirmed,      // Confirmado
+        Produced,       // Produzido
+        Ending,         // Finalizando
+        Delivered       // Entregue
+    }
+
+    /// <summary>
     /// Unidades de medida para produtos e ingredientes
     /// Valores como TEXT no banco de dados
     /// </summary>

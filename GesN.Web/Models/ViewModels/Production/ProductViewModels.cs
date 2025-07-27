@@ -443,6 +443,9 @@ namespace GesN.Web.Models.ViewModels.Production
         [Display(Name = "Componentes")]
         public ProductComponentIndexViewModel? ComponentIndexViewModel { get; set; }
 
+        [Display(Name = "Hierarquias do Produto")]
+        public List<ProductComponentHierarchyViewModel> ProductHierarchies { get; set; } = new();
+
         /// <summary>
         /// Indica se o produto é do tipo Group e deve exibir as abas relacionadas
         /// </summary>

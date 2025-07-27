@@ -35,11 +35,11 @@
                 @if (isComposite)
                 {
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="components-tab" data-bs-toggle="tab" 
-                        data-bs-target="#components-tab-pane" type="button" role="tab">
-                            <i class="fas fa-cogs"></i> Componentes
+                        <button class="nav-link" id="hierarchies-tab" data-bs-toggle="tab" data-bs-target="#hierarchies-tab-pane" type="button" role="tab">
+                            <i class="fas fa-sitemap"></i> Hierarquias
                         </button>
                     </li>
+                 
                 }
 
                 @if (isGroup)
@@ -67,28 +67,95 @@
                     </div>
                 </div>
 
-                <!-- Aba Componentes (só para Composite) -->
+                <!-- Abas para Composite Products -->
                 @if (isComposite)
                 {
-                    <div class="tab-pane fade" id="components-tab-pane" role="tabpanel">
+                    <!-- Aba Componentes -->
+                    @* <div class="tab-pane fade" id="components-tab-pane" role="tabpanel">
                         <div id="componentsContainer">
-                            <!-- Carrega os componentes do produto composto -->
-                            @if (Model.ComponentIndexViewModel != null)
-                            {
-                                @await Html.PartialAsync("~/Views/ProductComponent/_List.cshtml", Model.ComponentIndexViewModel)
+                            @{
+                                ViewBag.ProductId = ViewBag.ProductId ?? Model.Id;
                             }
-                            else
-                            {
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle"></i>
-                                    Nenhum componente encontrado para este produto.
-                                    <button type="button" class="btn btn-primary btn-sm ms-2" onclick="compositeProductManager.components.adicionarComponente('@ViewBag.ProductId')">
-                                        <i class="fas fa-plus"></i> Adicionar Componente
-                                    </button>
-                                </div>
+                            @await Html.PartialAsync("_ProductComponents", Model.ComponentIndexViewModel?.Components ?? new List<ProductComponentViewModel>())
+                        </div>
+                    </div> *@
+
+                    <!-- Aba Hierarquias -->
+                    <div class="tab-pane fade" id="hierarchies-tab-pane" role="tabpanel">
+                        <div id="hierarchiesContainer">
+                            @{
+                                ViewBag.ProductId = ViewBag.ProductId ?? Model.Id;
                             }
+                            @await Html.PartialAsync("_ProductComponentHierarchies", Model.ProductHierarchies ?? new List<ProductComponentHierarchyViewModel>())
                         </div>
                     </div>
+
+                    <!-- Aba Demandas -->
+                    @* <div class="tab-pane fade" id="demands-tab-pane" role="tabpanel">
+                        <div id="demandsContainer">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tasks"></i> Demandas de Produção
+                                </h5>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="compositeProductManager.demands.showCreateModal('@ViewBag.ProductId')">
+                                    <i class="fas fa-plus"></i> Nova Demanda
+                                </button>
+                            </div>
+
+                            <!-- Estatísticas Rápidas -->
+                            <div class="row mb-3">
+                                <div class="col-md-2">
+                                    <div class="card bg-warning text-white">
+                                        <div class="card-body text-center">
+                                            <div class="h4 mb-0" id="demands-pending-count">-</div>
+                                            <small>Pendentes</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="card bg-info text-white">
+                                        <div class="card-body text-center">
+                                            <div class="h4 mb-0" id="demands-confirmed-count">-</div>
+                                            <small>Confirmadas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="card bg-primary text-white">
+                                        <div class="card-body text-center">
+                                            <div class="h4 mb-0" id="demands-produced-count">-</div>
+                                            <small>Produzidas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body text-center">
+                                            <div class="h4 mb-0" id="demands-delivered-count">-</div>
+                                            <small>Entregues</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="card bg-danger text-white">
+                                        <div class="card-body text-center">
+                                            <div class="h4 mb-0" id="demands-overdue-count">-</div>
+                                            <small>Atrasadas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="demands-grid">
+                                <!-- Carregará via AJAX -->
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Carregando...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> *@
                 }
 
                 <!-- Abas do Grupo (só para Group) -->
@@ -128,4 +195,6 @@
 @if (isComposite)
 {
     <script src="~/js/CompositeProduct.js" asp-append-version="true"></script>
+    <script src="~/js/ProductComponentHierarchy.js" asp-append-version="true"></script>
+    <script src="~/js/Demand.js" asp-append-version="true"></script>
 }

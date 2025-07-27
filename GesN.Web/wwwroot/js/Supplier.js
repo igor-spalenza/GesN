@@ -88,6 +88,11 @@ var suppliersManager = {
                 $('#supplierModal .modal-body').html(data);
                 $('#supplierModal .modal-title').text('Novo Fornecedor');
                 $('#supplierModal').modal('show');
+                
+                // Inicializar máscaras após o modal ser exibido
+                $('#supplierModal').on('shown.bs.modal', function () {
+                    suppliersManager.initializeFormMasks();
+                });
             },
             error: function() {
                 toastr.error('Erro ao carregar formulário de criação');
@@ -182,6 +187,11 @@ var suppliersManager = {
             type: 'GET',
             success: function(data) {
                 suppliersManager.adicionarAba(tabId, 'Editar: ' + supplierName, data, false);
+                
+                // Inicializar máscaras após adicionar a aba
+                setTimeout(function() {
+                    suppliersManager.initializeFormMasks();
+                }, 100);
             },
             error: function() {
                 toastr.error('Erro ao carregar formulário de edição');
@@ -326,6 +336,29 @@ var suppliersManager = {
         } else if (termo.length === 0) {
             suppliersManager.carregarListaSuppliers();
         }
+    },
+
+    // Inicializar máscaras e validações de formulário
+    initializeFormMasks: function() {
+        // Máscara para telefone
+        $('#Phone').mask('(00) 00000-0000');
+        
+        // Máscara para documento baseada no tipo
+        $('#DocumentType').off('change.supplierMask').on('change.supplierMask', function() {
+            var docType = $(this).val();
+            var docInput = $('#DocumentNumber');
+            
+            docInput.unmask();
+            
+            if (docType === 'CPF') {
+                docInput.mask('000.000.000-00');
+            } else if (docType === 'CNPJ') {
+                docInput.mask('00.000.000/0000-00');
+            }
+        });
+        
+        // Aplicar máscara inicial se já tiver tipo selecionado
+        $('#DocumentType').trigger('change');
     }
 };
 

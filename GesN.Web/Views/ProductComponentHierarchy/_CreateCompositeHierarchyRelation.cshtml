@@ -1,0 +1,183 @@
+@using GesN.Web.Models.ViewModels.Production
+@model CreateCompositeProductXHierarchyViewModel
+
+<div class="modal fade" id="createCompositeHierarchyRelationModal" tabindex="-1" aria-labelledby="createCompositeHierarchyRelationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="createCompositeHierarchyRelationModalLabel">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Associar Hierarquia ao Produto
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form id="createCompositeHierarchyRelationForm" data-ajax-form="true">
+                <div class="modal-body">
+                    <!-- Campos Hidden -->
+                    <input type="hidden" asp-for="ProductId" />
+
+                    <!-- Seleção de Hierarquia -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="floating-input-group">
+                                <select asp-for="ProductComponentHierarchyId" class="form-select floating-input" 
+                                        asp-items="@Model.AvailableHierarchies" required>
+                                    <option value="">Selecione uma hierarquia...</option>
+                                </select>
+                                <label asp-for="ProductComponentHierarchyId" class="floating-label">
+                                    <i class="fas fa-sitemap text-primary"></i>
+                                    Hierarquia de Componentes
+                                </label>
+                                <span asp-validation-for="ProductComponentHierarchyId" class="field-validation-valid text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configurações de Quantidade -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="MinQuantity" type="number" min="1" 
+                                       class="form-control floating-input" placeholder=" " required />
+                                <label asp-for="MinQuantity" class="floating-label">
+                                    <i class="fas fa-sort-numeric-down text-primary"></i>
+                                    Quantidade Mínima
+                                </label>
+                                <span asp-validation-for="MinQuantity" class="field-validation-valid text-danger"></span>
+                                <div class="form-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle"></i>
+                                        Quantidade mínima necessária desta hierarquia
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="MaxQuantity" type="number" min="0" 
+                                       class="form-control floating-input" placeholder=" " />
+                                <label asp-for="MaxQuantity" class="floating-label">
+                                    <i class="fas fa-sort-numeric-up text-primary"></i>
+                                    Quantidade Máxima (0 = Ilimitado)
+                                </label>
+                                <span asp-validation-for="MaxQuantity" class="field-validation-valid text-danger"></span>
+                                <div class="form-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle"></i>
+                                        Quantidade máxima permitida (0 para ilimitado)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ordem de Montagem -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="AssemblyOrder" type="number" min="1" 
+                                       class="form-control floating-input" placeholder=" " required />
+                                <label asp-for="AssemblyOrder" class="floating-label">
+                                    <i class="fas fa-list-ol text-primary"></i>
+                                    Ordem de Montagem
+                                </label>
+                                <span asp-validation-for="AssemblyOrder" class="field-validation-valid text-danger"></span>
+                                <div class="form-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle"></i>
+                                        Ordem em que esta hierarquia será processada
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-check form-switch mt-3">
+                                <input asp-for="IsOptional" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsOptional" class="form-check-label">
+                                    <i class="fas fa-question-circle text-warning"></i>
+                                    Esta hierarquia é opcional
+                                </label>
+                                <div class="form-text">
+                                    <small class="text-muted">
+                                        Se marcado, esta hierarquia não será obrigatória na produção do produto
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observações -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="floating-input-group">
+                                <textarea asp-for="Notes" class="form-control floating-input" 
+                                          placeholder=" " rows="3" maxlength="500"></textarea>
+                                <label asp-for="Notes" class="floating-label">
+                                    <i class="fas fa-sticky-note text-primary"></i>
+                                    Observações
+                                </label>
+                                <span asp-validation-for="Notes" class="field-validation-valid text-danger"></span>
+                                <div class="form-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle"></i>
+                                        Observações adicionais sobre esta associação (máximo 500 caracteres)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview da Associação -->
+                    <div class="row" id="relationPreview" style="display: none;">
+                        <div class="col-12">
+                            <div class="card border-info bg-light">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-eye me-2"></i>
+                                        Preview da Associação
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <strong>Hierarquia:</strong>
+                                            <span id="previewHierarchy" class="text-primary"></span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Quantidade:</strong>
+                                            <span id="previewQuantity" class="text-success"></span>
+                                        </div>
+                                        <div class="col-md-6 mt-2">
+                                            <strong>Ordem:</strong>
+                                            <span id="previewOrder" class="text-info"></span>
+                                        </div>
+                                        <div class="col-md-6 mt-2">
+                                            <strong>Tipo:</strong>
+                                            <span id="previewType" class="badge"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Associar Hierarquia
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+ 

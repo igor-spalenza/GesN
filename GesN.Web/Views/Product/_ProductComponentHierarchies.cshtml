@@ -1,0 +1,190 @@
+@using GesN.Web.Models.ViewModels.Production
+@model List<ProductComponentHierarchyViewModel>
+
+<div class="product-hierarchy-section">
+    <div class="section-header">
+        <h6 class="section-title">
+            <i class="fas fa-sitemap"></i> Hierarquias de Componentes
+        </h6>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary btn-sm" onclick="CompositeProduct.showCreateHierarchyModal('@ViewBag.ProductId')">
+                <i class="fas fa-plus"></i> Nova Hierarquia
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="CompositeProduct.showAssignHierarchyModalWithConfig('@ViewBag.ProductId')">
+                <i class="fas fa-link"></i> Associar Existente
+            </button>
+        </div>
+    </div>
+
+    <div class="section-content">
+        @if (Model?.Any() == true)
+        {
+            <div class="table-responsive">
+                <table class="table table-hover" id="hierarchyRelationsTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ordem</th>
+                            <th>Hierarquia</th>
+                            <th>Configuração</th>
+                            <th>Quantidade</th>
+                            <th>Tipo</th>
+                            <th>Status</th>
+                            <th>Custo Adicional</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var relation in Model.OrderBy(r => r.AssemblyOrder))
+                        {
+                                                         <tr data-relation-id="@relation.RelationId" data-assembly-order="@relation.AssemblyOrder">
+                                 <td>
+                                     <div class="d-flex align-items-center">
+                                         <span class="badge bg-secondary me-2">@relation.AssemblyOrder</span>
+                                         <div class="btn-group btn-group-sm" role="group">
+                                             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="CompositeProduct.moveHierarchyUp('@relation.RelationId')" title="Mover para cima">
+                                                 <i class="fas fa-arrow-up"></i>
+                                             </button>
+                                             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="CompositeProduct.moveHierarchyDown('@relation.RelationId')" title="Mover para baixo">
+                                                 <i class="fas fa-arrow-down"></i>
+                                             </button>
+                                         </div>
+                                     </div>
+                                 </td>
+                                <td>
+                                    <div>
+                                                                                 <strong>@relation.Name</strong>
+                                         @if (!string.IsNullOrEmpty(relation.Description))
+                                         {
+                                             <br><small class="text-muted">@(relation.Description.Length > 50 ? relation.Description.Substring(0, 50) + "..." : relation.Description)</small>
+                                         }
+                                         else
+                                         {
+                                             <br><small class="text-muted">Hierarquia de componentes</small>
+                                         }
+                                    </div>
+                                </td>
+                                                                 <td>
+                                     <div class="small text-center">
+                                         @if (!string.IsNullOrEmpty(relation.Notes))
+                                         {
+                                             <div class="text-muted" title="@relation.Notes">
+                                                 <i class="fas fa-sticky-note"></i> Observações
+                                             </div>
+                                         }
+                                         else
+                                         {
+                                             <span class="text-muted">-</span>
+                                         }
+                                     </div>
+                                 </td>
+                                <td>
+                                    <div class="text-center">
+                                        <span class="badge bg-primary">@relation.MinQuantity</span>
+                                        @if (relation.MaxQuantity > 0)
+                                        {
+                                            <span> - </span>
+                                            <span class="badge bg-primary">@relation.MaxQuantity</span>
+                                        }
+                                        else
+                                        {
+                                            <span> - </span>
+                                            <span class="badge bg-info">∞</span>
+                                        }
+                                        <br><small class="text-muted">min - max</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-center">
+                                        @if (relation.IsOptional)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-question-circle"></i> Opcional
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-exclamation-circle"></i> Obrigatória
+                                            </span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-center">
+                                        <span class="badge bg-success">Ativo</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-center text-muted">
+                                        -
+                                    </div>
+                                </td>
+                                <td>
+                                                                         <div class="btn-group btn-group-sm" role="group">
+                                         <button type="button" class="btn btn-outline-info" 
+                                                 onclick="CompositeProduct.showRelationDetailsModal('@relation.RelationId')"
+                                                 title="Detalhes da Relação">
+                                             <i class="fas fa-eye"></i>
+                                         </button>
+                                         <button type="button" class="btn btn-outline-primary" 
+                                                 onclick="CompositeProduct.showEditRelationModal('@relation.RelationId')"
+                                                 title="Editar Configuração">
+                                             <i class="fas fa-edit"></i>
+                                         </button>
+                                         <button type="button" class="btn btn-outline-secondary" 
+                                                 onclick="CompositeProduct.showManageHierarchyComponentsModal('@relation.Id')"
+                                                 title="Gerenciar Componentes da Hierarquia">
+                                             <i class="fas fa-cogs"></i>
+                                         </button>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Mais Ações">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                                                                 <li>
+                                                     <a class="dropdown-item text-muted disabled" href="#">
+                                                         <i class="fas fa-check-circle"></i>
+                                                         Sempre Ativo
+                                                     </a>
+                                                 </li>
+                                                                                                 <li>
+                                                     <a class="dropdown-item" href="#" onclick="CompositeProduct.showHierarchyDetailsModal('@relation.Id')">
+                                                         <i class="fas fa-sitemap"></i> Ver Hierarquia Completa
+                                                     </a>
+                                                 </li>
+                                                 <li><hr class="dropdown-divider"></li>
+                                                 <li>
+                                                     <a class="dropdown-item text-danger" href="#" onclick="CompositeProduct.confirmRemoveRelation('@relation.RelationId', '@relation.Name')">
+                                                         <i class="fas fa-trash"></i> Remover Relação
+                                                     </a>
+                                                 </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="text-center py-4">
+                    <i class="fas fa-sitemap fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">Nenhuma hierarquia configurada</h6>
+                    <p class="text-muted">Configure hierarquias para este produto composto definindo quantidades, ordem de montagem e outras propriedades específicas.</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-primary" onclick="CompositeProduct.showCreateHierarchyModal('@ViewBag.ProductId')">
+                            <i class="fas fa-plus"></i> Criar Nova Hierarquia
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="CompositeProduct.showAssignHierarchyModalWithConfig('@ViewBag.ProductId')">
+                            <i class="fas fa-link"></i> Configurar Hierarquia Existente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div> 

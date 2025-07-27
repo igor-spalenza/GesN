@@ -71,7 +71,7 @@ namespace GesN.Web.Models.ViewModels.Production
 
         [Display(Name = "Nome do Item")]
         public string ItemName => !string.IsNullOrWhiteSpace(ProductName) ? ProductName :
-                                  !string.IsNullOrWhiteSpace(ProductCategoryName) ? $"[Categoria] {ProductCategoryName}" : "Item sem nome";
+                                  !string.IsNullOrWhiteSpace(ProductCategoryName) ? ProductCategoryName : "Item sem nome";
     }
 
     public class CreateProductGroupItemViewModel

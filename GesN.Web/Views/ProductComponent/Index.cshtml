@@ -11,81 +11,142 @@
                 <div class="card-header">
                     <h3 class="card-title">@ViewData["Title"]</h3>
                     <div class="card-tools">
-                        <a href="@Url.Action("Create")" class="btn btn-primary btn-sm">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="productComponentsManager.novoComponenteModal()">
                             <i class="fas fa-plus"></i> Novo Componente
-                        </a>
+                        </button>
                     </div>
                 </div>
-                <div class="card-body">
-                    @if (Model.Components.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped" id="componentsTable">
-                                <thead>
-                                    <tr>
-                                        <th>Produto Composto</th>
-                                        <th>Componente</th>
-                                        <th>Quantidade</th>
-                                        <th>Unidade</th>
-                                        <th>Opcional</th>
-                                        <th>Ordem</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var component in Model.Components)
-                                    {
-                                        <tr>
-                                            <td>@component.CompositeProductName</td>
-                                            <td>@component.ComponentProductName</td>
-                                            <td>@component.Quantity.ToString("N2")</td>
-                                            <td>@component.Unit</td>
-                                            <td>
-                                                @if (component.IsOptional)
-                                                {
-                                                    <span class="badge badge-info">Opcional</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge badge-success">Obrigatório</span>
-                                                }
-                                            </td>
-                                            <td>@component.AssemblyOrder</td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <a href="@Url.Action("Details", new { id = component.Id })" 
-                                                       class="btn btn-info btn-sm" title="Detalhes">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="@Url.Action("Edit", new { id = component.Id })" 
-                                                       class="btn btn-warning btn-sm" title="Editar">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="@Url.Action("Delete", new { id = component.Id })" 
-                                                       class="btn btn-danger btn-sm" title="Excluir">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                <div class="card-body p-0">
+                    <!-- Container para as abas -->
+                    <div class="card card-primary card-tabs">
+                        <div class="card-header p-0 pt-1">
+                            <ul class="nav nav-tabs" id="componentesTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab">
+                                        <i class="fas fa-list"></i> Lista de Componentes
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
-                    }
-                    else
-                    {
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            Nenhum componente cadastrado. <a href="@Url.Action("Create")">Clique aqui para criar o primeiro</a>.
+                        <div class="card-body">
+                            <div class="tab-content" id="componenteTabsContent">
+                                <div class="main-div tab-pane fade show active" id="main" role="tabpanel">
+                                    <div id="lista-componentes-container">
+                                        @if (Model.Components.Any())
+                                        {
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered table-striped" id="components-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Nome</th>
+                                                            <th>Descrição</th>
+                                                            <th>Hierarquia</th>
+                                                            <th>Custo Adicional</th>
+                                                            <th>Status</th>
+                                                            <th>Criado em</th>
+                                                            <th>Ações</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var component in Model.Components)
+                                                        {
+                                                            <tr>
+                                                                <td>
+                                                                    <strong>@component.Name</strong>
+                                                                </td>
+                                                                <td>
+                                                                    @if (!string.IsNullOrWhiteSpace(component.Description))
+                                                                    {
+                                                                        <span class="text-muted">@component.Description</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <em class="text-muted">-</em>
+                                                                    }
+                                                                </td>
+                                                                <td>
+                                                                    <span class="badge badge-secondary">
+                                                                        @(component.ProductComponentHierarchyName ?? "Não definida")
+                                                                    </span>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="text-success font-weight-bold">
+                                                                        @component.FormattedAdditionalCost
+                                                                    </span>
+                                                                </td>
+                                                                <td>
+                                                                    @if (component.StateCode == GesN.Web.Models.Enumerators.ObjectState.Active)
+                                                                    {
+                                                                        <span class="badge badge-success">✅ Ativo</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="badge badge-danger">❌ Inativo</span>
+                                                                    }
+                                                                </td>
+                                                                <td>
+                                                                    <small class="text-muted">
+                                                                        @component.FormattedCreatedAt
+                                                                    </small>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="btn-group" role="group">
+                                                                        <button type="button" class="btn btn-info btn-sm" title="Detalhes" 
+                                                                                onclick="productComponentsManager.verDetalhes('@component.Id')">
+                                                                            <i class="fas fa-eye"></i>
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-warning btn-sm" title="Editar"
+                                                                                onclick="productComponentsManager.editarComponente('@component.Id', '@component.Name')">
+                                                                            <i class="fas fa-edit"></i>
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-danger btn-sm" title="Excluir"
+                                                                                onclick="productComponentsManager.excluirComponente('@component.Id', '@component.Name')">
+                                                                            <i class="fas fa-trash"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle"></i>
+                                                Nenhum componente cadastrado. 
+                                                <button type="button" class="btn btn-link p-0" onclick="productComponentsManager.novoComponenteModal()">
+                                                    Clique aqui para criar o primeiro
+                                                </button>.
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal para criar/editar/visualizar componentes -->
+<div class="modal fade" id="componenteModal" tabindex="-1" aria-labelledby="componenteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="componenteModalLabel">Componente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Conteúdo será carregado dinamicamente -->
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
-    <script src="~/js/CompositeProduct.js"></script>
+    <script src="~/js/ProductComponent.js"></script>
 } 

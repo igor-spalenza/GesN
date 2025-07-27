@@ -1,0 +1,106 @@
+@using GesN.Web.Models.ViewModels.Production
+@using GesN.Web.Models.Enumerators
+@model List<ProductComponentHierarchyViewModel>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Componentes</th>
+                <th>Status</th>
+                <th>Criado em</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model?.Any() == true)
+            {
+                @foreach (var hierarchy in Model.OrderBy(h => h.Name))
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-sitemap text-muted me-2"></i>
+                                <div>
+                                    <strong>@hierarchy.Name</strong>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(hierarchy.Description))
+                            {
+                                <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@hierarchy.Description">
+                                    @hierarchy.Description
+                                </span>
+                            }
+                            else
+                            {
+                                <em class="text-muted">-</em>
+                            }
+                        </td>
+                        <td>
+                            <span class="badge bg-info">
+                                @hierarchy.ComponentCount
+                            </span>
+                        </td>
+                        <td>
+                            @if (hierarchy.IsActive)
+                            {
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    Ativa
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-times-circle"></i>
+                                    Inativa
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                @hierarchy.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-info" 
+                                        onclick="hierarchyManager.verDetalhes('@hierarchy.Id')"
+                                        title="Detalhes">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" 
+                                        onclick="hierarchyManager.editarHierarchy('@hierarchy.Id', '@hierarchy.Name')"
+                                        title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-danger" 
+                                        onclick="hierarchyManager.excluirHierarchy('@hierarchy.Id', '@hierarchy.Name')"
+                                        title="Excluir">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        <i class="fas fa-sitemap fa-3x mb-3"></i>
+                        <h6 class="text-muted">Nenhuma hierarquia encontrada</h6>
+                        <p class="text-muted">Crie hierarquias para organizar os componentes.</p>
+                        <button type="button" class="btn btn-primary" onclick="hierarchyManager.novoHierarchyModal()">
+                            <i class="fas fa-plus"></i> Criar Primeira Hierarquia
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div> 

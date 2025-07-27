@@ -1,0 +1,169 @@
+@model GesN.Web.Models.ViewModels.Production.EditDemandViewModel
+
+<form id="editDemandForm" method="post" asp-action="Edit">
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="StartedAt" type="hidden" />
+    <input asp-for="CompletedAt" type="hidden" />
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label asp-for="OrderItemId" class="form-label">@Html.DisplayNameFor(m => m.OrderItemId) <span class="text-danger">*</span></label>
+                @if (Model.IsReadonly)
+                {
+                    <input type="text" class="form-control" value="@Model.OrderItemDisplay" readonly />
+                    <input asp-for="OrderItemId" type="hidden" />
+                }
+                else
+                {
+                    <select asp-for="OrderItemId" class="form-control form-select" asp-items="Model.AvailableOrderItems">
+                        <option value="">Selecione um item do pedido...</option>
+                    </select>
+                }
+                <span asp-validation-for="OrderItemId" class="text-danger"></span>
+                @if (!string.IsNullOrEmpty(Model.OrderItemDisplay))
+                {
+                    <small class="form-text text-muted">@Model.OrderItemDisplay</small>
+                }
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label asp-for="ProductId" class="form-label">@Html.DisplayNameFor(m => m.ProductId) <span class="text-danger">*</span></label>
+                @if (Model.IsReadonly)
+                {
+                    <input type="text" class="form-control" value="@Model.ProductName" readonly />
+                    <input asp-for="ProductId" type="hidden" />
+                }
+                else
+                {
+                    <select asp-for="ProductId" class="form-control form-select" asp-items="Model.AvailableProducts">
+                        <option value="">Selecione um produto...</option>
+                    </select>
+                }
+                <span asp-validation-for="ProductId" class="text-danger"></span>
+                @if (!string.IsNullOrEmpty(Model.ProductName))
+                {
+                    <small class="form-text text-muted">@Model.ProductName</small>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label asp-for="Quantity" class="form-label">@Html.DisplayNameFor(m => m.Quantity) <span class="text-danger">*</span></label>
+                <input asp-for="Quantity" class="form-control quantity-mask" placeholder="Digite a quantidade" readonly="@Model.IsReadonly">
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label asp-for="Status" class="form-label">@Html.DisplayNameFor(m => m.Status)</label>
+                @if (Model.CanChangeStatus && !Model.IsReadonly)
+                {
+                    <select asp-for="Status" class="form-control form-select" asp-items="Model.AvailableStatuses">
+                    </select>
+                }
+                else
+                {
+                    <input type="text" class="form-control" value="@Model.StatusDisplay" readonly />
+                    <input asp-for="Status" type="hidden" />
+                }
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label asp-for="ExpectedDate" class="form-label">@Html.DisplayNameFor(m => m.ExpectedDate)</label>
+                @if (Model.CanChangeExpectedDate && !Model.IsReadonly)
+                {
+                    <input asp-for="ExpectedDate" type="date" class="form-control">
+                }
+                else
+                {
+                    <input type="text" class="form-control" value="@Model.ExpectedDate?.ToString("dd/MM/yyyy")" readonly />
+                    <input asp-for="ExpectedDate" type="hidden" />
+                }
+                <span asp-validation-for="ExpectedDate" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <label asp-for="ProductionOrderId" class="form-label">@Html.DisplayNameFor(m => m.ProductionOrderId)</label>
+                @if (Model.IsReadonly)
+                {
+                    <input type="text" class="form-control" value="@(string.IsNullOrEmpty(Model.ProductionOrderId) ? "Não atribuída" : "Atribuída")" readonly />
+                    <input asp-for="ProductionOrderId" type="hidden" />
+                }
+                else
+                {
+                    <select asp-for="ProductionOrderId" class="form-control form-select" asp-items="Model.AvailableProductionOrders">
+                        <option value="">Selecione uma ordem de produção (opcional)...</option>
+                    </select>
+                }
+                <span asp-validation-for="ProductionOrderId" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <label asp-for="Notes" class="form-label">@Html.DisplayNameFor(m => m.Notes)</label>
+                <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Observações sobre a demanda" readonly="@Model.IsReadonly"></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dados de Auditoria -->
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Informações do Sistema</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <small class="text-muted">Criado por:</small><br>
+                            <span>@Model.CreatedBy</span>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Criado em:</small><br>
+                            <span>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                        @if (Model.LastModifiedAt.HasValue)
+                        {
+                            <div class="col-md-3">
+                                <small class="text-muted">Modificado por:</small><br>
+                                <span>@Model.LastModifiedBy</span>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted">Modificado em:</small><br>
+                                <span>@Model.LastModifiedAt?.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
+        @if (!Model.IsReadonly)
+        {
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Salvar Alterações
+            </button>
+        }
+    </div>
+</form> 

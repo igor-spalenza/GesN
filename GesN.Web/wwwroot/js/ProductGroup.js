@@ -422,6 +422,9 @@ const productGroupManager = {
             // Initialize floating labels first
             productGroupManager.initializeFloatingLabels();
             
+            // Initialize group item form functionality
+            productGroupManager.exchangeRules.initializeGroupItemForm();
+            
             // Initialize autocomplete for ProductName field using Algolia autocomplete.js
             const productNameField = $('#ProductName');
             const productIdField = $('#ProductId');
@@ -1007,6 +1010,9 @@ const productGroupManager = {
             // Initialize floating labels first
             productGroupManager.initializeFloatingLabels();
             
+            // Initialize exchange rule form functionality
+            this.initializeExchangeRuleForm();
+            
             // Initialize autocomplete for Original Product field
             const originalProductField = $('#OriginalProductId');
             if (originalProductField.length) {
@@ -1162,6 +1168,188 @@ const productGroupManager = {
                     nameField.addClass('has-value');
                 }
             }
+        },
+
+        // Setup category autocomplete for a specific field
+        setupCategoryAutocomplete: function(nameFieldSelector, idFieldSelector) {
+            const nameField = $(nameFieldSelector);
+            const idField = $(idFieldSelector);
+            
+            if (nameField.length === 0) return;
+            
+            // Destroy existing autocomplete instance if any
+            if (nameField.data('aaAutocomplete')) {
+                nameField.autocomplete.destroy();
+            }
+            
+            // Initialize Algolia Autocomplete.js for Product Category
+            const autocompleteInstance = autocomplete(nameField[0], {
+                hint: false,
+                debug: false,
+                minLength: 2,
+                openOnFocus: false,
+                autoselect: true,
+                appendTo: nameField.closest('.modal-body, .tab-pane, body')[0]
+            }, [{
+                source: function(query, callback) {
+                    $.ajax({
+                        url: '/ProductCategory/BuscaProductCategoryAutocomplete',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: { termo: query },
+                        success: function(data) {
+                            const suggestions = $.map(data, function(item) {
+                                return {
+                                    label: item.name || item.label,
+                                    value: item.name || item.label,
+                                    id: item.id,
+                                    data: item
+                                };
+                            });
+                            callback(suggestions);
+                        },
+                        error: function() {
+                            callback([]);
+                        }
+                    });
+                },
+                displayKey: 'label',
+                templates: {
+                    suggestion: function(suggestion) {
+                        return '<div class="autocomplete-suggestion">' +
+                               '<div class="suggestion-title">' + (suggestion.data.name || suggestion.label) + '</div>' +
+                               (suggestion.data.description ? '<div class="suggestion-subtitle">' + suggestion.data.description + '</div>' : '') +
+                               '</div>';
+                    }
+                }
+            }]);
+
+            // Handle selection for Category
+            autocompleteInstance.on('autocomplete:selected', function(event, suggestion, dataset) {
+                if (suggestion && suggestion.id) {
+                    idField.val(suggestion.id);
+                    nameField.addClass('has-value');
+                    nameField.trigger('change');
+                }
+            });
+
+            // Clear hidden field when input is cleared
+            nameField.on('input', function() {
+                if ($(this).val().trim() === '') {
+                    idField.val('');
+                    $(this).removeClass('has-value');
+                }
+            });
+        },
+
+        // Initialize group item form (for _CreateGroupItem and _EditGroupItem)
+        initializeGroupItemForm: function() {
+            // Handle item type change
+            $('input[name="itemType"]').off('change.groupItem').on('change.groupItem', function() {
+                const selectedType = $(this).val();
+                
+                if (selectedType === 'Produto') {
+                    $('#productSelection').show();
+                    $('#categorySelection').hide();
+                    $('#ProductId').val('');
+                    $('#ProductName').val('').removeClass('has-value');
+                    $('#ProductCategoryId').val('');
+                    $('#ProductCategoryName').val('').removeClass('has-value');
+                } else if (selectedType === 'Categoria') {
+                    $('#productSelection').hide();
+                    $('#categorySelection').show();
+                    $('#ProductId').val('');
+                    $('#ProductName').val('').removeClass('has-value');
+                    $('#ProductCategoryId').val('');
+                    $('#ProductCategoryName').val('').removeClass('has-value');
+                }
+            });
+
+            // Initialize ProductCategory autocomplete
+            this.setupCategoryAutocomplete('#ProductCategoryName', '#ProductCategoryId');
+        },
+
+        // Setup group item autocomplete for exchange rules
+        setupGroupItemAutocomplete: function(nameFieldSelector, idFieldSelector) {
+            const nameField = $(nameFieldSelector);
+            const idField = $(idFieldSelector);
+            
+            if (nameField.length === 0 || nameField.prop('readonly')) return;
+            
+            // Destroy existing autocomplete instance if any
+            if (nameField.data('aaAutocomplete')) {
+                nameField.autocomplete.destroy();
+            }
+            
+            // Initialize Algolia Autocomplete.js for Group Item
+            const autocompleteInstance = autocomplete(nameField[0], {
+                hint: false,
+                debug: false,
+                minLength: 2,
+                openOnFocus: false,
+                autoselect: true,
+                appendTo: nameField.closest('.modal-body, .tab-pane, body')[0]
+            }, [{
+                source: function(query, callback) {
+                    const productGroupId = $('#ProductGroupId').val();
+                    $.ajax({
+                        url: '/ProductGroup/BuscaGroupItemAutocomplete',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: { termo: query, productGroupId: productGroupId },
+                        success: function(data) {
+                            const suggestions = $.map(data, function(item) {
+                                return {
+                                    label: item.label,
+                                    value: item.value,
+                                    id: item.id,
+                                    data: item
+                                };
+                            });
+                            callback(suggestions);
+                        },
+                        error: function() {
+                            callback([]);
+                        }
+                    });
+                },
+                displayKey: 'label',
+                templates: {
+                    suggestion: function(suggestion) {
+                        return '<div class="autocomplete-suggestion">' +
+                               '<div class="suggestion-title">' + suggestion.data.productName + '</div>' +
+                               (suggestion.data.productSKU ? '<div class="suggestion-subtitle">SKU: ' + suggestion.data.productSKU + '</div>' : '') +
+                               '<div class="suggestion-subtitle">Quantidade: ' + suggestion.data.weight + '</div>' +
+                               '</div>';
+                    }
+                }
+            }]);
+
+            // Handle selection
+            autocompleteInstance.on('autocomplete:selected', function(event, suggestion, dataset) {
+                if (suggestion && suggestion.id) {
+                    idField.val(suggestion.id);
+                    nameField.addClass('has-value');
+                    nameField.trigger('change');
+                }
+            });
+
+            // Clear hidden field when input is cleared
+            nameField.on('input', function() {
+                if ($(this).val().trim() === '') {
+                    idField.val('');
+                    $(this).removeClass('has-value');
+                }
+            });
+        },
+
+        // Initialize exchange rule form (for _CreateGroupExchangeRule and _EditGroupExchangeRule)
+        initializeExchangeRuleForm: function() {
+            // Initialize autocomplete for source group item
+            this.setupGroupItemAutocomplete('#SourceGroupItemName', '#SourceGroupItemId');
+            
+            // Initialize autocomplete for target group item
+            this.setupGroupItemAutocomplete('#TargetGroupItemName', '#TargetGroupItemId');
         },
 
         // Initialize Exchange Rule Create Form

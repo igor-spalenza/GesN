@@ -1,0 +1,196 @@
+@model GesN.Web.Models.ViewModels.Production.EditProductComponentViewModel
+@using GesN.Web.Models.Enumerators
+
+<form method="post" data-component-name="@Model.Name">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+
+    <div class="row">
+        <!-- Nome do Componente -->
+        <div class="col-md-6 mb-3">
+            <div class="floating-input-group">
+                <input asp-for="Name" type="text" 
+                       class="form-control floating-input" 
+                       placeholder=" " required maxlength="100" />
+                <label asp-for="Name" class="floating-label">
+                    <i class="fas fa-tag text-primary"></i>
+                    Nome do Componente
+                </label>
+                <span asp-validation-for="Name" class="field-validation-valid text-danger"></span>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="col-md-6 mb-3">
+            <div class="floating-input-group">
+                <select asp-for="StateCode" class="form-select floating-select" required>
+                    <option value="@((int)ObjectState.Active)">Ativo</option>
+                    <option value="@((int)ObjectState.Inactive)">Inativo</option>
+                </select>
+                <label asp-for="StateCode" class="floating-label">
+                    <i class="fas fa-toggle-on text-primary"></i>
+                    Status
+                </label>
+                <span asp-validation-for="StateCode" class="field-validation-valid text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Hierarquia de Componentes (com autocomplete) -->
+        <div class="col-12 mb-3">
+            <div class="floating-input-group">
+                <input type="text" 
+                       id="ProductComponentHierarchyName" 
+                       name="ProductComponentHierarchyName"
+                       value="@Model.ProductComponentHierarchyName"
+                       class="form-control floating-input autocomplete-input" 
+                       placeholder=" " 
+                       autocomplete="off"
+                       data-component-name="@Model.Name" />
+                <input type="hidden" 
+                       asp-for="ProductComponentHierarchyId" 
+                       id="ProductComponentHierarchyId" />
+                <label for="ProductComponentHierarchyName" class="floating-label">
+                    <i class="fas fa-sitemap text-primary"></i>
+                    Hierarquia de Componentes
+                </label>
+                <span asp-validation-for="ProductComponentHierarchyId" class="field-validation-valid text-danger"></span>
+                <div class="form-text">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Digite para buscar por hierarquias de componentes disponíveis
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Custo Adicional -->
+        <div class="col-md-6 mb-3">
+            <div class="floating-input-group">
+                <input asp-for="AdditionalCost" type="number" 
+                       class="form-control floating-input" 
+                       step="0.01" min="0" placeholder=" " />
+                <label asp-for="AdditionalCost" class="floating-label">
+                    <i class="fas fa-dollar-sign text-primary"></i>
+                    Custo Adicional (R$)
+                </label>
+                <span asp-validation-for="AdditionalCost" class="field-validation-valid text-danger"></span>
+                <div class="form-text">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Valor adicional específico para este componente
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Descrição -->
+        <div class="col-12 mb-3">
+            <div class="floating-input-group">
+                <textarea asp-for="Description" class="form-control floating-textarea" 
+                          rows="3" maxlength="500" placeholder=" "></textarea>
+                <label asp-for="Description" class="floating-label">
+                    <i class="fas fa-align-left text-primary"></i>
+                    Descrição (opcional)
+                </label>
+                <span asp-validation-for="Description" class="field-validation-valid text-danger"></span>
+                <div class="form-text">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Máximo 500 caracteres. Descreva detalhes específicos do componente.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações de Auditoria -->
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-light border">
+                <h6 class="mb-2">
+                    <i class="fas fa-info-circle text-info"></i>
+                    Informações de Auditoria
+                </h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small>
+                            <strong>Criado em:</strong> @Model.FormattedCreatedAt<br/>
+                            <strong>Criado por:</strong> @Model.CreatedBy
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <small>
+                            <strong>Última modificação:</strong> @Model.FormattedLastModifiedAt<br/>
+                            <strong>Modificado por:</strong> @(Model.LastModifiedBy ?? "-")
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações de Custo -->
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info" id="componentCostInfo">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-calculator fa-2x text-primary me-3"></i>
+                    <div>
+                        <h6 class="mb-1">
+                            <i class="fas fa-dollar-sign"></i>
+                            Resumo de Custos
+                        </h6>
+                        <div class="d-flex gap-3">
+                            <span>
+                                <strong>Custo Adicional:</strong> 
+                                <span id="displayAdditionalCost" class="text-success">@Model.AdditionalCost.ToString("C2")</span>
+                            </span>
+                            <span>
+                                <strong>Hierarquia:</strong> 
+                                <span id="displayHierarchyName" class="text-primary">@(Model.ProductComponentHierarchyName ?? "-")</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botões do Modal/Tab -->
+    <div class="modal-footer border-top pt-3 mt-3">
+        <button type="button" class="btn btn-secondary" onclick="productComponentsManager.fecharAba('@($"componente-{Model.Id}")')">
+            <i class="fas fa-times"></i> Fechar
+        </button>
+        <button type="button" class="btn btn-primary" onclick="productComponentsManager.salvarEdicaoComponente('@Model.Id')">
+            <i class="fas fa-save"></i> Salvar Alterações
+        </button>
+    </div>
+</form>
+
+<script>
+// Lógica específica para edição do ProductComponent
+$(document).ready(function() {
+    const container = $(document); // ou poderia ser um container mais específico
+    
+    // Atualizar display de custo quando custo adicional mudar
+    $('#AdditionalCost').on('input', function() {
+        if (typeof productComponentsManager !== 'undefined') {
+            productComponentsManager.atualizarDisplayCusto(container);
+        }
+    });
+
+    // Inicializar display de custo
+    if (typeof productComponentsManager !== 'undefined') {
+        productComponentsManager.atualizarDisplayCusto(container);
+    }
+    
+    // O autocomplete é inicializado pelo productComponentsManager.inicializarAutocompleteHierarchy()
+    // que é chamado automaticamente quando a aba é carregada
+});
+</script> 

@@ -83,7 +83,9 @@ namespace GesN.Web.Models.Entities.Production
         public int CalculateTotalAssemblyTime()
         {
             var baseTime = AssemblyTime;
-            var componentsTime = Components?.Sum(c => c.ComponentProduct?.AssemblyTime ?? 0) ?? 0;
+            // Na nova estrutura, usar tempo da hierarquia dos componentes (campo removido, retorna 0)
+            var componentsTime = Components?.Where(c => c.StateCode == ObjectState.Active)
+                .Sum(c => c.ProductComponentHierarchy?.CalculateTotalProcessingTime() ?? 0) ?? 0;
             return baseTime + componentsTime;
         }
 

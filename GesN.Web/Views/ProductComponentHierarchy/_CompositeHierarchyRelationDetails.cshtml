@@ -1,0 +1,208 @@
+@using GesN.Web.Models.ViewModels.Production
+@model CompositeProductXHierarchyDetailsViewModel
+
+<div class="relation-details-container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5 class="mb-1">
+                        <i class="fas fa-link text-primary"></i>
+                        Configuração da Hierarquia
+                    </h5>
+                    <small class="text-muted">ID: @Model.Id</small>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-success">Ativo</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Basic Information -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-sitemap text-primary"></i> Hierarquia
+                    </h6>
+                </div>
+                <div class="card-body">
+                                         <h6 class="card-title">@Model.HierarchyName</h6>
+                     <p class="card-text text-muted">Hierarquia de componentes configurada</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-box text-primary"></i> Produto
+                    </h6>
+                </div>
+                <div class="card-body">
+                                         <h6 class="card-title">@Model.ProductName</h6>
+                    <div class="mt-2">
+                        <span class="badge bg-secondary">
+                            <i class="fas fa-tag"></i> Produto Composto
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration Details -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cog text-primary"></i> Configurações da Relação
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Quantidade -->
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center">
+                                <h6 class="text-muted">Quantidade</h6>
+                                <div>
+                                    <span class="badge bg-primary fs-6">@Model.MinQuantity</span>
+                                    <span class="mx-2">-</span>
+                                    @if (Model.MaxQuantity > 0)
+                                    {
+                                        <span class="badge bg-primary fs-6">@Model.MaxQuantity</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info fs-6">∞</span>
+                                    }
+                                </div>
+                                <small class="text-muted">min - max</small>
+                            </div>
+                        </div>
+
+                        <!-- Ordem -->
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center">
+                                <h6 class="text-muted">Ordem de Montagem</h6>
+                                <div>
+                                    <span class="badge bg-secondary fs-5">#@Model.AssemblyOrder</span>
+                                </div>
+                                <small class="text-muted">sequência</small>
+                            </div>
+                        </div>
+
+                        <!-- Tipo -->
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center">
+                                <h6 class="text-muted">Tipo</h6>
+                                <div>
+                                    @if (Model.IsOptional)
+                                    {
+                                        <span class="badge bg-warning text-dark fs-6">
+                                            <i class="fas fa-question-circle"></i> Opcional
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger fs-6">
+                                            <i class="fas fa-exclamation-circle"></i> Obrigatória
+                                        </span>
+                                    }
+                                </div>
+                                <small class="text-muted">necessidade</small>
+                            </div>
+                        </div>
+
+                                                 <!-- Status -->
+                         <div class="col-md-3 mb-3">
+                             <div class="text-center">
+                                 <h6 class="text-muted">Status</h6>
+                                 <div>
+                                     <span class="badge bg-success fs-6">Ativo</span>
+                                 </div>
+                                 <small class="text-muted">configuração</small>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+         <!-- Notes Section -->
+     @if (!string.IsNullOrEmpty(Model.Notes))
+     {
+         <div class="row mb-4">
+             <div class="col-12">
+                 <div class="card">
+                     <div class="card-header">
+                         <h6 class="mb-0">
+                             <i class="fas fa-sticky-note text-primary"></i> Observações
+                         </h6>
+                     </div>
+                     <div class="card-body">
+                         <div class="p-2 bg-light rounded">
+                             @Model.Notes
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+     }
+
+    
+
+    
+
+         <!-- Actions -->
+     <div class="row mt-4">
+         <div class="col-12">
+             <div class="d-flex justify-content-end gap-2">
+                 <button type="button" class="btn btn-primary btn-sm" 
+                         onclick="CompositeProduct.showEditRelationModal('@Model.Id')">
+                     <i class="fas fa-edit"></i> Editar Configuração
+                 </button>
+                 
+                 <button type="button" class="btn btn-outline-secondary btn-sm" 
+                         onclick="CompositeProduct.showManageHierarchyComponentsModal('@Model.ProductComponentHierarchyId')">
+                     <i class="fas fa-cogs"></i> Gerenciar Componentes
+                 </button>
+                 
+                 <button type="button" class="btn btn-outline-info btn-sm" 
+                         onclick="CompositeProduct.showHierarchyDetailsModal('@Model.ProductComponentHierarchyId')">
+                     <i class="fas fa-sitemap"></i> Detalhes da Hierarquia
+                 </button>
+
+                 <button type="button" class="btn btn-outline-danger btn-sm" 
+                         onclick="CompositeProduct.confirmRemoveRelation('@Model.Id', '@Model.HierarchyName')">
+                     <i class="fas fa-trash"></i> Remover Relação
+                 </button>
+             </div>
+         </div>
+     </div>
+</div>
+
+<style>
+.relation-details-container .card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.relation-details-container .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.relation-details-container .badge.fs-6 {
+    font-size: 0.9rem !important;
+}
+
+.relation-details-container .badge.fs-5 {
+    font-size: 1.1rem !important;
+}
+</style> 

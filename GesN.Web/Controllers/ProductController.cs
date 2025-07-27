@@ -20,6 +20,7 @@ namespace GesN.Web.Controllers
         private readonly IProductComponentService _productComponentService;
         private readonly IProductGroupService _productGroupService;
         private readonly IProductionOrderService _productionOrderService;
+        private readonly ICompositeProductXHierarchyService _compositeProductXHierarchyService;
         private readonly ILogger<ProductController> _logger;
 
         public ProductController(
@@ -31,6 +32,7 @@ namespace GesN.Web.Controllers
             IProductComponentService productComponentService,
             IProductGroupService productGroupService,
             IProductionOrderService productionOrderService,
+            ICompositeProductXHierarchyService compositeProductXHierarchyService,
             ILogger<ProductController> logger)
         {
             _productCategoryService = productCategoryService;
@@ -41,6 +43,7 @@ namespace GesN.Web.Controllers
             _productComponentService = productComponentService;
             _productGroupService = productGroupService;
             _productionOrderService = productionOrderService;
+            _compositeProductXHierarchyService = compositeProductXHierarchyService;
             _logger = logger;
         }
 
@@ -196,17 +199,31 @@ namespace GesN.Web.Controllers
                 {
                     _logger.LogInformation("Carregando dados de ProductGroup para produto: {ProductId}", id);
 
-                    // Carregar GroupItems
-                    var groupItems = await _productGroupService.GetGroupItemsAsync(id);
+                    // Carregar GroupItems com dados de produtos e categorias
+                    var groupItems = await _productGroupService.GetGroupItemsWithProductDataAsync(id);
                     foreach (var item in groupItems)
                     {
-                        var itemProduct = await _productService.GetByIdAsync(item.ProductId);
+                        string? productName = null;
+                        string? productCategoryName = null;
+
+                        // Determinar se é produto ou categoria e popular os nomes
+                        if (!string.IsNullOrWhiteSpace(item.ProductId) && item.Product != null)
+                        {
+                            productName = item.Product.Name;
+                        }
+                        else if (!string.IsNullOrWhiteSpace(item.ProductCategoryId) && item.ProductCategory != null)
+                        {
+                            productCategoryName = item.ProductCategory.Name;
+                        }
+
                         viewModel.GroupItems.Add(new ProductGroupItemViewModel
                         {
                             Id = item.Id,
                             ProductGroupId = item.ProductGroupId,
                             ProductId = item.ProductId,
-                            ProductName = itemProduct?.Name ?? "Produto não encontrado",
+                            ProductName = productName,
+                            ProductCategoryId = item.ProductCategoryId,
+                            ProductCategoryName = productCategoryName,
                             Quantity = item.Quantity,
                             MinQuantity = item.MinQuantity,
                             MaxQuantity = item.MaxQuantity,
@@ -248,44 +265,27 @@ namespace GesN.Web.Controllers
                         viewModel.GroupItems.Count, viewModel.ExchangeRules.Count);
                 }
 
-                // Se for um produto do tipo Composite, carregar componentes
+                // Se for um produto do tipo Composite, carregar componentes e hierarquias
                 if (product.ProductType == ProductType.Composite)
                 {
                     _logger.LogInformation("Carregando componentes para produto composto: {ProductId}", id);
                     
+                    // Carregar componentes via hierarquias (nova estrutura)
                     try
                     {
-                        var components = await _productComponentService.GetByCompositeProductIdAsync(id);
+                        // Buscar todos os componentes - na nova estrutura não há relacionamento direto com produtos
+                        var components = await _productComponentService.GetAllAsync();
                         
                         // Criar ProductComponentIndexViewModel para a view
-                        var componentViewModels = components?.Select(c => new ProductComponentViewModel
-                        {
-                            Id = c.Id,
-                            CompositeProductId = c.CompositeProductId,
-                            ComponentProductId = c.ComponentProductId,
-                            ComponentProductName = c.ComponentProduct?.Name,
-                            ComponentProductSKU = c.ComponentProduct?.SKU,
-                            Quantity = c.Quantity,
-                            Unit = c.Unit.ToString(),
-                            IsOptional = c.IsOptional,
-                            AssemblyOrder = c.AssemblyOrder,
-                            Notes = c.Notes,
-                            CreatedAt = c.CreatedAt,
-                            ModifiedAt = c.LastModifiedAt,
-                            TotalCost = c.CalculateTotalCost()
-                        }).ToList() ?? new List<ProductComponentViewModel>();
+                        var componentViewModels = components?.Select(c => c.ToViewModel()).ToList() ?? new List<ProductComponentViewModel>();
 
                         // Criar o ViewModel de índice de componentes
                         var componentIndexViewModel = new ProductComponentIndexViewModel
                         {
                             Components = componentViewModels,
-                            CompositeProductId = id,
                             Statistics = new ProductComponentStatisticsViewModel
                             {
-                                TotalComponents = componentViewModels.Count,
-                                RequiredComponents = componentViewModels.Count(c => !c.IsOptional),
-                                OptionalComponents = componentViewModels.Count(c => c.IsOptional),
-                                EstimatedTotalCost = componentViewModels.Sum(c => c.TotalCost)
+                                TotalComponents = componentViewModels.Count
                             }
                         };
 
@@ -301,11 +301,53 @@ namespace GesN.Web.Controllers
                         viewModel.ComponentIndexViewModel = new ProductComponentIndexViewModel
                         {
                             Components = new List<ProductComponentViewModel>(),
-                            CompositeProductId = id,
                             Statistics = new ProductComponentStatisticsViewModel()
                         };
                         
                         _logger.LogInformation("Componentes inicializados com ViewModel vazio devido ao erro");
+                    }
+
+                    // Carregar hierarquias associadas ao produto composto
+                    _logger.LogInformation("Carregando hierarquias para produto composto: {ProductId}", id);
+                    
+                    try
+                    {
+                        var compositeRelations = await _compositeProductXHierarchyService.GetActiveProductHierarchiesAsync(id);
+                        var hierarchyViewModels = new List<ProductComponentHierarchyViewModel>();
+                        
+                        foreach (var relation in compositeRelations)
+                        {
+                            hierarchyViewModels.Add(new ProductComponentHierarchyViewModel
+                            {
+                                Id = relation.ProductComponentHierarchyId,
+                                Name = relation.HierarchyName,
+                                Description = "", // Será preenchida via service se necessário
+                                MinQuantity = relation.MinQuantity,
+                                MaxQuantity = relation.MaxQuantity,
+                                IsOptional = relation.IsOptional,
+                                AssemblyOrder = relation.AssemblyOrder,
+                                Notes = relation.Notes,
+                                StateCode = ObjectState.Active, // Usando Active por padrão já que são apenas ativas
+                                CreatedAt = DateTime.Now, // Placeholder - seria necessário buscar detalhes se necessário
+                                LastModifiedAt = null,
+                                RelationId = relation.Id,
+                                ProductName = product.Name // Adicionar o nome do produto
+                            });
+                        }
+                        
+                        // Ordenar por ordem de montagem
+                        viewModel.ProductHierarchies = hierarchyViewModels.OrderBy(h => h.AssemblyOrder).ThenBy(h => h.Name).ToList();
+                        
+                        _logger.LogInformation("Hierarquias carregadas: {HierarchiesCount} hierarquias", viewModel.ProductHierarchies.Count);
+                    }
+                    catch (Exception hierarchyEx)
+                    {
+                        _logger.LogError(hierarchyEx, "Erro ao carregar hierarquias para produto: {ProductId}. Erro: {Error}", id, hierarchyEx.Message);
+                        
+                        // Criar lista vazia em caso de erro
+                        viewModel.ProductHierarchies = new List<ProductComponentHierarchyViewModel>();
+                        
+                        _logger.LogInformation("Hierarquias inicializadas com lista vazia devido ao erro");
                     }
                 }
 

@@ -1,0 +1,268 @@
+@model GesN.Web.Models.ViewModels.Production.ProductComponentHierarchyDetailsViewModel
+
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="mb-0">
+                    <i class="fas fa-sitemap"></i> @Model.Name
+                </h6>
+                <small class="text-muted">
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge bg-success">Ativa</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Inativa</span>
+                    }
+                </small>
+            </div>
+            <div class="btn-group" role="group">
+                @if (Model.CanEdit)
+                {
+                    <button type="button" class="btn btn-outline-primary btn-sm" 
+                            onclick="CompositeProduct.showEditHierarchyModal('@Model.Id')">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                }
+                @if (Model.CanDuplicate)
+                {
+                    <button type="button" class="btn btn-outline-secondary btn-sm" 
+                            onclick="window.open('/ProductComponentHierarchy/Duplicate/@Model.Id', '_blank')">
+                        <i class="fas fa-copy"></i> Duplicar
+                    </button>
+                }
+                <button type="button" class="btn btn-outline-info btn-sm" 
+                        onclick="CompositeProduct.showManageHierarchyComponentsModal('@Model.Id', '@ViewBag.ProductId')">
+                    <i class="fas fa-cogs"></i> Gerenciar Componentes
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Informações Básicas -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <h6 class="text-primary">
+                    <i class="fas fa-info-circle"></i> Informações Gerais
+                </h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <td class="fw-bold">ID:</td>
+                            <td><code>@Model.Id</code></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Nome:</td>
+                            <td>@Model.Name</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Status:</td>
+                            <td>
+                                @if (Model.IsActive)
+                                {
+                                    <span class="badge bg-success">Ativa</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inativa</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Componentes:</td>
+                            <td>
+                                <span class="badge bg-info">@Model.ComponentCount</span>
+                                componentes
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-primary">
+                    <i class="fas fa-chart-bar"></i> Estatísticas de Uso
+                </h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <td class="fw-bold">Produtos Utilizando:</td>
+                            <td>
+                                <span class="badge bg-primary">@Model.UsageCount</span>
+                                produtos
+                            </td>
+                        </tr>
+                        @if (!string.IsNullOrEmpty(Model.UsageDescription))
+                        {
+                            <tr>
+                                <td class="fw-bold">Descrição de Uso:</td>
+                                <td>@Model.UsageDescription</td>
+                            </tr>
+                        }
+                        @if (Model.ProductRelationInfo != null)
+                        {
+                            <tr>
+                                <td class="fw-bold">Associado em:</td>
+                                <td>@Model.ProductRelationInfo.AssignedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Associado por:</td>
+                                <td>@Model.ProductRelationInfo.AssignedBy</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Descrição -->
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h6 class="text-primary">
+                        <i class="fas fa-align-left"></i> Descrição
+                    </h6>
+                    <p class="text-muted">@Model.Description</p>
+                </div>
+            </div>
+        }
+
+        <!-- Observações -->
+        @if (!string.IsNullOrEmpty(Model.Notes))
+        {
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h6 class="text-primary">
+                        <i class="fas fa-sticky-note"></i> Observações
+                    </h6>
+                    <div class="alert alert-light">
+                        <p class="mb-0">@Model.Notes</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Componentes da Hierarquia -->
+        @if (Model.Components?.Any() == true)
+        {
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h6 class="text-primary">
+                        <i class="fas fa-puzzle-piece"></i> Componentes da Hierarquia
+                    </h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Componente</th>
+                                    <th>Custo Adicional</th>
+                                    <th>Hierarquia</th>
+                                    <th class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var component in Model.Components)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-cog text-muted me-2"></i>
+                                                <div>
+                                                    <div class="fw-bold">@(component.Name ?? "Componente")</div>
+                                                    @if (!string.IsNullOrEmpty(component.Description))
+                                                    {
+                                                        <small class="text-muted">@component.Description</small>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">@component.AdditionalCost.ToString("C2")</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">@(component.ProductComponentHierarchy?.Name ?? "Esta Hierarquia")</span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (component.StateCode == GesN.Web.Models.Enumerators.ObjectState.Active)
+                                            {
+                                                <span class="badge bg-success">Ativo</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Inativo</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Produtos Relacionados -->
+        @if (Model.CompositeProducts?.Any() == true)
+        {
+            <div class="row">
+                <div class="col-12">
+                    <h6 class="text-primary">
+                        <i class="fas fa-boxes"></i> Produtos Compostos Relacionados
+                    </h6>
+                    <div class="row">
+                        @foreach (var product in Model.CompositeProducts)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-2">
+                                <div class="card border-left-primary">
+                                    <div class="card-body p-2">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-cube text-primary me-2"></i>
+                                            <div>
+                                                <div class="fw-bold">@(product.Product?.Name ?? "Produto")</div>
+                                                @if (!string.IsNullOrEmpty(product.Product?.SKU))
+                                                {
+                                                    <small class="text-muted">SKU: @product.Product.SKU</small>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Auditoria -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <small class="text-muted">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <i class="fas fa-calendar-plus"></i>
+                            Criado em: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            @if (!string.IsNullOrEmpty(Model.CreatedBy))
+                            {
+                                <span> por @Model.CreatedBy</span>
+                            }
+                        </div>
+                        @if (Model.LastModifiedAt.HasValue)
+                        {
+                            <div class="col-md-6">
+                                <i class="fas fa-calendar-edit"></i>
+                                Modificado em: @Model.LastModifiedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                @if (!string.IsNullOrEmpty(Model.LastModifiedBy))
+                                {
+                                    <span> por @Model.LastModifiedBy</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                </small>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -5,68 +5,43 @@ using System.ComponentModel.DataAnnotations;
 namespace GesN.Web.Models.Entities.Production
 {
     /// <summary>
-    /// Entidade de relacionamento entre produto composto e seus componentes
+    /// Entidade que representa um componente de produto
     /// </summary>
     public class ProductComponent : Entity
     {
         /// <summary>
-        /// ID do produto composto pai
+        /// Nome do componente
         /// </summary>
-        [Required(ErrorMessage = "O produto composto é obrigatório")]
-        [Display(Name = "Produto Composto")]
-        public string CompositeProductId { get; set; } = string.Empty;
+        [Required(ErrorMessage = "O nome do componente é obrigatório")]
+        [Display(Name = "Nome")]
+        [MaxLength(100, ErrorMessage = "O nome deve ter no máximo {1} caracteres")]
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// ID do produto componente (filho)
+        /// Descrição do componente
         /// </summary>
-        [Required(ErrorMessage = "O produto componente é obrigatório")]
-        [Display(Name = "Produto Componente")]
-        public string ComponentProductId { get; set; } = string.Empty;
+        [Display(Name = "Descrição")]
+        [MaxLength(500, ErrorMessage = "A descrição deve ter no máximo {1} caracteres")]
+        public string? Description { get; set; }
 
         /// <summary>
-        /// Quantidade necessária do componente
+        /// ID da hierarquia de componentes à qual este componente pertence
         /// </summary>
-        [Required(ErrorMessage = "A quantidade é obrigatória")]
-        [Display(Name = "Quantidade")]
-        [Range(0.001, double.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
-        public decimal Quantity { get; set; }
+        [Required(ErrorMessage = "A hierarquia de componentes é obrigatória")]
+        [Display(Name = "Hierarquia de Componentes")]
+        public string ProductComponentHierarchyId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Unidade de medida da quantidade
+        /// Custo adicional do componente
         /// </summary>
-        [Required(ErrorMessage = "A unidade é obrigatória")]
-        [Display(Name = "Unidade")]
-        public ProductionUnit Unit { get; set; } = ProductionUnit.Unidades;
+        [Display(Name = "Custo Adicional")]
+        [Range(0, double.MaxValue, ErrorMessage = "O custo adicional deve ser maior ou igual a zero")]
+        public decimal AdditionalCost { get; set; } = 0;
 
         /// <summary>
-        /// Indica se o componente é opcional
+        /// Propriedade navegacional para a hierarquia de componentes
         /// </summary>
-        [Display(Name = "Componente Opcional")]
-        public bool IsOptional { get; set; } = false;
-
-        /// <summary>
-        /// Ordem de montagem (para sequência de montagem)
-        /// </summary>
-        [Display(Name = "Ordem de Montagem")]
-        [Range(0, int.MaxValue, ErrorMessage = "A ordem deve ser maior ou igual a zero")]
-        public int AssemblyOrder { get; set; } = 0;
-
-        /// <summary>
-        /// Observações sobre o componente
-        /// </summary>
-        [Display(Name = "Observações")]
-        [MaxLength(500)]
-        public string? Notes { get; set; }
-
-        /// <summary>
-        /// Propriedade navegacional para o produto composto
-        /// </summary>
-        public Product? CompositeProduct { get; set; }
-
-        /// <summary>
-        /// Propriedade navegacional para o produto componente
-        /// </summary>
-        public Product? ComponentProduct { get; set; }
+        public ProductComponentHierarchy? ProductComponentHierarchy { get; set; }
 
         /// <summary>
         /// Construtor padrão
@@ -78,57 +53,77 @@ namespace GesN.Web.Models.Entities.Production
         /// <summary>
         /// Construtor com dados básicos
         /// </summary>
-        public ProductComponent(string compositeProductId, string componentProductId, decimal quantity, ProductionUnit unit = ProductionUnit.Unidades)
+        public ProductComponent(string name, string productComponentHierarchyId, decimal additionalCost = 0)
         {
-            CompositeProductId = compositeProductId;
-            ComponentProductId = componentProductId;
-            Quantity = quantity;
-            Unit = unit;
+            Name = name;
+            ProductComponentHierarchyId = productComponentHierarchyId;
+            AdditionalCost = additionalCost;
         }
 
         /// <summary>
-        /// Calcula o custo total deste componente
+        /// Construtor completo
+        /// </summary>
+        public ProductComponent(string name, string? description, string productComponentHierarchyId, decimal additionalCost)
+        {
+            Name = name;
+            Description = description;
+            ProductComponentHierarchyId = productComponentHierarchyId;
+            AdditionalCost = additionalCost;
+        }
+
+        /// <summary>
+        /// Calcula o custo total do componente incluindo custos adicionais
         /// </summary>
         public decimal CalculateTotalCost()
         {
-            if (ComponentProduct == null) return 0;
+            decimal baseCost = 0;
             
-            return ComponentProduct.Cost * Quantity;
+            // Se há uma hierarquia associada, pega o custo base dela
+            if (ProductComponentHierarchy != null)
+            {
+                // Aqui você pode implementar a lógica para calcular o custo base
+                // baseado na hierarquia, por exemplo, somando custos de materiais
+                baseCost = 0; // Placeholder - implementar conforme regra de negócio
+            }
+            
+            return baseCost + AdditionalCost;
         }
 
         /// <summary>
-        /// Verifica se o componente está disponível
+        /// Verifica se o componente está ativo
         /// </summary>
-        public bool IsAvailable()
+        public bool IsActive()
         {
-            if (ComponentProduct == null) return false;
-            
-            // Sem controle de estoque direto na nova estrutura - assume sempre disponível
-            return ComponentProduct.StateCode == ObjectState.Active;
+            return StateCode == ObjectState.Active;
         }
 
         /// <summary>
-        /// Obtém a descrição formatada da quantidade
+        /// Obtém informações resumidas do componente
         /// </summary>
-        public string GetQuantityDescription()
+        public string GetSummary()
         {
-            var description = $"{Quantity:N2} {Unit}";
+            var summary = Name;
             
-            if (IsOptional)
-                description += " (Opcional)";
+            if (!string.IsNullOrWhiteSpace(Description))
+                summary += $" - {Description}";
+                
+            if (AdditionalCost > 0)
+                summary += $" (Custo adicional: R$ {AdditionalCost:N2})";
             
-            return description;
+            return summary;
         }
 
         /// <summary>
-        /// Obtém informações de disponibilidade
+        /// Obtém o status de ativação formatado
         /// </summary>
-        public string GetAvailabilityInfo()
+        public string GetStatusDisplay()
         {
-            if (IsAvailable())
-                return "✅ Disponível";
-            
-            return "❌ Indisponível";
+            return StateCode switch
+            {
+                ObjectState.Active => "✅ Ativo",
+                ObjectState.Inactive => "❌ Inativo",
+                _ => "❓ Indefinido"
+            };
         }
 
         /// <summary>
@@ -136,9 +131,24 @@ namespace GesN.Web.Models.Entities.Production
         /// </summary>
         public bool HasCompleteData()
         {
-            return !string.IsNullOrWhiteSpace(CompositeProductId) &&
-                   !string.IsNullOrWhiteSpace(ComponentProductId) &&
-                   Quantity > 0;
+            return !string.IsNullOrWhiteSpace(Name) &&
+                   !string.IsNullOrWhiteSpace(ProductComponentHierarchyId);
+        }
+
+        /// <summary>
+        /// Obtém o nome da hierarquia associada
+        /// </summary>
+        public string GetHierarchyName()
+        {
+            return ProductComponentHierarchy?.Name ?? "Hierarquia não carregada";
+        }
+
+        /// <summary>
+        /// Valida se o componente está pronto para uso
+        /// </summary>
+        public bool IsReadyForUse()
+        {
+            return HasCompleteData() && IsActive();
         }
 
         /// <summary>
@@ -146,8 +156,20 @@ namespace GesN.Web.Models.Entities.Production
         /// </summary>
         public override string ToString()
         {
-            var productName = ComponentProduct?.Name ?? "Produto";
-            return $"{productName}: {GetQuantityDescription()}";
+            return GetSummary();
         }
+
+        // Métodos de compatibilidade (obsoletos)
+        
+        /// <summary>
+        /// Verifica se o componente está disponível (compatibilidade)  
+        /// </summary>
+        [Obsolete("Use IsActive() - a nova estrutura não tem conceito de disponibilidade separado")]
+        public bool IsAvailable()
+        {
+            return IsActive();
+        }
+
+
     }
 } 

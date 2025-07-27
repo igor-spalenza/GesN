@@ -63,6 +63,14 @@ namespace GesN.Web.Infrastructure.Configuration
             services.AddScoped<IProductionOrderRepository, ProductionOrderRepository>();
             services.AddScoped<IProductionOrderService, ProductionOrderService>();
 
+            // Sprint 4 - Composite Product Support (Demand & Hierarchy)
+            services.AddScoped<IDemandRepository, DemandRepository>();
+            services.AddScoped<IDemandService, DemandService>();
+            services.AddScoped<IProductComponentHierarchyRepository, ProductComponentHierarchyRepository>();
+            services.AddScoped<IProductComponentHierarchyService, ProductComponentHierarchyService>();
+            services.AddScoped<ICompositeProductXHierarchyRepository, CompositeProductXHierarchyRepository>();
+            services.AddScoped<ICompositeProductXHierarchyService, CompositeProductXHierarchyService>();
+
             // Legados
             services.AddScoped<IClienteService, ClienteService>();
             services.AddScoped<IClienteRepository, ClienteRepository>();

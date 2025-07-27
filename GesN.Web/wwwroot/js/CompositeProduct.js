@@ -38,6 +38,27 @@ const compositeProductManager = {
         window.removerComponente = (componentId) => {
             this.components.removerComponente(componentId);
         };
+
+        // Bind tab events for dynamic content loading
+        this.bindTabEvents();
+    },
+
+    // Bind tab events
+    bindTabEvents: function() {
+        // Event listeners para as abas (hierarquias e demandas)
+        $(document).off('shown.bs.tab', '#hierarchies-tab').on('shown.bs.tab', '#hierarchies-tab', () => {
+            const productId = $('.product-edit-container').data('product-id') || $('#ProductId').val();
+            if (productId) {
+                this.hierarchies.loadHierarchies(productId);
+            }
+        });
+
+        $(document).off('shown.bs.tab', '#demands-tab').on('shown.bs.tab', '#demands-tab', () => {
+            const productId = $('.product-edit-container').data('product-id') || $('#ProductId').val();
+            if (productId) {
+                this.demands.loadDemands(productId);
+            }
+        });
     },
 
     // Initialize components list (DataTable, etc.)
@@ -116,21 +137,36 @@ const compositeProductManager = {
 
     // ProductComponent Management
     components: {
-        // Carregar componentes
+        // Carregar componentes integrado
         carregarComponentes: function(productId) {
+            console.log('Carregando componentes para produto:', productId);
+            
+            if (!productId) {
+                console.error('ProductId não fornecido para carregar componentes');
+                return;
+            }
+
+            // Show loading indicator
+            const container = $('#componentsContainer');
+            if (container.length === 0) {
+                console.warn('Container #componentsContainer não encontrado');
+                return;
+            }
+
+            const originalContent = container.html();
+            container.html('<div class="text-center p-4"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>');
+
             $.ajax({
-                url: `/ProductComponent/List/${productId}`,
+                url: `/ProductComponent/ProductComponents/${productId}`,
                 type: 'GET',
                 success: (data) => {
-                    $('#componentsContainer').html(data);
-                    
-                    // Reinicializar DataTable após carregar novos componentes
-                    setTimeout(() => {
-                        this.initializeComponentsList();
-                    }, 100);
+                    container.html(data);
+                    console.log('Componentes carregados com sucesso');
                 },
                 error: (xhr) => {
-                    $('#componentsContainer').html('<div class="alert alert-danger">Erro ao carregar componentes</div>');
+                    console.error('Erro ao carregar componentes:', xhr);
+                    container.html(originalContent);
+                    toastr.error('Erro ao carregar componentes');
                 }
             });
         },
@@ -177,12 +213,19 @@ const compositeProductManager = {
             });
         },
 
-        // Adicionar componente
-        adicionarComponente: function(productId) {
+        // Show create component modal integrado
+        showCreateComponentModal: function(productId) {
+            console.log('Abrindo modal de criação de componente para produto:', productId);
+
             $.ajax({
                 url: `/ProductComponent/FormularioComponente/${productId}`,
                 type: 'GET',
                 success: function(data) {
+                    // Remove modal if it exists
+                    if ($('#createComponentModal').length > 0) {
+                        $('#createComponentModal').remove();
+                    }
+                    
                     const modalHtml = `
                         <div class="modal fade" id="createComponentModal" tabindex="-1">
                             <div class="modal-dialog modal-lg">
@@ -200,7 +243,7 @@ const compositeProductManager = {
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                             Cancelar
                                         </button>
-                                        <button type="button" class="btn btn-primary" onclick="compositeProductManager.components.salvarComponente()">
+                                        <button type="button" class="btn btn-primary" id="btnSaveComponent">
                                             <i class="fas fa-save"></i> Salvar
                                         </button>
                                     </div>
@@ -209,22 +252,51 @@ const compositeProductManager = {
                         </div>`;
                     
                     $('body').append(modalHtml);
-                    $('#createComponentModal').modal('show');
                     
                     // Initialize form after modal is shown
                     $('#createComponentModal').on('shown.bs.modal', function () {
+                        console.log('Modal de componente mostrado, productId:', productId);
+                        
+                        // Ensure CompositeProductId is set correctly
+                        const compositeProductIdField = $('#CompositeProductId');
+                        if (compositeProductIdField.length) {
+                            if (!compositeProductIdField.val() || compositeProductIdField.val() === '') {
+                                compositeProductIdField.val(productId);
+                                console.log('CompositeProductId definido para:', productId);
+                            }
+                        }
+                        
                         compositeProductManager.components.initializeForm();
+                        
+                        // Clear any previous validation errors
+                        $(this).find('.text-danger').text('');
+                        $(this).find('.is-invalid').removeClass('is-invalid');
+                    });
+                    
+                    // Handle save button click
+                    $('#createComponentModal').off('click', '#btnSaveComponent').on('click', '#btnSaveComponent', function() {
+                        compositeProductManager.components.save();
                     });
                     
                     // Clean up when modal is closed
                     $('#createComponentModal').on('hidden.bs.modal', function () {
+                        $(this).find('form')[0]?.reset();
                         $(this).remove();
                     });
+                    
+                    // Show modal
+                    $('#createComponentModal').modal('show');
                 },
                 error: function(xhr) {
+                    console.error('Erro ao abrir modal de criação:', xhr);
                     toastr.error('Erro ao abrir formulário de componente');
                 }
             });
+        },
+
+        // Manter compatibilidade com nome antigo
+        adicionarComponente: function(productId) {
+            this.showCreateComponentModal(productId);
         },
 
         // Editar componente
@@ -277,8 +349,8 @@ const compositeProductManager = {
             });
         },
 
-        // Salvar componente
-        salvarComponente: function() {
+        // Save component integrado
+        save: function() {
             const form = $('#formCreateComponent')[0];
             if (!form) {
                 toastr.error('Formulário não encontrado');
@@ -287,10 +359,30 @@ const compositeProductManager = {
 
             const formData = new FormData(form);
 
+            // Debug: Log form data before sending
+            console.log('Form data sendo enviado:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            
+            // Validate required fields before sending
+            const compositeProductId = formData.get('CompositeProductId');
+            const componentProductId = formData.get('ComponentProductId');
+            const quantity = formData.get('Quantity');
+            
+            console.log('Validation check - CompositeProductId:', compositeProductId);
+            console.log('Validation check - ComponentProductId:', componentProductId);
+            console.log('Validation check - Quantity:', quantity);
+            
+            if (!compositeProductId || compositeProductId.trim() === '') {
+                toastr.error('ID do produto composto não foi definido. Recarregue a página e tente novamente.');
+                return;
+            }
+
             // Disable submit button
-            const submitBtn = $('#createComponentModal .btn-primary');
-            const originalText = submitBtn.text();
-            submitBtn.prop('disabled', true).text('Salvando...');
+            const submitBtn = $('#btnSaveComponent');
+            const originalText = submitBtn.html();
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Salvando...');
 
             $.ajax({
                 url: '/ProductComponent/SalvarComponente',
@@ -304,9 +396,8 @@ const compositeProductManager = {
                         $('#createComponentModal').modal('hide');
                         
                         // Recarregar lista de componentes
-                        const productId = $('#formCreateComponent input[name="CompositeProductId"]').val();
-                        if (productId) {
-                            compositeProductManager.components.carregarComponentes(productId);
+                        if (compositeProductId) {
+                            compositeProductManager.components.carregarComponentes(compositeProductId);
                         }
                     } else {
                         toastr.error(response.message || 'Erro ao salvar componente');
@@ -317,14 +408,28 @@ const compositeProductManager = {
                     }
                 },
                 error: function(xhr) {
-                    const errorMsg = xhr.responseJSON?.message || 'Erro ao salvar componente';
+                    console.error('Erro ao salvar componente:', xhr);
+                    let errorMsg = 'Erro ao salvar componente';
+                    
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        compositeProductManager.utils.showValidationErrors(xhr.responseJSON.errors, 'createComponentModal');
+                        errorMsg = 'Verifique os dados informados';
+                    }
+                    
                     toastr.error(errorMsg);
                 },
                 complete: function() {
                     // Re-enable submit button
-                    submitBtn.prop('disabled', false).text(originalText);
+                    submitBtn.prop('disabled', false).html(originalText);
                 }
             });
+        },
+
+        // Manter compatibilidade com nome antigo
+        salvarComponente: function() {
+            this.save();
         },
 
         // Salvar edição de componente
@@ -520,6 +625,536 @@ const compositeProductManager = {
         }
     },
 
+    // ProductComponentHierarchy Management
+    hierarchies: {
+        // Carregar hierarquias integrado
+        carregarHierarquias: function(productId) {
+            console.log('Carregando hierarquias para produto:', productId);
+            
+            if (!productId) {
+                console.error('ProductId não fornecido para carregar hierarquias');
+                return;
+            }
+
+            // Show loading indicator
+            const container = $('#hierarchiesContainer');
+            if (container.length === 0) {
+                console.warn('Container #hierarchiesContainer não encontrado');
+                return;
+            }
+
+            const originalContent = container.html();
+            container.html('<div class="text-center p-4"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>');
+
+            $.ajax({
+                url: `/ProductComponentHierarchy/ProductHierarchies/${productId}`,
+                type: 'GET',
+                success: (data) => {
+                    container.html(data);
+                    console.log('Hierarquias carregadas com sucesso');
+                },
+                error: (xhr) => {
+                    console.error('Erro ao carregar hierarquias:', xhr);
+                    container.html(originalContent);
+                    toastr.error('Erro ao carregar hierarquias');
+                }
+            });
+        },
+
+        // Carregar hierarquias (método alternativo para compatibilidade)
+        loadHierarchies: function(productId) {
+            $('#hierarchies-grid').load(`/ProductComponentHierarchy/GetByProduct/${productId}`);
+        },
+
+        // Mostrar modal de criação de hierarquia (método alternativo para compatibilidade)
+        showCreateModal: function(productId) {
+            window.location.href = `/ProductComponentHierarchy/Create?productId=${productId}`;
+        },
+
+        // Show create CompositeProductXHierarchy modal
+        showCreateHierarchyModal: function(productId) {
+            // Limpar espaços e verificar se o productId é válido
+            productId = (productId || '').toString().trim();
+            
+            if (!productId || productId === 'undefined' || productId === 'null') {
+                toastr.error('ID do produto não foi informado ou é inválido');
+                return;
+            }
+
+            $.ajax({
+                url: `/ProductComponentHierarchy/FormularioCompositeProductXHierarchy/${productId}`,
+                type: 'GET',
+                success: function(data, textStatus, xhr) {
+                    // Check if response is JSON error
+                    if (xhr.getResponseHeader('Content-Type')?.includes('application/json')) {
+                        try {
+                            const jsonResponse = typeof data === 'string' ? JSON.parse(data) : data;
+                            if (jsonResponse.success === false) {
+                                toastr.error(jsonResponse.message || 'Erro ao carregar formulário de hierarquia');
+                                return;
+                            }
+                        } catch (parseError) {
+                            // Continue with normal processing if JSON parse fails
+                        }
+                    }
+
+                    // Remove modal if it exists
+                    if ($('#createCompositeProductXHierarchyModal').length > 0) {
+                        $('#createCompositeProductXHierarchyModal').remove();
+                    }
+                    
+                    $('body').append(data);
+                    
+                    // Check if modal was actually created
+                    if ($('#createCompositeProductXHierarchyModal').length === 0) {
+                        toastr.error('Erro ao criar formulário de hierarquia');
+                        return;
+                    }
+                    
+                    // Initialize modal
+                    const modal = new bootstrap.Modal(document.getElementById('createCompositeProductXHierarchyModal'));
+                    modal.show();
+                    
+                    // Handle form submission
+                    $('#createCompositeProductXHierarchyForm').off('submit').on('submit', function(e) {
+                        e.preventDefault();
+                        compositeProductManager.hierarchies.saveCompositeProductXHierarchy(this);
+                    });
+                    
+                    // Clean up when modal is closed
+                    $('#createCompositeProductXHierarchyModal').on('hidden.bs.modal', function () {
+                        $(this).find('form')[0]?.reset();
+                        $(this).remove();
+                    });
+                    
+                                         // Modal is already shown by Bootstrap Modal constructor above
+                },
+                error: function(xhr) {
+                    let errorMsg = 'Erro ao abrir formulário de hierarquia';
+                    
+                    // Try to extract error message from JSON response
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    } else if (xhr.responseText) {
+                        try {
+                            const errorResponse = JSON.parse(xhr.responseText);
+                            if (errorResponse.message) {
+                                errorMsg = errorResponse.message;
+                            }
+                        } catch (parseError) {
+                            // Use default error message
+                        }
+                    }
+                    
+                    toastr.error(errorMsg);
+                }
+            });
+        },
+
+        // Show assign hierarchy modal integrado
+        showAssignHierarchyModal: function(productId) {
+            console.log('Abrindo modal de associação de hierarquia para produto:', productId);
+
+            $.ajax({
+                url: `/ProductComponentHierarchy/FormularioAssociarHierarquia/${productId}`,
+                type: 'GET',
+                success: function(data) {
+                    // Remove modal if it exists
+                    if ($('#assignHierarchyModal').length > 0) {
+                        $('#assignHierarchyModal').remove();
+                    }
+                    
+                    const modalHtml = `
+                        <div class="modal fade" id="assignHierarchyModal" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">
+                                            <i class="fas fa-link"></i> Associar Hierarquia Existente
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        ${data}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            Cancelar
+                                        </button>
+                                        <button type="button" class="btn btn-primary" id="btnAssignHierarchy">
+                                            <i class="fas fa-link"></i> Associar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    
+                    $('body').append(modalHtml);
+                    
+                    // Handle assign button click
+                    $('#assignHierarchyModal').off('click', '#btnAssignHierarchy').on('click', '#btnAssignHierarchy', function() {
+                        compositeProductManager.hierarchies.assignHierarchy();
+                    });
+                    
+                    // Clean up when modal is closed
+                    $('#assignHierarchyModal').on('hidden.bs.modal', function () {
+                        $(this).remove();
+                    });
+                    
+                    // Show modal
+                    $('#assignHierarchyModal').modal('show');
+                },
+                error: function(xhr) {
+                    console.error('Erro ao abrir modal de associação de hierarquia:', xhr);
+                    toastr.error('Erro ao abrir formulário de associação');
+                }
+            });
+        },
+
+        // Show hierarchy details modal
+        showHierarchyDetailsModal: function(hierarchyId, productId = null) {
+            console.log('Abrindo detalhes da hierarquia:', hierarchyId, 'para produto:', productId);
+
+            const url = productId ? 
+                `/ProductComponentHierarchy/DetalhesHierarquia/${hierarchyId}?productId=${productId}` :
+                `/ProductComponentHierarchy/DetalhesHierarquia/${hierarchyId}`;
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(data) {
+                    // Remove modal if it exists
+                    if ($('#hierarchyDetailsModal').length > 0) {
+                        $('#hierarchyDetailsModal').remove();
+                    }
+                    
+                    const modalHtml = `
+                        <div class="modal fade" id="hierarchyDetailsModal" tabindex="-1">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">
+                                            <i class="fas fa-sitemap"></i> Detalhes da Hierarquia
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        ${data}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            <i class="fas fa-times"></i> Fechar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    
+                    $('body').append(modalHtml);
+                    
+                    // Clean up when modal is closed
+                    $('#hierarchyDetailsModal').on('hidden.bs.modal', function () {
+                        $(this).remove();
+                    });
+                    
+                    // Show modal
+                    $('#hierarchyDetailsModal').modal('show');
+                },
+                error: function(xhr) {
+                    console.error('Erro ao abrir detalhes da hierarquia:', xhr);
+                    toastr.error('Erro ao carregar detalhes da hierarquia');
+                }
+            });
+        },
+
+        // Show manage hierarchy components modal
+        showManageHierarchyComponentsModal: function(hierarchyId, productId = null) {
+            console.log('Abrindo gerenciamento de componentes da hierarquia:', hierarchyId);
+
+            const url = productId ? 
+                `/ProductComponentHierarchy/GerenciarComponentesHierarquia/${hierarchyId}?productId=${productId}` :
+                `/ProductComponentHierarchy/GerenciarComponentesHierarquia/${hierarchyId}`;
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(data) {
+                    // Remove modal if it exists
+                    if ($('#manageHierarchyComponentsModal').length > 0) {
+                        $('#manageHierarchyComponentsModal').remove();
+                    }
+                    
+                    const modalHtml = `
+                        <div class="modal fade" id="manageHierarchyComponentsModal" tabindex="-1">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">
+                                            <i class="fas fa-cogs"></i> Gerenciar Componentes da Hierarquia
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        ${data}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            <i class="fas fa-times"></i> Fechar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    
+                    $('body').append(modalHtml);
+                    
+                    // Clean up when modal is closed
+                    $('#manageHierarchyComponentsModal').on('hidden.bs.modal', function () {
+                        $(this).remove();
+                    });
+                    
+                    // Show modal
+                    $('#manageHierarchyComponentsModal').modal('show');
+                },
+                error: function(xhr) {
+                    console.error('Erro ao abrir gerenciamento de componentes:', xhr);
+                    toastr.error('Erro ao carregar gerenciamento de componentes');
+                }
+            });
+        },
+
+        // Save hierarchy integrado
+        saveHierarchy: function() {
+            const form = $('#formCreateHierarchy')[0];
+            if (!form) {
+                toastr.error('Formulário não encontrado');
+                return;
+            }
+
+            const formData = new FormData(form);
+
+            // Disable submit button
+            const submitBtn = $('#btnSaveHierarchy');
+            const originalText = submitBtn.html();
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Salvando...');
+
+            $.ajax({
+                url: '/ProductComponentHierarchy/SalvarHierarquia',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        $('#createHierarchyModal').modal('hide');
+                        
+                        // Recarregar lista de hierarquias
+                        const productId = $('.product-edit-container').data('product-id');
+                        if (productId) {
+                            compositeProductManager.hierarchies.carregarHierarquias(productId);
+                        }
+                    } else {
+                        toastr.error(response.message || 'Erro ao salvar hierarquia');
+                        if (response.errors) {
+                            compositeProductManager.utils.showValidationErrors(response.errors, 'createHierarchyModal');
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Erro ao salvar hierarquia:', xhr);
+                    let errorMsg = 'Erro ao salvar hierarquia';
+                    
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        compositeProductManager.utils.showValidationErrors(xhr.responseJSON.errors, 'createHierarchyModal');
+                        errorMsg = 'Verifique os dados informados';
+                    }
+                    
+                    toastr.error(errorMsg);
+                },
+                complete: function() {
+                    // Re-enable submit button
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            });
+        },
+
+        // Save CompositeProductXHierarchy relation
+        saveCompositeProductXHierarchy: function(form) {
+            if (!form) {
+                toastr.error('Formulário não encontrado');
+                return;
+            }
+
+            const formData = new FormData(form);
+
+            // Disable submit button
+            const submitBtn = $(form).find('button[type="submit"]');
+            const originalText = submitBtn.html();
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Salvando...');
+
+            $.ajax({
+                url: '/ProductComponentHierarchy/SalvarCompositeProductXHierarchy',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        $('#createCompositeProductXHierarchyModal').modal('hide');
+                        
+                        // Recarregar lista de hierarquias do produto
+                        const productId = $('.product-edit-container').data('product-id') || $('#ProductId').val();
+                        if (productId) {
+                            compositeProductManager.hierarchies.loadHierarchies(productId);
+                        }
+                    } else {
+                        toastr.error(response.message || 'Erro ao criar relação');
+                        if (response.errors) {
+                            compositeProductManager.utils.showValidationErrors(response.errors, 'createCompositeProductXHierarchyModal');
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Erro ao salvar relação CompositeProductXHierarchy:', xhr);
+                    let errorMsg = 'Erro ao criar relação';
+                    
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        compositeProductManager.utils.showValidationErrors(xhr.responseJSON.errors, 'createCompositeProductXHierarchyModal');
+                        errorMsg = 'Verifique os dados informados';
+                    }
+                    
+                    toastr.error(errorMsg);
+                },
+                complete: function() {
+                    // Re-enable submit button
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            });
+        },
+
+        // Assign hierarchy to product
+        assignHierarchy: function() {
+            const form = $('#formAssignHierarchy')[0];
+            if (!form) {
+                toastr.error('Formulário não encontrado');
+                return;
+            }
+
+            const formData = new FormData(form);
+
+            // Disable submit button
+            const submitBtn = $('#btnAssignHierarchy');
+            const originalText = submitBtn.html();
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Associando...');
+
+            $.ajax({
+                url: '/ProductComponentHierarchy/AssociarHierarquia',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        $('#assignHierarchyModal').modal('hide');
+                        
+                        // Recarregar lista de hierarquias
+                        if (response.productId) {
+                            compositeProductManager.hierarchies.carregarHierarquias(response.productId);
+                        }
+                    } else {
+                        toastr.error(response.message || 'Erro ao associar hierarquia');
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Erro ao associar hierarquia:', xhr);
+                    toastr.error('Erro ao associar hierarquia');
+                },
+                complete: function() {
+                    // Re-enable submit button
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            });
+        },
+
+        // Confirm unassign hierarchy
+        confirmUnassignHierarchy: function(productId, hierarchyId, hierarchyName) {
+            if (confirm(`Tem certeza que deseja desassociar a hierarquia "${hierarchyName}" deste produto?`)) {
+                this.unassignHierarchy(productId, hierarchyId);
+            }
+        },
+
+        // Unassign hierarchy from product
+        unassignHierarchy: function(productId, hierarchyId) {
+            $.ajax({
+                url: '/ProductComponentHierarchy/DesassociarHierarquia',
+                type: 'POST',
+                data: {
+                    productId: productId,
+                    hierarchyId: hierarchyId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message || 'Hierarquia desassociada com sucesso');
+                        
+                        // Recarregar lista de hierarquias
+                        if (response.productId) {
+                            compositeProductManager.hierarchies.carregarHierarquias(response.productId);
+                        }
+                    } else {
+                        toastr.error(response.message || 'Erro ao desassociar hierarquia');
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Erro ao desassociar hierarquia:', xhr);
+                    toastr.error('Erro ao desassociar hierarquia');
+                }
+            });
+        },
+
+        // Show edit hierarchy modal (implementar se necessário)
+        showEditHierarchyModal: function(hierarchyId) {
+            // Redirecionar para a página de edição padrão ou implementar modal
+            window.open(`/ProductComponentHierarchy/Edit/${hierarchyId}`, '_blank');
+        }
+    },
+
+    // Demand Management
+    demands: {
+        // Mostrar modal de criação de demanda
+        showCreateModal: function(productId) {
+            window.location.href = `/Demand/Create?productId=${productId}`;
+        },
+        
+        // Carregar demandas
+        loadDemands: function(productId) {
+            $('#demands-grid').load(`/Demand/GetByProduct/${productId}`);
+            this.loadStats(productId);
+        },
+        
+        // Carregar estatísticas das demandas
+        loadStats: function(productId) {
+            $.get(`/Demand/GetStatsByProduct/${productId}`)
+                .done(function(data) {
+                    $('#demands-pending-count').text(data.pending || 0);
+                    $('#demands-confirmed-count').text(data.confirmed || 0);
+                    $('#demands-produced-count').text(data.produced || 0);
+                    $('#demands-delivered-count').text(data.delivered || 0);
+                    $('#demands-overdue-count').text(data.overdue || 0);
+                })
+                .fail(function() {
+                    console.error('Erro ao carregar estatísticas das demandas');
+                });
+        }
+    },
+
     // Utility methods
     utils: {
         // Show validation errors
@@ -557,7 +1192,13 @@ window.CompositeProduct = {
     updateCompositeProductStats: (data) => compositeProductManager.statistics.updateCompositeProductStats(data),
     loadCompositeStatistics: () => compositeProductManager.statistics.loadCompositeStatistics(),
     
-    // Components
+    // Components - Integrated methods
+    showCreateComponentModal: (id) => compositeProductManager.components.showCreateComponentModal(id),
+    showEditComponentModal: (id) => compositeProductManager.components.editarComponente(id),
+    confirmDeleteComponent: (id, name) => compositeProductManager.components.confirmarRemocao(id, name),
+    refreshComponentsList: (id) => compositeProductManager.components.carregarComponentes(id),
+    
+    // Components - Legacy compatibility
     carregarComponentes: (id) => compositeProductManager.components.carregarComponentes(id),
     abrirGerenciamento: (id) => compositeProductManager.components.abrirGerenciamento(id),
     adicionarComponente: (id) => compositeProductManager.components.adicionarComponente(id),
@@ -572,7 +1213,16 @@ window.CompositeProduct = {
     initializeEditForm: () => compositeProductManager.components.initializeEditForm(),
     calculateComponentCost: () => compositeProductManager.components.calculateComponentCost(),
     initializeComponentsList: () => compositeProductManager.components.initializeComponentsList(),
-    initializeComponentsTable: () => compositeProductManager.components.initializeComponentsTable()
+    initializeComponentsTable: () => compositeProductManager.components.initializeComponentsTable(),
+    
+    // Hierarchies - Implemented methods
+    showCreateHierarchyModal: (id) => compositeProductManager.hierarchies.showCreateHierarchyModal(id),
+    showAssignHierarchyModal: (id) => compositeProductManager.hierarchies.showAssignHierarchyModal(id),
+    showHierarchyDetailsModal: (hierarchyId, productId) => compositeProductManager.hierarchies.showHierarchyDetailsModal(hierarchyId, productId),
+    showEditHierarchyModal: (id) => compositeProductManager.hierarchies.showEditHierarchyModal(id),
+    showManageHierarchyComponentsModal: (hierarchyId, productId) => compositeProductManager.hierarchies.showManageHierarchyComponentsModal(hierarchyId, productId),
+    confirmUnassignHierarchy: (productId, hierarchyId, name) => compositeProductManager.hierarchies.confirmUnassignHierarchy(productId, hierarchyId, name),
+    refreshHierarchiesList: (id) => compositeProductManager.hierarchies.carregarHierarquias(id)
 };
 
 // Global functions for onclick events in views

@@ -34,8 +34,16 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div>
-                                            <strong>@(item.ProductName ?? "Produto não identificado")</strong>
-                                            <br><small class="text-muted">ID: @item.ProductId</small>
+                                            <strong>@item.ItemName</strong>
+                                            <br><small class="text-muted">Tipo: @item.ItemType</small>
+                                            @* @if (!string.IsNullOrWhiteSpace(item.ProductId))
+                                            {
+                                                <br><small class="text-muted">ID Produto: @item.ProductId</small>
+                                            }
+                                            else if (!string.IsNullOrWhiteSpace(item.ProductCategoryId))
+                                            {
+                                                <br><small class="text-muted">ID Categoria: @item.ProductCategoryId</small>
+                                            } *@
                                         </div>
                                     </div>
                                 </td>
@@ -94,7 +102,7 @@
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <button type="button" class="btn btn-outline-danger" 
-                                                onclick="ProductGroup.confirmDeleteItem('@item.Id', '@item.ProductName')"
+                                                onclick="ProductGroup.confirmDeleteItem('@item.Id', '@item.ItemName')"
                                                 title="Excluir">
                                             <i class="bi bi-trash"></i>
                                         </button>

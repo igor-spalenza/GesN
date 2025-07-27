@@ -41,14 +41,60 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Pedido" asp-action="Index">Pedido</a>
-                            </li> *@
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="Index">Customer</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">Order</a>
+                            </li> *@
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Produto
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Product" asp-action="Index">Produtos</a></li>
+                                    @* | ProductGroupItem | ProductGroupExchangeRule | CompositeProductXHierarchy | ProductIngredient | *@
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="ProductCategory" asp-action="Index">Categorias</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="ProductComponentHierarchy" asp-action="Index">Hierarquias</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="ProductComponent" asp-action="Index">Componentes</a></li>
+                                </ul>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Vendas
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Order" asp-action="Index">Entrada de Venda</a></li>
+                                    @* | OrderItem | Contract | Address | FiscalData | Demand | *@
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Customer" asp-action="Index">Clientes</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Contract" asp-action="Index">--- Futuro Contratos ---</a></li>
+                                </ul>
+                            </li>
+                            
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Produção
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Demand" asp-action="Index">Demandas de Venda</a></li>
+                                    @* | ProductComposition |  *@
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="ProductionOrder" asp-action="Index">Ordens de Produção</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Compras
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Ingredient" asp-action="Index">Ingredientes</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Supplier" asp-action="Index">Fornecedores</a></li>
+                                </ul>
+                            </li>
+                            @* <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Produtos</a>
                             </li>
                             <li class="nav-item">
@@ -68,7 +114,7 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="ProductionOrder" asp-action="Index">Ordens de Produção</a>
-                            </li>
+                            </li> *@
                         </ul>
                         <partial name="_LoginPartial" />
                     </div>

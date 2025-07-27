@@ -133,7 +133,7 @@ namespace GesN.Web.Models.Entities.Production
                 return Product.Name;
             
             if (ProductCategory != null)
-                return $"[Categoria] {ProductCategory.Name}";
+                return ProductCategory.Name;
             
             return "Item sem nome";
         }

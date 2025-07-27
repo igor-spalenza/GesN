@@ -1,231 +1,373 @@
 using System.ComponentModel.DataAnnotations;
 using GesN.Web.Models.Entities.Production;
+using GesN.Web.Models.Enumerators;
 
 namespace GesN.Web.Models.ViewModels.Production
 {
+    /// <summary>
+    /// ViewModel principal para exibição de ProductComponent
+    /// </summary>
     public class ProductComponentViewModel
     {
-        public string? Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
-        [Display(Name = "Produto Composto")]
-        public string CompositeProductId { get; set; } = string.Empty;
+        [Display(Name = "Nome")]
+        public string Name { get; set; } = string.Empty;
 
-        [Display(Name = "Nome do Produto Composto")]
-        public string? CompositeProductName { get; set; }
+        [Display(Name = "Descrição")]
+        public string? Description { get; set; }
 
-        [Display(Name = "Produto Componente")]
-        public string ComponentProductId { get; set; } = string.Empty;
+        [Display(Name = "Hierarquia de Componentes")]
+        public string ProductComponentHierarchyId { get; set; } = string.Empty;
 
-        [Display(Name = "Nome do Componente")]
-        public string? ComponentProductName { get; set; }
+        [Display(Name = "Nome da Hierarquia")]
+        public string? ProductComponentHierarchyName { get; set; }
 
-        [Display(Name = "SKU do Componente")]
-        public string? ComponentProductSKU { get; set; }
+        [Display(Name = "Custo Adicional")]
+        public decimal AdditionalCost { get; set; }
 
-        [Display(Name = "Quantidade")]
-        public decimal Quantity { get; set; }
+        [Display(Name = "Status")]
+        public ObjectState StateCode { get; set; }
 
-        [Display(Name = "Unidade")]
-        public string? Unit { get; set; }
+        [Display(Name = "Criado em")]
+        public DateTime CreatedAt { get; set; }
 
-        [Display(Name = "Opcional")]
-        public bool IsOptional { get; set; }
+        [Display(Name = "Criado por")]
+        public string CreatedBy { get; set; } = string.Empty;
 
-        [Display(Name = "Ordem de Montagem")]
-        public int AssemblyOrder { get; set; }
+        [Display(Name = "Última modificação")]
+        public DateTime? LastModifiedAt { get; set; }
 
-        [Display(Name = "Observações")]
-        public string? Notes { get; set; }
-
-        [Display(Name = "Data de Criação")]
-        public DateTime? CreatedAt { get; set; }
-
-        [Display(Name = "Última Modificação")]
-        public DateTime? ModifiedAt { get; set; }
-
-        [Display(Name = "Custo Total")]
-        public decimal TotalCost { get; set; }
+        [Display(Name = "Modificado por")]
+        public string? LastModifiedBy { get; set; }
 
         // Propriedades calculadas
-        [Display(Name = "Tipo")]
-        public string OptionalDisplay => IsOptional ? "Opcional" : "Obrigatório";
+        [Display(Name = "Status")]
+        public string StatusDisplay => StateCode switch
+        {
+            ObjectState.Active => "✅ Ativo",
+            ObjectState.Inactive => "❌ Inativo",
+            _ => "❓ Indefinido"
+        };
 
-        [Display(Name = "Data de Criação")]
-        public string FormattedCreatedAt => CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
+        [Display(Name = "Custo Adicional")]
+        public string FormattedAdditionalCost => AdditionalCost.ToString("C2");
 
-        [Display(Name = "Última Modificação")]
-        public string FormattedModifiedAt => ModifiedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
+        [Display(Name = "Criado em")]
+        public string FormattedCreatedAt => CreatedAt.ToString("dd/MM/yyyy HH:mm");
+
+        [Display(Name = "Última modificação")]
+        public string FormattedLastModifiedAt => LastModifiedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
+
+        [Display(Name = "Resumo")]
+        public string Summary
+        {
+            get
+            {
+                var summary = Name;
+                if (!string.IsNullOrWhiteSpace(Description))
+                    summary += $" - {Description}";
+                if (AdditionalCost > 0)
+                    summary += $" (Custo adicional: {FormattedAdditionalCost})";
+                return summary;
+            }
+        }
     }
 
+    /// <summary>
+    /// ViewModel para criação de ProductComponent
+    /// </summary>
     public class CreateProductComponentViewModel
     {
-        [Required(ErrorMessage = "O produto composto é obrigatório")]
-        [Display(Name = "Produto Composto")]
-        public string CompositeProductId { get; set; } = string.Empty;
+        [Required(ErrorMessage = "O nome do componente é obrigatório")]
+        [Display(Name = "Nome")]
+        [MaxLength(100, ErrorMessage = "O nome deve ter no máximo {1} caracteres")]
+        public string Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "O componente é obrigatório")]
-        [Display(Name = "Componente")]
-        public string ComponentProductId { get; set; } = string.Empty;
+        [Display(Name = "Descrição")]
+        [MaxLength(500, ErrorMessage = "A descrição deve ter no máximo {1} caracteres")]
+        public string? Description { get; set; }
 
-        [Required(ErrorMessage = "A quantidade é obrigatória")]
-        [Range(0.001, double.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
-        [Display(Name = "Quantidade")]
-        public decimal Quantity { get; set; } = 1;
+        [Required(ErrorMessage = "A hierarquia de componentes é obrigatória")]
+        [Display(Name = "Hierarquia de Componentes")]
+        public string ProductComponentHierarchyId { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "A unidade é obrigatória")]
-        [Display(Name = "Unidade")]
-        public string Unit { get; set; } = "Unidades";
+        [Display(Name = "Nome da Hierarquia")]
+        public string? ProductComponentHierarchyName { get; set; }
 
-        [Display(Name = "Componente Opcional")]
-        public bool IsOptional { get; set; }
+        [Display(Name = "Custo Adicional")]
+        [Range(0, double.MaxValue, ErrorMessage = "O custo adicional deve ser maior ou igual a zero")]
+        public decimal AdditionalCost { get; set; } = 0;
 
-        [Range(0, int.MaxValue, ErrorMessage = "A ordem deve ser maior ou igual a zero")]
-        [Display(Name = "Ordem de Montagem")]
-        public int AssemblyOrder { get; set; }
+        [Display(Name = "Status")]
+        public ObjectState StateCode { get; set; } = ObjectState.Active;
 
-        [StringLength(500, ErrorMessage = "As observações devem ter no máximo {1} caracteres")]
-        [Display(Name = "Observações")]
-        public string? Notes { get; set; }
-
-        [Display(Name = "Componentes Disponíveis")]
-        public List<ComponentSelectionViewModel> AvailableComponents { get; set; } = new();
+        // Lista para popular dropdown/autocomplete
+        [Display(Name = "Hierarquias Disponíveis")]
+        public List<HierarchySelectionViewModel> AvailableHierarchies { get; set; } = new();
     }
 
+    /// <summary>
+    /// ViewModel para edição de ProductComponent
+    /// </summary>
     public class EditProductComponentViewModel
     {
         [Required]
         public string Id { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "O produto composto é obrigatório")]
-        [Display(Name = "Produto Composto")]
-        public string CompositeProductId { get; set; } = string.Empty;
+        [Required(ErrorMessage = "O nome do componente é obrigatório")]
+        [Display(Name = "Nome")]
+        [MaxLength(100, ErrorMessage = "O nome deve ter no máximo {1} caracteres")]
+        public string Name { get; set; } = string.Empty;
 
-        [Display(Name = "Nome do Produto Composto")]
-        public string? CompositeProductName { get; set; }
+        [Display(Name = "Descrição")]
+        [MaxLength(500, ErrorMessage = "A descrição deve ter no máximo {1} caracteres")]
+        public string? Description { get; set; }
 
-        [Required(ErrorMessage = "O componente é obrigatório")]
-        [Display(Name = "Componente")]
-        public string ComponentProductId { get; set; } = string.Empty;
+        [Required(ErrorMessage = "A hierarquia de componentes é obrigatória")]
+        [Display(Name = "Hierarquia de Componentes")]
+        public string ProductComponentHierarchyId { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "A quantidade é obrigatória")]
-        [Range(0.001, double.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
-        [Display(Name = "Quantidade")]
-        public decimal Quantity { get; set; } = 1;
+        [Display(Name = "Nome da Hierarquia")]
+        public string? ProductComponentHierarchyName { get; set; }
 
-        [Required(ErrorMessage = "A unidade é obrigatória")]
-        [Display(Name = "Unidade")]
-        public string Unit { get; set; } = "Unidades";
+        [Display(Name = "Custo Adicional")]
+        [Range(0, double.MaxValue, ErrorMessage = "O custo adicional deve ser maior ou igual a zero")]
+        public decimal AdditionalCost { get; set; } = 0;
 
-        [Display(Name = "Componente Opcional")]
-        public bool IsOptional { get; set; }
+        [Display(Name = "Status")]
+        public ObjectState StateCode { get; set; } = ObjectState.Active;
 
-        [Range(0, int.MaxValue, ErrorMessage = "A ordem deve ser maior ou igual a zero")]
-        [Display(Name = "Ordem de Montagem")]
-        public int AssemblyOrder { get; set; }
+        // Informações de auditoria (somente leitura)
+        [Display(Name = "Criado em")]
+        public DateTime CreatedAt { get; set; }
 
-        [StringLength(500, ErrorMessage = "As observações devem ter no máximo {1} caracteres")]
-        [Display(Name = "Observações")]
-        public string? Notes { get; set; }
+        [Display(Name = "Criado por")]
+        public string CreatedBy { get; set; } = string.Empty;
 
-        [Display(Name = "Data de Criação")]
-        public DateTime? CreatedAt { get; set; }
-
-        [Display(Name = "Última Modificação")]
-        public DateTime? ModifiedAt { get; set; }
-        
-        [Display(Name = "Última Modificação")]
+        [Display(Name = "Última modificação")]
         public DateTime? LastModifiedAt { get; set; }
-        
-        [Display(Name = "Criado Por")]
-        public string? CreatedBy { get; set; }
-        
-        [Display(Name = "Estado")]
-        public string? StateCode { get; set; }
-        
-        [Display(Name = "Produto Componente")]
-        public string? ComponentProduct { get; set; }
-        
-        public decimal CalculateTotalCost()
-        {
-            return 0; // Placeholder - será implementado quando necessário
-        }
 
-        [Display(Name = "Componentes Disponíveis")]
-        public List<ComponentSelectionViewModel> AvailableComponents { get; set; } = new();
+        [Display(Name = "Modificado por")]
+        public string? LastModifiedBy { get; set; }
+
+        // Lista para popular dropdown/autocomplete
+        [Display(Name = "Hierarquias Disponíveis")]
+        public List<HierarchySelectionViewModel> AvailableHierarchies { get; set; } = new();
+
+        // Propriedades calculadas
+        [Display(Name = "Criado em")]
+        public string FormattedCreatedAt => CreatedAt.ToString("dd/MM/yyyy HH:mm");
+
+        [Display(Name = "Última modificação")]
+        public string FormattedLastModifiedAt => LastModifiedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
     }
 
+    /// <summary>
+    /// ViewModel para detalhes de ProductComponent
+    /// </summary>
     public class ProductComponentDetailsViewModel
     {
         public string Id { get; set; } = string.Empty;
-        public string CompositeProductId { get; set; } = string.Empty;
-        public string? CompositeProductName { get; set; }
-        public string ComponentProductId { get; set; } = string.Empty;
-        public string? ComponentProductName { get; set; }
-        public decimal Quantity { get; set; }
-        public string? Unit { get; set; }
-        public bool IsOptional { get; set; }
-        public int AssemblyOrder { get; set; }
-        public string? Notes { get; set; }
-        public DateTime? CreatedAt { get; set; }
-        public DateTime? ModifiedAt { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string ProductComponentHierarchyId { get; set; } = string.Empty;
+        public string? ProductComponentHierarchyName { get; set; }
+        public decimal AdditionalCost { get; set; }
+        public ObjectState StateCode { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string CreatedBy { get; set; } = string.Empty;
+        public DateTime? LastModifiedAt { get; set; }
+        public string? LastModifiedBy { get; set; }
 
         // Propriedades calculadas
-        public string OptionalDisplay => IsOptional ? "Opcional" : "Obrigatório";
-        public string AssemblyOrderDisplay => AssemblyOrder.ToString();
-        public string FormattedCreatedAt => CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
-        public string FormattedModifiedAt => ModifiedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
+        public string StatusDisplay => StateCode switch
+        {
+            ObjectState.Active => "✅ Ativo",
+            ObjectState.Inactive => "❌ Inativo",
+            _ => "❓ Indefinido"
+        };
+
+        public string FormattedAdditionalCost => AdditionalCost.ToString("C2");
+        public string FormattedCreatedAt => CreatedAt.ToString("dd/MM/yyyy HH:mm");
+        public string FormattedLastModifiedAt => LastModifiedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-";
+
+        public string Summary
+        {
+            get
+            {
+                var summary = Name;
+                if (!string.IsNullOrWhiteSpace(Description))
+                    summary += $" - {Description}";
+                if (AdditionalCost > 0)
+                    summary += $" (Custo adicional: {FormattedAdditionalCost})";
+                return summary;
+            }
+        }
     }
 
+    /// <summary>
+    /// ViewModel para listagem de ProductComponent
+    /// </summary>
     public class ProductComponentIndexViewModel
     {
         public List<ProductComponentViewModel> Components { get; set; } = new();
-        public string CompositeProductId { get; set; } = string.Empty;
-        public string? CompositeProductName { get; set; }
         public ProductComponentStatisticsViewModel Statistics { get; set; } = new();
+        public ProductComponentSearchViewModel SearchFilters { get; set; } = new();
     }
 
+    /// <summary>
+    /// ViewModel para estatísticas de ProductComponent
+    /// </summary>
     public class ProductComponentStatisticsViewModel
     {
         public int TotalComponents { get; set; }
-        public int OptionalComponents { get; set; }
-        public int RequiredComponents { get; set; }
-        public decimal EstimatedTotalCost { get; set; }
+        public int ActiveComponents { get; set; }
+        public int InactiveComponents { get; set; }
+        public decimal TotalAdditionalCosts { get; set; }
+        public decimal AverageAdditionalCost { get; set; }
+
+        public string FormattedTotalAdditionalCosts => TotalAdditionalCosts.ToString("C2");
+        public string FormattedAverageAdditionalCost => AverageAdditionalCost.ToString("C2");
     }
 
-    public class ComponentSelectionViewModel
-    {
-        public string Value { get; set; } = string.Empty;
-        public string Text { get; set; } = string.Empty;
-        public string? Unit { get; set; }
-        public decimal? Cost { get; set; }
-        public bool IsSelected { get; set; }
-    }
-
+    /// <summary>
+    /// ViewModel para busca/filtro de ProductComponent
+    /// </summary>
     public class ProductComponentSearchViewModel
     {
-        [Display(Name = "Produto Composto")]
-        public string? CompositeProductId { get; set; }
+        [Display(Name = "Nome")]
+        public string? Name { get; set; }
 
-        [Display(Name = "Componente")]
-        public string? ComponentProductId { get; set; }
+        [Display(Name = "Hierarquia")]
+        public string? ProductComponentHierarchyId { get; set; }
 
-        [Display(Name = "Tipo")]
-        public bool? IsOptional { get; set; }
+        [Display(Name = "Status")]
+        public ObjectState? StateCode { get; set; }
 
-        public List<OptionalSelectionViewModel> GetAvailableOptionalTypes()
+        [Display(Name = "Custo Mínimo")]
+        public decimal? MinAdditionalCost { get; set; }
+
+        [Display(Name = "Custo Máximo")]
+        public decimal? MaxAdditionalCost { get; set; }
+
+        public List<ComponentStatusSelectionViewModel> GetAvailableStatuses()
         {
-            return new List<OptionalSelectionViewModel>
+            return new List<ComponentStatusSelectionViewModel>
             {
                 new() { Value = null, Text = "Todos", IsSelected = true },
-                new() { Value = false, Text = "Obrigatório", IsSelected = false },
-                new() { Value = true, Text = "Opcional", IsSelected = false }
+                new() { Value = ObjectState.Active, Text = "Ativo", IsSelected = false },
+                new() { Value = ObjectState.Inactive, Text = "Inativo", IsSelected = false }
             };
         }
     }
 
-    public class OptionalSelectionViewModel
+
+
+
+
+    /// <summary>
+    /// ViewModel para autocomplete de ProductComponentHierarchy
+    /// </summary>
+    public class ProductComponentHierarchyAutocompleteViewModel
     {
-        public bool? Value { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string Label => !string.IsNullOrWhiteSpace(Description) ? 
+            $"{Name} - {Description}" : Name;
+        public string Value => Name;
+    }
+
+    /// <summary>
+    /// Classe helper para conversão entre entidade e ViewModel
+    /// </summary>
+    public static class ProductComponentMappingExtensions
+    {
+        public static ProductComponentViewModel ToViewModel(this ProductComponent entity)
+        {
+            return new ProductComponentViewModel
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                Description = entity.Description,
+                ProductComponentHierarchyId = entity.ProductComponentHierarchyId,
+                ProductComponentHierarchyName = entity.ProductComponentHierarchy?.Name,
+                AdditionalCost = entity.AdditionalCost,
+                StateCode = entity.StateCode,
+                CreatedAt = entity.CreatedAt,
+                CreatedBy = entity.CreatedBy,
+                LastModifiedAt = entity.LastModifiedAt,
+                LastModifiedBy = entity.LastModifiedBy
+            };
+        }
+
+        public static ProductComponentDetailsViewModel ToDetailsViewModel(this ProductComponent entity)
+        {
+            return new ProductComponentDetailsViewModel
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                Description = entity.Description,
+                ProductComponentHierarchyId = entity.ProductComponentHierarchyId,
+                ProductComponentHierarchyName = entity.ProductComponentHierarchy?.Name,
+                AdditionalCost = entity.AdditionalCost,
+                StateCode = entity.StateCode,
+                CreatedAt = entity.CreatedAt,
+                CreatedBy = entity.CreatedBy,
+                LastModifiedAt = entity.LastModifiedAt,
+                LastModifiedBy = entity.LastModifiedBy
+            };
+        }
+
+        public static EditProductComponentViewModel ToEditViewModel(this ProductComponent entity)
+        {
+            return new EditProductComponentViewModel
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                Description = entity.Description,
+                ProductComponentHierarchyId = entity.ProductComponentHierarchyId,
+                ProductComponentHierarchyName = entity.ProductComponentHierarchy?.Name,
+                AdditionalCost = entity.AdditionalCost,
+                StateCode = entity.StateCode,
+                CreatedAt = entity.CreatedAt,
+                CreatedBy = entity.CreatedBy,
+                LastModifiedAt = entity.LastModifiedAt,
+                LastModifiedBy = entity.LastModifiedBy
+            };
+        }
+
+        public static ProductComponent ToEntity(this CreateProductComponentViewModel viewModel)
+        {
+            return new ProductComponent
+            {
+                Name = viewModel.Name,
+                Description = viewModel.Description,
+                ProductComponentHierarchyId = viewModel.ProductComponentHierarchyId,
+                AdditionalCost = viewModel.AdditionalCost,
+                StateCode = viewModel.StateCode
+            };
+        }
+
+        public static ProductComponent UpdateEntity(this EditProductComponentViewModel viewModel, ProductComponent entity)
+        {
+            entity.Name = viewModel.Name;
+            entity.Description = viewModel.Description;
+            entity.ProductComponentHierarchyId = viewModel.ProductComponentHierarchyId;
+            entity.AdditionalCost = viewModel.AdditionalCost;
+            entity.StateCode = viewModel.StateCode;
+            
+            return entity;
+        }
+    }
+
+    /// <summary>
+    /// ViewModel para seleção de status de componente
+    /// </summary>
+    public class ComponentStatusSelectionViewModel
+    {
+        public ObjectState? Value { get; set; }
         public string Text { get; set; } = string.Empty;
         public bool IsSelected { get; set; }
     }
