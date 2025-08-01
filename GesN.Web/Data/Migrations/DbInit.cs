@@ -359,7 +359,7 @@ namespace GesN.Web.Data.Migrations
                     Name TEXT NOT NULL,
                     Description TEXT,
                     Unit TEXT NOT NULL DEFAULT 'UN',
-                    CostPerUnit REAL NOT NULL DEFAULT 0,
+                    CostPerUnit REAL DEFAULT 0,
                     SupplierId TEXT,
                     MinStock REAL DEFAULT 0,
                     CurrentStock REAL DEFAULT 0,

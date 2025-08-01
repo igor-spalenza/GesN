@@ -382,10 +382,10 @@ const productGroupManager = {
                 return;
             }
 
-            // Show loading indicator
-            const container = $('#groupItemsContainer');
+            // Show loading indicator - usando ID dinâmico baseado no productGroupId (ProductId)
+            const container = $(`#groupItemsContainer-${productGroupId}`);
             if (container.length === 0) {
-                console.warn('Container #groupItemsContainer not found');
+                console.warn(`Container #groupItemsContainer-${productGroupId} not found`);
                 return;
             }
 
@@ -1345,10 +1345,18 @@ const productGroupManager = {
 
         // Initialize exchange rule form (for _CreateGroupExchangeRule and _EditGroupExchangeRule)
         initializeExchangeRuleForm: function() {
-            // Initialize autocomplete for source group item
-            this.setupGroupItemAutocomplete('#SourceGroupItemName', '#SourceGroupItemId');
+            // ✅ CORREÇÃO: Verificar se SourceGroupItemName é readonly antes de aplicar autocomplete
+            const sourceItemField = $('#SourceGroupItemName');
+            if (sourceItemField.length && !sourceItemField.prop('readonly')) {
+                // Initialize autocomplete apenas se não for readonly (item predefinido)
+                this.setupGroupItemAutocomplete('#SourceGroupItemName', '#SourceGroupItemId');
+            } else if (sourceItemField.length && sourceItemField.prop('readonly')) {
+                // ✅ GARANTIR: Se é readonly, marcar como has-value para floating label
+                sourceItemField.addClass('has-value');
+                sourceItemField.closest('.floating-input-group').addClass('has-value');
+            }
             
-            // Initialize autocomplete for target group item
+            // Initialize autocomplete for target group item (sempre necessário)
             this.setupGroupItemAutocomplete('#TargetGroupItemName', '#TargetGroupItemId');
         },
 

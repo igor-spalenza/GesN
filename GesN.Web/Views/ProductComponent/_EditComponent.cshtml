@@ -1,6 +1,9 @@
 @model GesN.Web.Models.ViewModels.Production.EditProductComponentViewModel
 @using GesN.Web.Models.Enumerators
 
+@* Incluir CSS específico do domínio Product *@
+<link href="~/css/ProductDomain.css" rel="stylesheet" />
+
 <form method="post" data-component-name="@Model.Name">
     @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.Id)

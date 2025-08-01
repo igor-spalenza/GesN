@@ -8,14 +8,29 @@
             <h4>Identificação do Cliente</h4>
             
             <div class="form-group mb-3">
-                <label for="buscarCustomer" class="form-label">Cliente *</label>
-                <input type="text" 
-                       id="buscarCustomer" 
-                       placeholder="Digite o nome, sobrenome ou telefone do cliente..." 
-                       class="form-control" 
-                       autocomplete="off" />
-                <input type="hidden" id="CustomerId" name="CustomerId" />
-                <small class="form-text text-muted">Comece digitando para buscar clientes existentes</small>
+                <div class="floating-input-group">
+                    <input type="text" 
+                           id="CustomerName" 
+                           name="CustomerName"
+                           class="form-control floating-input autocomplete-input" 
+                           placeholder=" " 
+                           autocomplete="off"
+                           data-order-context="create" />
+                    <input type="hidden" 
+                           asp-for="CustomerId" 
+                           id="CustomerId" />
+                    <label for="CustomerName" class="floating-label">
+                        <i class="fas fa-user text-primary"></i>
+                        Cliente *
+                    </label>
+                    <span asp-validation-for="CustomerId" class="field-validation-valid text-danger"></span>
+                    <div class="form-text">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            Digite o nome, sobrenome ou telefone para buscar clientes
+                        </small>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group mb-3">

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Logging;
 using GesN.Web.Interfaces.Services;
 using GesN.Web.Models.ViewModels.Production;
 using System.Security.Claims;
@@ -17,15 +18,21 @@ namespace GesN.Web.Controllers
         private readonly IProductComponentHierarchyService _hierarchyService;
         private readonly IProductComponentService _componentService;
         private readonly ICompositeProductXHierarchyService _compositeProductHierarchyService;
+        private readonly IProductService _productService;
+        private readonly ILogger<ProductComponentHierarchyController> _logger;
 
         public ProductComponentHierarchyController(
             IProductComponentHierarchyService hierarchyService,
             IProductComponentService componentService,
-            ICompositeProductXHierarchyService compositeProductHierarchyService)
+            ICompositeProductXHierarchyService compositeProductHierarchyService,
+            IProductService productService,
+            ILogger<ProductComponentHierarchyController> logger)
         {
             _hierarchyService = hierarchyService;
             _componentService = componentService;
             _compositeProductHierarchyService = compositeProductHierarchyService;
+            _productService = productService;
+            _logger = logger;
         }
 
         #region Views Principais
@@ -520,6 +527,58 @@ namespace GesN.Web.Controllers
         }
 
         /// <summary>
+        /// Buscar hierarquias disponíveis para autocomplete na criação de CompositeProductXHierarchy
+        /// Retorna apenas hierarquias que não estão associadas ao produto
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> BuscarHierarchiaDisponivel(string termo, string? productId = null)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(termo) || termo.Length < 2)
+                    return Json(new List<object>());
+
+                // Buscar hierarquias que correspondem ao termo
+                var hierarchies = await _hierarchyService.SearchAsync(termo);
+                
+                // Filtrar apenas hierarquias ativas
+                var activeHierarchies = hierarchies.Where(h => h.IsActive()).ToList();
+
+                // Se um productId foi fornecido, filtrar hierarquias já associadas
+                if (!string.IsNullOrWhiteSpace(productId))
+                {
+                    var associatedHierarchyIds = (await _compositeProductHierarchyService.GetProductHierarchiesAsync(productId))
+                        .Select(r => r.ProductComponentHierarchyId)
+                        .ToHashSet();
+                        
+                    activeHierarchies = activeHierarchies
+                        .Where(h => !associatedHierarchyIds.Contains(h.Id))
+                        .ToList();
+                }
+
+                var result = activeHierarchies
+                    .Take(10) // Limitar a 10 resultados
+                    .Select(h => new
+                    {
+                        id = h.Id,
+                        name = h.Name,
+                        description = h.Description ?? "",
+                        label = !string.IsNullOrWhiteSpace(h.Description) ? 
+                            $"{h.Name} - {h.Description}" : h.Name,
+                        value = h.Name
+                    })
+                    .ToList();
+
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar hierarquias disponíveis para autocomplete com termo: {Termo}, ProductId: {ProductId}", termo, productId);
+                return Json(new List<object>());
+            }
+        }
+
+        /// <summary>
         /// Obter estatísticas do dashboard
         /// </summary>
         [HttpGet]
@@ -848,7 +907,7 @@ namespace GesN.Web.Controllers
                 }
 
                 ViewBag.ProductId = productId;
-                return PartialView("~/Views/Product/_ProductComponentHierarchies.cshtml", viewModels);
+                return PartialView("~/Views/Product/_CompositeProductXHierarchy.cshtml", viewModels);
             }
             catch (Exception ex)
             {
@@ -1121,7 +1180,7 @@ namespace GesN.Web.Controllers
                 var relations = await _compositeProductHierarchyService.GetProductHierarchiesAsync(productId);
                 
                 ViewBag.ProductId = productId;
-                return PartialView("~/Views/Product/_ProductComponentHierarchies.cshtml", relations.ToList());
+                return PartialView("~/Views/Product/_CompositeProductXHierarchy.cshtml", relations.ToList());
             }
             catch (Exception ex)
             {
@@ -1406,21 +1465,21 @@ namespace GesN.Web.Controllers
         /// <summary>
         /// Formulário para criar/associar CompositeProductXHierarchy
         /// </summary>
-        [HttpGet("FormularioCompositeProductXHierarchy/{productId}")]
-        public async Task<IActionResult> FormularioCompositeProductXHierarchy(string productId)
+        [HttpGet]
+        public async Task<IActionResult> FormularioCompositeProductXHierarchy(string id)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(productId))
+                if (string.IsNullOrWhiteSpace(id))
                 {
                     return BadRequest("ID do produto é obrigatório");
                 }
 
-                var viewModel = await _compositeProductHierarchyService.PrepareCreateViewModelAsync(productId);
+                var viewModel = await _compositeProductHierarchyService.PrepareCreateViewModelAsync(id);
                 
                 // Garantir que o ProductId seja passado para a view
-                ViewBag.ProductId = productId;
-                viewModel.ProductId = productId; // Garantir que o ViewModel também tenha o ProductId
+                ViewBag.ProductId = id;
+                viewModel.ProductId = id; // Garantir que o ViewModel também tenha o ProductId
                 
                 return PartialView("~/Views/ProductComponentHierarchy/_CreateCompositeProductXHierarchy.cshtml", viewModel);
             }
@@ -1446,21 +1505,199 @@ namespace GesN.Web.Controllers
                                                kvp => kvp.Key,
                                                kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
                                            );
-                    return Json(new { success = false, errors });
+                    return Json(new CreateCompositeProductXHierarchyResult("Dados inválidos", errors));
                 }
 
                 var userId = GetCurrentUserId();
                 var relationId = await _compositeProductHierarchyService.CreateRelationAsync(viewModel, userId);
 
-                return Json(new { success = true, message = "Relação criada com sucesso!", relationId });
+                // ✅ Buscar dados completos da relação criada para retorno estruturado
+                var createdRelation = await _compositeProductHierarchyService.GetRelationByIdAsync(relationId);
+                if (createdRelation == null)
+                {
+                    return Json(new CreateCompositeProductXHierarchyResult(false, "Erro: Relação criada mas não foi possível recuperar os dados"));
+                }
+
+                // ✅ Contar total de registros para o produto
+                var totalCount = await _compositeProductHierarchyService.GetRelationsCountByProductIdAsync(viewModel.ProductId);
+
+                // ✅ Buscar informações adicionais para exibição
+                var product = await _productService.GetByIdAsync(viewModel.ProductId);
+                var hierarchy = await _hierarchyService.GetByIdAsync(viewModel.ProductComponentHierarchyId);
+                
+                // ✅ Converter DetailsViewModel para ViewModel (para uso nos templates JavaScript)
+                var createdViewModel = new CompositeProductXHierarchyViewModel
+                {
+                    Id = createdRelation.Id,
+                    ProductComponentHierarchyId = createdRelation.ProductComponentHierarchyId,
+                    ProductId = createdRelation.ProductId,
+                    MinQuantity = createdRelation.MinQuantity,
+                    MaxQuantity = createdRelation.MaxQuantity,
+                    IsOptional = createdRelation.IsOptional,
+                    AssemblyOrder = createdRelation.AssemblyOrder,
+                    Notes = createdRelation.Notes,
+                    ProductName = product?.Name ?? "",
+                    HierarchyName = hierarchy?.Name ?? "",
+                    HierarchyDescription = hierarchy?.Description ?? hierarchy?.Name ?? ""
+                };
+
+                return Json(new CreateCompositeProductXHierarchyResult(
+                    success: true,
+                    message: "Hierarquia adicionada com sucesso!",
+                    data: createdViewModel,
+                    totalCount: totalCount
+                ));
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Erro ao criar relação: {ex.Message}" });
+                _logger.LogError(ex, "Erro ao criar relação CompositeProductXHierarchy");
+                return Json(new CreateCompositeProductXHierarchyResult(false, "Erro interno do servidor ao criar relação"));
+            }
+        }
+
+        /// <summary>
+        /// Carregar formulário de edição de relação CompositeProductXHierarchy
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> EditarCompositeProductXHierarchy(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest("ID da relação é obrigatório");
+                }
+
+                var viewModel = await _compositeProductHierarchyService.PrepareEditViewModelAsync(id);
+                if (viewModel == null)
+                {
+                    return NotFound("Relação não encontrada");
+                }
+
+                // Buscar informações adicionais para a view
+                var product = await _productService.GetByIdAsync(viewModel.ProductId);
+                var hierarchy = await _hierarchyService.GetByIdAsync(viewModel.ProductComponentHierarchyId);
+                
+                ViewBag.ProductName = product?.Name ?? "Produto não encontrado";
+                ViewBag.HierarchyName = hierarchy?.Name ?? "Hierarquia não encontrada";
+                
+                return PartialView("~/Views/ProductComponentHierarchy/_EditCompositeHierarchyRelation.cshtml", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar formulário de edição de CompositeProductXHierarchy para ID: {Id}", id);
+                return StatusCode(500, "Erro interno do servidor");
+            }
+        }
+
+        /// <summary>
+        /// Salvar alterações na relação CompositeProductXHierarchy
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AtualizarCompositeProductXHierarchy(EditCompositeProductXHierarchyViewModel viewModel)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Where(x => x.Value.Errors.Count > 0)
+                                           .ToDictionary(
+                                               kvp => kvp.Key,
+                                               kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                                           );
+                    return Json(new { success = false, errors });
+                }
+
+                var userId = GetCurrentUserId();
+                var success = await _compositeProductHierarchyService.UpdateRelationAsync(viewModel, userId);
+
+                if (success)
+                {
+                    return Json(new { success = true, message = "Relação atualizada com sucesso!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Erro ao atualizar relação" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao atualizar CompositeProductXHierarchy ID: {Id}", viewModel.Id);
+                return Json(new { success = false, message = $"Erro ao atualizar relação: {ex.Message}" });
             }
         }
 
         #endregion
+
+        /// <summary>
+        /// Exibe detalhes de uma relação CompositeProductXHierarchy
+        /// </summary>
+        /// <param name="id">ID da relação</param>
+        /// <returns>Partial view com detalhes</returns>
+        [HttpGet]
+        public async Task<IActionResult> DetalhesCompositeProductXHierarchy(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest("ID da relação é obrigatório");
+                }
+
+                var detailsViewModel = await _compositeProductHierarchyService.GetRelationByIdAsync(id);
+                if (detailsViewModel == null)
+                {
+                    return NotFound("Relação não encontrada");
+                }
+                
+                return PartialView("~/Views/ProductComponentHierarchy/_CompositeHierarchyRelationDetails.cshtml", detailsViewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar detalhes de CompositeProductXHierarchy para ID: {Id}", id);
+                return StatusCode(500, "Erro interno do servidor");
+            }
+        }
+
+        /// <summary>
+        /// Deleta uma relação CompositeProductXHierarchy
+        /// </summary>
+        /// <param name="id">ID da relação</param>
+        /// <returns>JSON com resultado da operação</returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletarCompositeProductXHierarchy(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return Json(new { success = false, message = "ID da relação é obrigatório" });
+                }
+
+                var userId = GetCurrentUserId();
+                var success = await _compositeProductHierarchyService.DeleteRelationAsync(id, userId);
+
+                if (success)
+                {
+                    return Json(new { success = true, message = "Relação removida com sucesso!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Erro ao remover relação" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao deletar CompositeProductXHierarchy ID: {Id}", id);
+                return Json(new { success = false, message = $"Erro ao remover relação: {ex.Message}" });
+            }
+        }
+
+        #endregion
+
+        #region general
 
         private string GetCurrentUserId()
         {

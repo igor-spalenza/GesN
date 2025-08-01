@@ -709,21 +709,52 @@ namespace GesN.Web.Controllers
                     return Json(new List<object>());
                 }
 
+                // ✅ CORREÇÃO: Usar método que carrega Product OU ProductCategory
                 var groupItems = await _productGroupService.GetGroupItemsWithProductDataAsync(productGroupId);
                 
                 var filteredItems = groupItems
-                    .Where(item => item.Product != null && 
-                                  (item.Product.Name.Contains(termo, StringComparison.OrdinalIgnoreCase) ||
-                                  (item.Product.SKU != null && item.Product.SKU.Contains(termo, StringComparison.OrdinalIgnoreCase))))
-                    .Select(item => new
+                    .Where(item => 
                     {
-                        id = item.Id,
-                        label = item.Product!.Name + (string.IsNullOrWhiteSpace(item.Product.SKU) ? "" : $" - {item.Product.SKU}"),
-                        value = item.Product!.Name + (string.IsNullOrWhiteSpace(item.Product.SKU) ? "" : $" - {item.Product.SKU}"),
-                        productName = item.Product!.Name,
-                        productSKU = item.Product.SKU,
-                        weight = item.Quantity,
-                        unitPrice = item.GetEffectivePrice()
+                        // ✅ CORREÇÃO: Filtrar tanto Product quanto ProductCategory
+                        if (item.Product != null)
+                        {
+                            return item.Product.Name.Contains(termo, StringComparison.OrdinalIgnoreCase) ||
+                                   (item.Product.SKU != null && item.Product.SKU.Contains(termo, StringComparison.OrdinalIgnoreCase));
+                        }
+                        else if (item.ProductCategory != null)
+                        {
+                            return item.ProductCategory.Name.Contains(termo, StringComparison.OrdinalIgnoreCase);
+                        }
+                        return false;
+                    })
+                    .Select(item => 
+                    {
+                        // ✅ CORREÇÃO: Usar método unificado para display name
+                        var displayName = _productGroupService.GetGroupItemDisplayName(item);
+                        var itemName = "";
+                        var itemSKU = "";
+                        
+                        if (item.Product != null)
+                        {
+                            itemName = item.Product.Name;
+                            itemSKU = item.Product.SKU ?? "";
+                        }
+                        else if (item.ProductCategory != null)
+                        {
+                            itemName = item.ProductCategory.Name + " (Categoria)";
+                            itemSKU = "";
+                        }
+                        
+                        return new
+                        {
+                            id = item.Id,
+                            label = displayName,
+                            value = displayName,
+                            productName = itemName,
+                            productSKU = itemSKU,
+                            weight = item.Quantity,
+                            unitPrice = item.GetEffectivePrice()
+                        };
                     })
                     .Take(10)
                     .ToList();
@@ -753,15 +784,15 @@ namespace GesN.Web.Controllers
                     return BadRequest("ProductGroupId e ItemId são obrigatórios");
                 }
 
-                // Obter informações do item
-                var item = await _productGroupService.GetGroupItemByIdAsync(itemId);
+                // ✅ CORREÇÃO: Obter informações do item com dados carregados (Product ou ProductCategory)
+                var item = await _productGroupService.GetGroupItemWithDataByIdAsync(itemId);
                 if (item == null)
                 {
                     return NotFound("Item não encontrado");
                 }
 
-                var product = await _productService.GetByIdAsync(item.ProductId);
-                var itemName = product?.Name ?? "Item não encontrado";
+                // ✅ CORREÇÃO: Usar método unificado para obter display name
+                var itemName = _productGroupService.GetGroupItemDisplayName(item);
 
                 // Obter regras onde este item é origem
                 var sourceRules = await _productGroupService.GetExchangeRulesAsync(productGroupId);
@@ -776,8 +807,9 @@ namespace GesN.Web.Controllers
 
                 foreach (var rule in sourceRulesList)
                 {
-                    var targetItem = await _productGroupService.GetGroupItemByIdAsync(rule.TargetGroupItemId);
-                    var targetProduct = targetItem != null ? await _productService.GetByIdAsync(targetItem.ProductId) : null;
+                    // ✅ CORREÇÃO: Buscar target item com dados carregados
+                    var targetItem = await _productGroupService.GetGroupItemWithDataByIdAsync(rule.TargetGroupItemId);
+                    var targetItemName = _productGroupService.GetGroupItemDisplayName(targetItem);
                     
                     sourceRulesViewModels.Add(new ProductGroupExchangeRuleViewModel
                     {
@@ -787,7 +819,7 @@ namespace GesN.Web.Controllers
                         SourceGroupItemName = itemName,
                         SourceGroupItemWeight = rule.SourceGroupItemWeight,
                         TargetGroupItemId = rule.TargetGroupItemId,
-                        TargetGroupItemName = targetProduct?.Name ?? "Item não encontrado",
+                        TargetGroupItemName = targetItemName,
                         TargetGroupItemWeight = rule.TargetGroupItemWeight,
                         ExchangeRatio = rule.ExchangeRatio,
                         IsActive = rule.IsActive,
@@ -798,15 +830,16 @@ namespace GesN.Web.Controllers
 
                 foreach (var rule in targetRulesList)
                 {
-                    var sourceItem = await _productGroupService.GetGroupItemByIdAsync(rule.SourceGroupItemId);
-                    var sourceProduct = sourceItem != null ? await _productService.GetByIdAsync(sourceItem.ProductId) : null;
+                    // ✅ CORREÇÃO: Buscar source item com dados carregados
+                    var sourceItem = await _productGroupService.GetGroupItemWithDataByIdAsync(rule.SourceGroupItemId);
+                    var sourceItemName = _productGroupService.GetGroupItemDisplayName(sourceItem);
                     
                     targetRulesViewModels.Add(new ProductGroupExchangeRuleViewModel
                     {
                         Id = rule.Id,
                         ProductGroupId = rule.ProductGroupId,
                         SourceGroupItemId = rule.SourceGroupItemId,
-                        SourceGroupItemName = sourceProduct?.Name ?? "Item não encontrado",
+                        SourceGroupItemName = sourceItemName,
                         SourceGroupItemWeight = rule.SourceGroupItemWeight,
                         TargetGroupItemId = rule.TargetGroupItemId,
                         TargetGroupItemName = itemName,
@@ -896,8 +929,12 @@ namespace GesN.Web.Controllers
                 
                 foreach (var rule in exchangeRules)
                 {
-                    var sourceItemName = rule.SourceGroupItem?.Product?.Name ?? "Item origem não encontrado";
-                    var targetItemName = rule.TargetGroupItem?.Product?.Name ?? "Item destino não encontrado";
+                    // ✅ CORREÇÃO: Buscar itens com dados carregados (Product ou ProductCategory)
+                    var sourceItem = await _productGroupService.GetGroupItemWithDataByIdAsync(rule.SourceGroupItemId);
+                    var targetItem = await _productGroupService.GetGroupItemWithDataByIdAsync(rule.TargetGroupItemId);
+                    
+                    var sourceItemName = _productGroupService.GetGroupItemDisplayName(sourceItem);
+                    var targetItemName = _productGroupService.GetGroupItemDisplayName(targetItem);
                     
                     viewModels.Add(new ProductGroupExchangeRuleViewModel
                     {
@@ -940,20 +977,16 @@ namespace GesN.Web.Controllers
                 // Se foi especificado um item de origem, carregar seus dados
                 if (!string.IsNullOrWhiteSpace(sourceItemId))
                 {
-                    var sourceItem = await _productGroupService.GetGroupItemByIdAsync(sourceItemId);
+                    // ✅ CORREÇÃO: Usar método que carrega Product OU ProductCategory
+                    var sourceItem = await _productGroupService.GetGroupItemWithDataByIdAsync(sourceItemId);
                     if (sourceItem != null)
                     {
-                        // Carregar dados do produto relacionado
-                        var product = await _productRepository.GetByIdAsync(sourceItem.ProductId);
-                        if (product != null)
-                        {
-                            viewModel.SourceGroupItemId = sourceItem.Id;
-                            viewModel.SourceGroupItemWeight = sourceItem.Quantity;
-                            
-                            // Adicionar dados para exibição
-                            ViewBag.SourceGroupItemName = product.Name + (string.IsNullOrWhiteSpace(product.SKU) ? "" : $" - {product.SKU}");
-                            ViewBag.IsSourceItemPredefined = true;
-                        }
+                        viewModel.SourceGroupItemId = sourceItem.Id;
+                        viewModel.SourceGroupItemWeight = sourceItem.Quantity;
+                        
+                        // ✅ CORREÇÃO: Usar método unificado para obter display name
+                        ViewBag.SourceGroupItemName = _productGroupService.GetGroupItemDisplayName(sourceItem);
+                        ViewBag.IsSourceItemPredefined = true;
                     }
                 }
 

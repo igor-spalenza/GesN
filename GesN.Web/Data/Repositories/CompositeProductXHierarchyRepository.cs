@@ -802,13 +802,13 @@ namespace GesN.Web.Data.Repositories
         {
             return new CompositeProductXHierarchy
             {
-                Id = row.Id,
+                Id = Convert.ToInt32(row.Id), // Conversão explícita de long para int
                 ProductComponentHierarchyId = row.ProductComponentHierarchyId,
                 ProductId = row.ProductId,
-                MinQuantity = row.MinQuantity,
-                MaxQuantity = row.MaxQuantity,
+                MinQuantity = Convert.ToInt32(row.MinQuantity), // Conversão explícita
+                MaxQuantity = Convert.ToInt32(row.MaxQuantity), // Conversão explícita
                 IsOptional = row.IsOptional == 1,
-                AssemblyOrder = row.AssemblyOrder,
+                AssemblyOrder = Convert.ToInt32(row.AssemblyOrder), // Conversão explícita
                 Notes = row.Notes,
                 // Propriedades de navegação simuladas
                 ProductComponentHierarchy = new ProductComponentHierarchy

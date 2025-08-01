@@ -6,9 +6,11 @@
     var status = ViewBag.Status as string ?? "Todos os Pedidos";
 }
 
-<div class="venda-main">
+<link href="~/css/SalesDomain.css" rel="stylesheet" />
 
-    <div class="container-fluid venda-lateral-fixa">
+<div class="index-main">
+
+    <div class="container-fluid menu-lateral-fixo">
         <h1>Vendas</h1><br />
 
         <button type="button" class="btn btn-sales mb-3" onclick="ordersManager.novoOrderModal()">
@@ -19,7 +21,7 @@
         <p class="text-sm">Sem lembretes no momento.</p>
     </div> 
     
-    <div class="venda-conteudo-dinamico">
+    <div class="conteudo-dinamico">
 
 
         <!-- Abas de Navegação -->

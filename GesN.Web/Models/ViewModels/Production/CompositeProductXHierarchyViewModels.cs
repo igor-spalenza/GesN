@@ -312,4 +312,137 @@ namespace GesN.Web.Models.ViewModels.Production
             };
         }
     }
+
+    #region Response Models para Operações CRUD
+
+    /// <summary>
+    /// Response padrão para operações CRUD de CompositeProductXHierarchy
+    /// </summary>
+    public class CompositeProductXHierarchyOperationResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public CompositeProductXHierarchyViewModel? Data { get; set; }
+        public string Operation { get; set; } = string.Empty; // CREATE, UPDATE, DELETE
+        public int TotalCount { get; set; }
+        public Dictionary<string, string[]>? Errors { get; set; }
+
+        /// <summary>
+        /// Construtor padrão
+        /// </summary>
+        public CompositeProductXHierarchyOperationResult()
+        {
+        }
+
+        /// <summary>
+        /// Construtor para operação bem-sucedida
+        /// </summary>
+        public CompositeProductXHierarchyOperationResult(bool success, string message, string operation)
+        {
+            Success = success;
+            Message = message;
+            Operation = operation;
+        }
+
+        /// <summary>
+        /// Construtor para operação com dados
+        /// </summary>
+        public CompositeProductXHierarchyOperationResult(bool success, string message, string operation, CompositeProductXHierarchyViewModel? data, int totalCount = 0)
+        {
+            Success = success;
+            Message = message;
+            Operation = operation;
+            Data = data;
+            TotalCount = totalCount;
+        }
+
+        /// <summary>
+        /// Construtor para operação com erro
+        /// </summary>
+        public CompositeProductXHierarchyOperationResult(bool success, string message, Dictionary<string, string[]>? errors = null)
+        {
+            Success = success;
+            Message = message;
+            Errors = errors;
+        }
+    }
+
+    /// <summary>
+    /// Response específico para criação
+    /// </summary>
+    public class CreateCompositeProductXHierarchyResult : CompositeProductXHierarchyOperationResult
+    {
+        public CreateCompositeProductXHierarchyResult() : base()
+        {
+            Operation = "CREATE";
+        }
+
+        public CreateCompositeProductXHierarchyResult(bool success, string message) : base(success, message, "CREATE")
+        {
+        }
+
+        public CreateCompositeProductXHierarchyResult(bool success, string message, CompositeProductXHierarchyViewModel data, int totalCount) 
+            : base(success, message, "CREATE", data, totalCount)
+        {
+        }
+
+        public CreateCompositeProductXHierarchyResult(string message, Dictionary<string, string[]>? errors = null) 
+            : base(false, message, errors)
+        {
+            Operation = "CREATE";
+        }
+    }
+
+    /// <summary>
+    /// Response específico para atualização  
+    /// </summary>
+    public class UpdateCompositeProductXHierarchyResult : CompositeProductXHierarchyOperationResult
+    {
+        public UpdateCompositeProductXHierarchyResult() : base()
+        {
+            Operation = "UPDATE";
+        }
+
+        public UpdateCompositeProductXHierarchyResult(bool success, string message) : base(success, message, "UPDATE")
+        {
+        }
+
+        public UpdateCompositeProductXHierarchyResult(bool success, string message, CompositeProductXHierarchyViewModel data, int totalCount) 
+            : base(success, message, "UPDATE", data, totalCount)
+        {
+        }
+
+        public UpdateCompositeProductXHierarchyResult(string message, Dictionary<string, string[]>? errors = null) 
+            : base(false, message, errors)
+        {
+            Operation = "UPDATE";
+        }
+    }
+
+    /// <summary>
+    /// Response específico para exclusão
+    /// </summary>
+    public class DeleteCompositeProductXHierarchyResult : CompositeProductXHierarchyOperationResult
+    {
+        public DeleteCompositeProductXHierarchyResult() : base()
+        {
+            Operation = "DELETE";
+            Data = null; // DELETE não retorna dados
+        }
+
+        public DeleteCompositeProductXHierarchyResult(bool success, string message, int totalCount = 0) : base(success, message, "DELETE")
+        {
+            Data = null; // DELETE não retorna dados
+            TotalCount = totalCount;
+        }
+
+        public DeleteCompositeProductXHierarchyResult(string message, Dictionary<string, string[]>? errors = null) 
+            : base(false, message, errors)
+        {
+            Operation = "DELETE";
+            Data = null;
+        }
+    }
+
+    #endregion
 } 

@@ -1,6 +1,9 @@
 @model GesN.Web.Models.ViewModels.Production.CreateProductComponentViewModel
 @using GesN.Web.Models.Enumerators
 
+@* Incluir CSS específico do domínio Product *@
+<link href="~/css/ProductDomain.css" rel="stylesheet" />
+
 <form method="post">
     @Html.AntiForgeryToken()
 

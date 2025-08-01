@@ -37,6 +37,11 @@ namespace GesN.Web.Interfaces.Services
         /// </summary>
         Task<bool> RelationExistsAsync(string id);
 
+        /// <summary>
+        /// Contar total de relações de um produto
+        /// </summary>
+        Task<int> GetRelationsCountByProductIdAsync(string productId);
+
         #endregion
 
         #region Business Logic

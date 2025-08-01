@@ -62,18 +62,26 @@
                 </div>
                 <div class="col-md-6">
                     <div class="floating-input-group">
-                        <select asp-for="CategoryId" class="form-select select2-category" placeholder=" ">
-                            <option value=""></option>
-                            @if (Model.AvailableCategories != null)
-                            {
-                                @foreach (var category in Model.AvailableCategories)
-                                {
-                                    <option value="@category.Value" selected="@category.IsSelected">@category.Text</option>
-                                }
-                            }
-                        </select>
-                        <label asp-for="CategoryId" class="floating-label">Categoria</label>
-                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        <input type="text" class="form-control floating-input category-autocomplete" 
+                               id="CategoryName-@Model.Id" 
+                               name="CategoryName"
+                               value="@Model.Category"
+                               placeholder=" " 
+                               autocomplete="off"
+                               data-context="edit"
+                               data-product-id="@Model.Id" />
+                        <input asp-for="CategoryId" type="hidden" id="CategoryId-@Model.Id" />
+                        <label for="CategoryName-@Model.Id" class="floating-label">
+                            <i class="fas fa-tags text-primary"></i>
+                            Categoria
+                        </label>
+                        <span asp-validation-for="CategoryId" class="field-validation-valid text-danger"></span>
+                        <div class="form-text">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                Digite para buscar por categorias disponíveis
+                            </small>
+                        </div>
                     </div>
                 </div>
             </div>

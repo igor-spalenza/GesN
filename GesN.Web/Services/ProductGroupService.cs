@@ -272,6 +272,55 @@ namespace GesN.Web.Services
             return await _groupItemRepository.GetByIdAsync(itemId);
         }
 
+        /// <summary>
+        /// Busca um ProductGroupItem pelo ID e carrega seus dados relacionados (Product ou ProductCategory)
+        /// </summary>
+        public async Task<ProductGroupItem?> GetGroupItemWithDataByIdAsync(string itemId)
+        {
+            var item = await _groupItemRepository.GetByIdAsync(itemId);
+            if (item == null) return null;
+
+            // Carregar produto se tiver ProductId
+            if (!string.IsNullOrWhiteSpace(item.ProductId))
+            {
+                var product = await _productRepository.GetByIdAsync(item.ProductId);
+                if (product != null)
+                {
+                    item.Product = product;
+                }
+            }
+            // Carregar categoria se tiver ProductCategoryId
+            else if (!string.IsNullOrWhiteSpace(item.ProductCategoryId))
+            {
+                var category = await _productCategoryRepository.GetByIdAsync(item.ProductCategoryId);
+                if (category != null)
+                {
+                    item.ProductCategory = category;
+                }
+            }
+
+            return item;
+        }
+
+        /// <summary>
+        /// Obtém o nome de exibição de um ProductGroupItem (Product ou ProductCategory)
+        /// </summary>
+        public string GetGroupItemDisplayName(ProductGroupItem? item)
+        {
+            if (item?.Product != null)
+            {
+                return item.Product.Name + (string.IsNullOrWhiteSpace(item.Product.SKU) ? "" : $" - {item.Product.SKU}");
+            }
+            else if (item?.ProductCategory != null)
+            {
+                return item.ProductCategory.Name + " (Categoria)";
+            }
+            else
+            {
+                return "Item não identificado";
+            }
+        }
+
         public async Task<bool> AddGroupItemAsync(ProductGroupItem item)
         {
             try

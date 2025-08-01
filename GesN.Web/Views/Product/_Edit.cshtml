@@ -14,9 +14,6 @@
     var productTypeValue = Model.ProductType;
 }
 
-@* Incluir CSS dos floating labels *@
-<link href="~/css/product-form.css" rel="stylesheet" />
-
 @* Incluir token de antiforgery para chamadas AJAX *@
 @Html.AntiForgeryToken()
 
@@ -24,10 +21,10 @@
     <div class="row">
         <!-- Navegação por Abas -->
         <div class="col-12">
-            <ul class="nav nav-tabs" id="productEditTabs" role="tablist">
+            <ul class="nav nav-tabs" id="productEditTabs-@Model.Id" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" 
-                            data-bs-target="#basic-tab-pane" type="button" role="tab">
+                    <button class="nav-link active" id="basic-tab-@Model.Id" data-bs-toggle="tab" 
+                            data-bs-target="#basic-tab-pane-@Model.Id" type="button" role="tab">
                         <i class="fas fa-box"></i> Dados Básicos
                     </button>
                 </li>
@@ -35,7 +32,7 @@
                 @if (isComposite)
                 {
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="hierarchies-tab" data-bs-toggle="tab" data-bs-target="#hierarchies-tab-pane" type="button" role="tab">
+                        <button class="nav-link" id="hierarchies-tab-@Model.Id" data-bs-toggle="tab" data-bs-target="#hierarchies-tab-pane-@Model.Id" type="button" role="tab">
                             <i class="fas fa-sitemap"></i> Hierarquias
                         </button>
                     </li>
@@ -45,8 +42,8 @@
                 @if (isGroup)
                 {
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="group-items-tab" data-bs-toggle="tab" 
-                                data-bs-target="#group-items-tab-pane" type="button" role="tab">
+                        <button class="nav-link" id="group-items-tab-@Model.Id" data-bs-toggle="tab" 
+                                data-bs-target="#group-items-tab-pane-@Model.Id" type="button" role="tab">
                             <i class="fas fa-list"></i> Itens do Grupo
                         </button>
                     </li>
@@ -58,11 +55,11 @@
     <!-- Conteúdo das Abas -->
     <div class="row mt-3">
         <div class="col-12">
-            <div class="tab-content" id="productEditTabsContent">
+            <div class="tab-content" id="productEditTabsContent-@Model.Id">
                 
                 <!-- Aba Dados Básicos -->
-                <div class="tab-pane fade show active" id="basic-tab-pane" role="tabpanel">
-                    <div id="basicDataContainer">
+                <div class="tab-pane fade show active" id="basic-tab-pane-@Model.Id" role="tabpanel">
+                    <div id="basicDataContainer-@Model.Id">
                         @await Html.PartialAsync("_EditBasicData", Model)
                     </div>
                 </div>
@@ -81,12 +78,12 @@
                     </div> *@
 
                     <!-- Aba Hierarquias -->
-                    <div class="tab-pane fade" id="hierarchies-tab-pane" role="tabpanel">
-                        <div id="hierarchiesContainer">
+                    <div class="tab-pane fade" id="hierarchies-tab-pane-@Model.Id" role="tabpanel">
+                        <div id="hierarchiesContainer-@Model.Id">
                             @{
                                 ViewBag.ProductId = ViewBag.ProductId ?? Model.Id;
                             }
-                            @await Html.PartialAsync("_ProductComponentHierarchies", Model.ProductHierarchies ?? new List<ProductComponentHierarchyViewModel>())
+                            @await Html.PartialAsync("_CompositeProductXHierarchy", Model.CompositeProductXHierarchies ?? new List<CompositeProductXHierarchyViewModel>())
                         </div>
                     </div>
 
@@ -161,8 +158,8 @@
                 <!-- Abas do Grupo (só para Group) -->
                 @if (isGroup)
                 {
-                    <div class="tab-pane fade" id="group-items-tab-pane" role="tabpanel">
-                        <div id="groupItemsContainer">
+                    <div class="tab-pane fade" id="group-items-tab-pane-@Model.Id" role="tabpanel">
+                        <div id="groupItemsContainer-@Model.Id">
                             @{
                                 ViewBag.ProductId = ViewBag.ProductId ?? Model.Id;
                             }
@@ -195,6 +192,4 @@
 @if (isComposite)
 {
     <script src="~/js/CompositeProduct.js" asp-append-version="true"></script>
-    <script src="~/js/ProductComponentHierarchy.js" asp-append-version="true"></script>
-    <script src="~/js/Demand.js" asp-append-version="true"></script>
 }

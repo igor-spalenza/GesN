@@ -543,12 +543,153 @@ const hierarchyManager = {
 
         // Initial display update
         updateDisplay();
+    },
+
+    // Autocomplete functionality for hierarchy selection
+    initializeHierarchyAutocomplete: function(inputId, hiddenId) {
+        const inputField = $('#' + inputId);
+        const hiddenField = $('#' + hiddenId);
+        
+        if (!inputField.length || !hiddenField.length) {
+            console.warn('Campos de autocomplete não encontrados:', inputId, hiddenId);
+            return;
+        }
+
+        // Get productId from data attribute
+        const productId = inputField.data('product-id') || '';
+
+        // Remove previous instance if exists
+        if (inputField.data('aaAutocomplete')) {
+            inputField.autocomplete.destroy();
+        }
+
+        // Initialize Algolia Autocomplete.js
+        const autocompleteInstance = autocomplete(inputField[0], {
+            hint: false,
+            debug: false,
+            minLength: 2,
+            openOnFocus: false,
+            autoselect: false,
+            appendTo: inputField.closest('.modal-body, .tab-pane, body')[0]
+        }, [{
+            source: function(query, callback) {
+                $.ajax({
+                    url: '/ProductComponentHierarchy/BuscarHierarchiaDisponivel',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { 
+                        termo: query,
+                        productId: productId
+                    },
+                    success: function(data) {
+                        const suggestions = $.map(data, function(item) {
+                            return {
+                                label: item.label,
+                                value: item.name,
+                                id: item.id,
+                                name: item.name,
+                                description: item.description,
+                                data: item
+                            };
+                        });
+                        callback(suggestions);
+                    },
+                    error: function() {
+                        console.error('Erro ao buscar hierarquias');
+                        callback([]);
+                    }
+                });
+            },
+            displayKey: 'label',
+            templates: {
+                suggestion: function(suggestion) {
+                    return '<div class="hierarchy-suggestion">' +
+                        '<div class="hierarchy-name">' + suggestion.name + '</div>' +
+                        (suggestion.description ? '<div class="hierarchy-description">' + suggestion.description + '</div>' : '') +
+                        '</div>';
+                },
+                empty: function(query) {
+                    return '<div class="aa-empty">Nenhuma hierarquia encontrada para "' + query.query + '"</div>';
+                }
+            }
+        }]);
+
+        // Handle selection
+        autocompleteInstance.on('autocomplete:selected', function(event, suggestion) {
+            // Set hidden field with ID
+            hiddenField.val(suggestion.id);
+            
+            // Set display field with name
+            inputField.val(suggestion.name);
+            
+            // Trigger validation
+            hiddenField.trigger('change');
+            inputField.removeClass('is-invalid').addClass('is-valid');
+            
+            // Update floating label
+            const label = inputField.siblings('.floating-label');
+            if (label.length) {
+                label.addClass('active');
+            }
+            
+            console.log('Hierarquia selecionada:', suggestion.name, 'ID:', suggestion.id);
+        });
+
+        // Handle clearing
+        autocompleteInstance.on('autocomplete:empty', function() {
+            hiddenField.val('');
+            hiddenField.trigger('change');
+        });
+
+        // Handle input clearing
+        inputField.on('input', function() {
+            const currentValue = $(this).val();
+            if (currentValue === '') {
+                hiddenField.val('');
+                hiddenField.trigger('change');
+                $(this).removeClass('is-valid is-invalid');
+                
+                // Update floating label
+                const label = $(this).siblings('.floating-label');
+                if (label.length) {
+                    label.removeClass('active');
+                }
+            }
+        });
+
+        // Handle manual validation on blur
+        inputField.on('blur', function() {
+            const currentValue = $(this).val();
+            const hiddenValue = hiddenField.val();
+            
+            if (currentValue && !hiddenValue) {
+                // User typed something but didn't select from autocomplete
+                $(this).addClass('is-invalid');
+                const errorSpan = $(this).siblings('.field-validation-valid, .field-validation-error');
+                errorSpan.text('Selecione uma opção da lista de sugestões').removeClass('field-validation-valid').addClass('field-validation-error');
+            } else if (currentValue && hiddenValue) {
+                // Valid selection
+                $(this).removeClass('is-invalid').addClass('is-valid');
+                const errorSpan = $(this).siblings('.field-validation-error');
+                errorSpan.text('').removeClass('field-validation-error').addClass('field-validation-valid');
+            }
+        });
+
+        return autocompleteInstance;
     }
 };
 
 // Funções globais para compatibilidade
 window.initializeCompositeHierarchyRelationForm = function() {
     hierarchyManager.initializeCompositeHierarchyRelationForm();
+};
+
+// Global object for ProductComponentHierarchy namespace
+window.ProductComponentHierarchy = {
+    initializeHierarchyAutocomplete: function(inputId, hiddenId) {
+        return hierarchyManager.initializeHierarchyAutocomplete(inputId, hiddenId);
+    },
+    manager: hierarchyManager
 };
 
 // Inicialização quando o DOM estiver pronto

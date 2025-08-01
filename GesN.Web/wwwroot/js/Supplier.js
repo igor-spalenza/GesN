@@ -102,19 +102,19 @@ var suppliersManager = {
 
     // Salvar novo fornecedor
     salvarNovoSupplier: function(form) {
-        console.log('salvarNovoSupplier called', form);
+
         
         // Validação simples dos campos obrigatórios
         var name = $(form).find('#Name').val();
         
         if (!name) {
-            console.log('Required fields validation failed');
+
             toastr.error('Por favor, preencha o nome do fornecedor');
             return false;
         }
 
         var formData = $(form).serialize();
-        console.log('Form data:', formData);
+
         
         $.ajax({
             url: '/Supplier/Create',
@@ -124,7 +124,7 @@ var suppliersManager = {
                 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
             },
             success: function(response) {
-                console.log('Success response:', response);
+    
                 if (response.success) {
                     $('#supplierModal').modal('hide');
                     toastr.success('Fornecedor criado com sucesso!');
@@ -136,7 +136,7 @@ var suppliersManager = {
                         }, 500);
                     }
                 } else {
-                    console.log('Response indicated failure:', response.message);
+        
                     toastr.error(response.message || 'Erro ao criar fornecedor');
                 }
             },

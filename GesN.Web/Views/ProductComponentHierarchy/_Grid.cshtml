@@ -67,21 +67,21 @@
                             </small>
                         </td>
                         <td>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <button type="button" class="btn btn-outline-info" 
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-primary"
                                         onclick="hierarchyManager.verDetalhes('@hierarchy.Id')"
                                         title="Detalhes">
-                                    <i class="fas fa-eye"></i>
+                                    <i class="bi bi-eye"></i>
                                 </button>
-                                <button type="button" class="btn btn-outline-primary" 
+                                <button type="button" class="btn btn-sm btn-outline-warning"
                                         onclick="hierarchyManager.editarHierarchy('@hierarchy.Id', '@hierarchy.Name')"
                                         title="Editar">
-                                    <i class="fas fa-edit"></i>
+                                    <i class="bi bi-pencil"></i>
                                 </button>
-                                <button type="button" class="btn btn-outline-danger" 
+                                <button type="button" class="btn btn-sm btn-outline-danger" 
                                         onclick="hierarchyManager.excluirHierarchy('@hierarchy.Id', '@hierarchy.Name')"
                                         title="Excluir">
-                                    <i class="fas fa-trash"></i>
+                                    <i class="bi bi-trash"></i>
                                 </button>
                             </div>
                         </td>

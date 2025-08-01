@@ -15,6 +15,7 @@ const productManager = {
         this.loadGrid();
         this.loadStatistics();
         this.checkForCompositeProducts();
+        this.setupDynamicScriptLoading();
     },
 
     // Eventos principais
@@ -69,32 +70,56 @@ const productManager = {
         // Configurar MutationObserver para navegadores modernos
         if (typeof MutationObserver !== 'undefined') {
             const observer = new MutationObserver((mutations) => {
+                let shouldReinitialize = false;
+                
                 mutations.forEach((mutation) => {
                     mutation.addedNodes.forEach((node) => {
                         if (node.nodeType === 1) { // Element node
                             const $node = $(node);
+                            
                             // Verificar se é o container de edição de produto
                             if ($node.hasClass('product-edit-container') || $node.find('.product-edit-container').length) {
                                 setTimeout(() => {
                                     this.initializeForm(node);
                                     this.checkForCompositeProducts();
                                 }, 100);
+                                shouldReinitialize = true;
                             }
                             // Verificar se há componentes que precisam de inicialização
-                            else if ($node.find('.select2-category, input[name="Price"], input[name="Cost"]').length) {
+                            else if ($node.find('.category-autocomplete, input[name="Price"], input[name="Cost"]').length) {
                                 setTimeout(() => {
                                     this.initializeForm(node);
                                 }, 100);
+                                shouldReinitialize = true;
+                            }
+                            // Verificar especificamente por autocomplete não inicializado
+                            else if ($node.hasClass('category-autocomplete') || $node.find('.category-autocomplete').length) {
+                                const $autocompleteInputs = $node.hasClass('category-autocomplete') ? $node : $node.find('.category-autocomplete');
+                                const $uninitialized = $autocompleteInputs.not('[data-autocomplete-initialized="true"]');
+                                
+                                if ($uninitialized.length > 0) {
+                    
+                                    setTimeout(() => {
+                                        this.autocomplete.initializeAll($node);
+                                    }, 100);
+                                    shouldReinitialize = true;
+                                }
                             }
                         }
                     });
                 });
+                
+                if (shouldReinitialize) {
+        
+                }
             });
             
             observer.observe(document.body, {
                 childList: true,
                 subtree: true
             });
+            
+    
         }
     },
 
@@ -216,7 +241,7 @@ const productManager = {
 
     // Função de compatibilidade para resolver problemas de cache
     novoProductModal: function() {
-        console.warn('Função novoProductModal é deprecated, use novoProduct()');
+        
         this.novoProduct();
     },
 
@@ -348,6 +373,26 @@ const productManager = {
                     }
                 }
                 
+                // Detectar tipo de produto e disparar eventos para carregamento dinâmico de scripts
+                const $container = $(`#conteudo-${tabId}`);
+                const $productEditContainer = $container.find('.product-edit-container');
+                
+                if ($productEditContainer.length) {
+                    const isComposite = $productEditContainer.data('is-composite') === true || $productEditContainer.data('is-composite') === 'true';
+                    const isGroup = $productEditContainer.data('is-group') === true || $productEditContainer.data('is-group') === 'true';
+                    
+                    // Disparar eventos para carregamento dinâmico de scripts
+                    if (isComposite) {
+            
+                        $(document).trigger('composite-product-tab-opened', [productId]);
+                    }
+                    
+                    if (isGroup) {
+            
+                        $(document).trigger('product-group-tab-opened', [productId]);
+                    }
+                }
+                
                 // Inicializar gerenciamento de sub-abas e componentes do formulário
                 setTimeout(() => {
                     this.initializeEditTabs(productId, tabId);
@@ -386,22 +431,22 @@ const productManager = {
         const containerSelector = `#conteudo-${tabId}`;
         
         // Remover eventos anteriores para evitar duplicatas
-        $(`${containerSelector} #productEditTabs button[data-bs-toggle="tab"]`).off('shown.bs.tab.productEdit');
+        $(`${containerSelector} #productEditTabs-${productId} button[data-bs-toggle="tab"]`).off('shown.bs.tab.productEdit');
         
         // Configurar carregamento lazy das sub-abas
-        $(`${containerSelector} #productEditTabs button[data-bs-toggle="tab"]`).on('shown.bs.tab.productEdit', (e) => {
+        $(`${containerSelector} #productEditTabs-${productId} button[data-bs-toggle="tab"]`).on('shown.bs.tab.productEdit', (e) => {
             const targetTab = $(e.target).attr('data-bs-target');
             
             switch(targetTab) {
-                case '#components-tab-pane':
-                    if ($(`${containerSelector} #componentsContainer .spinner-border`).length > 0) {
+                case `#components-tab-pane-${productId}`:
+                    if ($(`${containerSelector} #componentsContainer-${productId} .spinner-border`).length > 0) {
                         // TODO: Implementar carregamento de componentes
-                        console.log('Carregamento de componentes não implementado ainda');
+                
                     }
                     break;
-                case '#group-items-tab-pane':
-                case '#group-options-tab-pane':
-                case '#exchange-rules-tab-pane':
+                case `#group-items-tab-pane-${productId}`:
+                case `#group-options-tab-pane-${productId}`:
+                case `#exchange-rules-tab-pane-${productId}`:
                     // As abas ProductGroup agora são renderizadas diretamente via @await Html.PartialAsync()
                     // Não precisamos recarregar via AJAX
                     break;
@@ -582,7 +627,7 @@ const productManager = {
 
     filtrarEstoqueBaixo: function() {
         // Implementar filtro para estoque baixo
-        console.log('Filtrar produtos com estoque baixo');
+
         // Por enquanto, apenas aplicar filtros existentes
         this.aplicarFiltros();
     },
@@ -935,115 +980,165 @@ const productManager = {
         }
     },
 
-    // Select2 Management for Category Fields
-    select2: {
-        // Initialize all Select2 instances in container
+    // Autocomplete Management for Category Fields
+    autocomplete: {
+        // Initialize all autocomplete instances in container
         initializeAll: function(container) {
             const $container = container ? $(container) : $(document);
             
-            // Initialize category selects
-            $container.find('.select2-category').each(function() {
-                productManager.select2.initializeCategorySelect($(this));
+            // Initialize category autocompletes
+            $container.find('.category-autocomplete').each(function() {
+                productManager.autocomplete.initializeCategoryAutocomplete($(this));
             });
         },
 
-        // Initialize a single category select
-        initializeCategorySelect: function($select) {
-            if (!$select.length) return;
+        // Initialize a single category autocomplete following the ROBUST PATTERN
+        initializeCategoryAutocomplete: function($input) {
+            if (!$input.length || $input.data('autocomplete-initialized')) return;
             
-            // Generate unique ID if not present
-            const selectId = $select.attr('id') || 'select2-category-' + Math.random().toString(36).substr(2, 9);
-            $select.attr('id', selectId);
+            // Mark as initialized
+            $input.data('autocomplete-initialized', true);
             
-            // Skip if already initialized and working
-            if ($select.hasClass('select2-hidden-accessible') && $select.next('.select2-container').length) {
+            // Get the container for this autocomplete instance
+            const $container = $input.closest('.floating-input-group');
+            
+            // Find hidden input using dynamic ID pattern (more robust)
+            const inputId = $input.attr('id');
+            const hiddenId = inputId ? inputId.replace('CategoryName-', 'CategoryId-') : null;
+            const $hiddenInput = hiddenId ? $container.find(`#${hiddenId}`) : $container.find('input[name="CategoryId"], input[asp-for="CategoryId"]');
+            
+            // ✅ VALIDATION: Verificar existência dos campos essenciais
+            if (!$hiddenInput.length) {
+                console.warn('Hidden CategoryId field not found for input:', inputId);
                 return;
             }
             
-            // Destroy previous instance
-            if ($select.hasClass('select2-hidden-accessible')) {
-                $select.select2('destroy');
+            // ✅ CLEANUP: Remove instância anterior se houver
+            if ($input.data('aaAutocomplete')) {
+                $input.autocomplete.destroy();
             }
             
-            // Find correct dropdown parent (modal if exists, otherwise body)
-            const $modal = $select.closest('.modal');
-            const dropdownParent = $modal.length ? $modal : $('body');
-            
-            $select.select2({
-                placeholder: 'Selecione uma categoria',
-                allowClear: true,
-                language: 'pt-BR',
-                dropdownParent: dropdownParent,
-                width: '100%',
-                ajax: {
-                    url: '/ProductCategory/BuscaProductCategoryAutocomplete',
-                    dataType: 'json',
-                    delay: 300,
-                    data: function (params) {
-                        return {
-                            termo: params.term || ''
-                        };
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: data.map(function(item) {
+            // ✅ ALGOLIA CONFIG: Configuração robusta seguindo padrão
+            const autocompleteInstance = autocomplete($input[0], {
+                hint: false,
+                debug: false,
+                minLength: 2,
+                openOnFocus: false,
+                autoselect: true,
+                appendTo: $container[0] // ✅ CRUCIAL: Container correto para múltiplas views
+            }, [{
+                source: function(query, callback) {
+                    $.ajax({
+                        url: '/ProductCategory/BuscaProductCategoryAutocomplete',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: { termo: query },
+                        success: function(data) {
+                            const suggestions = $.map(data, function(item) {
                                 return {
+                                    label: item.name || item.label,
+                                    value: item.value || item.name,
                                     id: item.id,
-                                    text: item.text,
-                                    description: item.description
+                                    description: item.description,
+                                    data: item
                                 };
-                            })
-                        };
+                            });
+                            callback(suggestions);
+                        },
+                        error: function() {
+                            callback([]);
+                        }
+                    });
+                },
+                displayKey: 'label',
+                templates: {
+                    suggestion: function(suggestion) {
+                        return '<div class="autocomplete-suggestion">' +
+                               '<div class="suggestion-title">' + (suggestion.data.name || suggestion.label) + '</div>' +
+                               (suggestion.data.description ? '<div class="suggestion-subtitle">' + suggestion.data.description + '</div>' : '') +
+                               '</div>';
                     },
-                    cache: true
-                },
-                templateResult: function(category) {
-                    if (category.loading) {
-                        return 'Buscando...';
-                    }
-                    
-                    if (!category.id) {
-                        return category.text;
-                    }
-                    
-                    const $result = $(
-                        '<div class="select2-result-category">' +
-                            '<div class="select2-result-category__title">' + category.text + '</div>' +
-                            (category.description ? '<div class="select2-result-category__description">' + category.description + '</div>' : '') +
-                        '</div>'
-                    );
-                    
-                    return $result;
-                },
-                templateSelection: function(category) {
-                    return category.text || category.id;
-                },
-                minimumInputLength: 0
+                    empty: '<div class="aa-empty">Nenhuma categoria encontrada</div>'
+                }
+            }]);
+            
+            // ✅ EVENT HANDLERS: Seleção robusta
+            autocompleteInstance.on('autocomplete:selected', function(event, suggestion, dataset) {
+                $hiddenInput.val(suggestion.id);
+                $input.val(suggestion.value);
+                
+                // ✅ UI UPDATES: Handle floating label
+                $container.addClass('has-value');
+                
+                // ✅ INTEGRATION: Trigger validation
+                $hiddenInput.trigger('change');
             });
             
-            // Handle floating label integration
-            $select.on('select2:open select2:close select2:select select2:unselect', function() {
-                const $container = $(this).next('.select2-container');
-                if ($(this).val()) {
-                    $container.addClass('has-value');
-                } else {
+            // ✅ VALIDATION: Limpar seleção se campo ficar vazio
+            $input.on('blur', function() {
+                if ($(this).val() === '') {
+                    $hiddenInput.val('');
                     $container.removeClass('has-value');
+                    $hiddenInput.trigger('change');
                 }
             });
             
-            // Set initial state for floating label
-            if ($select.val()) {
-                $select.next('.select2-container').addClass('has-value');
+            // ✅ INTEGRATION: Handle floating label state on load
+            if ($input.val()) {
+                $container.addClass('has-value');
+            }
+
+             // Handle manual input clearing and typing
+            $input.on('input keyup', function() {
+                const $container = $(this).closest('.floating-input-group');
+                
+                if ($(this).val()) {
+                    $container.addClass('has-value');
+                } else {
+                    if ($hiddenInput.length) {
+                        $hiddenInput.val('');
+                        $hiddenInput.trigger('change');
+                    }
+                    $container.removeClass('has-value');
+                }
+            });
+
+            // Handle focus/blur for floating labels
+            $input.on('focus', function() {
+                $(this).closest('.floating-input-group').addClass('has-value');
+            }).on('blur', function() {
+                if (!$(this).val()) {
+                    $(this).closest('.floating-input-group').removeClass('has-value');
+                }
+            });
+
+            // Set initial value if CategoryId is populated
+            if ($hiddenInput.length && $hiddenInput.val()) {
+                $.ajax({
+                    url: '/ProductCategory/BuscaProductCategoryAutocomplete',
+                    method: 'GET',
+                    data: { termo: '' },
+                    success: function(data) {
+                        const currentCategory = data.find(item => item.id === $hiddenInput.val());
+                        if (currentCategory) {
+                            $input.val(currentCategory.name);
+                            $input.closest('.floating-input-group').addClass('has-value');
+                        }
+                    }
+                });
             }
         },
 
-        // Destroy all Select2 instances in container
+        // Destroy all autocomplete instances in container
         destroyAll: function(container) {
             const $container = container ? $(container) : $(document);
-            $container.find('.select2-hidden-accessible').each(function() {
-                const $select = $(this);
-                if ($select.data('select2')) {
-                    $select.select2('destroy');
+            $container.find('.category-autocomplete').each(function() {
+                const $input = $(this);
+                if ($input.data('autocomplete-initialized')) {
+                    // Clean up autocomplete
+                    $input.autocomplete('destroy');
+                    $input.removeData('autocomplete-initialized');
+                    clearTimeout($input.data('timeout'));
                 }
             });
         }
@@ -1053,8 +1148,8 @@ const productManager = {
     initializeForm: function(container) {
         const $container = $(container);
         
-        // Initialize Select2 components
-        this.select2.initializeAll($container);
+        // Initialize autocomplete components
+        this.autocomplete.initializeAll($container);
         
         // Setup form calculations
         this.setupFormCalculations($container);
@@ -1172,6 +1267,61 @@ const productManager = {
         }
 
         return null;
+    },
+
+    // Sistema de carregamento dinâmico de scripts para DevTools Sources
+    dynamicScripts: {
+        loaded: {},
+        loading: {},
+        
+        loadScript: function(src, id) {
+            if (this.loaded[id] || this.loading[id]) {
+                return Promise.resolve();
+            }
+            
+            this.loading[id] = true;
+            
+            return new Promise((resolve, reject) => {
+                $.getScript(src)
+                    .done(() => {
+                        this.loaded[id] = true;
+                        this.loading[id] = false;
+        
+                        resolve();
+                    })
+                    .fail((jqxhr, settings, exception) => {
+                        this.loading[id] = false;
+                        console.error('❌ Erro ao carregar script:', src, exception);
+                        reject(exception);
+                    });
+            });
+        },
+        
+        loadCompositeProductScripts: function() {
+            return Promise.all([
+                this.loadScript('/js/CompositeProduct.js?v=' + new Date().getTime(), 'compositeProduct'),
+                // Não carregar ProductComponentHierarchy.js pois removemos a dependência
+            ]);
+        },
+        
+        loadProductGroupScripts: function() {
+            return this.loadScript('/js/ProductGroup.js?v=' + new Date().getTime(), 'productGroup');
+        }
+    },
+
+    // Configurar event handlers para carregamento dinâmico
+    setupDynamicScriptLoading: function() {
+        // Evento personalizado para detectar abertura de produtos compostos
+        $(document).on('composite-product-tab-opened', (event, productId) => {
+
+            this.dynamicScripts.loadCompositeProductScripts();
+        });
+        
+        // Evento personalizado para detectar abertura de produtos grupo
+        $(document).on('product-group-tab-opened', (event, productId) => {
+
+            this.dynamicScripts.loadProductGroupScripts();
+        });
     },
 
     // ProductGroup functionality moved to ProductGroup.js

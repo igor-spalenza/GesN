@@ -241,8 +241,12 @@ namespace GesN.Web.Controllers
                     var exchangeRules = await _productGroupService.GetExchangeRulesAsync(id);
                     foreach (var rule in exchangeRules)
                     {
-                        var sourceItemName = rule.SourceGroupItem?.Product?.Name ?? "Item origem não encontrado";
-                        var targetItemName = rule.TargetGroupItem?.Product?.Name ?? "Item destino não encontrado";
+                        // ✅ CORREÇÃO: Buscar itens com dados carregados (Product ou ProductCategory)
+                        var sourceItem = await _productGroupService.GetGroupItemWithDataByIdAsync(rule.SourceGroupItemId);
+                        var targetItem = await _productGroupService.GetGroupItemWithDataByIdAsync(rule.TargetGroupItemId);
+                        
+                        var sourceItemName = _productGroupService.GetGroupItemDisplayName(sourceItem);
+                        var targetItemName = _productGroupService.GetGroupItemDisplayName(targetItem);
                         
                         viewModel.ExchangeRules.Add(new ProductGroupExchangeRuleViewModel
                         {
@@ -313,39 +317,25 @@ namespace GesN.Web.Controllers
                     try
                     {
                         var compositeRelations = await _compositeProductXHierarchyService.GetActiveProductHierarchiesAsync(id);
-                        var hierarchyViewModels = new List<ProductComponentHierarchyViewModel>();
+                        var relationViewModels = compositeRelations.ToList(); // Converter para List
                         
-                        foreach (var relation in compositeRelations)
+                        // Garantir que o nome do produto esteja preenchido em cada relação
+                        foreach (var relation in relationViewModels)
                         {
-                            hierarchyViewModels.Add(new ProductComponentHierarchyViewModel
-                            {
-                                Id = relation.ProductComponentHierarchyId,
-                                Name = relation.HierarchyName,
-                                Description = "", // Será preenchida via service se necessário
-                                MinQuantity = relation.MinQuantity,
-                                MaxQuantity = relation.MaxQuantity,
-                                IsOptional = relation.IsOptional,
-                                AssemblyOrder = relation.AssemblyOrder,
-                                Notes = relation.Notes,
-                                StateCode = ObjectState.Active, // Usando Active por padrão já que são apenas ativas
-                                CreatedAt = DateTime.Now, // Placeholder - seria necessário buscar detalhes se necessário
-                                LastModifiedAt = null,
-                                RelationId = relation.Id,
-                                ProductName = product.Name // Adicionar o nome do produto
-                            });
+                            relation.ProductName = product.Name;
                         }
                         
-                        // Ordenar por ordem de montagem
-                        viewModel.ProductHierarchies = hierarchyViewModels.OrderBy(h => h.AssemblyOrder).ThenBy(h => h.Name).ToList();
+                        // Ordenar por ordem de montagem e depois por nome da hierarquia
+                        viewModel.CompositeProductXHierarchies = relationViewModels.OrderBy(r => r.AssemblyOrder).ThenBy(r => r.HierarchyName).ToList();
                         
-                        _logger.LogInformation("Hierarquias carregadas: {HierarchiesCount} hierarquias", viewModel.ProductHierarchies.Count);
+                        _logger.LogInformation("Hierarquias carregadas: {HierarchiesCount} hierarquias", viewModel.CompositeProductXHierarchies.Count);
                     }
                     catch (Exception hierarchyEx)
                     {
                         _logger.LogError(hierarchyEx, "Erro ao carregar hierarquias para produto: {ProductId}. Erro: {Error}", id, hierarchyEx.Message);
                         
                         // Criar lista vazia em caso de erro
-                        viewModel.ProductHierarchies = new List<ProductComponentHierarchyViewModel>();
+                        viewModel.CompositeProductXHierarchies = new List<CompositeProductXHierarchyViewModel>();
                         
                         _logger.LogInformation("Hierarquias inicializadas com lista vazia devido ao erro");
                     }

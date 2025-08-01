@@ -498,31 +498,40 @@ namespace GesN.Web.Controllers
         }
 
         /// <summary>
-        /// Busca customers para autocomplete baseado em FirstName, LastName e Phone
+        /// Endpoint para autocomplete de Customer
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> BuscaCustomerAutocomplete(string termo)
         {
-            if (string.IsNullOrWhiteSpace(termo))
-                return Json(new List<object>());
-
             try
             {
+                // ✅ VALIDAÇÃO: Minimum length check
+                if (string.IsNullOrWhiteSpace(termo) || termo.Length < 2)
+                    return Json(new List<object>());
+
+                // ✅ SERVICE LAYER: Usar serviço especializado
                 var customers = await _customerService.SearchCustomersForAutocompleteAsync(termo);
 
-                var resultado = customers.Select(c => new {
-                    id = c.Id,
-                    label = $"{c.FullName}" + (!string.IsNullOrWhiteSpace(c.Phone) ? $" - {c.Phone}" : ""),
-                    value = c.FullName,
-                    phone = c.Phone ?? "",
-                    email = c.Email ?? ""
-                });
+                var result = customers
+                    .Where(c => c.StateCode == ObjectState.Active) // ✅ FILTRO: Apenas ativos
+                    .Take(10) // ✅ PERFORMANCE: Limitar resultados
+                    .Select(c => new {
+                        id = c.Id,
+                        name = c.FullName,
+                        description = c.Phone ?? "",
+                        label = $"{c.FullName}" + (!string.IsNullOrWhiteSpace(c.Phone) ? $" - {c.Phone}" : ""),
+                        value = c.FullName,
+                        phone = c.Phone ?? "",
+                        email = c.Email ?? ""
+                    })
+                    .ToList();
 
-                return Json(resultado);
+                return Json(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar customers para autocomplete: {Termo}", termo);
+                // ✅ ERROR HANDLING: Log e retorno seguro
+                _logger.LogError(ex, "Erro ao buscar customers para autocomplete com termo: {Termo}", termo);
                 return Json(new List<object>());
             }
         }

@@ -164,6 +164,20 @@ namespace GesN.Web.Services
             return await _relationRepository.ExistsAsync(relationId);
         }
 
+        public async Task<int> GetRelationsCountByProductIdAsync(string productId)
+        {
+            try
+            {
+                var relations = await _relationRepository.GetActiveByProductIdAsync(productId);
+                return relations.Count();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao contar relações do produto {ProductId}", productId);
+                return 0; // Retorna 0 em caso de erro para não quebrar a aplicação
+            }
+        }
+
         #endregion
 
         #region Business Logic
