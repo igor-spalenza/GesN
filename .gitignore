@@ -70,7 +70,8 @@ ScaffoldingReadMe.txt
 StyleCopReport.xml
 
 # Database files and diretories
-GesN.Web/Context/
+GesN.Web/Past-Context-Docs/
+#GesN.Web/Context/
 ArqInf.svg
 *.drawio.*
 *.drawio
