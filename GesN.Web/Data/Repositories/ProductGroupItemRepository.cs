@@ -20,23 +20,14 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*
                 FROM ProductGroupItem pgi
-                LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.StateCode = @StateCode
                 ORDER BY pgi.CreatedAt";
 
-            var result = await connection.QueryAsync<ProductGroupItem, Product, ProductGroupItem>(
+            return await connection.QueryAsync<ProductGroupItem>(
                 sql,
-                (groupItem, product) =>
-                {
-                    groupItem.Product = product;
-                    return groupItem;
-                },
-                new { StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
-
-            return result;
+                new { StateCode = (int)ObjectState.Active });
         }
 
         public async Task<ProductGroupItem?> GetByIdAsync(string id)
@@ -44,20 +35,13 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*
                 FROM ProductGroupItem pgi
-                LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.Id = @Id";
 
-            var result = await connection.QueryAsync<ProductGroupItem, Product, ProductGroupItem>(
+            var result = await connection.QueryAsync<ProductGroupItem>(
                 sql,
-                (groupItem, product) =>
-                {
-                    groupItem.Product = product;
-                    return groupItem;
-                },
-                new { Id = id },
-                splitOn: "Id");
+                new { Id = id });
 
             return result.FirstOrDefault();
         }
@@ -67,24 +51,15 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*
                 FROM ProductGroupItem pgi
-                LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
                   AND pgi.StateCode = @StateCode
                 ORDER BY pgi.CreatedAt";
 
-            var result = await connection.QueryAsync<ProductGroupItem, Product, ProductGroupItem>(
+            return await connection.QueryAsync<ProductGroupItem>(
                 sql,
-                (groupItem, product) =>
-                {
-                    groupItem.Product = product;
-                    return groupItem;
-                },
-                new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
-
-            return result;
+                new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active });
         }
 
         public async Task<IEnumerable<ProductGroupItem>> GetByProductIdAsync(string productId)
@@ -108,25 +83,16 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*
                 FROM ProductGroupItem pgi
-                LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
                   AND pgi.IsOptional = 1
                   AND pgi.StateCode = @StateCode
                 ORDER BY pgi.CreatedAt";
 
-            var result = await connection.QueryAsync<ProductGroupItem, Product, ProductGroupItem>(
+            return await connection.QueryAsync<ProductGroupItem>(
                 sql,
-                (groupItem, product) =>
-                {
-                    groupItem.Product = product;
-                    return groupItem;
-                },
-                new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
-
-            return result;
+                new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active });
         }
 
         public async Task<IEnumerable<ProductGroupItem>> GetRequiredItemsAsync(string productGroupId)
@@ -134,25 +100,16 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*
                 FROM ProductGroupItem pgi
-                LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
                   AND pgi.IsOptional = 0
                   AND pgi.StateCode = @StateCode
                 ORDER BY pgi.CreatedAt";
 
-            var result = await connection.QueryAsync<ProductGroupItem, Product, ProductGroupItem>(
+            return await connection.QueryAsync<ProductGroupItem>(
                 sql,
-                (groupItem, product) =>
-                {
-                    groupItem.Product = product;
-                    return groupItem;
-                },
-                new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
-
-            return result;
+                new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active });
         }
 
         public async Task<ProductGroupItem?> GetByProductGroupAndProductAsync(string productGroupId, string productId)
@@ -160,21 +117,14 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*
                 FROM ProductGroupItem pgi
-                LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
                   AND pgi.ProductId = @ProductId";
 
-            var result = await connection.QueryAsync<ProductGroupItem, Product, ProductGroupItem>(
+            var result = await connection.QueryAsync<ProductGroupItem>(
                 sql,
-                (groupItem, product) =>
-                {
-                    groupItem.Product = product;
-                    return groupItem;
-                },
-                new { ProductGroupId = productGroupId, ProductId = productId },
-                splitOn: "Id");
+                new { ProductGroupId = productGroupId, ProductId = productId });
 
             return result.FirstOrDefault();
         }
@@ -184,31 +134,22 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*
                 FROM ProductGroupItem pgi
-                LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
                   AND pgi.Quantity >= @MinQuantity
                   AND pgi.Quantity <= @MaxQuantity
                   AND pgi.StateCode = @StateCode
                 ORDER BY pgi.Quantity";
 
-            var result = await connection.QueryAsync<ProductGroupItem, Product, ProductGroupItem>(
+            return await connection.QueryAsync<ProductGroupItem>(
                 sql,
-                (groupItem, product) =>
-                {
-                    groupItem.Product = product;
-                    return groupItem;
-                },
                 new { 
                     ProductGroupId = productGroupId, 
                     MinQuantity = minQuantity, 
                     MaxQuantity = maxQuantity,
                     StateCode = (int)ObjectState.Active 
-                },
-                splitOn: "Id");
-
-            return result;
+                });
         }
 
         public async Task<IEnumerable<ProductGroupItem>> GetWithExtraPriceAsync(string productGroupId)
@@ -216,25 +157,16 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, p.* as Product
+                SELECT pgi.*
                 FROM ProductGroupItem pgi
-                LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
                   AND pgi.ExtraPrice > 0
                   AND pgi.StateCode = @StateCode
                 ORDER BY pgi.ExtraPrice DESC";
 
-            var result = await connection.QueryAsync<ProductGroupItem, Product, ProductGroupItem>(
+            return await connection.QueryAsync<ProductGroupItem>(
                 sql,
-                (groupItem, product) =>
-                {
-                    groupItem.Product = product;
-                    return groupItem;
-                },
-                new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
-
-            return result;
+                new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active });
         }
 
         public async Task<string> CreateAsync(ProductGroupItem groupItem)
@@ -243,12 +175,12 @@ namespace GesN.Web.Data.Repositories
             
             const string sql = @"
                 INSERT INTO ProductGroupItem (
-                    Id, ProductGroupId, ProductId, Quantity, MinQuantity, MaxQuantity,
+                    Id, ProductGroupId, ProductId, ProductCategoryId, Quantity, MinQuantity, MaxQuantity,
                     DefaultQuantity, IsOptional, ExtraPrice, StateCode,
                     CreatedAt, CreatedBy, LastModifiedAt, LastModifiedBy
                 )
                 VALUES (
-                    @Id, @ProductGroupId, @ProductId, @Quantity, @MinQuantity, @MaxQuantity,
+                    @Id, @ProductGroupId, @ProductId, @ProductCategoryId, @Quantity, @MinQuantity, @MaxQuantity,
                     @DefaultQuantity, @IsOptional, @ExtraPrice, @StateCode,
                     @CreatedAt, @CreatedBy, @LastModifiedAt, @LastModifiedBy
                 )";
@@ -265,6 +197,7 @@ namespace GesN.Web.Data.Repositories
                 UPDATE ProductGroupItem SET 
                     ProductGroupId = @ProductGroupId,
                     ProductId = @ProductId,
+                    ProductCategoryId = @ProductCategoryId,
                     Quantity = @Quantity,
                     MinQuantity = @MinQuantity,
                     MaxQuantity = @MaxQuantity,
@@ -428,26 +361,21 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pgi.*, 
-                       p.* as Product
+                SELECT pgi.*
                 FROM ProductGroupItem pgi
                 LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
                   AND pgi.StateCode = @StateCode
-                  AND p.IsActive = 1
+                  AND p.StateCode = @ActiveState
                 ORDER BY p.Name";
 
-            var result = await connection.QueryAsync<ProductGroupItem, Product, ProductGroupItem>(
+            return await connection.QueryAsync<ProductGroupItem>(
                 sql,
-                (groupItem, product) =>
-                {
-                    groupItem.Product = product;
-                    return groupItem;
-                },
-                new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
-
-            return result;
+                new { 
+                    ProductGroupId = productGroupId, 
+                    StateCode = (int)ObjectState.Active,
+                    ActiveState = (int)ObjectState.Active
+                });
         }
 
         public async Task<IEnumerable<ProductGroupItem>> GetOptionalByGroupAsync(string productGroupId)
@@ -462,31 +390,21 @@ namespace GesN.Web.Data.Repositories
             var offset = (page - 1) * pageSize;
             
             const string sql = @"
-                SELECT pgi.*, 
-                       p.* as Product
+                SELECT pgi.*
                 FROM ProductGroupItem pgi
-                LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
                   AND pgi.StateCode = @StateCode
                 ORDER BY pgi.CreatedAt DESC
                 LIMIT @PageSize OFFSET @Offset";
 
-            var result = await connection.QueryAsync<ProductGroupItem, Product, ProductGroupItem>(
+            return await connection.QueryAsync<ProductGroupItem>(
                 sql,
-                (groupItem, product) =>
-                {
-                    groupItem.Product = product;
-                    return groupItem;
-                },
                 new { 
                     ProductGroupId = productGroupId, 
                     StateCode = (int)ObjectState.Active,
                     PageSize = pageSize,
                     Offset = offset
-                },
-                splitOn: "Id");
-
-            return result;
+                });
         }
 
         public async Task<bool> ItemExistsInGroupAsync(string productGroupId, string productId)
@@ -514,20 +432,121 @@ namespace GesN.Web.Data.Repositories
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
-            const string sql = @"
-                SELECT COALESCE(SUM(p.UnitPrice + pgi.ExtraPrice), 0)
+            // Primeiro buscar os itens
+            const string itemsSql = @"
+                SELECT pgi.ProductId, pgi.ExtraPrice
                 FROM ProductGroupItem pgi
-                LEFT JOIN Product p ON pgi.ProductId = p.Id
                 WHERE pgi.ProductGroupId = @ProductGroupId 
                   AND pgi.Id IN @SelectedItemIds
                   AND pgi.StateCode = @StateCode";
 
-            return await connection.QuerySingleAsync<decimal>(sql, new
+            var items = await connection.QueryAsync<(string ProductId, decimal ExtraPrice)>(itemsSql, new
             {
                 ProductGroupId = productGroupId,
                 SelectedItemIds = selectedItemIds.ToList(),
                 StateCode = (int)ObjectState.Active
             });
+
+            decimal totalPrice = 0;
+            foreach (var item in items)
+            {
+                // Buscar preço do produto separadamente
+                const string productPriceSql = "SELECT UnitPrice FROM Product WHERE Id = @ProductId";
+                var unitPrice = await connection.QuerySingleOrDefaultAsync<decimal?>(productPriceSql, new { ProductId = item.ProductId });
+                
+                totalPrice += (unitPrice ?? 0) + item.ExtraPrice;
+            }
+
+            return totalPrice;
+        }
+
+        // Métodos específicos para ProductCategory
+        public async Task<IEnumerable<ProductGroupItem>> GetByProductCategoryIdAsync(string productCategoryId)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+            
+            const string sql = @"
+                SELECT pgi.*, pg.Name as ProductGroupName
+                FROM ProductGroupItem pgi
+                LEFT JOIN Product pg ON pgi.ProductGroupId = pg.Id
+                WHERE pgi.ProductCategoryId = @ProductCategoryId 
+                  AND pgi.StateCode = @StateCode
+                ORDER BY pgi.CreatedAt";
+
+            return await connection.QueryAsync<ProductGroupItem>(sql, 
+                new { ProductCategoryId = productCategoryId, StateCode = (int)ObjectState.Active });
+        }
+
+        public async Task<ProductGroupItem?> GetByProductGroupAndCategoryAsync(string productGroupId, string productCategoryId)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+            
+            const string sql = @"
+                SELECT pgi.*
+                FROM ProductGroupItem pgi
+                WHERE pgi.ProductGroupId = @ProductGroupId 
+                  AND pgi.ProductCategoryId = @ProductCategoryId";
+
+            var result = await connection.QueryAsync<ProductGroupItem>(
+                sql,
+                new { ProductGroupId = productGroupId, ProductCategoryId = productCategoryId });
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<bool> CategoryItemExistsInGroupAsync(string productGroupId, string productCategoryId)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+            
+            const string sql = @"
+                SELECT COUNT(1) 
+                FROM ProductGroupItem 
+                WHERE ProductGroupId = @ProductGroupId 
+                  AND ProductCategoryId = @ProductCategoryId
+                  AND StateCode = @StateCode";
+
+            var count = await connection.QuerySingleAsync<int>(sql, new
+            {
+                ProductGroupId = productGroupId,
+                ProductCategoryId = productCategoryId,
+                StateCode = (int)ObjectState.Active
+            });
+
+            return count > 0;
+        }
+
+        public async Task<IEnumerable<ProductGroupItem>> GetCategoryItemsByGroupAsync(string productGroupId)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+            
+            const string sql = @"
+                SELECT pgi.*
+                FROM ProductGroupItem pgi
+                WHERE pgi.ProductGroupId = @ProductGroupId 
+                  AND pgi.ProductCategoryId IS NOT NULL
+                  AND pgi.StateCode = @StateCode
+                ORDER BY pgi.CreatedAt";
+
+            return await connection.QueryAsync<ProductGroupItem>(
+                sql,
+                new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active });
+        }
+
+        public async Task<IEnumerable<ProductGroupItem>> GetProductItemsByGroupAsync(string productGroupId)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+            
+            const string sql = @"
+                SELECT pgi.*
+                FROM ProductGroupItem pgi
+                WHERE pgi.ProductGroupId = @ProductGroupId 
+                  AND pgi.ProductId IS NOT NULL
+                  AND pgi.StateCode = @StateCode
+                ORDER BY pgi.CreatedAt";
+
+            return await connection.QueryAsync<ProductGroupItem>(
+                sql,
+                new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active });
         }
     }
 } 

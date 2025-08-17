@@ -1,6 +1,6 @@
 @using GesN.Web.Models.ViewModels.Production
 @using GesN.Web.Models.Enumerators
-@model EditProductViewModel
+@model EditProductWithGroupsViewModel
 
 @{
     // Verificações defensivas
@@ -9,22 +9,22 @@
         throw new ArgumentNullException(nameof(Model), "O modelo não pode ser nulo");
     }
     
-    var isComposite = Model.ProductType == ProductType.Composite;
-    var isGroup = Model.ProductType == ProductType.Group;
+    var isComposite = Model.IsComposite;
+    var isGroup = Model.IsGroup;
     var productTypeValue = Model.ProductType;
 }
 
-@* Incluir CSS dos floating labels *@
-<link href="~/css/product-form.css" rel="stylesheet" />
+@* Incluir token de antiforgery para chamadas AJAX *@
+@Html.AntiForgeryToken()
 
-<div class="container-fluid">
+<div class="container-fluid product-edit-container" data-product-id="@ViewBag.ProductId" data-is-composite="@isComposite.ToString().ToLower()" data-is-group="@isGroup.ToString().ToLower()">
     <div class="row">
         <!-- Navegação por Abas -->
         <div class="col-12">
-            <ul class="nav nav-tabs" id="productEditTabs" role="tablist">
+            <ul class="nav nav-tabs" id="productEditTabs-@Model.Id" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" 
-                            data-bs-target="#basic-tab-pane" type="button" role="tab">
+                    <button class="nav-link active" id="basic-tab-@Model.Id" data-bs-toggle="tab" 
+                            data-bs-target="#basic-tab-pane-@Model.Id" type="button" role="tab">
                         <i class="fas fa-box"></i> Dados Básicos
                     </button>
                 </li>
@@ -32,31 +32,19 @@
                 @if (isComposite)
                 {
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="components-tab" data-bs-toggle="tab" 
-                                data-bs-target="#components-tab-pane" type="button" role="tab">
-                            <i class="fas fa-cogs"></i> Componentes
+                        <button class="nav-link" id="hierarchies-tab-@Model.Id" data-bs-toggle="tab" data-bs-target="#hierarchies-tab-pane-@Model.Id" type="button" role="tab">
+                            <i class="fas fa-sitemap"></i> Hierarquias
                         </button>
                     </li>
+                 
                 }
-                
+
                 @if (isGroup)
                 {
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="group-items-tab" data-bs-toggle="tab" 
-                                data-bs-target="#group-items-tab-pane" type="button" role="tab">
+                        <button class="nav-link" id="group-items-tab-@Model.Id" data-bs-toggle="tab" 
+                                data-bs-target="#group-items-tab-pane-@Model.Id" type="button" role="tab">
                             <i class="fas fa-list"></i> Itens do Grupo
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="group-options-tab" data-bs-toggle="tab" 
-                                data-bs-target="#group-options-tab-pane" type="button" role="tab">
-                            <i class="fas fa-sliders-h"></i> Opções
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="exchange-rules-tab" data-bs-toggle="tab" 
-                                data-bs-target="#exchange-rules-tab-pane" type="button" role="tab">
-                            <i class="fas fa-exchange-alt"></i> Regras de Troca
                         </button>
                     </li>
                 }
@@ -67,67 +55,115 @@
     <!-- Conteúdo das Abas -->
     <div class="row mt-3">
         <div class="col-12">
-            <div class="tab-content" id="productEditTabsContent">
+            <div class="tab-content" id="productEditTabsContent-@Model.Id">
                 
                 <!-- Aba Dados Básicos -->
-                <div class="tab-pane fade show active" id="basic-tab-pane" role="tabpanel">
-                    <div id="basicDataContainer">
+                <div class="tab-pane fade show active" id="basic-tab-pane-@Model.Id" role="tabpanel">
+                    <div id="basicDataContainer-@Model.Id">
                         @await Html.PartialAsync("_EditBasicData", Model)
                     </div>
                 </div>
 
-                <!-- Aba Componentes (só para Composite) -->
+                <!-- Abas para Composite Products -->
                 @if (isComposite)
                 {
-                    <div class="tab-pane fade" id="components-tab-pane" role="tabpanel">
+                    <!-- Aba Componentes -->
+                    @* <div class="tab-pane fade" id="components-tab-pane" role="tabpanel">
                         <div id="componentsContainer">
-                            <!-- Será carregado via AJAX quando a aba for clicada -->
-                            <div class="text-center py-4">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
-                                </div>
-                                <p class="mt-2">Carregando componentes...</p>
-                            </div>
+                            @{
+                                ViewBag.ProductId = ViewBag.ProductId ?? Model.Id;
+                            }
+                            @await Html.PartialAsync("_ProductComponents", Model.ComponentIndexViewModel?.Components ?? new List<ProductComponentViewModel>())
+                        </div>
+                    </div> *@
+
+                    <!-- Aba Hierarquias -->
+                    <div class="tab-pane fade" id="hierarchies-tab-pane-@Model.Id" role="tabpanel">
+                        <div id="hierarchiesContainer-@Model.Id">
+                            @{
+                                ViewBag.ProductId = ViewBag.ProductId ?? Model.Id;
+                            }
+                            @await Html.PartialAsync("_CompositeProductXHierarchy", Model.CompositeProductXHierarchies ?? new List<CompositeProductXHierarchyViewModel>())
                         </div>
                     </div>
+
+                    <!-- Aba Demandas -->
+                    @* <div class="tab-pane fade" id="demands-tab-pane" role="tabpanel">
+                        <div id="demandsContainer">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tasks"></i> Demandas de Produção
+                                </h5>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="compositeProductManager.demands.showCreateModal('@ViewBag.ProductId')">
+                                    <i class="fas fa-plus"></i> Nova Demanda
+                                </button>
+                            </div>
+
+                            <!-- Estatísticas Rápidas -->
+                            <div class="row mb-3">
+                                <div class="col-md-2">
+                                    <div class="card bg-warning text-white">
+                                        <div class="card-body text-center">
+                                            <div class="h4 mb-0" id="demands-pending-count">-</div>
+                                            <small>Pendentes</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="card bg-info text-white">
+                                        <div class="card-body text-center">
+                                            <div class="h4 mb-0" id="demands-confirmed-count">-</div>
+                                            <small>Confirmadas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="card bg-primary text-white">
+                                        <div class="card-body text-center">
+                                            <div class="h4 mb-0" id="demands-produced-count">-</div>
+                                            <small>Produzidas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body text-center">
+                                            <div class="h4 mb-0" id="demands-delivered-count">-</div>
+                                            <small>Entregues</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="card bg-danger text-white">
+                                        <div class="card-body text-center">
+                                            <div class="h4 mb-0" id="demands-overdue-count">-</div>
+                                            <small>Atrasadas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="demands-grid">
+                                <!-- Carregará via AJAX -->
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Carregando...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> *@
                 }
 
                 <!-- Abas do Grupo (só para Group) -->
                 @if (isGroup)
                 {
-                    <div class="tab-pane fade" id="group-items-tab-pane" role="tabpanel">
-                        <div id="groupItemsContainer">
-                            <!-- Será carregado via AJAX quando a aba for clicada -->
-                            <div class="text-center py-4">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
-                                </div>
-                                <p class="mt-2">Carregando itens do grupo...</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="tab-pane fade" id="group-options-tab-pane" role="tabpanel">
-                        <div id="groupOptionsContainer">
-                            <!-- Será carregado via AJAX quando a aba for clicada -->
-                            <div class="text-center py-4">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
-                                </div>
-                                <p class="mt-2">Carregando opções...</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="tab-pane fade" id="exchange-rules-tab-pane" role="tabpanel">
-                        <div id="exchangeRulesContainer">
-                            <!-- Será carregado via AJAX quando a aba for clicada -->
-                            <div class="text-center py-4">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
-                                </div>
-                                <p class="mt-2">Carregando regras de troca...</p>
-                            </div>
+                    <div class="tab-pane fade" id="group-items-tab-pane-@Model.Id" role="tabpanel">
+                        <div id="groupItemsContainer-@Model.Id">
+                            @{
+                                ViewBag.ProductId = ViewBag.ProductId ?? Model.Id;
+                            }
+                            @await Html.PartialAsync("_ProductGroupItems", Model.GroupItems)
                         </div>
                     </div>
                 }
@@ -146,4 +182,14 @@
     </button>
 </div>
 
- 
+@* Scripts necessários para produtos do tipo Group *@
+@if (isGroup)
+{
+    <script src="~/js/ProductGroup.js" asp-append-version="true"></script>
+}
+
+@* Scripts necessários para produtos do tipo Composite *@
+@if (isComposite)
+{
+    <script src="~/js/CompositeProduct.js" asp-append-version="true"></script>
+}

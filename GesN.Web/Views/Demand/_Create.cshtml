@@ -1,0 +1,82 @@
+@model GesN.Web.Models.ViewModels.Production.CreateDemandViewModel
+
+<form id="createDemandForm" method="post" asp-action="Create">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label asp-for="OrderItemId" class="form-label">@Html.DisplayNameFor(m => m.OrderItemId) <span class="text-danger">*</span></label>
+                <select asp-for="OrderItemId" class="form-control form-select" asp-items="Model.AvailableOrderItems">
+                    <option value="">Selecione um item do pedido...</option>
+                </select>
+                <span asp-validation-for="OrderItemId" class="text-danger"></span>
+                @if (!string.IsNullOrEmpty(Model.SelectedOrderItemDisplay))
+                {
+                    <small class="form-text text-muted">Selecionado: @Model.SelectedOrderItemDisplay</small>
+                }
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label asp-for="ProductId" class="form-label">@Html.DisplayNameFor(m => m.ProductId) <span class="text-danger">*</span></label>
+                <select asp-for="ProductId" class="form-control form-select" asp-items="Model.AvailableProducts">
+                    <option value="">Selecione um produto...</option>
+                </select>
+                <span asp-validation-for="ProductId" class="text-danger"></span>
+                @if (!string.IsNullOrEmpty(Model.SelectedProductDisplay))
+                {
+                    <small class="form-text text-muted">Selecionado: @Model.SelectedProductDisplay</small>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label asp-for="Quantity" class="form-label">@Html.DisplayNameFor(m => m.Quantity) <span class="text-danger">*</span></label>
+                <input asp-for="Quantity" class="form-control quantity-mask" placeholder="Digite a quantidade">
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label asp-for="ExpectedDate" class="form-label">@Html.DisplayNameFor(m => m.ExpectedDate)</label>
+                <input asp-for="ExpectedDate" type="date" class="form-control">
+                <span asp-validation-for="ExpectedDate" class="text-danger"></span>
+                <small class="form-text text-muted">Se não informada, será definida para 7 dias a partir de hoje</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <label asp-for="ProductionOrderId" class="form-label">@Html.DisplayNameFor(m => m.ProductionOrderId)</label>
+                <select asp-for="ProductionOrderId" class="form-control form-select" asp-items="Model.AvailableProductionOrders">
+                    <option value="">Selecione uma ordem de produção (opcional)...</option>
+                </select>
+                <span asp-validation-for="ProductionOrderId" class="text-danger"></span>
+                <small class="form-text text-muted">Pode ser definida posteriormente</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <label asp-for="Notes" class="form-label">@Html.DisplayNameFor(m => m.Notes)</label>
+                <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Observações sobre a demanda (opcional)"></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Criar Demanda
+        </button>
+    </div>
+</form> 

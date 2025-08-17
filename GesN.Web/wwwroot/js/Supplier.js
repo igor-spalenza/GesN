@@ -88,6 +88,11 @@ var suppliersManager = {
                 $('#supplierModal .modal-body').html(data);
                 $('#supplierModal .modal-title').text('Novo Fornecedor');
                 $('#supplierModal').modal('show');
+                
+                // Inicializar máscaras após o modal ser exibido
+                $('#supplierModal').on('shown.bs.modal', function () {
+                    suppliersManager.initializeFormMasks();
+                });
             },
             error: function() {
                 toastr.error('Erro ao carregar formulário de criação');
@@ -97,19 +102,19 @@ var suppliersManager = {
 
     // Salvar novo fornecedor
     salvarNovoSupplier: function(form) {
-        console.log('salvarNovoSupplier called', form);
+
         
         // Validação simples dos campos obrigatórios
         var name = $(form).find('#Name').val();
         
         if (!name) {
-            console.log('Required fields validation failed');
+
             toastr.error('Por favor, preencha o nome do fornecedor');
             return false;
         }
 
         var formData = $(form).serialize();
-        console.log('Form data:', formData);
+
         
         $.ajax({
             url: '/Supplier/Create',
@@ -119,7 +124,7 @@ var suppliersManager = {
                 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
             },
             success: function(response) {
-                console.log('Success response:', response);
+    
                 if (response.success) {
                     $('#supplierModal').modal('hide');
                     toastr.success('Fornecedor criado com sucesso!');
@@ -131,7 +136,7 @@ var suppliersManager = {
                         }, 500);
                     }
                 } else {
-                    console.log('Response indicated failure:', response.message);
+        
                     toastr.error(response.message || 'Erro ao criar fornecedor');
                 }
             },
@@ -182,6 +187,11 @@ var suppliersManager = {
             type: 'GET',
             success: function(data) {
                 suppliersManager.adicionarAba(tabId, 'Editar: ' + supplierName, data, false);
+                
+                // Inicializar máscaras após adicionar a aba
+                setTimeout(function() {
+                    suppliersManager.initializeFormMasks();
+                }, 100);
             },
             error: function() {
                 toastr.error('Erro ao carregar formulário de edição');
@@ -326,11 +336,34 @@ var suppliersManager = {
         } else if (termo.length === 0) {
             suppliersManager.carregarListaSuppliers();
         }
+    },
+
+    // Inicializar máscaras e validações de formulário
+    initializeFormMasks: function() {
+        // Máscara para telefone
+        $('#Phone').mask('(00) 00000-0000');
+        
+        // Máscara para documento baseada no tipo
+        $('#DocumentType').off('change.supplierMask').on('change.supplierMask', function() {
+            var docType = $(this).val();
+            var docInput = $('#DocumentNumber');
+            
+            docInput.unmask();
+            
+            if (docType === 'CPF') {
+                docInput.mask('000.000.000-00');
+            } else if (docType === 'CNPJ') {
+                docInput.mask('00.000.000/0000-00');
+            }
+        });
+        
+        // Aplicar máscara inicial se já tiver tipo selecionado
+        $('#DocumentType').trigger('change');
     }
 };
 
 // Inicializar quando o documento estiver pronto
-$(document).ready(function() {
+$(function() {
     if (typeof suppliersManager !== 'undefined') {
         suppliersManager.init();
     }

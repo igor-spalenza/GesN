@@ -51,56 +51,90 @@ namespace GesN.Web.Data.Repositories
                 new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active });
         }
 
-        public async Task<IEnumerable<ProductGroupExchangeRule>> GetByOriginalProductIdAsync(string originalProductId)
+        public async Task<IEnumerable<ProductGroupExchangeRule>> GetBySourceGroupItemIdAsync(string sourceGroupItemId)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
                 SELECT pger.*, 
-                       ep.* as ExchangeProduct
+                       sgi.* as SourceGroupItem,
+                       sp.* as SourceProduct,
+                       tgi.* as TargetGroupItem,
+                       tp.* as TargetProduct
                 FROM ProductGroupExchangeRule pger
-                LEFT JOIN Product ep ON pger.ExchangeProductId = ep.Id
-                WHERE pger.OriginalProductId = @OriginalProductId 
+                LEFT JOIN ProductGroupItem sgi ON pger.SourceGroupItemId = sgi.Id
+                LEFT JOIN Product sp ON sgi.ProductId = sp.Id
+                LEFT JOIN ProductGroupItem tgi ON pger.TargetGroupItemId = tgi.Id
+                LEFT JOIN Product tp ON tgi.ProductId = tp.Id
+                WHERE pger.SourceGroupItemId = @SourceGroupItemId 
                   AND pger.StateCode = @StateCode
                   AND pger.IsActive = 1
-                ORDER BY ep.Name";
+                ORDER BY sp.Name, tp.Name";
 
-            var result = await connection.QueryAsync<ProductGroupExchangeRule, Product, ProductGroupExchangeRule>(
+            var result = await connection.QueryAsync<ProductGroupExchangeRule, ProductGroupItem, Product, ProductGroupItem, Product, ProductGroupExchangeRule>(
                 sql,
-                (rule, exchangeProduct) =>
+                (rule, sourceGroupItem, sourceProduct, targetGroupItem, targetProduct) =>
                 {
-                    rule.ExchangeProduct = exchangeProduct;
+                    if (sourceGroupItem != null)
+                    {
+                        sourceGroupItem.Product = sourceProduct;
+                        rule.SourceGroupItem = sourceGroupItem;
+                    }
+                    
+                    if (targetGroupItem != null)
+                    {
+                        targetGroupItem.Product = targetProduct;
+                        rule.TargetGroupItem = targetGroupItem;
+                    }
+                    
                     return rule;
                 },
-                new { OriginalProductId = originalProductId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
+                new { SourceGroupItemId = sourceGroupItemId, StateCode = (int)ObjectState.Active },
+                splitOn: "Id,Id,Id,Id");
 
             return result;
         }
 
-        public async Task<IEnumerable<ProductGroupExchangeRule>> GetByExchangeProductIdAsync(string exchangeProductId)
+        public async Task<IEnumerable<ProductGroupExchangeRule>> GetByTargetGroupItemIdAsync(string targetGroupItemId)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
                 SELECT pger.*, 
-                       op.* as OriginalProduct
+                       sgi.* as SourceGroupItem,
+                       sp.* as SourceProduct,
+                       tgi.* as TargetGroupItem,
+                       tp.* as TargetProduct
                 FROM ProductGroupExchangeRule pger
-                LEFT JOIN Product op ON pger.OriginalProductId = op.Id
-                WHERE pger.ExchangeProductId = @ExchangeProductId 
+                LEFT JOIN ProductGroupItem sgi ON pger.SourceGroupItemId = sgi.Id
+                LEFT JOIN Product sp ON sgi.ProductId = sp.Id
+                LEFT JOIN ProductGroupItem tgi ON pger.TargetGroupItemId = tgi.Id
+                LEFT JOIN Product tp ON tgi.ProductId = tp.Id
+                WHERE pger.TargetGroupItemId = @TargetGroupItemId 
                   AND pger.StateCode = @StateCode
                   AND pger.IsActive = 1
-                ORDER BY op.Name";
+                ORDER BY sp.Name, tp.Name";
 
-            var result = await connection.QueryAsync<ProductGroupExchangeRule, Product, ProductGroupExchangeRule>(
+            var result = await connection.QueryAsync<ProductGroupExchangeRule, ProductGroupItem, Product, ProductGroupItem, Product, ProductGroupExchangeRule>(
                 sql,
-                (rule, originalProduct) =>
+                (rule, sourceGroupItem, sourceProduct, targetGroupItem, targetProduct) =>
                 {
-                    rule.OriginalProduct = originalProduct;
+                    if (sourceGroupItem != null)
+                    {
+                        sourceGroupItem.Product = sourceProduct;
+                        rule.SourceGroupItem = sourceGroupItem;
+                    }
+                    
+                    if (targetGroupItem != null)
+                    {
+                        targetGroupItem.Product = targetProduct;
+                        rule.TargetGroupItem = targetGroupItem;
+                    }
+                    
                     return rule;
                 },
-                new { ExchangeProductId = exchangeProductId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
+                new { TargetGroupItemId = targetGroupItemId, StateCode = (int)ObjectState.Active },
+                splitOn: "Id,Id,Id,Id");
 
             return result;
         }
@@ -111,26 +145,40 @@ namespace GesN.Web.Data.Repositories
             
             const string sql = @"
                 SELECT pger.*, 
-                       op.* as OriginalProduct,
-                       ep.* as ExchangeProduct
+                       sgi.* as SourceGroupItem,
+                       sp.* as SourceProduct,
+                       tgi.* as TargetGroupItem,
+                       tp.* as TargetProduct
                 FROM ProductGroupExchangeRule pger
-                LEFT JOIN Product op ON pger.OriginalProductId = op.Id
-                LEFT JOIN Product ep ON pger.ExchangeProductId = ep.Id
+                LEFT JOIN ProductGroupItem sgi ON pger.SourceGroupItemId = sgi.Id
+                LEFT JOIN Product sp ON sgi.ProductId = sp.Id
+                LEFT JOIN ProductGroupItem tgi ON pger.TargetGroupItemId = tgi.Id
+                LEFT JOIN Product tp ON tgi.ProductId = tp.Id
                 WHERE pger.ProductGroupId = @ProductGroupId 
                   AND pger.IsActive = 1
                   AND pger.StateCode = @StateCode
-                ORDER BY op.Name, ep.Name";
+                ORDER BY sp.Name, tp.Name";
 
-            var result = await connection.QueryAsync<ProductGroupExchangeRule, Product, Product, ProductGroupExchangeRule>(
+            var result = await connection.QueryAsync<ProductGroupExchangeRule, ProductGroupItem, Product, ProductGroupItem, Product, ProductGroupExchangeRule>(
                 sql,
-                (rule, originalProduct, exchangeProduct) =>
+                (rule, sourceGroupItem, sourceProduct, targetGroupItem, targetProduct) =>
                 {
-                    rule.OriginalProduct = originalProduct;
-                    rule.ExchangeProduct = exchangeProduct;
+                    if (sourceGroupItem != null)
+                    {
+                        sourceGroupItem.Product = sourceProduct;
+                        rule.SourceGroupItem = sourceGroupItem;
+                    }
+                    
+                    if (targetGroupItem != null)
+                    {
+                        targetGroupItem.Product = targetProduct;
+                        rule.TargetGroupItem = targetGroupItem;
+                    }
+                    
                     return rule;
                 },
                 new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id,Id");
+                splitOn: "Id,Id,Id,Id");
 
             return result;
         }
@@ -141,61 +189,89 @@ namespace GesN.Web.Data.Repositories
             
             const string sql = @"
                 SELECT pger.*, 
-                       op.* as OriginalProduct,
-                       ep.* as ExchangeProduct
+                       sgi.* as SourceGroupItem,
+                       sp.* as SourceProduct,
+                       tgi.* as TargetGroupItem,
+                       tp.* as TargetProduct
                 FROM ProductGroupExchangeRule pger
-                LEFT JOIN Product op ON pger.OriginalProductId = op.Id
-                LEFT JOIN Product ep ON pger.ExchangeProductId = ep.Id
+                LEFT JOIN ProductGroupItem sgi ON pger.SourceGroupItemId = sgi.Id
+                LEFT JOIN Product sp ON sgi.ProductId = sp.Id
+                LEFT JOIN ProductGroupItem tgi ON pger.TargetGroupItemId = tgi.Id
+                LEFT JOIN Product tp ON tgi.ProductId = tp.Id
                 WHERE pger.ProductGroupId = @ProductGroupId 
                   AND pger.IsActive = 0
                   AND pger.StateCode = @StateCode
-                ORDER BY op.Name, ep.Name";
+                ORDER BY sp.Name, tp.Name";
 
-            var result = await connection.QueryAsync<ProductGroupExchangeRule, Product, Product, ProductGroupExchangeRule>(
+            var result = await connection.QueryAsync<ProductGroupExchangeRule, ProductGroupItem, Product, ProductGroupItem, Product, ProductGroupExchangeRule>(
                 sql,
-                (rule, originalProduct, exchangeProduct) =>
+                (rule, sourceGroupItem, sourceProduct, targetGroupItem, targetProduct) =>
                 {
-                    rule.OriginalProduct = originalProduct;
-                    rule.ExchangeProduct = exchangeProduct;
+                    if (sourceGroupItem != null)
+                    {
+                        sourceGroupItem.Product = sourceProduct;
+                        rule.SourceGroupItem = sourceGroupItem;
+                    }
+                    
+                    if (targetGroupItem != null)
+                    {
+                        targetGroupItem.Product = targetProduct;
+                        rule.TargetGroupItem = targetGroupItem;
+                    }
+                    
                     return rule;
                 },
                 new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id,Id");
+                splitOn: "Id,Id,Id,Id");
 
             return result;
         }
 
-        public async Task<ProductGroupExchangeRule?> GetExchangeRuleAsync(string productGroupId, string originalProductId, string exchangeProductId)
+        public async Task<ProductGroupExchangeRule?> GetExchangeRuleAsync(string productGroupId, string sourceGroupItemId, string targetGroupItemId)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
                 SELECT pger.*, 
-                       op.* as OriginalProduct,
-                       ep.* as ExchangeProduct
+                       sgi.* as SourceGroupItem,
+                       sp.* as SourceProduct,
+                       tgi.* as TargetGroupItem,
+                       tp.* as TargetProduct
                 FROM ProductGroupExchangeRule pger
-                LEFT JOIN Product op ON pger.OriginalProductId = op.Id
-                LEFT JOIN Product ep ON pger.ExchangeProductId = ep.Id
+                LEFT JOIN ProductGroupItem sgi ON pger.SourceGroupItemId = sgi.Id
+                LEFT JOIN Product sp ON sgi.ProductId = sp.Id
+                LEFT JOIN ProductGroupItem tgi ON pger.TargetGroupItemId = tgi.Id
+                LEFT JOIN Product tp ON tgi.ProductId = tp.Id
                 WHERE pger.ProductGroupId = @ProductGroupId 
-                  AND pger.OriginalProductId = @OriginalProductId
-                  AND pger.ExchangeProductId = @ExchangeProductId
+                  AND pger.SourceGroupItemId = @SourceGroupItemId
+                  AND pger.TargetGroupItemId = @TargetGroupItemId
                   AND pger.StateCode = @StateCode";
 
-            var result = await connection.QueryAsync<ProductGroupExchangeRule, Product, Product, ProductGroupExchangeRule>(
+            var result = await connection.QueryAsync<ProductGroupExchangeRule, ProductGroupItem, Product, ProductGroupItem, Product, ProductGroupExchangeRule>(
                 sql,
-                (rule, originalProduct, exchangeProduct) =>
+                (rule, sourceGroupItem, sourceProduct, targetGroupItem, targetProduct) =>
                 {
-                    rule.OriginalProduct = originalProduct;
-                    rule.ExchangeProduct = exchangeProduct;
+                    if (sourceGroupItem != null)
+                    {
+                        sourceGroupItem.Product = sourceProduct;
+                        rule.SourceGroupItem = sourceGroupItem;
+                    }
+                    
+                    if (targetGroupItem != null)
+                    {
+                        targetGroupItem.Product = targetProduct;
+                        rule.TargetGroupItem = targetGroupItem;
+                    }
+                    
                     return rule;
                 },
                 new { 
                     ProductGroupId = productGroupId, 
-                    OriginalProductId = originalProductId, 
-                    ExchangeProductId = exchangeProductId,
+                    SourceGroupItemId = sourceGroupItemId, 
+                    TargetGroupItemId = targetGroupItemId,
                     StateCode = (int)ObjectState.Active 
                 },
-                splitOn: "Id,Id");
+                splitOn: "Id,Id,Id,Id");
 
             return result.FirstOrDefault();
         }
@@ -206,23 +282,37 @@ namespace GesN.Web.Data.Repositories
             
             const string sql = @"
                 SELECT pger.*, 
-                       op.* as OriginalProduct,
-                       ep.* as ExchangeProduct
+                       sgi.* as SourceGroupItem,
+                       sp.* as SourceProduct,
+                       tgi.* as TargetGroupItem,
+                       tp.* as TargetProduct
                 FROM ProductGroupExchangeRule pger
-                LEFT JOIN Product op ON pger.OriginalProductId = op.Id
-                LEFT JOIN Product ep ON pger.ExchangeProductId = ep.Id
+                LEFT JOIN ProductGroupItem sgi ON pger.SourceGroupItemId = sgi.Id
+                LEFT JOIN Product sp ON sgi.ProductId = sp.Id
+                LEFT JOIN ProductGroupItem tgi ON pger.TargetGroupItemId = tgi.Id
+                LEFT JOIN Product tp ON tgi.ProductId = tp.Id
                 WHERE pger.ProductGroupId = @ProductGroupId 
                   AND pger.ExchangeRatio >= @MinRatio
                   AND pger.ExchangeRatio <= @MaxRatio
                   AND pger.StateCode = @StateCode
                 ORDER BY pger.ExchangeRatio";
 
-            var result = await connection.QueryAsync<ProductGroupExchangeRule, Product, Product, ProductGroupExchangeRule>(
+            var result = await connection.QueryAsync<ProductGroupExchangeRule, ProductGroupItem, Product, ProductGroupItem, Product, ProductGroupExchangeRule>(
                 sql,
-                (rule, originalProduct, exchangeProduct) =>
+                (rule, sourceGroupItem, sourceProduct, targetGroupItem, targetProduct) =>
                 {
-                    rule.OriginalProduct = originalProduct;
-                    rule.ExchangeProduct = exchangeProduct;
+                    if (sourceGroupItem != null)
+                    {
+                        sourceGroupItem.Product = sourceProduct;
+                        rule.SourceGroupItem = sourceGroupItem;
+                    }
+                    
+                    if (targetGroupItem != null)
+                    {
+                        targetGroupItem.Product = targetProduct;
+                        rule.TargetGroupItem = targetGroupItem;
+                    }
+                    
                     return rule;
                 },
                 new { 
@@ -231,40 +321,12 @@ namespace GesN.Web.Data.Repositories
                     MaxRatio = maxRatio,
                     StateCode = (int)ObjectState.Active 
                 },
-                splitOn: "Id,Id");
+                splitOn: "Id,Id,Id,Id");
 
             return result;
         }
 
-        public async Task<IEnumerable<ProductGroupExchangeRule>> GetWithAdditionalCostAsync(string productGroupId)
-        {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            
-            const string sql = @"
-                SELECT pger.*, 
-                       op.* as OriginalProduct,
-                       ep.* as ExchangeProduct
-                FROM ProductGroupExchangeRule pger
-                LEFT JOIN Product op ON pger.OriginalProductId = op.Id
-                LEFT JOIN Product ep ON pger.ExchangeProductId = ep.Id
-                WHERE pger.ProductGroupId = @ProductGroupId 
-                  AND pger.AdditionalCost > 0
-                  AND pger.StateCode = @StateCode
-                ORDER BY pger.AdditionalCost DESC";
 
-            var result = await connection.QueryAsync<ProductGroupExchangeRule, Product, Product, ProductGroupExchangeRule>(
-                sql,
-                (rule, originalProduct, exchangeProduct) =>
-                {
-                    rule.OriginalProduct = originalProduct;
-                    rule.ExchangeProduct = exchangeProduct;
-                    return rule;
-                },
-                new { ProductGroupId = productGroupId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id,Id");
-
-            return result;
-        }
 
         public async Task<string> CreateAsync(ProductGroupExchangeRule rule)
         {
@@ -272,13 +334,13 @@ namespace GesN.Web.Data.Repositories
             
             const string sql = @"
                 INSERT INTO ProductGroupExchangeRule (
-                    Id, ProductGroupId, OriginalProductId, ExchangeProductId, 
-                    ExchangeRatio, AdditionalCost, IsActive, StateCode,
+                    Id, ProductGroupId, SourceGroupItemId, SourceGroupItemWeight, 
+                    TargetGroupItemId, TargetGroupItemWeight, ExchangeRatio, IsActive, StateCode,
                     CreatedAt, CreatedBy, LastModifiedAt, LastModifiedBy
                 )
                 VALUES (
-                    @Id, @ProductGroupId, @OriginalProductId, @ExchangeProductId, 
-                    @ExchangeRatio, @AdditionalCost, @IsActive, @StateCode,
+                    @Id, @ProductGroupId, @SourceGroupItemId, @SourceGroupItemWeight, 
+                    @TargetGroupItemId, @TargetGroupItemWeight, @ExchangeRatio, @IsActive, @StateCode,
                     @CreatedAt, @CreatedBy, @LastModifiedAt, @LastModifiedBy
                 )";
             
@@ -293,10 +355,11 @@ namespace GesN.Web.Data.Repositories
             const string sql = @"
                 UPDATE ProductGroupExchangeRule SET 
                     ProductGroupId = @ProductGroupId,
-                    OriginalProductId = @OriginalProductId,
-                    ExchangeProductId = @ExchangeProductId,
+                    SourceGroupItemId = @SourceGroupItemId,
+                    SourceGroupItemWeight = @SourceGroupItemWeight,
+                    TargetGroupItemId = @TargetGroupItemId,
+                    TargetGroupItemWeight = @TargetGroupItemWeight,
                     ExchangeRatio = @ExchangeRatio,
-                    AdditionalCost = @AdditionalCost,
                     IsActive = @IsActive,
                     StateCode = @StateCode,
                     LastModifiedAt = @LastModifiedAt,
@@ -382,33 +445,7 @@ namespace GesN.Web.Data.Repositories
             return rowsAffected > 0;
         }
 
-        public async Task<bool> UpdateAdditionalCostAsync(string id, decimal additionalCost)
-        {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            
-            const string sql = @"
-                UPDATE ProductGroupExchangeRule SET 
-                    AdditionalCost = @AdditionalCost,
-                    LastModifiedAt = @LastModifiedAt
-                WHERE Id = @Id";
-            
-            var rowsAffected = await connection.ExecuteAsync(sql, 
-                new { Id = id, AdditionalCost = additionalCost, LastModifiedAt = DateTime.UtcNow });
-            return rowsAffected > 0;
-        }
 
-        public async Task<decimal> CalculateExchangeCostAsync(string ruleId, decimal quantity)
-        {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            
-            const string sql = @"
-                SELECT (ExchangeRatio * @Quantity) + AdditionalCost 
-                FROM ProductGroupExchangeRule 
-                WHERE Id = @RuleId";
-            
-            return await connection.QuerySingleOrDefaultAsync<decimal>(sql, 
-                new { RuleId = ruleId, Quantity = quantity });
-        }
 
         public async Task<IEnumerable<ProductGroupExchangeRule>> SearchAsync(string searchTerm)
         {
@@ -465,21 +502,21 @@ namespace GesN.Web.Data.Repositories
             return rowsAffected > 0;
         }
 
-        public async Task<bool> ValidateUniqueExchangeAsync(string productGroupId, string originalProductId, string exchangeProductId, string? excludeId = null)
+        public async Task<bool> ValidateUniqueExchangeAsync(string productGroupId, string sourceGroupItemId, string targetGroupItemId, string? excludeId = null)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             string sql = @"
                 SELECT COUNT(1) FROM ProductGroupExchangeRule 
                 WHERE ProductGroupId = @ProductGroupId 
-                  AND OriginalProductId = @OriginalProductId 
-                  AND ExchangeProductId = @ExchangeProductId
+                  AND SourceGroupItemId = @SourceGroupItemId 
+                  AND TargetGroupItemId = @TargetGroupItemId
                   AND StateCode = @StateCode";
 
             object parameters = new { 
                 ProductGroupId = productGroupId, 
-                OriginalProductId = originalProductId, 
-                ExchangeProductId = exchangeProductId,
+                SourceGroupItemId = sourceGroupItemId, 
+                TargetGroupItemId = targetGroupItemId,
                 StateCode = (int)ObjectState.Active 
             };
 
@@ -488,8 +525,8 @@ namespace GesN.Web.Data.Repositories
                 sql += " AND Id != @ExcludeId";
                 parameters = new { 
                     ProductGroupId = productGroupId, 
-                    OriginalProductId = originalProductId, 
-                    ExchangeProductId = exchangeProductId,
+                    SourceGroupItemId = sourceGroupItemId, 
+                    TargetGroupItemId = targetGroupItemId,
                     StateCode = (int)ObjectState.Active,
                     ExcludeId = excludeId 
                 };
@@ -551,22 +588,36 @@ namespace GesN.Web.Data.Repositories
             
             const string sql = @"
                 SELECT pger.*, 
-                       op.* as OriginalProduct,
-                       ep.* as ExchangeProduct
+                       sgi.* as SourceGroupItem,
+                       sp.* as SourceProduct,
+                       tgi.* as TargetGroupItem,
+                       tp.* as TargetProduct
                 FROM ProductGroupExchangeRule pger
-                LEFT JOIN Product op ON pger.OriginalProductId = op.Id
-                LEFT JOIN Product ep ON pger.ExchangeProductId = ep.Id
+                LEFT JOIN ProductGroupItem sgi ON pger.SourceGroupItemId = sgi.Id
+                LEFT JOIN Product sp ON sgi.ProductId = sp.Id
+                LEFT JOIN ProductGroupItem tgi ON pger.TargetGroupItemId = tgi.Id
+                LEFT JOIN Product tp ON tgi.ProductId = tp.Id
                 WHERE pger.ProductGroupId = @ProductGroupId 
                   AND pger.StateCode = @StateCode
                 ORDER BY pger.CreatedAt DESC
                 LIMIT @PageSize OFFSET @Offset";
 
-            var result = await connection.QueryAsync<ProductGroupExchangeRule, Product, Product, ProductGroupExchangeRule>(
+            var result = await connection.QueryAsync<ProductGroupExchangeRule, ProductGroupItem, Product, ProductGroupItem, Product, ProductGroupExchangeRule>(
                 sql,
-                (rule, originalProduct, exchangeProduct) =>
+                (rule, sourceGroupItem, sourceProduct, targetGroupItem, targetProduct) =>
                 {
-                    rule.OriginalProduct = originalProduct;
-                    rule.ExchangeProduct = exchangeProduct;
+                    if (sourceGroupItem != null)
+                    {
+                        sourceGroupItem.Product = sourceProduct;
+                        rule.SourceGroupItem = sourceGroupItem;
+                    }
+                    
+                    if (targetGroupItem != null)
+                    {
+                        targetGroupItem.Product = targetProduct;
+                        rule.TargetGroupItem = targetGroupItem;
+                    }
+                    
                     return rule;
                 },
                 new { 
@@ -575,39 +626,39 @@ namespace GesN.Web.Data.Repositories
                     PageSize = pageSize,
                     Offset = offset
                 },
-                splitOn: "Id,Id");
+                splitOn: "Id,Id,Id,Id");
 
             return result;
         }
 
-        public async Task<IEnumerable<ProductGroupExchangeRule>> GetAvailableExchangesAsync(string productGroupId, string originalProductId)
+        public async Task<IEnumerable<ProductGroupExchangeRule>> GetAvailableExchangesAsync(string productGroupId, string sourceGroupItemId)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
                 SELECT pger.*, 
-                       op.* as OriginalProduct,
-                       ep.* as ExchangeProduct
+                       sgi.Id, sgi.ProductCategoryId, sgi.ProductId, sgi.MinQuantity, sgi.MaxQuantity, sgi.RequiredQuantity, sgi.UnitPrice, sgi.IsRequired, sgi.IsActive,
+                       tgi.Id, tgi.ProductCategoryId, tgi.ProductId, tgi.MinQuantity, tgi.MaxQuantity, tgi.RequiredQuantity, tgi.UnitPrice, tgi.IsRequired, tgi.IsActive
                 FROM ProductGroupExchangeRule pger
-                LEFT JOIN Product op ON pger.OriginalProductId = op.Id
-                LEFT JOIN Product ep ON pger.ExchangeProductId = ep.Id
+                LEFT JOIN ProductGroupItem sgi ON pger.SourceGroupItemId = sgi.Id
+                LEFT JOIN ProductGroupItem tgi ON pger.TargetGroupItemId = tgi.Id
                 WHERE pger.ProductGroupId = @ProductGroupId 
-                  AND pger.OriginalProductId = @OriginalProductId
+                  AND pger.SourceGroupItemId = @SourceGroupItemId
                   AND pger.IsActive = 1
                   AND pger.StateCode = @StateCode
-                ORDER BY ep.Name";
+                ORDER BY pger.CreatedAt";
 
-            var result = await connection.QueryAsync<ProductGroupExchangeRule, Product, Product, ProductGroupExchangeRule>(
+            var result = await connection.QueryAsync<ProductGroupExchangeRule, ProductGroupItem, ProductGroupItem, ProductGroupExchangeRule>(
                 sql,
-                (rule, originalProduct, exchangeProduct) =>
+                (rule, sourceGroupItem, targetGroupItem) =>
                 {
-                    rule.OriginalProduct = originalProduct;
-                    rule.ExchangeProduct = exchangeProduct;
+                    rule.SourceGroupItem = sourceGroupItem;
+                    rule.TargetGroupItem = targetGroupItem;
                     return rule;
                 },
                 new { 
                     ProductGroupId = productGroupId, 
-                    OriginalProductId = originalProductId,
+                    SourceGroupItemId = sourceGroupItemId,
                     StateCode = (int)ObjectState.Active 
                 },
                 splitOn: "Id,Id");
@@ -615,7 +666,7 @@ namespace GesN.Web.Data.Repositories
             return result;
         }
 
-        public async Task<bool> ExchangeRuleExistsAsync(string productGroupId, string originalProductId, string exchangeProductId)
+        public async Task<bool> ExchangeRuleExistsAsync(string productGroupId, string sourceGroupItemId, string targetGroupItemId)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
@@ -623,15 +674,39 @@ namespace GesN.Web.Data.Repositories
                 SELECT COUNT(1) 
                 FROM ProductGroupExchangeRule 
                 WHERE ProductGroupId = @ProductGroupId 
-                  AND OriginalProductId = @OriginalProductId
-                  AND ExchangeProductId = @ExchangeProductId
+                  AND SourceGroupItemId = @SourceGroupItemId
+                  AND TargetGroupItemId = @TargetGroupItemId
                   AND StateCode = @StateCode";
 
             var count = await connection.QuerySingleAsync<int>(sql, new
             {
                 ProductGroupId = productGroupId,
-                OriginalProductId = originalProductId,
-                ExchangeProductId = exchangeProductId,
+                SourceGroupItemId = sourceGroupItemId,
+                TargetGroupItemId = targetGroupItemId,
+                StateCode = (int)ObjectState.Active
+            });
+
+            return count > 0;
+        }
+
+        // New methods to match the updated interface
+        public async Task<bool> ValidateGroupItemsCompatibilityAsync(string sourceGroupItemId, string targetGroupItemId)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+            
+            const string sql = @"
+                SELECT COUNT(1) 
+                FROM ProductGroupItem sgi
+                JOIN ProductGroupItem tgi ON sgi.ProductGroupId = tgi.ProductGroupId
+                WHERE sgi.Id = @SourceGroupItemId 
+                  AND tgi.Id = @TargetGroupItemId
+                  AND sgi.StateCode = @StateCode 
+                  AND tgi.StateCode = @StateCode";
+
+            var count = await connection.QuerySingleAsync<int>(sql, new
+            {
+                SourceGroupItemId = sourceGroupItemId,
+                TargetGroupItemId = targetGroupItemId,
                 StateCode = (int)ObjectState.Active
             });
 

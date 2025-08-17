@@ -57,7 +57,7 @@ namespace GesN.Web.Interfaces.Services
         /// <summary>
         /// Cria um novo pedido
         /// </summary>
-        Task<string> CreateOrderAsync(CreateOrderViewModel order);
+        Task<string> CreateOrderAsync(CreateOrderEntryViewModel order, string userId);
 
         /// <summary>
         /// Atualiza um pedido existente
@@ -92,22 +92,22 @@ namespace GesN.Web.Interfaces.Services
         /// <summary>
         /// Obtém estatísticas dos pedidos
         /// </summary>
-        Task<OrderStatisticsViewModel> GetOrderStatisticsAsync();
+        Task<OrderEntryStatisticsViewModel> GetOrderStatisticsAsync();
 
         /// <summary>
         /// Converte um pedido para ViewModel
         /// </summary>
-        OrderViewModel ConvertToViewModel(OrderEntry order);
+        OrderEntryViewModel ConvertToViewModel(OrderEntry order);
 
         /// <summary>
         /// Converte um pedido para DetailsViewModel
         /// </summary>
-        OrderDetailsViewModel ConvertToDetailsViewModel(OrderEntry order);
+        OrderEntryDetailsViewModel ConvertToDetailsViewModel(OrderEntry order);
 
         /// <summary>
         /// Converte um pedido para EditViewModel
         /// </summary>
-        EditOrderViewModel ConvertToEditViewModel(OrderEntry order);
+        EditOrderEntryViewModel ConvertToEditViewModel(OrderEntry order);
 
         /// <summary>
         /// Valida os dados de um pedido
@@ -117,6 +117,6 @@ namespace GesN.Web.Interfaces.Services
         /// <summary>
         /// Valida os dados de um pedido
         /// </summary>
-        Task<bool> ValidateCreateOrderDataAsync(CreateOrderViewModel order);
+        Task<bool> ValidateCreateOrderDataAsync(CreateOrderEntryViewModel order);
     }
 } 

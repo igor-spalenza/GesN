@@ -1,9 +1,6 @@
 @using GesN.Web.Models.ViewModels.Production
 @model CreateProductViewModel
 
-@* Incluir CSS dos floating labels *@
-<link href="~/css/product-form.css" rel="stylesheet" />
-
 <form id="formNovoProduct" enctype="application/x-www-form-urlencoded">
     @Html.AntiForgeryToken()
     
@@ -57,15 +54,24 @@
                 </div>
                 <div class="col-md-6">
                     <div class="floating-input-group">
-                        <select asp-for="CategoryId" class="floating-select" placeholder=" ">
-                            <option value=""></option>
-                            @foreach (var category in Model.AvailableCategories)
-                            {
-                                <option value="@category.Value" selected="@category.IsSelected">@category.Text</option>
-                            }
-                        </select>
-                        <label asp-for="CategoryId" class="floating-label">Categoria</label>
-                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        <input type="text" class="form-control floating-input category-autocomplete" 
+                               id="CategoryName-create" 
+                               name="CategoryName"
+                               placeholder=" " 
+                               autocomplete="off"
+                               data-context="create" />
+                        <input asp-for="CategoryId" type="hidden" id="CategoryId-create" />
+                        <label for="CategoryName-create" class="floating-label">
+                            <i class="fas fa-tags text-primary"></i>
+                            Categoria
+                        </label>
+                        <span asp-validation-for="CategoryId" class="field-validation-valid text-danger"></span>
+                        <div class="form-text">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                Digite para buscar por categorias disponíveis
+                            </small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -154,7 +160,10 @@
                         <span asp-validation-for="AssemblyTime" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="col-md-8">
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
                     <div class="floating-input-group">
                         <textarea asp-for="AssemblyInstructions" class="floating-textarea" placeholder=" " rows="4"></textarea>
                         <label asp-for="AssemblyInstructions" class="floating-label">Instruções de Montagem</label>
@@ -179,4 +188,6 @@
             <i class="fas fa-save"></i> Criar Produto
         </button>
     </div>
-</form> 
+</form>
+
+ 

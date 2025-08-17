@@ -15,7 +15,6 @@ namespace GesN.Web.Interfaces.Services
         Task<bool> ValidateProductGroupAsync(ProductGroup productGroup);
         Task<bool> ValidateGroupConfigurationAsync(ProductGroup productGroup);
         Task<bool> HasValidItemsAsync(string productGroupId);
-        Task<bool> HasRequiredOptionsAsync(string productGroupId);
         
         // Cálculos
         Task<decimal> CalculateBasePriceAsync(string productGroupId);
@@ -36,18 +35,19 @@ namespace GesN.Web.Interfaces.Services
 
         // Gerenciamento de itens do grupo
         Task<IEnumerable<ProductGroupItem>> GetGroupItemsAsync(string productGroupId);
+        Task<IEnumerable<ProductGroupItem>> GetGroupItemsWithProductDataAsync(string productGroupId);
+        Task<ProductGroupItem?> GetGroupItemByIdAsync(string itemId);
+        Task<ProductGroupItem?> GetGroupItemWithDataByIdAsync(string itemId);
         Task<bool> AddGroupItemAsync(ProductGroupItem item);
         Task<bool> UpdateGroupItemAsync(ProductGroupItem item);
         Task<bool> RemoveGroupItemAsync(string itemId);
-
-        // Gerenciamento de opções do grupo
-        Task<IEnumerable<ProductGroupOption>> GetGroupOptionsAsync(string productGroupId);
-        Task<bool> AddGroupOptionAsync(ProductGroupOption option);
-        Task<bool> UpdateGroupOptionAsync(ProductGroupOption option);
-        Task<bool> RemoveGroupOptionAsync(string optionId);
+        
+        // Métodos auxiliares para display name
+        string GetGroupItemDisplayName(ProductGroupItem? item);
 
         // Gerenciamento de regras de troca
         Task<IEnumerable<ProductGroupExchangeRule>> GetExchangeRulesAsync(string productGroupId);
+        Task<ProductGroupExchangeRule?> GetExchangeRuleByIdAsync(string ruleId);
         Task<bool> AddExchangeRuleAsync(ProductGroupExchangeRule rule);
         Task<bool> UpdateExchangeRuleAsync(ProductGroupExchangeRule rule);
         Task<bool> RemoveExchangeRuleAsync(string ruleId);

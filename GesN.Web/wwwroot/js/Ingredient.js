@@ -98,9 +98,80 @@ var ingredientsManager = {
                 $('#ingredientModal .modal-body').html(data);
                 $('#ingredientModal .modal-title').text('Novo Ingrediente');
                 $('#ingredientModal').modal('show');
+                
+                // Inicializar formulário após mostrar modal
+                $('#ingredientModal').on('shown.bs.modal', function () {
+                    ingredientsManager.initializeCreateForm();
+                });
             },
             error: function() {
                 toastr.error('Erro ao carregar formulário de criação');
+            }
+        });
+    },
+
+    // Inicializar formulário de criação
+    initializeCreateForm: function() {
+        // Carregar fornecedores
+        $.ajax({
+            url: '/Supplier/BuscaSupplierAutocomplete',
+            type: 'GET',
+            data: { termo: '' },
+            success: function(data) {
+                var select = $('#SupplierId');
+                data.forEach(function(supplier) {
+                    select.append('<option value="' + supplier.id + '">' + supplier.text + '</option>');
+                });
+            }
+        });
+
+        // Formatação de moeda
+        $('#CostPerUnit').on('blur', function() {
+            var value = parseFloat($(this).val());
+            if (!isNaN(value)) {
+                $(this).val(value.toFixed(2));
+            }
+        });
+
+        // Validação de estoque
+        $('#MinStock, #CurrentStock').on('blur', function() {
+            var value = parseFloat($(this).val());
+            if (!isNaN(value)) {
+                $(this).val(value.toFixed(2));
+            }
+        });
+    },
+
+    // Inicializar formulário de edição  
+    initializeEditForm: function(currentSupplierId) {
+        // Carregar fornecedores
+        $.ajax({
+            url: '/Supplier/BuscaSupplierAutocomplete',
+            type: 'GET',
+            data: { termo: '' },
+            success: function(data) {
+                var select = $('#SupplierId');
+                
+                data.forEach(function(supplier) {
+                    var selected = supplier.id === currentSupplierId ? 'selected' : '';
+                    select.append('<option value="' + supplier.id + '" ' + selected + '>' + supplier.text + '</option>');
+                });
+            }
+        });
+
+        // Formatação de moeda
+        $('#CostPerUnit').on('blur', function() {
+            var value = parseFloat($(this).val());
+            if (!isNaN(value)) {
+                $(this).val(value.toFixed(2));
+            }
+        });
+
+        // Validação de estoque
+        $('#MinStock, #CurrentStock').on('blur', function() {
+            var value = parseFloat($(this).val());
+            if (!isNaN(value)) {
+                $(this).val(value.toFixed(2));
             }
         });
     },
@@ -346,7 +417,7 @@ var ingredientsManager = {
 };
 
 // Inicializar quando o documento estiver pronto
-$(document).ready(function() {
+$(function() {
     if (typeof ingredientsManager !== 'undefined') {
         ingredientsManager.init();
     }

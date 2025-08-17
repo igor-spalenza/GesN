@@ -82,26 +82,4 @@
     </div>
 </form>
 
-<script>
-$(document).ready(function() {
-    // Máscara para telefone
-    $('#Phone').mask('(00) 00000-0000');
-    
-    // Máscara para documento baseada no tipo
-    $('#DocumentType').change(function() {
-        var docType = $(this).val();
-        var docInput = $('#DocumentNumber');
-        
-        docInput.unmask();
-        
-        if (docType === 'CPF') {
-            docInput.mask('000.000.000-00');
-        } else if (docType === 'CNPJ') {
-            docInput.mask('00.000.000/0000-00');
-        }
-    });
-    
-    // Aplicar máscara inicial se já tiver tipo selecionado
-    $('#DocumentType').trigger('change');
-});
-</script> 
+ 

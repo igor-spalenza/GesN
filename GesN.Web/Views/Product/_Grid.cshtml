@@ -8,8 +8,8 @@
                 <th>Nome</th>
                 <th>Tipo</th>
                 <th>Categoria</th>
-                <th>Preço</th>
-                <th>Preço Unit.</th>
+                @* <th>Preço</th>
+                <th>Preço Unit.</th> *@
                 <th>Status</th>
                 <th width="180px">Ações</th>
             </tr>
@@ -41,10 +41,10 @@
                         @{
                             var typeClass = product.ProductType switch
                             {
-                                ProductType.Simple => "badge-primary",
-                                ProductType.Composite => "badge-info", 
-                                ProductType.Group => "badge-success",
-                                _ => "badge-secondary"
+                                ProductType.Simple => "bg-primary",
+                                ProductType.Composite => "bg-info", 
+                                ProductType.Group => "bg-success",
+                                _ => "bg-secondary"
                             };
                         }
                         <span class="badge @typeClass">@product.ProductTypeDisplay</span>
@@ -59,7 +59,7 @@
                             <span class="text-muted">-</span>
                         }
                     </td>
-                    <td>
+                    @* <td>
                         @if (product.Price > 0)
                         {
                             <span class="fw-bold text-success">@product.PriceDisplay</span>
@@ -78,7 +78,7 @@
                         {
                             <span class="text-muted">N/A</span>
                         }
-                    </td>
+                    </td> *@
                     <td>
                         @if (product.StateCode == 1)
                         {
@@ -106,7 +106,7 @@
                                     title="Excluir">
                                 <i class="bi bi-trash"></i>
                             </button>
-                            @if (product.ProductType == ProductType.Composite)
+                            @* @if (product.ProductType == ProductType.Composite)
                             {
                                 <button type="button" class="btn btn-sm btn-outline-info" 
                                         onclick="productManager.gerenciarComponentes('@product.Id')" 
@@ -121,7 +121,7 @@
                                         title="Gerenciar Grupo">
                                     <i class="bi bi-layers"></i>
                                 </button>
-                            }
+                            } *@
                         </div>
                     </td>
                 </tr>

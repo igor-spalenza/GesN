@@ -96,10 +96,10 @@ namespace GesN.Web.Services
 
         public async Task<bool> DeleteAsync(string id)
         {
-            if (!await CanDeleteAsync(id))
-            {
-                throw new InvalidOperationException("Este produto não pode ser excluído pois está sendo usado em outros registros.");
-            }
+            //if (!await CanDeleteAsync(id))
+            //{
+            //    throw new InvalidOperationException("Este produto não pode ser excluído pois está sendo usado em outros registros.");
+            //}
 
             return await _productRepository.DeleteAsync(id);
         }
@@ -173,14 +173,11 @@ namespace GesN.Web.Services
             // Para produtos compostos, somar o custo dos componentes
             if (product.ProductType == ProductType.Composite)
             {
-                var components = await _productComponentRepository.GetByCompositeProductIdAsync(productId);
-                foreach (var component in components)
+                // Na nova estrutura, usar apenas custos adicionais dos componentes ativos
+                var components = await _productComponentRepository.GetAllAsync();
+                foreach (var component in components.Where(c => c.StateCode == ObjectState.Active))
                 {
-                    var componentProduct = await _productRepository.GetByIdAsync(component.ComponentProductId);
-                    if (componentProduct != null)
-                    {
-                        totalCost += componentProduct.Cost * component.Quantity;
-                    }
+                    totalCost += component.AdditionalCost;
                 }
             }
 
@@ -207,13 +204,14 @@ namespace GesN.Web.Services
             // Para produtos compostos, somar o tempo de montagem dos componentes
             if (product.ProductType == ProductType.Composite)
             {
-                var components = await _productComponentRepository.GetByCompositeProductIdAsync(productId);
-                foreach (var component in components)
+                // Na nova estrutura, usar tempo estimado das hierarquias
+                var components = await _productComponentRepository.GetAllAsync();
+                foreach (var component in components.Where(c => c.StateCode == ObjectState.Active))
                 {
-                    var componentProduct = await _productRepository.GetByIdAsync(component.ComponentProductId);
-                    if (componentProduct != null)
+                    // Tempo baseado na hierarquia (se carregada) - campo removido na nova estrutura
+                    if (component.ProductComponentHierarchy != null)
                     {
-                        totalTime += componentProduct.AssemblyTime * (int)component.Quantity;
+                        totalTime += component.ProductComponentHierarchy.CalculateTotalProcessingTime();
                     }
                 }
             }
@@ -252,10 +250,8 @@ namespace GesN.Web.Services
         // Validation
         public async Task<bool> CanDeleteAsync(string id)
         {
-            // Verificar se o produto está sendo usado como componente
-            var usedAsComponent = await _productComponentRepository.GetByComponentProductIdAsync(id);
-            if (usedAsComponent.Any())
-                return false;
+            // Na nova estrutura, os componentes não referenciam produtos diretamente
+            // Então não há verificação de uso como componente
 
             // Verificar se o produto está em pedidos
             var usedInOrders = await _orderItemRepository.GetByProductIdAsync(id);

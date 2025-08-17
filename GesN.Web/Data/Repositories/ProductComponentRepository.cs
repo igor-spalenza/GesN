@@ -20,25 +20,29 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pc.*, 
-                       cp.Name as CompositeProductName,
-                       comp.Name as ComponentProductName
+                SELECT 
+                    pc.Id, pc.Name, pc.Description, pc.ProductComponentHierarchyId, 
+                    pc.AdditionalCost, pc.StateCode, pc.CreatedAt, pc.CreatedBy, 
+                    pc.LastModifiedAt, pc.LastModifiedBy,
+                    pch.Id as HierarchyId, pch.Name as HierarchyName, pch.Description as HierarchyDescription
                 FROM ProductComponent pc
-                LEFT JOIN Product cp ON pc.CompositeProductId = cp.Id
-                LEFT JOIN Product comp ON pc.ComponentProductId = comp.Id
+                LEFT JOIN ProductComponentHierarchy pch ON pc.ProductComponentHierarchyId = pch.Id 
                 WHERE pc.StateCode = @StateCode
-                ORDER BY pc.CompositeProductId, pc.AssemblyOrder";
+                ORDER BY pc.Name";
 
-            var components = await connection.QueryAsync<ProductComponent, Product, Product, ProductComponent>(
-                sql, 
-                (component, compositeProduct, componentProduct) =>
+            var components = await connection.QueryAsync<ProductComponent, ProductComponentHierarchy, ProductComponent>(
+                sql,
+                (component, hierarchy) =>
                 {
-                    component.CompositeProduct = compositeProduct;
-                    component.ComponentProduct = componentProduct;
+                    if (hierarchy != null)
+                    {
+                        component.ProductComponentHierarchy = hierarchy;
+                    }
                     return component;
                 },
                 new { StateCode = (int)ObjectState.Active },
-                splitOn: "CompositeProductName,ComponentProductName");
+                splitOn: "HierarchyId"
+            );
 
             return components;
         }
@@ -48,120 +52,82 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pc.*, 
-                       cp.* as CompositeProduct,
-                       comp.* as ComponentProduct
+                SELECT 
+                    pc.Id, pc.Name, pc.Description, pc.ProductComponentHierarchyId, 
+                    pc.AdditionalCost, pc.StateCode, pc.CreatedAt, pc.CreatedBy, 
+                    pc.LastModifiedAt, pc.LastModifiedBy,
+                    pch.Id as HierarchyId, pch.Name as HierarchyName, pch.Description as HierarchyDescription
                 FROM ProductComponent pc
-                LEFT JOIN Product cp ON pc.CompositeProductId = cp.Id
-                LEFT JOIN Product comp ON pc.ComponentProductId = comp.Id
+                LEFT JOIN ProductComponentHierarchy pch ON pc.ProductComponentHierarchyId = pch.Id
                 WHERE pc.Id = @Id";
 
-            var result = await connection.QueryAsync<ProductComponent, Product, Product, ProductComponent>(
+            var result = await connection.QueryAsync<ProductComponent, ProductComponentHierarchy, ProductComponent>(
                 sql,
-                (component, compositeProduct, componentProduct) =>
+                (component, hierarchy) =>
                 {
-                    component.CompositeProduct = compositeProduct;
-                    component.ComponentProduct = componentProduct;
+                    if (hierarchy != null)
+                    {
+                        component.ProductComponentHierarchy = hierarchy;
+                    }
                     return component;
                 },
                 new { Id = id },
-                splitOn: "Id,Id");
+                splitOn: "HierarchyId"
+            );
 
             return result.FirstOrDefault();
         }
 
-        public async Task<IEnumerable<ProductComponent>> GetByCompositeProductIdAsync(string compositeProductId)
+        public async Task<IEnumerable<ProductComponent>> GetByHierarchyIdAsync(string hierarchyId)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT pc.*, 
-                       comp.* as ComponentProduct
+                SELECT 
+                    pc.Id, pc.Name, pc.Description, pc.ProductComponentHierarchyId, 
+                    pc.AdditionalCost, pc.StateCode, pc.CreatedAt, pc.CreatedBy, 
+                    pc.LastModifiedAt, pc.LastModifiedBy,
+                    pch.Id as HierarchyId, pch.Name as HierarchyName, pch.Description as HierarchyDescription
                 FROM ProductComponent pc
-                LEFT JOIN Product comp ON pc.ComponentProductId = comp.Id
-                WHERE pc.CompositeProductId = @CompositeProductId 
-                  AND pc.StateCode = @StateCode
-                ORDER BY pc.AssemblyOrder";
+                LEFT JOIN ProductComponentHierarchy pch ON pc.ProductComponentHierarchyId = pch.Id
+                WHERE pc.ProductComponentHierarchyId = @HierarchyId 
+                AND pc.StateCode = @StateCode
+                ORDER BY pc.Name";
 
-            var result = await connection.QueryAsync<ProductComponent, Product, ProductComponent>(
+            var components = await connection.QueryAsync<ProductComponent, ProductComponentHierarchy, ProductComponent>(
                 sql,
-                (component, componentProduct) =>
+                (component, hierarchy) =>
                 {
-                    component.ComponentProduct = componentProduct;
+                    if (hierarchy != null)
+                    {
+                        component.ProductComponentHierarchy = hierarchy;
+                    }
                     return component;
                 },
-                new { CompositeProductId = compositeProductId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
+                new { HierarchyId = hierarchyId, StateCode = (int)ObjectState.Active },
+                splitOn: "HierarchyId"
+            );
 
-            return result;
+            return components;
         }
 
-        public async Task<IEnumerable<ProductComponent>> GetByComponentProductIdAsync(string componentProductId)
-        {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            
-            const string sql = @"
-                SELECT pc.*, 
-                       cp.* as CompositeProduct
-                FROM ProductComponent pc
-                LEFT JOIN Product cp ON pc.CompositeProductId = cp.Id
-                WHERE pc.ComponentProductId = @ComponentProductId 
-                  AND pc.StateCode = @StateCode
-                ORDER BY cp.Name";
-
-            var result = await connection.QueryAsync<ProductComponent, Product, ProductComponent>(
-                sql,
-                (component, compositeProduct) =>
-                {
-                    component.CompositeProduct = compositeProduct;
-                    return component;
-                },
-                new { ComponentProductId = componentProductId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
-
-            return result;
-        }
-
-        public async Task<IEnumerable<ProductComponent>> SearchAsync(string searchTerm)
-        {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            
-            const string sql = @"
-                SELECT pc.*, 
-                       cp.Name as CompositeProductName,
-                       comp.Name as ComponentProductName
-                FROM ProductComponent pc
-                LEFT JOIN Product cp ON pc.CompositeProductId = cp.Id
-                LEFT JOIN Product comp ON pc.ComponentProductId = comp.Id
-                WHERE pc.StateCode = @StateCode
-                  AND (cp.Name LIKE @SearchTerm
-                       OR comp.Name LIKE @SearchTerm
-                       OR pc.Notes LIKE @SearchTerm)
-                ORDER BY cp.Name, pc.AssemblyOrder";
-
-            var searchPattern = $"%{searchTerm}%";
-            return await connection.QueryAsync<ProductComponent>(sql, 
-                new { StateCode = (int)ObjectState.Active, SearchTerm = searchPattern });
-        }
-
-        public async Task<string> CreateAsync(ProductComponent component)
+        public async Task<bool> CreateAsync(ProductComponent component)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
                 INSERT INTO ProductComponent (
-                    Id, CompositeProductId, ComponentProductId, Quantity, Unit, 
-                    IsOptional, AssemblyOrder, Notes, StateCode, CreatedAt, 
-                    CreatedBy, LastModifiedAt, LastModifiedBy
-                )
-                VALUES (
-                    @Id, @CompositeProductId, @ComponentProductId, @Quantity, @Unit,
-                    @IsOptional, @AssemblyOrder, @Notes, @StateCode, @CreatedAt,
-                    @CreatedBy, @LastModifiedAt, @LastModifiedBy
+                    Id, Name, Description, ProductComponentHierarchyId, 
+                    AdditionalCost, StateCode, CreatedAt, CreatedBy, 
+                    LastModifiedAt, LastModifiedBy
+                ) VALUES (
+                    @Id, @Name, @Description, @ProductComponentHierarchyId,
+                    @AdditionalCost, @StateCode, @CreatedAt, @CreatedBy,
+                    @LastModifiedAt, @LastModifiedBy
                 )";
-            
-            await connection.ExecuteAsync(sql, component);
-            return component.Id;
+
+            var rowsAffected = await connection.ExecuteAsync(sql, component);
+            return rowsAffected > 0;
         }
 
         public async Task<bool> UpdateAsync(ProductComponent component)
@@ -169,19 +135,16 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                UPDATE ProductComponent SET 
-                    CompositeProductId = @CompositeProductId,
-                    ComponentProductId = @ComponentProductId,
-                    Quantity = @Quantity,
-                    Unit = @Unit,
-                    IsOptional = @IsOptional,
-                    AssemblyOrder = @AssemblyOrder,
-                    Notes = @Notes,
+                UPDATE ProductComponent SET
+                    Name = @Name,
+                    Description = @Description,
+                    ProductComponentHierarchyId = @ProductComponentHierarchyId,
+                    AdditionalCost = @AdditionalCost,
                     StateCode = @StateCode,
                     LastModifiedAt = @LastModifiedAt,
                     LastModifiedBy = @LastModifiedBy
                 WHERE Id = @Id";
-            
+
             var rowsAffected = await connection.ExecuteAsync(sql, component);
             return rowsAffected > 0;
         }
@@ -189,204 +152,134 @@ namespace GesN.Web.Data.Repositories
         public async Task<bool> DeleteAsync(string id)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
-            const string sql = "UPDATE ProductComponent SET StateCode = @StateCode WHERE Id = @Id";
-            var rowsAffected = await connection.ExecuteAsync(sql, new { StateCode = (int)ObjectState.Inactive, Id = id });
+            
+            const string sql = @"
+                UPDATE ProductComponent 
+                SET StateCode = @StateCode,
+                    LastModifiedAt = @LastModifiedAt 
+                WHERE Id = @Id";
+
+            var rowsAffected = await connection.ExecuteAsync(sql, new 
+            { 
+                Id = id, 
+                StateCode = (int)ObjectState.Inactive,
+                LastModifiedAt = DateTime.UtcNow
+            });
+
             return rowsAffected > 0;
         }
 
-        public async Task<bool> ExistsAsync(string id)
+        public async Task<IEnumerable<ProductComponent>> SearchAsync(string searchTerm)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
-            const string sql = "SELECT COUNT(1) FROM ProductComponent WHERE Id = @Id";
-            var count = await connection.QuerySingleAsync<int>(sql, new { Id = id });
-            return count > 0;
+            
+            const string sql = @"
+                SELECT 
+                    pc.Id, pc.Name, pc.Description, pc.ProductComponentHierarchyId, 
+                    pc.AdditionalCost, pc.StateCode, pc.CreatedAt, pc.CreatedBy, 
+                    pc.LastModifiedAt, pc.LastModifiedBy,
+                    pch.Id as HierarchyId, pch.Name as HierarchyName, pch.Description as HierarchyDescription
+                FROM ProductComponent pc
+                LEFT JOIN ProductComponentHierarchy pch ON pc.ProductComponentHierarchyId = pch.Id
+                WHERE pc.StateCode = @StateCode
+                AND (pc.Name LIKE @SearchTerm 
+                     OR pc.Description LIKE @SearchTerm
+                     OR pch.Name LIKE @SearchTerm)
+                ORDER BY pc.Name
+                LIMIT 50";
+
+            var components = await connection.QueryAsync<ProductComponent, ProductComponentHierarchy, ProductComponent>(
+                sql,
+                (component, hierarchy) =>
+                {
+                    if (hierarchy != null)
+                    {
+                        component.ProductComponentHierarchy = hierarchy;
+                    }
+                    return component;
+                },
+                new { 
+                    StateCode = (int)ObjectState.Active,
+                    SearchTerm = $"%{searchTerm}%"
+                },
+                splitOn: "HierarchyId"
+            );
+
+            return components;
         }
 
         public async Task<int> CountAsync()
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
+            
             const string sql = "SELECT COUNT(*) FROM ProductComponent WHERE StateCode = @StateCode";
-            return await connection.QuerySingleAsync<int>(sql, new { StateCode = (int)ObjectState.Active });
+            
+            return await connection.ExecuteScalarAsync<int>(sql, new { StateCode = (int)ObjectState.Active });
         }
 
-        public async Task<int> CountByCompositeProductAsync(string compositeProductId)
-        {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            const string sql = @"
-                SELECT COUNT(*) FROM ProductComponent 
-                WHERE CompositeProductId = @CompositeProductId AND StateCode = @StateCode";
-            return await connection.QuerySingleAsync<int>(sql, 
-                new { CompositeProductId = compositeProductId, StateCode = (int)ObjectState.Active });
-        }
-
-        public async Task<IEnumerable<ProductComponent>> GetPagedAsync(int page, int pageSize)
+        public async Task<bool> ExistsAsync(string id)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
-            const string sql = @"
-                SELECT pc.*, 
-                       cp.Name as CompositeProductName,
-                       comp.Name as ComponentProductName
-                FROM ProductComponent pc
-                LEFT JOIN Product cp ON pc.CompositeProductId = cp.Id
-                LEFT JOIN Product comp ON pc.ComponentProductId = comp.Id
-                WHERE pc.StateCode = @StateCode
-                ORDER BY cp.Name, pc.AssemblyOrder
-                LIMIT @PageSize OFFSET @Offset";
-
-            var offset = (page - 1) * pageSize;
-            return await connection.QueryAsync<ProductComponent>(sql, 
-                new { StateCode = (int)ObjectState.Active, PageSize = pageSize, Offset = offset });
-        }
-
-        public async Task<IEnumerable<ProductComponent>> GetByCompositeProductPagedAsync(string compositeProductId, int page, int pageSize)
-        {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
+            const string sql = "SELECT COUNT(*) FROM ProductComponent WHERE Id = @Id AND StateCode = @StateCode";
             
-            const string sql = @"
-                SELECT pc.*, 
-                       comp.* as ComponentProduct
-                FROM ProductComponent pc
-                LEFT JOIN Product comp ON pc.ComponentProductId = comp.Id
-                WHERE pc.CompositeProductId = @CompositeProductId 
-                  AND pc.StateCode = @StateCode
-                ORDER BY pc.AssemblyOrder
-                LIMIT @PageSize OFFSET @Offset";
-
-            var offset = (page - 1) * pageSize;
-            var result = await connection.QueryAsync<ProductComponent, Product, ProductComponent>(
-                sql,
-                (component, componentProduct) =>
-                {
-                    component.ComponentProduct = componentProduct;
-                    return component;
-                },
-                new { CompositeProductId = compositeProductId, StateCode = (int)ObjectState.Active, PageSize = pageSize, Offset = offset },
-                splitOn: "Id");
-
-            return result;
-        }
-
-        public async Task<bool> ComponentExistsInCompositeAsync(string compositeProductId, string componentProductId)
-        {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            const string sql = @"
-                SELECT COUNT(1) FROM ProductComponent 
-                WHERE CompositeProductId = @CompositeProductId 
-                  AND ComponentProductId = @ComponentProductId 
-                  AND StateCode = @StateCode";
-            var count = await connection.QuerySingleAsync<int>(sql, 
-                new { CompositeProductId = compositeProductId, ComponentProductId = componentProductId, StateCode = (int)ObjectState.Active });
+            var count = await connection.ExecuteScalarAsync<int>(sql, new { Id = id, StateCode = (int)ObjectState.Active });
             return count > 0;
         }
 
-        public async Task<IEnumerable<ProductComponent>> GetOrderedByAssemblyAsync(string compositeProductId)
+        // Métodos obsoletos mas mantidos para compatibilidade (retornarão listas vazias)
+        [Obsolete("ProductComponent não possui mais CompositeProductId. Use GetByHierarchyIdAsync()")]
+        public async Task<IEnumerable<ProductComponent>> GetByCompositeProductIdAsync(string compositeProductId)
         {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            
-            const string sql = @"
-                SELECT pc.*, 
-                       comp.* as ComponentProduct
-                FROM ProductComponent pc
-                LEFT JOIN Product comp ON pc.ComponentProductId = comp.Id
-                WHERE pc.CompositeProductId = @CompositeProductId 
-                  AND pc.StateCode = @StateCode
-                ORDER BY pc.AssemblyOrder";
-
-            var result = await connection.QueryAsync<ProductComponent, Product, ProductComponent>(
-                sql,
-                (component, componentProduct) =>
-                {
-                    component.ComponentProduct = componentProduct;
-                    return component;
-                },
-                new { CompositeProductId = compositeProductId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
-
-            return result;
+            return new List<ProductComponent>();
         }
 
-        public async Task<IEnumerable<ProductComponent>> GetOptionalComponentsAsync(string compositeProductId)
+        [Obsolete("ProductComponent não possui mais ComponentProductId")]
+        public async Task<IEnumerable<ProductComponent>> GetByComponentProductIdAsync(string componentProductId)
         {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            
-            const string sql = @"
-                SELECT pc.*, 
-                       comp.* as ComponentProduct
-                FROM ProductComponent pc
-                LEFT JOIN Product comp ON pc.ComponentProductId = comp.Id
-                WHERE pc.CompositeProductId = @CompositeProductId 
-                  AND pc.IsOptional = 1
-                  AND pc.StateCode = @StateCode
-                ORDER BY pc.AssemblyOrder";
-
-            var result = await connection.QueryAsync<ProductComponent, Product, ProductComponent>(
-                sql,
-                (component, componentProduct) =>
-                {
-                    component.ComponentProduct = componentProduct;
-                    return component;
-                },
-                new { CompositeProductId = compositeProductId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
-
-            return result;
+            return new List<ProductComponent>();
         }
 
-        public async Task<IEnumerable<ProductComponent>> GetRequiredComponentsAsync(string compositeProductId)
-        {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            
-            const string sql = @"
-                SELECT pc.*, 
-                       comp.* as ComponentProduct
-                FROM ProductComponent pc
-                LEFT JOIN Product comp ON pc.ComponentProductId = comp.Id
-                WHERE pc.CompositeProductId = @CompositeProductId 
-                  AND pc.IsOptional = 0
-                  AND pc.StateCode = @StateCode
-                ORDER BY pc.AssemblyOrder";
-
-            var result = await connection.QueryAsync<ProductComponent, Product, ProductComponent>(
-                sql,
-                (component, componentProduct) =>
-                {
-                    component.ComponentProduct = componentProduct;
-                    return component;
-                },
-                new { CompositeProductId = compositeProductId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id");
-
-            return result;
-        }
-
+        [Obsolete("ProductComponent não possui mais relacionamento direto com produtos")]
         public async Task<ProductComponent?> GetByCompositeAndComponentProductAsync(string compositeProductId, string componentProductId)
         {
-            using var connection = await _connectionFactory.CreateConnectionAsync();
-            
-            const string sql = @"
-                SELECT pc.*, 
-                       cp.* as CompositeProduct,
-                       comp.* as ComponentProduct
-                FROM ProductComponent pc
-                LEFT JOIN Product cp ON pc.CompositeProductId = cp.Id
-                LEFT JOIN Product comp ON pc.ComponentProductId = comp.Id
-                WHERE pc.CompositeProductId = @CompositeProductId 
-                  AND pc.ComponentProductId = @ComponentProductId
-                  AND pc.StateCode = @StateCode";
+            return null;
+        }
 
-            var result = await connection.QueryAsync<ProductComponent, Product, Product, ProductComponent>(
-                sql,
-                (component, compositeProduct, componentProduct) =>
-                {
-                    component.CompositeProduct = compositeProduct;
-                    component.ComponentProduct = componentProduct;
-                    return component;
-                },
-                new { CompositeProductId = compositeProductId, ComponentProductId = componentProductId, StateCode = (int)ObjectState.Active },
-                splitOn: "Id,Id");
+        [Obsolete("ProductComponent não possui mais CompositeProductId")]
+        public async Task<int> CountByCompositeProductAsync(string compositeProductId)
+        {
+            return 0;
+        }
 
-            return result.FirstOrDefault();
+        [Obsolete("ProductComponent não possui mais CompositeProductId")]
+        public async Task<IEnumerable<ProductComponent>> GetByCompositeProductPagedAsync(string compositeProductId, int page, int pageSize)
+        {
+            return new List<ProductComponent>();
+        }
+
+        [Obsolete("ProductComponent não possui mais relacionamento direto com produtos")]
+        public async Task<bool> ComponentExistsInCompositeAsync(string compositeProductId, string componentProductId)
+        {
+            return false;
+        }
+
+        [Obsolete("ProductComponent não possui mais AssemblyOrder")]
+        public async Task<IEnumerable<ProductComponent>> GetOrderedByAssemblyAsync(string compositeProductId)
+        {
+            return new List<ProductComponent>();
+        }
+
+        [Obsolete("ProductComponent não possui mais IsOptional")]
+        public async Task<IEnumerable<ProductComponent>> GetOptionalComponentsAsync(string compositeProductId)
+        {
+            return new List<ProductComponent>();
+        }
+
+        [Obsolete("ProductComponent não possui mais IsOptional")]
+        public async Task<IEnumerable<ProductComponent>> GetRequiredComponentsAsync(string compositeProductId)
+        {
+            return new List<ProductComponent>();
         }
     }
 } 

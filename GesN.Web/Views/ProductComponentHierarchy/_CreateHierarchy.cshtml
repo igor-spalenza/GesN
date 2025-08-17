@@ -1,0 +1,100 @@
+@model GesN.Web.Models.ViewModels.Production.CreateProductComponentHierarchyViewModel
+
+<div class="card">
+    <div class="card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-plus"></i> Criar Nova Hierarquia
+        </h6>
+    </div>
+    <div class="card-body">
+        <form id="formCreateHierarchy" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="row">
+                <!-- Nome da Hierarquia -->
+                <div class="col-md-8 mb-3">
+                    <div class="floating-input-group">
+                        <input asp-for="Name" type="text" 
+                               class="form-control floating-input" 
+                               maxlength="100" placeholder=" " required />
+                        <label asp-for="Name" class="floating-label">
+                            <i class="fas fa-sitemap text-primary"></i>
+                            Nome da Hierarquia
+                        </label>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Status Ativo -->
+                <div class="col-md-4 mb-3 d-flex align-items-center">
+                    <div class="form-check">
+                        <input asp-for="IsActive" type="checkbox" class="form-check-input" checked />
+                        <label asp-for="IsActive" class="form-check-label">
+                            <i class="fas fa-check-circle text-success"></i>
+                            Hierarquia ativa
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descrição -->
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <div class="floating-input-group">
+                        <textarea asp-for="Description" class="form-control floating-textarea" 
+                                  rows="3" maxlength="500" placeholder=" "></textarea>
+                        <label asp-for="Description" class="floating-label">
+                            <i class="fas fa-align-left text-primary"></i>
+                            Descrição (opcional)
+                        </label>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                        <div class="form-text">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                Máximo 500 caracteres. Descreva a finalidade e estrutura desta hierarquia.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observações -->
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <div class="floating-input-group">
+                        <textarea asp-for="Notes" class="form-control floating-textarea" 
+                                  rows="2" maxlength="1000" placeholder=" "></textarea>
+                        <label asp-for="Notes" class="floating-label">
+                            <i class="fas fa-sticky-note text-primary"></i>
+                            Observações (opcional)
+                        </label>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                        <div class="form-text">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                Máximo 1000 caracteres. Informações adicionais ou instruções especiais.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações Adicionais -->
+            <div class="alert alert-info">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-lightbulb fa-2x text-primary me-3"></i>
+                    <div>
+                        <h6 class="mb-1">
+                            <i class="fas fa-info-circle"></i>
+                            Sobre Hierarquias de Componentes
+                        </h6>
+                        <p class="mb-0">
+                            As hierarquias permitem organizar e estruturar os componentes de produtos compostos 
+                            de forma lógica, facilitando o gerenciamento e a montagem dos produtos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div> 

@@ -516,7 +516,30 @@ var usersManager = {
     }
 };
 
-// Inicializar quando o documento estiver pronto
-$(document).ready(function() {
+    // Inicializar quando o documento estiver pronto
+$(function() {
     usersManager.init();
+    
+    // Inicializar select múltiplo com Select2 para a página principal
+    $('.form-select[multiple]').select2({
+        theme: 'bootstrap-5',
+        language: 'pt-BR',
+        placeholder: 'Selecione as opções...',
+        allowClear: true
+    });
+
+    // Implementar busca instantânea (apenas para demonstração)
+    $('#searchInput').on('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        $('.user-row').each(function() {
+            const userName = $(this).find('td:first').text().toLowerCase();
+            const userEmail = $(this).find('td:nth-child(2)').text().toLowerCase();
+            
+            if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
 }); 

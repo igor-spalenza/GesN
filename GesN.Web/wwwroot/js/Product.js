@@ -14,6 +14,8 @@ const productManager = {
         this.bindEvents();
         this.loadGrid();
         this.loadStatistics();
+        this.checkForCompositeProducts();
+        this.setupDynamicScriptLoading();
     },
 
     // Eventos principais
@@ -41,6 +43,84 @@ const productManager = {
         if ($('#btnLimparFiltros').length) {
             $('#btnLimparFiltros').on('click', () => this.limparFiltros());
         }
+        
+        // Event handlers globais para modals e abas
+        this.setupGlobalEventHandlers();
+    },
+
+    // Configurar monitoramento de mudanças no DOM
+    setupGlobalEventHandlers: function() {
+        // Aplicar validação em tempo real nos formulários
+        $(document).on('input', 'input[name="Price"], input[name="Cost"]', function() {
+            const input = $(this);
+            const value = input.val();
+            
+            // Debounced validation
+            clearTimeout(this.validationTimeout);
+            this.validationTimeout = setTimeout(() => {
+                if (value && isNaN(parseFloat(value))) {
+                    input.addClass('is-invalid');
+                } else {
+                    input.removeClass('is-invalid');
+                }
+            }, 200);
+        });
+        
+        // Remover evento DOMNodeInserted depreciado - usar apenas MutationObserver
+        // Configurar MutationObserver para navegadores modernos
+        if (typeof MutationObserver !== 'undefined') {
+            const observer = new MutationObserver((mutations) => {
+                let shouldReinitialize = false;
+                
+                mutations.forEach((mutation) => {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === 1) { // Element node
+                            const $node = $(node);
+                            
+                            // Verificar se é o container de edição de produto
+                            if ($node.hasClass('product-edit-container') || $node.find('.product-edit-container').length) {
+                                setTimeout(() => {
+                                    this.initializeForm(node);
+                                    this.checkForCompositeProducts();
+                                }, 100);
+                                shouldReinitialize = true;
+                            }
+                            // Verificar se há componentes que precisam de inicialização
+                            else if ($node.find('.category-autocomplete, input[name="Price"], input[name="Cost"]').length) {
+                                setTimeout(() => {
+                                    this.initializeForm(node);
+                                }, 100);
+                                shouldReinitialize = true;
+                            }
+                            // Verificar especificamente por autocomplete não inicializado
+                            else if ($node.hasClass('category-autocomplete') || $node.find('.category-autocomplete').length) {
+                                const $autocompleteInputs = $node.hasClass('category-autocomplete') ? $node : $node.find('.category-autocomplete');
+                                const $uninitialized = $autocompleteInputs.not('[data-autocomplete-initialized="true"]');
+                                
+                                if ($uninitialized.length > 0) {
+                    
+                                    setTimeout(() => {
+                                        this.autocomplete.initializeAll($node);
+                                    }, 100);
+                                    shouldReinitialize = true;
+                                }
+                            }
+                        }
+                    });
+                });
+                
+                if (shouldReinitialize) {
+        
+                }
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+            
+    
+        }
     },
 
     // Carregar grid principal
@@ -67,9 +147,9 @@ const productManager = {
         }
 
         $(this.config.gridId).DataTable({
-            language: {
-                url: '/lib/datatables.net/pt-BR.json'
-            },
+            //language: {
+            //    url: '/lib/datatables.net/pt-.json'
+            //},
             responsive: true,
             pageLength: 25,
             order: [[1, 'asc']], // Ordenar por nome
@@ -89,7 +169,7 @@ const productManager = {
                 $('#total-produtos').text(data.totalProducts);
                 $('#produtos-ativos').text(data.activeProducts);
                 $('#produtos-simples').text(data.simpleProducts);
-                $('#produtos-compostos').text(data.compositeProducts);
+                // CompositeProduct statistics handled in CompositeProduct.js
                 $('#grupos-produtos').text(data.groupProducts);
                 
                 // Atualizar badges de alerta se existirem
@@ -142,13 +222,13 @@ const productManager = {
                 $(this.config.modalId + ' .modal-body').html(data);
                 $(this.config.modalId + ' .modal-dialog').removeClass('modal-xl').addClass('modal-lg');
                 
-                // Inicializar floating labels após carregar o conteúdo
+                // Inicializar componentes do formulário (Select2, cálculos, etc.)
                 setTimeout(() => {
                     const formContainer = document.getElementById('formNovoProduct');
-                    if (formContainer && this.forms) {
-                        this.forms.initFloatingLabels(formContainer);
+                    if (formContainer) {
+                        this.initializeForm(formContainer);
                     }
-                }, 100);
+                }, 150);
                 
                 $(this.config.modalId).modal('show');
             },
@@ -161,49 +241,57 @@ const productManager = {
 
     // Função de compatibilidade para resolver problemas de cache
     novoProductModal: function() {
-        console.warn('Função novoProductModal é deprecated, use novoProduct()');
+        
         this.novoProduct();
     },
 
     // Salvar novo produto
     salvarNovoProduct: function() {
         const form = $('#formNovoProduct');
-        const formData = form.serialize();
+        if (form.length === 0) {
+            return;
+        }
 
         if (!this.validateForm(form)) {
             return;
         }
 
-        $.ajax({
+        const formData = new FormData(form[0]);
+
+        // Desabilita o botão de submit para evitar múltiplos envios
+        const submitButton = form.find('button[type="button"]');
+        const buttonText = submitButton.text();
+        submitButton.prop('disabled', true).text('Salvando...');
+
+        return $.ajax({
             url: `${this.config.baseUrl}/SalvarNovo`,
             type: 'POST',
             data: formData,
+            processData: false,
+            contentType: false,
             success: (response) => {
                 if (response.success) {
-                    toastr.success('Produto criado com sucesso!');
                     $(this.config.modalId).modal('hide');
+                    toastr.success(response.message || 'Produto criado com sucesso!');
                     this.loadGrid();
                     this.loadStatistics();
                     
-                    // Limpar o formulário para próximas criações
-                    if (this.forms) {
-                        this.forms.resetFormState(form[0]);
-                    }
-                    
-                    // Se for produto composto ou grupo, abrir para edição
-                    if (response.productType !== 0) { // 0 = Simple
-                        setTimeout(() => {
-                            this.editarProduct(response.productId);
-                        }, 500);
+                    if (response.productId) {
+                        // Chama o método de edição diretamente
+                        this.editarProduct(response.productId);
                     }
                 } else {
-                    toastr.error(response.message || 'Erro ao criar produto');
+                    toastr.error(response.message || 'Não foi possível criar o produto');
                     this.showValidationErrors(response.errors);
                 }
             },
-            error: (xhr) => {
-                console.error('Erro ao salvar produto:', xhr);
-                toastr.error('Erro ao salvar produto');
+            error: (xhr, status, error) => {
+                const errorMessage = xhr.responseJSON?.message || 'Ocorreu um erro ao salvar o produto. Por favor, tente novamente.';
+                toastr.error(errorMessage);
+            },
+            complete: () => {
+                // Reabilita o botão
+                submitButton.prop('disabled', false).text(buttonText);
             }
         });
     },
@@ -227,7 +315,7 @@ const productManager = {
     },
 
     // Editar produto - abrir como aba
-    editarProduct: function(productId) {
+    editarProduct: function(productId, productName = null) {
         // Verificar se já existe uma aba para este produto
         const existingTabId = `product-${productId}`;
         const existingTab = $(`#${existingTabId}-tab`);
@@ -245,11 +333,13 @@ const productManager = {
         this.config.currentProductId = productId;
         this.config.currentEditMode = 'edit';
         
-        // Cria a aba com nome temporário que será atualizado
+        // Se productName não foi fornecido, usa um placeholder que será atualizado
+        const tabTitle = productName || 'Carregando...';
+        
         const novaAba = `
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="${tabId}-tab" data-bs-toggle="tab" data-bs-target="#${tabId}" type="button" role="tab" data-product-id="${productId}">
-                    <i class="fas fa-edit"></i> Carregando...
+                    <i class="fas fa-edit"></i> ${tabTitle}
                     <span class="btn-close ms-2" onclick="productManager.fecharAba('${tabId}')"></span>
                 </button>
             </li>`;
@@ -272,22 +362,45 @@ const productManager = {
             .done((data) => {
                 $(`#conteudo-${tabId}`).html(data);
                 
-                // Extrai o nome do produto do conteúdo carregado para atualizar o título da aba
-                const productNameElement = $(`#conteudo-${tabId}`).find('input[name="Name"]');
-                if (productNameElement.length > 0) {
-                    const productName = productNameElement.val();
-                    $(`#${tabId}-tab`).html(`<i class="fas fa-edit"></i> ${productName} <span class="btn-close ms-2" onclick="productManager.fecharAba('${tabId}')"></span>`);
+                // Se productName não foi fornecido, extrai do conteúdo carregado
+                if (!productName) {
+                    const productNameElement = $(`#conteudo-${tabId}`).find('input[name="Name"]');
+                    if (productNameElement.length > 0) {
+                        const extractedProductName = productNameElement.val();
+                        if (extractedProductName) {
+                            $(`#${tabId}-tab`).html(`<i class="fas fa-edit"></i> ${extractedProductName} <span class="btn-close ms-2" onclick="productManager.fecharAba('${tabId}')"></span>`);
+                        }
+                    }
                 }
                 
-                // Inicializar gerenciamento de sub-abas e floating labels
+                // Detectar tipo de produto e disparar eventos para carregamento dinâmico de scripts
+                const $container = $(`#conteudo-${tabId}`);
+                const $productEditContainer = $container.find('.product-edit-container');
+                
+                if ($productEditContainer.length) {
+                    const isComposite = $productEditContainer.data('is-composite') === true || $productEditContainer.data('is-composite') === 'true';
+                    const isGroup = $productEditContainer.data('is-group') === true || $productEditContainer.data('is-group') === 'true';
+                    
+                    // Disparar eventos para carregamento dinâmico de scripts
+                    if (isComposite) {
+            
+                        $(document).trigger('composite-product-tab-opened', [productId]);
+                    }
+                    
+                    if (isGroup) {
+            
+                        $(document).trigger('product-group-tab-opened', [productId]);
+                    }
+                }
+                
+                // Inicializar gerenciamento de sub-abas e componentes do formulário
                 setTimeout(() => {
                     this.initializeEditTabs(productId, tabId);
-                    // Inicializar floating labels no conteúdo carregado
                     const container = document.getElementById(`conteudo-${tabId}`);
                     if (container) {
-                        this.forms.initFloatingLabels(container);
+                        this.initializeForm(container);
                     }
-                }, 100);
+                }, 150);
             })
             .fail(() => {
                 $(`#conteudo-${tabId}`).html('<div class="alert alert-danger">Erro ao carregar produto. Tente novamente.</div>');
@@ -318,32 +431,24 @@ const productManager = {
         const containerSelector = `#conteudo-${tabId}`;
         
         // Remover eventos anteriores para evitar duplicatas
-        $(`${containerSelector} #productEditTabs button[data-bs-toggle="tab"]`).off('shown.bs.tab.productEdit');
+        $(`${containerSelector} #productEditTabs-${productId} button[data-bs-toggle="tab"]`).off('shown.bs.tab.productEdit');
         
         // Configurar carregamento lazy das sub-abas
-        $(`${containerSelector} #productEditTabs button[data-bs-toggle="tab"]`).on('shown.bs.tab.productEdit', (e) => {
+        $(`${containerSelector} #productEditTabs-${productId} button[data-bs-toggle="tab"]`).on('shown.bs.tab.productEdit', (e) => {
             const targetTab = $(e.target).attr('data-bs-target');
             
             switch(targetTab) {
-                case '#components-tab-pane':
-                    if ($(`${containerSelector} #componentsContainer .spinner-border`).length > 0) {
-                        this.components.carregarComponentes(productId);
+                case `#components-tab-pane-${productId}`:
+                    if ($(`${containerSelector} #componentsContainer-${productId} .spinner-border`).length > 0) {
+                        // TODO: Implementar carregamento de componentes
+                
                     }
                     break;
-                case '#group-items-tab-pane':
-                    if ($(`${containerSelector} #groupItemsContainer .spinner-border`).length > 0) {
-                        this.groupItems.carregarItens(productId);
-                    }
-                    break;
-                case '#group-options-tab-pane':
-                    if ($(`${containerSelector} #groupOptionsContainer .spinner-border`).length > 0) {
-                        this.groupOptions.carregarOpcoes(productId);
-                    }
-                    break;
-                case '#exchange-rules-tab-pane':
-                    if ($(`${containerSelector} #exchangeRulesContainer .spinner-border`).length > 0) {
-                        this.exchangeRules.carregarRegras(productId);
-                    }
+                case `#group-items-tab-pane-${productId}`:
+                case `#group-options-tab-pane-${productId}`:
+                case `#exchange-rules-tab-pane-${productId}`:
+                    // As abas ProductGroup agora são renderizadas diretamente via @await Html.PartialAsync()
+                    // Não precisamos recarregar via AJAX
                     break;
             }
         });
@@ -432,11 +537,6 @@ const productManager = {
         this.components.abrirGerenciamento(productId);
     },
 
-    // Gerenciar grupo (para grupos de produtos)
-    gerenciarGrupo: function(productId) {
-        this.groupItems.abrirGerenciamento(productId);
-    },
-
     // Validação de formulário
     validateForm: function(form) {
         // Se o formulário tem floating labels, use o sistema de validação específico
@@ -470,13 +570,18 @@ const productManager = {
         return isValid;
     },
 
-    // Mostrar erros de validação para aba específica
+    // Mostrar erros de validação para aba específica ou modal
     showValidationErrors: function(errors, tabId = null) {
         if (errors) {
             // Determinar o container correto
             let container = '';
             if (tabId) {
-                container = `#conteudo-${tabId}`;
+                // Check if it's a modal
+                if (tabId.includes('Modal')) {
+                    container = `#${tabId}`;
+                } else {
+                    container = `#conteudo-${tabId}`;
+                }
             } else if (this.config.currentEditMode === 'create') {
                 container = '#formNovoProduct';
             }
@@ -522,107 +627,35 @@ const productManager = {
 
     filtrarEstoqueBaixo: function() {
         // Implementar filtro para estoque baixo
-        console.log('Filtrar produtos com estoque baixo');
+
         // Por enquanto, apenas aplicar filtros existentes
         this.aplicarFiltros();
     },
 
-    // Namespace para gerenciamento de componentes
-    components: {
-        // Carregar componentes
-        carregarComponentes: function(productId) {
-            $.ajax({
-                url: `/ProductComponent/List/${productId}`,
-                type: 'GET',
-                success: (data) => {
-                    $('#componentsContainer').html(data);
-                },
-                error: (xhr) => {
-                    console.error('Erro ao carregar componentes:', xhr);
-                    $('#componentsContainer').html('<div class="alert alert-danger">Erro ao carregar componentes</div>');
-                }
-            });
-        },
-
-        // Abrir gerenciamento de componentes
-        abrirGerenciamento: function(productId) {
-            // Implementar modal específico para componentes
-            console.log('Gerenciar componentes do produto:', productId);
-        },
-
-        // Adicionar componente
-        adicionarComponente: function(productId) {
-            // Implementar adição de componente
-        },
-
-        // Editar componente
-        editarComponente: function(componentId) {
-            // Implementar edição de componente
-        },
-
-        // Remover componente
-        removerComponente: function(componentId) {
-            // Implementar remoção de componente
-        }
-    },
-
-    // Namespace para gerenciamento de itens do grupo
-    groupItems: {
-        // Carregar itens do grupo
-        carregarItens: function(productId) {
-            $.ajax({
-                url: `/ProductGroup/Items/${productId}`,
-                type: 'GET',
-                success: (data) => {
-                    $('#groupItemsContainer').html(data);
-                },
-                error: (xhr) => {
-                    console.error('Erro ao carregar itens do grupo:', xhr);
-                    $('#groupItemsContainer').html('<div class="alert alert-danger">Erro ao carregar itens do grupo</div>');
-                }
-            });
-        },
-
-        // Abrir gerenciamento de grupo
-        abrirGerenciamento: function(productId) {
-            // Implementar modal específico para grupo
-            console.log('Gerenciar grupo do produto:', productId);
-        }
-    },
-
-    // Namespace para gerenciamento de opções do grupo
-    groupOptions: {
-        // Carregar opções
-        carregarOpcoes: function(productId) {
-            $.ajax({
-                url: `/ProductGroup/Options/${productId}`,
-                type: 'GET',
-                success: (data) => {
-                    $('#groupOptionsContainer').html(data);
-                },
-                error: (xhr) => {
-                    console.error('Erro ao carregar opções:', xhr);
-                    $('#groupOptionsContainer').html('<div class="alert alert-danger">Erro ao carregar opções</div>');
-                }
-            });
-        }
-    },
-
-    // Namespace para gerenciamento de regras de troca
-    exchangeRules: {
-        // Carregar regras de troca
-        carregarRegras: function(productId) {
-            $.ajax({
-                url: `/ProductGroup/ExchangeRules/${productId}`,
-                type: 'GET',
-                success: (data) => {
-                    $('#exchangeRulesContainer').html(data);
-                },
-                error: (xhr) => {
-                    console.error('Erro ao carregar regras:', xhr);
-                    $('#exchangeRulesContainer').html('<div class="alert alert-danger">Erro ao carregar regras de troca</div>');
-                }
-            });
+    // Verificar se há produtos compostos e carregar CompositeProduct.js dinamicamente
+    checkForCompositeProducts: function() {
+        // Verificar se há container de produto composto na página
+        const compositeContainer = $('.product-edit-container[data-is-composite="true"]');
+        
+        if (compositeContainer.length > 0) {
+            // Verificar se CompositeProduct.js já foi carregado
+            if (typeof compositeProductManager === 'undefined') {
+                // Carregar CompositeProduct.js dinamicamente
+                const script = document.createElement('script');
+                script.src = '/js/CompositeProduct.js?v=' + new Date().getTime();
+                script.onload = function() {
+                    // Aguardar um pouco para garantir que o script foi processado
+                    setTimeout(function() {
+                        // Inicializar componentes se necessário
+                        if (typeof compositeProductManager !== 'undefined') {
+                            compositeProductManager.init();
+                        }
+                    }, 100);
+                };
+                document.head.appendChild(script);
+            } else {
+                compositeProductManager.init();
+            }
         }
     },
 
@@ -644,8 +677,11 @@ const productManager = {
             // Ensure all addon inputs maintain floating state
             $(container).find('.floating-input-group-addon .floating-input').addClass('has-value');
             
-            // Ensure all textareas maintain floating state
-            $(container).find('.floating-textarea').addClass('has-value');
+            // Check textareas for initial values (don't force floating)
+            $(container).find('.floating-textarea').each(function() {
+                const $textarea = $(this);
+                productManager.forms.checkInputValue($textarea);
+            });
             
             // Ensure selects with values maintain floating state
             $(container).find('.floating-select').each(function() {
@@ -679,15 +715,14 @@ const productManager = {
                     return;
                 }
                 
-                // Textareas should always have floating labels
+                // Textareas should behave like regular inputs
                 if ($input.hasClass('floating-textarea')) {
-                    $input.addClass('has-value');
-                    // Still add event listeners for validation and other behaviors
+                    // Check initial value and add class if needed
+                    productManager.forms.checkInputValue($input);
+                    
+                    // Add event listeners for textareas
                     $input.on('focus blur input change', function() {
-                        // Don't remove has-value class for textareas, but check for other behaviors
-                        if (!$(this).hasClass('has-value')) {
-                            $(this).addClass('has-value');
-                        }
+                        productManager.forms.checkInputValue($(this));
                     });
                     return;
                 }
@@ -943,8 +978,357 @@ const productManager = {
                 }
             });
         }
-    }
+    },
+
+    // Autocomplete Management for Category Fields
+    autocomplete: {
+        // Initialize all autocomplete instances in container
+        initializeAll: function(container) {
+            const $container = container ? $(container) : $(document);
+            
+            // Initialize category autocompletes
+            $container.find('.category-autocomplete').each(function() {
+                productManager.autocomplete.initializeCategoryAutocomplete($(this));
+            });
+        },
+
+        // Initialize a single category autocomplete following the ROBUST PATTERN
+        initializeCategoryAutocomplete: function($input) {
+            if (!$input.length || $input.data('autocomplete-initialized')) return;
+            
+            // Mark as initialized
+            $input.data('autocomplete-initialized', true);
+            
+            // Get the container for this autocomplete instance
+            const $container = $input.closest('.floating-input-group');
+            
+            // Find hidden input using dynamic ID pattern (more robust)
+            const inputId = $input.attr('id');
+            const hiddenId = inputId ? inputId.replace('CategoryName-', 'CategoryId-') : null;
+            const $hiddenInput = hiddenId ? $container.find(`#${hiddenId}`) : $container.find('input[name="CategoryId"], input[asp-for="CategoryId"]');
+            
+            // ✅ VALIDATION: Verificar existência dos campos essenciais
+            if (!$hiddenInput.length) {
+                console.warn('Hidden CategoryId field not found for input:', inputId);
+                return;
+            }
+            
+            // ✅ CLEANUP: Remove instância anterior se houver
+            if ($input.data('aaAutocomplete')) {
+                $input.autocomplete.destroy();
+            }
+            
+            // ✅ ALGOLIA CONFIG: Configuração robusta seguindo padrão
+            const autocompleteInstance = autocomplete($input[0], {
+                hint: false,
+                debug: false,
+                minLength: 2,
+                openOnFocus: false,
+                autoselect: true,
+                appendTo: $container[0] // ✅ CRUCIAL: Container correto para múltiplas views
+            }, [{
+                source: function(query, callback) {
+                    $.ajax({
+                        url: '/ProductCategory/BuscaProductCategoryAutocomplete',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: { termo: query },
+                        success: function(data) {
+                            const suggestions = $.map(data, function(item) {
+                                return {
+                                    label: item.name || item.label,
+                                    value: item.value || item.name,
+                                    id: item.id,
+                                    description: item.description,
+                                    data: item
+                                };
+                            });
+                            callback(suggestions);
+                        },
+                        error: function() {
+                            callback([]);
+                        }
+                    });
+                },
+                displayKey: 'label',
+                templates: {
+                    suggestion: function(suggestion) {
+                        return '<div class="autocomplete-suggestion">' +
+                               '<div class="suggestion-title">' + (suggestion.data.name || suggestion.label) + '</div>' +
+                               (suggestion.data.description ? '<div class="suggestion-subtitle">' + suggestion.data.description + '</div>' : '') +
+                               '</div>';
+                    },
+                    empty: '<div class="aa-empty">Nenhuma categoria encontrada</div>'
+                }
+            }]);
+            
+            // ✅ EVENT HANDLERS: Seleção robusta
+            autocompleteInstance.on('autocomplete:selected', function(event, suggestion, dataset) {
+                $hiddenInput.val(suggestion.id);
+                $input.val(suggestion.value);
+                
+                // ✅ UI UPDATES: Handle floating label
+                $container.addClass('has-value');
+                
+                // ✅ INTEGRATION: Trigger validation
+                $hiddenInput.trigger('change');
+            });
+            
+            // ✅ VALIDATION: Limpar seleção se campo ficar vazio
+            $input.on('blur', function() {
+                if ($(this).val() === '') {
+                    $hiddenInput.val('');
+                    $container.removeClass('has-value');
+                    $hiddenInput.trigger('change');
+                }
+            });
+            
+            // ✅ INTEGRATION: Handle floating label state on load
+            if ($input.val()) {
+                $container.addClass('has-value');
+            }
+
+             // Handle manual input clearing and typing
+            $input.on('input keyup', function() {
+                const $container = $(this).closest('.floating-input-group');
+                
+                if ($(this).val()) {
+                    $container.addClass('has-value');
+                } else {
+                    if ($hiddenInput.length) {
+                        $hiddenInput.val('');
+                        $hiddenInput.trigger('change');
+                    }
+                    $container.removeClass('has-value');
+                }
+            });
+
+            // Handle focus/blur for floating labels
+            $input.on('focus', function() {
+                $(this).closest('.floating-input-group').addClass('has-value');
+            }).on('blur', function() {
+                if (!$(this).val()) {
+                    $(this).closest('.floating-input-group').removeClass('has-value');
+                }
+            });
+
+            // Set initial value if CategoryId is populated
+            if ($hiddenInput.length && $hiddenInput.val()) {
+                $.ajax({
+                    url: '/ProductCategory/BuscaProductCategoryAutocomplete',
+                    method: 'GET',
+                    data: { termo: '' },
+                    success: function(data) {
+                        const currentCategory = data.find(item => item.id === $hiddenInput.val());
+                        if (currentCategory) {
+                            $input.val(currentCategory.name);
+                            $input.closest('.floating-input-group').addClass('has-value');
+                        }
+                    }
+                });
+            }
+        },
+
+        // Destroy all autocomplete instances in container
+        destroyAll: function(container) {
+            const $container = container ? $(container) : $(document);
+            $container.find('.category-autocomplete').each(function() {
+                const $input = $(this);
+                if ($input.data('autocomplete-initialized')) {
+                    // Clean up autocomplete
+                    $input.autocomplete('destroy');
+                    $input.removeData('autocomplete-initialized');
+                    clearTimeout($input.data('timeout'));
+                }
+            });
+        }
+    },
+
+    // Form initialization and setup
+    initializeForm: function(container) {
+        const $container = $(container);
+        
+        // Initialize autocomplete components
+        this.autocomplete.initializeAll($container);
+        
+        // Setup form calculations
+        this.setupFormCalculations($container);
+        
+        // Initialize floating labels if forms module exists
+        if (this.forms) {
+            this.forms.initFloatingLabels(container);
+        }
+    },
+
+    // Setup form calculations (margin, etc.)
+    setupFormCalculations: function(container) {
+        const $container = $(container);
+        
+        // Setup margin calculation for price/cost fields
+        $container.find('input[name="Price"], input[name="Cost"]').off('input.marginCalc').on('input.marginCalc', function() {
+            productManager.calculateMargin($container);
+        });
+        
+        // Calculate initial margin
+        setTimeout(() => {
+            productManager.calculateMargin($container);
+        }, 100);
+    },
+
+    // Calculate profit margin
+    calculateMargin: function(container) {
+        const $container = $(container);
+        const $priceInput = $container.find('input[name="Price"]');
+        const $costInput = $container.find('input[name="Cost"]');
+        const $marginDisplay = $container.find('#marginDisplay');
+        const $marginSection = $container.find('#marginSection');
+        
+        if (!$priceInput.length || !$costInput.length || !$marginDisplay.length) {
+            return;
+        }
+        
+        const price = parseFloat($priceInput.val()) || 0;
+        const cost = parseFloat($costInput.val()) || 0;
+        
+        if (price > 0 && cost > 0) {
+            const margin = ((price - cost) / price * 100);
+            $marginDisplay.text(margin.toFixed(2) + '%');
+            
+            // Show margin section (for create form)
+            if ($marginSection.length) {
+                $marginSection.show();
+            }
+            
+            // Show margin parent (for edit form)
+            const $marginParent = $marginDisplay.parent();
+            $marginParent.removeClass('d-none').show();
+            
+            // Add color coding based on margin percentage
+            if (margin < 10) {
+                $marginParent.removeClass('alert-info alert-success').addClass('alert-warning');
+            } else if (margin < 30) {
+                $marginParent.removeClass('alert-warning alert-success').addClass('alert-info');
+            } else {
+                $marginParent.removeClass('alert-warning alert-info').addClass('alert-success');
+            }
+        } else {
+            // Hide margin displays when no valid calculation
+            if ($marginSection.length) {
+                $marginSection.hide();
+            }
+            $marginDisplay.parent().hide();
+        }
+    },
+
+    // Clean up form when modal is closed
+    cleanupForm: function(container) {
+        const $container = $(container);
+        
+        // Destroy Select2 instances
+        this.select2.destroyAll($container);
+        
+        // Remove event handlers
+        $container.find('input[name="Price"], input[name="Cost"]').off('input.marginCalc');
+    },
+
+    // Get current product ID (for editing context)
+    getCurrentProductId: function() {
+        // First try to get from global config (most reliable in tab context)
+        if (this.config.currentProductId) {
+            return this.config.currentProductId;
+        }
+
+        // Try to get from current edit form
+        const editForm = $('form[id*="EditProduct"], form[id*="editProduct"]');
+        if (editForm.length) {
+            const productId = editForm.find('input[name="Id"]').val();
+            if (productId) return productId;
+        }
+
+        // Try to get from product-edit-container data attribute
+        const productContainer = $('.product-edit-container');
+        if (productContainer.length) {
+            const productId = productContainer.data('product-id') || productContainer.attr('data-product-id');
+            if (productId) return productId;
+        }
+
+        // Try to get from active tab data attribute
+        const activeTab = $('.nav-link.active[data-product-id]');
+        if (activeTab.length) {
+            const productId = activeTab.data('product-id');
+            if (productId) return productId;
+        }
+
+        // Try to get from URL if we're on edit page
+        const urlParts = window.location.pathname.split('/');
+        const editIndex = urlParts.indexOf('FormularioEdicao');
+        if (editIndex > -1 && urlParts.length > editIndex + 1) {
+            return urlParts[editIndex + 1];
+        }
+
+        return null;
+    },
+
+    // Sistema de carregamento dinâmico de scripts para DevTools Sources
+    dynamicScripts: {
+        loaded: {},
+        loading: {},
+        
+        loadScript: function(src, id) {
+            if (this.loaded[id] || this.loading[id]) {
+                return Promise.resolve();
+            }
+            
+            this.loading[id] = true;
+            
+            return new Promise((resolve, reject) => {
+                $.getScript(src)
+                    .done(() => {
+                        this.loaded[id] = true;
+                        this.loading[id] = false;
+        
+                        resolve();
+                    })
+                    .fail((jqxhr, settings, exception) => {
+                        this.loading[id] = false;
+                        console.error('❌ Erro ao carregar script:', src, exception);
+                        reject(exception);
+                    });
+            });
+        },
+        
+        loadCompositeProductScripts: function() {
+            return Promise.all([
+                this.loadScript('/js/CompositeProduct.js?v=' + new Date().getTime(), 'compositeProduct'),
+                // Não carregar ProductComponentHierarchy.js pois removemos a dependência
+            ]);
+        },
+        
+        loadProductGroupScripts: function() {
+            return this.loadScript('/js/ProductGroup.js?v=' + new Date().getTime(), 'productGroup');
+        }
+    },
+
+    // Configurar event handlers para carregamento dinâmico
+    setupDynamicScriptLoading: function() {
+        // Evento personalizado para detectar abertura de produtos compostos
+        $(document).on('composite-product-tab-opened', (event, productId) => {
+
+            this.dynamicScripts.loadCompositeProductScripts();
+        });
+        
+        // Evento personalizado para detectar abertura de produtos grupo
+        $(document).on('product-group-tab-opened', (event, productId) => {
+
+            this.dynamicScripts.loadProductGroupScripts();
+        });
+    },
+
+    // ProductGroup functionality moved to ProductGroup.js
+    // Include ProductGroup.js in your view to use ProductGroup methods
 };
+
+// ProductGroup functions now available in ProductGroup.js
 
 // Função utilitária para debounce
 function debounce(func, wait) {
@@ -960,8 +1344,6 @@ function debounce(func, wait) {
 }
 
 // Inicializar quando o documento estiver pronto
-$(document).ready(function() {
+$(function() {
     productManager.init();
-    console.log('ProductManager inicializado:', productManager);
-    console.log('Função novoProduct disponível:', typeof productManager.novoProduct);
 }); 

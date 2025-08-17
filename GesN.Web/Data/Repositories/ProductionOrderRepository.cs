@@ -55,7 +55,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT po.*, p.* as Product
+                SELECT po.*, p.*
                 FROM ProductionOrder po
                 LEFT JOIN Product p ON po.ProductId = p.Id
                 WHERE po.OrderItemId = @OrderItemId AND po.StateCode = @StateCode
@@ -105,7 +105,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT po.*, p.* as Product
+                SELECT po.*, p.*
                 FROM ProductionOrder po
                 LEFT JOIN Product p ON po.ProductId = p.Id
                 WHERE po.Priority = @Priority AND po.StateCode = @StateCode
@@ -129,7 +129,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT po.*, p.* as Product
+                SELECT po.*, p.*
                 FROM ProductionOrder po
                 LEFT JOIN Product p ON po.ProductId = p.Id
                 WHERE po.AssignedTo = @AssignedTo AND po.StateCode = @StateCode
@@ -173,7 +173,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT po.*, p.* as Product
+                SELECT po.*, p.*
                 FROM ProductionOrder po
                 LEFT JOIN Product p ON po.ProductId = p.Id
                 WHERE po.CreatedAt >= @StartDate 
@@ -388,7 +388,7 @@ namespace GesN.Web.Data.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync();
             
             const string sql = @"
-                SELECT po.*, p.* as Product
+                SELECT po.*, p.*
                 FROM ProductionOrder po
                 LEFT JOIN Product p ON po.ProductId = p.Id
                 WHERE po.ScheduledEndDate < @CurrentDate 

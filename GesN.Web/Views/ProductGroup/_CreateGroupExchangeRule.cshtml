@@ -1,0 +1,110 @@
+@using GesN.Web.Models.ViewModels.Production
+@model CreateProductGroupExchangeRuleViewModel
+
+<div class="modal fade" id="createGroupExchangeRuleModal" tabindex="-1" role="dialog" aria-labelledby="createGroupExchangeRuleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createGroupExchangeRuleModalLabel">
+                    <i class="fas fa-plus"></i> Adicionar Regra de Troca
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCreateGroupExchangeRule" enctype="application/x-www-form-urlencoded">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ProductGroupId" value="@Model.ProductGroupId" />
+                    @* <input type="hidden" id="ProductGroupId" name="ProductGroupId" value="@ViewBag.ProductId" /> *@
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="SourceGroupItemId" type="hidden" />
+                                @if (ViewBag.IsSourceItemPredefined == true)
+                                {
+                                    <input id="SourceGroupItemName" type="text" class="floating-input has-value" value="@ViewBag.SourceGroupItemName" readonly placeholder=" " />
+                                    <label for="SourceGroupItemName" class="floating-label">Item Original (Predefinido)</label>
+                                }
+                                else
+                                {
+                                    <input id="SourceGroupItemName" type="text" class="floating-input" placeholder=" " required autocomplete="off" />
+                                    <label for="SourceGroupItemName" class="floating-label">Item Original</label>
+                                }
+                                <span asp-validation-for="SourceGroupItemId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="TargetGroupItemId" type="hidden" />
+                                <input id="TargetGroupItemName" type="text" class="floating-input" placeholder=" " required autocomplete="off" />
+                                <label for="TargetGroupItemName" class="floating-label">Item de Troca</label>
+                                <span asp-validation-for="TargetGroupItemId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="SourceGroupItemWeight" type="number" min="1" class="floating-input has-value" placeholder=" " required />
+                                <label asp-for="SourceGroupItemWeight" class="floating-label">Peso do Item Original</label>
+                                <span asp-validation-for="SourceGroupItemWeight" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="TargetGroupItemWeight" type="number" min="1" class="floating-input has-value" placeholder=" " required />
+                                <label asp-for="TargetGroupItemWeight" class="floating-label">Peso do Item de Troca</label>
+                                <span asp-validation-for="TargetGroupItemWeight" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="floating-input-group">
+                                <input asp-for="ExchangeRatio" type="number" step="0.01" min="0.01" class="floating-input" placeholder=" " required />
+                                <label asp-for="ExchangeRatio" class="floating-label">Proporção de Troca</label>
+                                <span asp-validation-for="ExchangeRatio" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- Space for additional fields if needed -->
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                <label asp-for="IsActive" class="form-check-label">
+                                    Regra Ativa
+                                </label>
+                                <small class="form-text text-muted">Se marcado, esta regra estará disponível para uso</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Informações sobre regras de troca:</h6>
+                        <ul class="mb-0">
+                            <li><strong>Proporção:</strong> Define quantos produtos de troca equivalem a 1 produto original</li>
+                            <li><strong>Custo Adicional:</strong> Valor extra cobrado na troca (opcional)</li>
+                            <li><strong>Status:</strong> Apenas regras ativas ficam disponíveis para o cliente</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSaveGroupExchangeRule">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+ 

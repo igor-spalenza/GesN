@@ -1,0 +1,146 @@
+@using GesN.Web.Models.ViewModels.Production
+@model List<ProductGroupItemViewModel>
+
+<div class="product-group-section">
+    <div class="section-header">
+        <h6 class="section-title">
+            <i class="fas fa-boxes"></i> Itens do Grupo
+        </h6>
+        <button type="button" class="btn btn-primary btn-sm" onclick="ProductGroup.showCreateItemModal('@ViewBag.ProductId')">
+            <i class="fas fa-plus"></i> Adicionar Item
+        </button>
+    </div>
+
+    <div class="section-content">
+        @if (Model?.Any() == true)
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Min/Max</th>
+                            <th>Preço Extra</th>
+                            <th>Opcional</th>
+                            <th>Regras de Troca</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div>
+                                            <strong>@item.ItemName</strong>
+                                            <br><small class="text-muted">Tipo: @item.ItemType</small>
+                                            @* @if (!string.IsNullOrWhiteSpace(item.ProductId))
+                                            {
+                                                <br><small class="text-muted">ID Produto: @item.ProductId</small>
+                                            }
+                                            else if (!string.IsNullOrWhiteSpace(item.ProductCategoryId))
+                                            {
+                                                <br><small class="text-muted">ID Categoria: @item.ProductCategoryId</small>
+                                            } *@
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">@item.Quantity</span>
+                                    @if (item.DefaultQuantity != item.Quantity)
+                                    {
+                                        <br><small class="text-muted">Padrão: @item.DefaultQuantity</small>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        @item.MinQuantity - @(item.MaxQuantity?.ToString() ?? "∞")
+                                    </small>
+                                </td>
+                                <td>
+                                    @if (item.ExtraPrice > 0)
+                                    {
+                                        <span class="text-success">+ @(item.ExtraPrice?.ToString("C") ?? "0")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">--</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsOptional)
+                                    {
+                                        <span class="badge bg-secondary">Opcional</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary">Obrigatório</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div id="exchange-rules-info-@item.Id" class="flex-grow-1">
+                                            <!-- Informações sobre regras de troca serão carregadas aqui -->
+                                            <small class="text-muted">
+                                                <i class="fas fa-spinner fa-spin"></i> Carregando...
+                                            </small>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-info btn-sm" 
+                                                onclick="ProductGroup.showItemExchangeRulesModal('@ViewBag.ProductId', '@item.Id')"
+                                                title="Gerenciar Regras de Troca">
+                                            <i class="fas fa-exchange-alt"></i> Regras
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-primary" 
+                                                onclick="ProductGroup.showEditItemModal('@item.Id')"
+                                                title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                onclick="ProductGroup.confirmDeleteItem('@item.Id', '@item.ItemName')"
+                                                title="Excluir">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="text-center py-4">
+                    <i class="fas fa-boxes fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">Nenhum item adicionado</h6>
+                    <p class="text-muted">Adicione itens para compor este grupo de produtos.</p>
+                    <button type="button" class="btn btn-primary" onclick="ProductGroup.showCreateItemModal('@ViewBag.ProductId')">
+                        <i class="fas fa-plus"></i> Adicionar Primeiro Item
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Load exchange rules info for each item
+    @if (Model?.Any() == true)
+    {
+        @foreach (var item in Model)
+        {
+            <text>
+            ProductGroup.loadExchangeRulesInfo('@item.Id');
+            </text>
+        }
+    }
+});
+</script> 

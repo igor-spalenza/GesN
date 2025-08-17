@@ -35,7 +35,41 @@ namespace GesN.Web.Controllers
             try
             {
                 var orders = await _orderService.GetActiveOrdersAsync();
-                return View(orders);
+                
+                // Converte as entidades para ViewModels
+                var orderViewModels = orders.Select(o => new OrderEntryViewModel
+                {
+                    Id = o.Id,
+                    NumberSequence = o.NumberSequence,
+                    CustomerId = o.CustomerId,
+                    CustomerName = o.Customer?.FullName,
+                    OrderDate = o.OrderDate,
+                    DeliveryDate = o.DeliveryDate ?? DateTime.Today.AddDays(1),
+                    Type = o.Type,
+                    Status = o.Status,
+                    PrintStatus = o.PrintStatus,
+                    Subtotal = o.Subtotal,
+                    DiscountAmount = o.DiscountAmount,
+                    TaxAmount = o.TaxAmount,
+                    TotalAmount = o.TotalAmount,
+                    Notes = o.Notes,
+                    CreatedAt = o.CreatedAt,
+                    LastModifiedAt = o.LastModifiedAt
+                }).ToList();
+
+                // Cria o ViewModel para a página Index
+                var indexViewModel = new OrderEntryIndexViewModel
+                {
+                    Orders = orderViewModels,
+                    Statistics = await _orderService.GetOrderStatisticsAsync(),
+                    Search = new OrderEntrySearchViewModel(),
+                    TotalOrders = orderViewModels.Count,
+                    CurrentPage = 1,
+                    PageSize = 50,
+                    TotalPages = 1
+                };
+
+                return View(indexViewModel);
             }
             catch (Exception ex)
             {
@@ -51,7 +85,7 @@ namespace GesN.Web.Controllers
             try
             {
                 var orders = await _orderService.GetActiveOrdersAsync();
-                var orderViewModels = orders.Select(o => new OrderViewModel
+                var orderViewModels = orders.Select(o => new OrderEntryViewModel
                 {
                     Id = o.Id,
                     NumberSequence = o.NumberSequence,
@@ -114,7 +148,7 @@ namespace GesN.Web.Controllers
                 if (order == null)
                     return NotFound();
 
-                var detailsViewModel = new OrderDetailsViewModel
+                var detailsViewModel = new OrderEntryDetailsViewModel
                 {
                     Id = order.Id,
                     NumberSequence = order.NumberSequence,
@@ -132,7 +166,7 @@ namespace GesN.Web.Controllers
                     Notes = order.Notes,
                     CreatedAt = order.CreatedAt,
                     LastModifiedAt = order.LastModifiedAt,
-                    Items = order.Items?.Select(i => new OrderItemViewModel
+                    Items = order.Items?.Select(i => new OrderEntryItemViewModel
                     {
                         Id = i.Id,
                         ProductId = i.ProductId,
@@ -142,7 +176,7 @@ namespace GesN.Web.Controllers
                         DiscountAmount = i.DiscountAmount,
                         TaxAmount = i.TaxAmount,
                         Notes = i.Notes
-                    }).ToList() ?? new List<OrderItemViewModel>()
+                    }).ToList() ?? new List<OrderEntryItemViewModel>()
                 };
 
                 return PartialView("_Details", detailsViewModel);
@@ -162,7 +196,7 @@ namespace GesN.Web.Controllers
         // POST: Order/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateOrderViewModel orderViewModel)
+        public async Task<IActionResult> Create(CreateOrderEntryViewModel orderViewModel)
         {
             try
             {
@@ -171,8 +205,11 @@ namespace GesN.Web.Controllers
                     return View(orderViewModel);
                 }
 
+                // Obter ID do usuário logado
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
+
                 // Cria o pedido
-                var orderId = await _orderService.CreateOrderAsync(orderViewModel);
+                var orderId = await _orderService.CreateOrderAsync(orderViewModel, userId);
                 TempData["SuccessMessage"] = "Pedido criado com sucesso!";
                 return RedirectToAction(nameof(Details), new { id = orderId });
             }
@@ -187,7 +224,7 @@ namespace GesN.Web.Controllers
         // POST: Order/SalvarNovo
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SalvarNovo([FromForm] CreateOrderViewModel orderViewModel)
+        public async Task<IActionResult> SalvarNovo([FromForm] CreateOrderEntryViewModel orderViewModel)
         {
             try
             {
@@ -213,8 +250,11 @@ namespace GesN.Web.Controllers
                         errors = errors 
                     });
                 }
+
+                // Obter ID do usuário logado
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
                 
-                var orderId = await _orderService.CreateOrderAsync(orderViewModel);
+                var orderId = await _orderService.CreateOrderAsync(orderViewModel, userId);
                 
                 // Busca o pedido criado para obter o NumberSequence
                 var createdOrder = await _orderService.GetOrderByIdAsync(orderId);
@@ -287,7 +327,7 @@ namespace GesN.Web.Controllers
                 if (order == null)
                     return NotFound();
 
-                var editViewModel = new EditOrderViewModel
+                var editViewModel = new EditOrderEntryViewModel
                 {
                     Id = order.Id,
                     NumberSequence = order.NumberSequence,
@@ -305,7 +345,7 @@ namespace GesN.Web.Controllers
                     Notes = order.Notes,
                     CreatedAt = order.CreatedAt,
                     LastModifiedAt = order.LastModifiedAt,
-                    Items = order.Items?.Select(i => new OrderItemViewModel
+                    Items = order.Items?.Select(i => new OrderEntryItemViewModel
                     {
                         Id = i.Id,
                         ProductId = i.ProductId,
@@ -315,7 +355,7 @@ namespace GesN.Web.Controllers
                         DiscountAmount = i.DiscountAmount,
                         TaxAmount = i.TaxAmount,
                         Notes = i.Notes
-                    }).ToList() ?? new List<OrderItemViewModel>()
+                    }).ToList() ?? new List<OrderEntryItemViewModel>()
                 };
 
                 return PartialView("_Edit", editViewModel);
@@ -362,7 +402,7 @@ namespace GesN.Web.Controllers
                 }
 
                 // Define dados de auditoria
-                order.LastModifiedBy = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                order.LastModifiedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
                 order.CreatedBy = existingOrder.CreatedBy;
                 order.CreatedAt = existingOrder.CreatedAt;
                 order.Status = existingOrder.Status;
@@ -449,7 +489,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Confirma o pedido
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Confirmed, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Confirmed, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao confirmar pedido. Por favor, tente novamente.";
@@ -483,7 +523,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Cancela o pedido
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Cancelled, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Cancelled, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao cancelar pedido. Por favor, tente novamente.";
@@ -517,7 +557,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Inicia produção
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.InProduction, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.InProduction, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao iniciar produção do pedido. Por favor, tente novamente.";
@@ -551,7 +591,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Marca para entrega
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.ReadyForDelivery, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.ReadyForDelivery, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao marcar pedido para entrega. Por favor, tente novamente.";
@@ -585,7 +625,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Inicia entrega
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.InDelivery, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.InDelivery, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao iniciar entrega do pedido. Por favor, tente novamente.";
@@ -619,7 +659,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Marca como entregue
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Delivered, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Delivered, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao marcar pedido como entregue. Por favor, tente novamente.";
@@ -653,7 +693,7 @@ namespace GesN.Web.Controllers
                     return NotFound();
 
                 // Marca como concluído
-                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Completed, User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var success = await _orderService.UpdateOrderStatusAsync(id, OrderStatus.Completed, User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema");
                 if (!success)
                 {
                     TempData["ErrorMessage"] = "Erro ao marcar pedido como concluído. Por favor, tente novamente.";

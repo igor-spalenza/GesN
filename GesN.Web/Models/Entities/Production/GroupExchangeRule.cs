@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations;
 namespace GesN.Web.Models.Entities.Production
 {
     /// <summary>
-    /// Entidade que representa regras de troca entre produtos em grupos
+    /// Entidade que representa regras de troca entre itens de grupos de produtos
     /// Tabela: ProductGroupExchangeRule
+    /// Nova modelagem: relaciona itens de grupo (ProductGroupItem) com pesos para trocas flexíveis
     /// </summary>
     public class ProductGroupExchangeRule : Entity
     {
@@ -17,18 +18,34 @@ namespace GesN.Web.Models.Entities.Production
         public string ProductGroupId { get; set; } = string.Empty;
 
         /// <summary>
-        /// ID do produto original (que será trocado)
+        /// ID do item de grupo origem (que será trocado)
         /// </summary>
-        [Required(ErrorMessage = "O produto original é obrigatório")]
-        [Display(Name = "Produto Original")]
-        public string OriginalProductId { get; set; } = string.Empty;
+        [Required(ErrorMessage = "O item de grupo origem é obrigatório")]
+        [Display(Name = "Item de Grupo Origem")]
+        public string SourceGroupItemId { get; set; } = string.Empty;
 
         /// <summary>
-        /// ID do produto de troca (ExchangeProductId na tabela)
+        /// Peso do item de grupo origem na troca
         /// </summary>
-        [Required(ErrorMessage = "O produto de troca é obrigatório")]
-        [Display(Name = "Produto de Troca")]
-        public string ExchangeProductId { get; set; } = string.Empty;
+        [Required(ErrorMessage = "O peso do item origem é obrigatório")]
+        [Display(Name = "Peso do Item Origem")]
+        [Range(1, int.MaxValue, ErrorMessage = "O peso deve ser maior que zero")]
+        public int SourceGroupItemWeight { get; set; } = 1;
+
+        /// <summary>
+        /// ID do item de grupo destino (que será recebido)
+        /// </summary>
+        [Required(ErrorMessage = "O item de grupo destino é obrigatório")]
+        [Display(Name = "Item de Grupo Destino")]
+        public string TargetGroupItemId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Peso do item de grupo destino na troca
+        /// </summary>
+        [Required(ErrorMessage = "O peso do item destino é obrigatório")]
+        [Display(Name = "Peso do Item Destino")]
+        [Range(1, int.MaxValue, ErrorMessage = "O peso deve ser maior que zero")]
+        public int TargetGroupItemWeight { get; set; } = 1;
 
         /// <summary>
         /// Proporção da troca (ExchangeRatio na tabela)
@@ -36,12 +53,6 @@ namespace GesN.Web.Models.Entities.Production
         [Display(Name = "Proporção de Troca")]
         [Range(0.001, double.MaxValue, ErrorMessage = "A proporção deve ser maior que zero")]
         public decimal ExchangeRatio { get; set; } = 1;
-
-        /// <summary>
-        /// Custo adicional da troca (AdditionalCost na tabela)
-        /// </summary>
-        [Display(Name = "Custo Adicional")]
-        public decimal AdditionalCost { get; set; } = 0;
 
         /// <summary>
         /// Indica se a regra está ativa
@@ -55,14 +66,14 @@ namespace GesN.Web.Models.Entities.Production
         public Product? ProductGroup { get; set; }
 
         /// <summary>
-        /// Propriedade navegacional para o produto original
+        /// Propriedade navegacional para o item de grupo origem
         /// </summary>
-        public Product? OriginalProduct { get; set; }
+        public ProductGroupItem? SourceGroupItem { get; set; }
 
         /// <summary>
-        /// Propriedade navegacional para o produto de troca
+        /// Propriedade navegacional para o item de grupo destino
         /// </summary>
-        public Product? ExchangeProduct { get; set; }
+        public ProductGroupItem? TargetGroupItem { get; set; }
 
         /// <summary>
         /// Construtor padrão
@@ -74,19 +85,34 @@ namespace GesN.Web.Models.Entities.Production
         /// <summary>
         /// Construtor com dados básicos
         /// </summary>
-        public ProductGroupExchangeRule(string productGroupId, string originalProductId, string exchangeProductId)
+        public ProductGroupExchangeRule(string productGroupId, string sourceGroupItemId, string targetGroupItemId)
         {
             ProductGroupId = productGroupId;
-            OriginalProductId = originalProductId;
-            ExchangeProductId = exchangeProductId;
+            SourceGroupItemId = sourceGroupItemId;
+            TargetGroupItemId = targetGroupItemId;
         }
 
         /// <summary>
-        /// Calcula o custo total da troca
+        /// Construtor com dados completos
         /// </summary>
-        public decimal CalculateExchangeCost()
+        public ProductGroupExchangeRule(string productGroupId, string sourceGroupItemId, int sourceWeight, string targetGroupItemId, int targetWeight, decimal exchangeRatio = 1)
         {
-            return AdditionalCost * ExchangeRatio;
+            ProductGroupId = productGroupId;
+            SourceGroupItemId = sourceGroupItemId;
+            SourceGroupItemWeight = sourceWeight;
+            TargetGroupItemId = targetGroupItemId;
+            TargetGroupItemWeight = targetWeight;
+            ExchangeRatio = exchangeRatio;
+        }
+
+        /// <summary>
+        /// Calcula a proporção efetiva da troca considerando os pesos
+        /// </summary>
+        public decimal CalculateEffectiveRatio()
+        {
+            if (TargetGroupItemWeight == 0) return 0;
+            
+            return ExchangeRatio * (decimal)SourceGroupItemWeight / TargetGroupItemWeight;
         }
 
         /// <summary>
@@ -97,38 +123,37 @@ namespace GesN.Web.Models.Entities.Production
             if (!IsActive)
                 return false;
 
-            // Verifica se o produto de troca está disponível
-            if (ExchangeProduct != null)
+            // Verifica se os itens de grupo estão disponíveis
+            if (SourceGroupItem?.Product != null && TargetGroupItem?.Product != null)
             {
-                return ExchangeProduct.IsActive;
+                return SourceGroupItem.Product.IsActive && TargetGroupItem.Product.IsActive;
             }
 
             return false;
         }
 
         /// <summary>
-        /// Obtém a descrição da proporção de troca
+        /// Obtém a descrição da proporção de troca incluindo pesos
         /// </summary>
         public string GetExchangeRatioDescription()
         {
-            if (ExchangeRatio == 1)
+            var effectiveRatio = CalculateEffectiveRatio();
+            
+            if (SourceGroupItemWeight == 1 && TargetGroupItemWeight == 1 && ExchangeRatio == 1)
                 return "1:1";
 
-            return $"1:{ExchangeRatio:N2}";
+            return $"{SourceGroupItemWeight}:{TargetGroupItemWeight} (Taxa {ExchangeRatio:N2})";
         }
 
         /// <summary>
-        /// Obtém informações sobre o custo adicional
+        /// Obtém informações sobre os pesos dos itens
         /// </summary>
-        public string GetAdditionalCostInfo()
+        public string GetWeightInfo()
         {
-            if (AdditionalCost == 0)
-                return "Sem custo adicional";
+            if (SourceGroupItemWeight == 1 && TargetGroupItemWeight == 1)
+                return "Pesos equilibrados";
 
-            if (AdditionalCost > 0)
-                return $"+R$ {AdditionalCost:N2}";
-
-            return $"-R$ {Math.Abs(AdditionalCost):N2}";
+            return $"Origem: {SourceGroupItemWeight} | Destino: {TargetGroupItemWeight}";
         }
 
         /// <summary>
@@ -140,7 +165,7 @@ namespace GesN.Web.Models.Entities.Production
                 return "❌ Inativa";
 
             if (!CanApplyExchange())
-                return "⚠️ Produto de troca indisponível";
+                return "⚠️ Itens de grupo indisponíveis";
 
             return "✅ Ativa e disponível";
         }
@@ -151,10 +176,40 @@ namespace GesN.Web.Models.Entities.Production
         public bool HasCompleteData()
         {
             return !string.IsNullOrWhiteSpace(ProductGroupId) &&
-                   !string.IsNullOrWhiteSpace(OriginalProductId) &&
-                   !string.IsNullOrWhiteSpace(ExchangeProductId) &&
+                   !string.IsNullOrWhiteSpace(SourceGroupItemId) &&
+                   !string.IsNullOrWhiteSpace(TargetGroupItemId) &&
+                   SourceGroupItemWeight > 0 &&
+                   TargetGroupItemWeight > 0 &&
                    ExchangeRatio > 0 &&
-                   OriginalProductId != ExchangeProductId;
+                   SourceGroupItemId != TargetGroupItemId;
+        }
+
+        /// <summary>
+        /// Obtém o nome do produto do item origem
+        /// </summary>
+        public string GetSourceProductName()
+        {
+            return SourceGroupItem?.Product?.Name ?? "Item não encontrado";
+        }
+
+        /// <summary>
+        /// Obtém o nome do produto do item destino
+        /// </summary>
+        public string GetTargetProductName()
+        {
+            return TargetGroupItem?.Product?.Name ?? "Item não encontrado";
+        }
+
+        /// <summary>
+        /// Obtém a descrição completa da regra de troca
+        /// </summary>
+        public string GetCompleteDescription()
+        {
+            var sourceName = GetSourceProductName();
+            var targetName = GetTargetProductName();
+            var ratio = GetExchangeRatioDescription();
+            
+            return $"{sourceName} → {targetName} ({ratio})";
         }
 
         /// <summary>
@@ -163,8 +218,8 @@ namespace GesN.Web.Models.Entities.Production
         public override string ToString()
         {
             var ratio = GetExchangeRatioDescription();
-            var costInfo = GetAdditionalCostInfo();
-            return $"Troca ({ratio}) - {costInfo}";
+            var weightInfo = GetWeightInfo();
+            return $"Troca ({ratio}) - {weightInfo}";
         }
     }
 } 

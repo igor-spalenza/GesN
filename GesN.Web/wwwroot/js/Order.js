@@ -81,33 +81,37 @@ const ordersManager = {
         $.get('/Order/CreatePartial')
             .done(function (data) {
                 $('#orderModal .modal-body').html(data);
-                ordersManager.inicializarAutocomplete($('#orderModal'));
+                ordersManager.inicializarAutocompleteCustomer($('#orderModal'));
+                ordersManager.inicializarFloatingLabels($('#orderModal'));
             })
             .fail(function () {
                 $('#orderModal .modal-body').html('<div class="alert alert-danger">Erro ao carregar formulário</div>');
             });
     },
 
-    inicializarAutocomplete: function (container) {
-        const field = container.find('#buscarCustomer');
-
-        if (field.length === 0) {
+    // ✅ MÉTODO REFATORADO: Autocomplete Customer seguindo padrão da referência
+    inicializarAutocompleteCustomer: function(container) {
+        const customerNameField = container.find('#CustomerName');
+        const customerIdField = container.find('#CustomerId');
+        
+        // ✅ VALIDAÇÃO: Verificar existência dos campos
+        if (customerNameField.length === 0) {
             return;
         }
 
-        // Remove instância anterior se houver
-        if (field.data('aaAutocomplete')) {
-            field.autocomplete.destroy();
+        // ✅ CLEANUP: Remove instância anterior se houver
+        if (customerNameField.data('aaAutocomplete')) {
+            customerNameField.autocomplete.destroy();
         }
 
-        // Inicializa Algolia Autocomplete.js
-        const autocompleteInstance = autocomplete(field[0], {
+        // ✅ ALGOLIA CONFIG: Configuração padrão
+        const autocompleteInstance = autocomplete(customerNameField[0], {
             hint: false,
             debug: false,
             minLength: 2,
             openOnFocus: false,
             autoselect: true,
-            appendTo: container[0] // Anexa ao container do modal
+            appendTo: container[0] // ✅ CRUCIAL: Container correto
         }, [{
             source: function(query, callback) {
                 $.ajax({
@@ -120,7 +124,10 @@ const ordersManager = {
                             return {
                                 label: item.label,
                                 value: item.value,
-                                id: item.id
+                                id: item.id,
+                                phone: item.phone || '',
+                                email: item.email || '',
+                                data: item
                             };
                         });
                         callback(suggestions);
@@ -130,27 +137,92 @@ const ordersManager = {
                     }
                 });
             },
-            displayKey: 'value',
+            displayKey: 'label',
             templates: {
                 suggestion: function(suggestion) {
-                    return '<div class="autocomplete-suggestion">' + suggestion.label + '</div>';
+                    return '<div class="autocomplete-suggestion">' +
+                           '<div class="suggestion-title">' + (suggestion.data.value || suggestion.value) + '</div>' +
+                           (suggestion.data.phone ? '<div class="suggestion-subtitle">' + suggestion.data.phone + '</div>' : '') +
+                           '</div>';
                 }
             }
         }]);
 
-        // Eventos
+        // ✅ EVENT HANDLERS: Seleção
         autocompleteInstance.on('autocomplete:selected', function(event, suggestion, dataset) {
-            container.find('#CustomerId').val(suggestion.id);
-            field.val(suggestion.value);
+            customerIdField.val(suggestion.id);
+            customerNameField.val(suggestion.value);
+            
+            // ✅ UI UPDATES: Atualizar floating label
+            const $container = customerNameField.closest('.floating-input-group');
+            if ($container.length) {
+                $container.addClass('has-value');
+            }
+            
+            // Trigger change para validação
+            customerIdField.trigger('change');
         });
 
-        autocompleteInstance.on('autocomplete:empty', function() {
-            container.find('#CustomerId').val('');
+        // ✅ VALIDATION: Limpar seleção se campo ficar vazio
+        customerNameField.on('blur', function() {
+            if ($(this).val() === '') {
+                customerIdField.val('');
+                const $container = $(this).closest('.floating-input-group');
+                if ($container.length) {
+                    $container.removeClass('has-value');
+                }
+                customerIdField.trigger('change');
+            }
         });
 
-        // Adiciona placeholder e estilos
-        field.attr('placeholder', 'Digite para buscar cliente...');
-        field.addClass('form-control');
+        // ✅ INTEGRATION: Se já tem valor, marcar container como preenchido
+        if (customerNameField.val()) {
+            const $container = customerNameField.closest('.floating-input-group');
+            if ($container.length) {
+                $container.addClass('has-value');
+            }
+        }
+
+        // ✅ FLOATING LABEL: Inicializar comportamento das floating labels
+        this.inicializarFloatingLabels(container);
+    },
+
+    // ✅ FLOATING LABELS: Inicializar comportamento
+    inicializarFloatingLabels: function(container) {
+        container.find('.floating-input, .autocomplete-input').each(function() {
+            const $input = $(this);
+            const $container = $input.closest('.floating-input-group');
+            
+            // Marcar como preenchido se já tem valor
+            if ($input.val() && $input.val().trim() !== '') {
+                $input.addClass('has-value');
+                $container.addClass('has-value');
+            }
+
+            // Event listeners para controlar a classe has-value
+            $input.on('input blur', function() {
+                if ($(this).val() && $(this).val().trim() !== '') {
+                    $(this).addClass('has-value');
+                    $container.addClass('has-value');
+                } else {
+                    $(this).removeClass('has-value');  
+                    $container.removeClass('has-value');
+                }
+            });
+
+            $input.on('focus', function() {
+                $container.addClass('focused');
+            });
+
+            $input.on('blur', function() {
+                $container.removeClass('focused');
+            });
+        });
+    },
+
+    // ✅ COMPATIBILIDADE: Alias para manter compatibilidade com código existente
+    inicializarAutocomplete: function(container) {
+        return this.inicializarAutocompleteCustomer(container);
     },
 
     salvarNovoModal: function () {
@@ -527,7 +599,7 @@ const ordersManager = {
     }
 };
 
-$(document).ready(function() {
+$(function() {
     ordersManager.carregarListaOrders();
 
     $('#orderModal').on('hidden.bs.modal', function () {

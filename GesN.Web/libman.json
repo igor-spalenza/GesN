@@ -16,7 +16,7 @@
       "files": [
         "js/select2.min.js",
         "css/select2.min.css",
-        "js/i18n/pt-BR.min.js"
+        "js/i18n/pt-br.min.js"
       ]
     },
     {

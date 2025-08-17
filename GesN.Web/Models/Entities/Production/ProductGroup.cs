@@ -14,10 +14,7 @@ namespace GesN.Web.Models.Entities.Production
         /// </summary>
         public ICollection<ProductGroupItem> GroupItems { get; set; } = new List<ProductGroupItem>();
 
-        /// <summary>
-        /// Lista de opções de configuração do grupo (relacionamento 1:N com ProductGroupOption)
-        /// </summary>
-        public ICollection<ProductGroupOption> GroupOptions { get; set; } = new List<ProductGroupOption>();
+
 
         /// <summary>
         /// Lista de regras de troca do grupo (relacionamento 1:N com ProductGroupExchangeRule)

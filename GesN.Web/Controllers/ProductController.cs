@@ -20,6 +20,7 @@ namespace GesN.Web.Controllers
         private readonly IProductComponentService _productComponentService;
         private readonly IProductGroupService _productGroupService;
         private readonly IProductionOrderService _productionOrderService;
+        private readonly ICompositeProductXHierarchyService _compositeProductXHierarchyService;
         private readonly ILogger<ProductController> _logger;
 
         public ProductController(
@@ -31,6 +32,7 @@ namespace GesN.Web.Controllers
             IProductComponentService productComponentService,
             IProductGroupService productGroupService,
             IProductionOrderService productionOrderService,
+            ICompositeProductXHierarchyService compositeProductXHierarchyService,
             ILogger<ProductController> logger)
         {
             _productCategoryService = productCategoryService;
@@ -41,6 +43,7 @@ namespace GesN.Web.Controllers
             _productComponentService = productComponentService;
             _productGroupService = productGroupService;
             _productionOrderService = productionOrderService;
+            _compositeProductXHierarchyService = compositeProductXHierarchyService;
             _logger = logger;
         }
 
@@ -156,11 +159,19 @@ namespace GesN.Web.Controllers
                 _logger.LogInformation("Produto encontrado: {ProductName}, Tipo: {ProductType}", product.Name, product.ProductType);
 
                 _logger.LogInformation("Carregando dropdowns...");
-                await PopulateDropdownsAsync();
+                var availableCategories = await GetCategoriesSelectListAsync();
                 _logger.LogInformation("Dropdowns carregados com sucesso");
 
-                _logger.LogInformation("Criando ViewModel...");
-                var viewModel = new EditProductViewModel
+                // Buscar o nome da categoria se CategoryId não for nulo
+                string? categoryName = product.Category; // Usar o valor já salvo no produto
+                if (!string.IsNullOrWhiteSpace(product.CategoryId) && string.IsNullOrWhiteSpace(categoryName))
+                {
+                    var category = await _productCategoryService.GetCategoryByIdAsync(product.CategoryId);
+                    categoryName = category?.Name;
+                }
+
+                _logger.LogInformation("Criando ViewModel expandido...");
+                var viewModel = new EditProductWithGroupsViewModel
                 {
                     Id = product.Id,
                     SKU = product.SKU,
@@ -168,6 +179,7 @@ namespace GesN.Web.Controllers
                     Description = product.Description,
                     ProductType = product.ProductType,
                     CategoryId = product.CategoryId,
+                    Category = categoryName,
                     Price = product.Price,
                     QuantityPrice = product.QuantityPrice,
                     UnitPrice = product.UnitPrice,
@@ -179,10 +191,171 @@ namespace GesN.Web.Controllers
                     StateCode = (int)product.StateCode,
                     CreatedAt = product.CreatedAt,
                     ModifiedAt = product.LastModifiedAt,
-                    AvailableCategories = new List<CategorySelectionViewModel>()
+                    AvailableCategories = availableCategories
                 };
+
+                // Se for um produto do tipo Group, carregar dados dos ProductGroups
+                if (product.ProductType == ProductType.Group)
+                {
+                    _logger.LogInformation("Carregando dados de ProductGroup para produto: {ProductId}", id);
+
+                    // Carregar GroupItems com dados de produtos e categorias
+                    var groupItems = await _productGroupService.GetGroupItemsWithProductDataAsync(id);
+                    foreach (var item in groupItems)
+                    {
+                        string? productName = null;
+                        string? productCategoryName = null;
+
+                        // Determinar se é produto ou categoria e popular os nomes
+                        if (!string.IsNullOrWhiteSpace(item.ProductId) && item.Product != null)
+                        {
+                            productName = item.Product.Name;
+                        }
+                        else if (!string.IsNullOrWhiteSpace(item.ProductCategoryId) && item.ProductCategory != null)
+                        {
+                            productCategoryName = item.ProductCategory.Name;
+                        }
+
+                        viewModel.GroupItems.Add(new ProductGroupItemViewModel
+                        {
+                            Id = item.Id,
+                            ProductGroupId = item.ProductGroupId,
+                            ProductId = item.ProductId,
+                            ProductName = productName,
+                            ProductCategoryId = item.ProductCategoryId,
+                            ProductCategoryName = productCategoryName,
+                            Quantity = item.Quantity,
+                            MinQuantity = item.MinQuantity,
+                            MaxQuantity = item.MaxQuantity,
+                            DefaultQuantity = item.DefaultQuantity,
+                            IsOptional = item.IsOptional,
+                            ExtraPrice = item.ExtraPrice,
+                            CreatedAt = item.CreatedAt,
+                            ModifiedAt = item.LastModifiedAt
+                        });
+                    }
+
+
+
+                    // Carregar ExchangeRules
+                    var exchangeRules = await _productGroupService.GetExchangeRulesAsync(id);
+                    foreach (var rule in exchangeRules)
+                    {
+                        // ✅ CORREÇÃO: Buscar itens com dados carregados (Product ou ProductCategory)
+                        var sourceItem = await _productGroupService.GetGroupItemWithDataByIdAsync(rule.SourceGroupItemId);
+                        var targetItem = await _productGroupService.GetGroupItemWithDataByIdAsync(rule.TargetGroupItemId);
+                        
+                        var sourceItemName = _productGroupService.GetGroupItemDisplayName(sourceItem);
+                        var targetItemName = _productGroupService.GetGroupItemDisplayName(targetItem);
+                        
+                        viewModel.ExchangeRules.Add(new ProductGroupExchangeRuleViewModel
+                        {
+                            Id = rule.Id,
+                            ProductGroupId = rule.ProductGroupId,
+                            SourceGroupItemId = rule.SourceGroupItemId,
+                            SourceGroupItemName = sourceItemName,
+                            SourceGroupItemWeight = rule.SourceGroupItemWeight,
+                            TargetGroupItemId = rule.TargetGroupItemId,
+                            TargetGroupItemName = targetItemName,
+                            TargetGroupItemWeight = rule.TargetGroupItemWeight,
+                            ExchangeRatio = rule.ExchangeRatio,
+                            IsActive = rule.IsActive,
+                            CreatedAt = rule.CreatedAt,
+                            ModifiedAt = rule.LastModifiedAt
+                        });
+                    }
+
+                                        _logger.LogInformation("Dados de ProductGroup carregados: {GroupItems} itens, {ExchangeRules} regras",
+                        viewModel.GroupItems.Count, viewModel.ExchangeRules.Count);
+                }
+
+                // Se for um produto do tipo Composite, carregar componentes e hierarquias
+                if (product.ProductType == ProductType.Composite)
+                {
+                    _logger.LogInformation("Carregando componentes para produto composto: {ProductId}", id);
+                    
+                    // Carregar componentes via hierarquias (nova estrutura)
+                    try
+                    {
+                        // Buscar todos os componentes - na nova estrutura não há relacionamento direto com produtos
+                        var components = await _productComponentService.GetAllAsync();
+                        
+                        // Criar ProductComponentIndexViewModel para a view
+                        var componentViewModels = components?.Select(c => c.ToViewModel()).ToList() ?? new List<ProductComponentViewModel>();
+
+                        // Criar o ViewModel de índice de componentes
+                        var componentIndexViewModel = new ProductComponentIndexViewModel
+                        {
+                            Components = componentViewModels,
+                            Statistics = new ProductComponentStatisticsViewModel
+                            {
+                                TotalComponents = componentViewModels.Count
+                            }
+                        };
+
+                        viewModel.ComponentIndexViewModel = componentIndexViewModel;
+                        
+                        _logger.LogInformation("Componentes carregados: {ComponentsCount} componentes", componentViewModels.Count);
+                    }
+                    catch (Exception componentEx)
+                    {
+                        _logger.LogError(componentEx, "Erro ao carregar componentes para produto: {ProductId}. Erro: {Error}", id, componentEx.Message);
+                        
+                        // Criar ViewModel vazio em caso de erro
+                        viewModel.ComponentIndexViewModel = new ProductComponentIndexViewModel
+                        {
+                            Components = new List<ProductComponentViewModel>(),
+                            Statistics = new ProductComponentStatisticsViewModel()
+                        };
+                        
+                        _logger.LogInformation("Componentes inicializados com ViewModel vazio devido ao erro");
+                    }
+
+                    // Carregar hierarquias associadas ao produto composto
+                    _logger.LogInformation("Carregando hierarquias para produto composto: {ProductId}", id);
+                    
+                    try
+                    {
+                        var compositeRelations = await _compositeProductXHierarchyService.GetActiveProductHierarchiesAsync(id);
+                        var relationViewModels = compositeRelations.ToList(); // Converter para List
+                        
+                        // Garantir que o nome do produto esteja preenchido em cada relação
+                        foreach (var relation in relationViewModels)
+                        {
+                            relation.ProductName = product.Name;
+                        }
+                        
+                        // Ordenar por ordem de montagem e depois por nome da hierarquia
+                        viewModel.CompositeProductXHierarchies = relationViewModels.OrderBy(r => r.AssemblyOrder).ThenBy(r => r.HierarchyName).ToList();
+                        
+                        _logger.LogInformation("Hierarquias carregadas: {HierarchiesCount} hierarquias", viewModel.CompositeProductXHierarchies.Count);
+                    }
+                    catch (Exception hierarchyEx)
+                    {
+                        _logger.LogError(hierarchyEx, "Erro ao carregar hierarquias para produto: {ProductId}. Erro: {Error}", id, hierarchyEx.Message);
+                        
+                        // Criar lista vazia em caso de erro
+                        viewModel.CompositeProductXHierarchies = new List<CompositeProductXHierarchyViewModel>();
+                        
+                        _logger.LogInformation("Hierarquias inicializadas com lista vazia devido ao erro");
+                    }
+                }
+
+                // Marcar a categoria atual como selecionada
+                if (!string.IsNullOrWhiteSpace(product.CategoryId))
+                {
+                    var selectedCategory = viewModel.AvailableCategories.FirstOrDefault(c => c.Value == product.CategoryId);
+                    if (selectedCategory != null)
+                    {
+                        selectedCategory.IsSelected = true;
+                    }
+                }
                 
-                _logger.LogInformation("ViewModel criado com sucesso. Retornando PartialView");
+                _logger.LogInformation("ViewModel expandido criado com sucesso. Retornando PartialView");
+                
+                // Passar ProductId para ViewBag (necessário para ProductGroup tabs)
+                ViewBag.ProductId = product.Id;
+                
                 return PartialView("_Edit", viewModel);
             }
             catch (Exception ex)
@@ -315,6 +488,14 @@ namespace GesN.Web.Controllers
 
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Sistema";
                 
+                // Buscar o nome da categoria se CategoryId foi fornecido
+                string? categoryName = null;
+                if (!string.IsNullOrWhiteSpace(viewModel.CategoryId))
+                {
+                    var category = await _productCategoryService.GetCategoryByIdAsync(viewModel.CategoryId);
+                    categoryName = category?.Name;
+                }
+                
                 // Criar o produto baseado no tipo
                 Product product = viewModel.ProductType switch
                 {
@@ -324,6 +505,7 @@ namespace GesN.Web.Controllers
                         Name = viewModel.Name,
                         Description = viewModel.Description,
                         CategoryId = viewModel.CategoryId,
+                        Category = categoryName,
                         Price = viewModel.Price,
                         QuantityPrice = viewModel.QuantityPrice,
                         UnitPrice = viewModel.UnitPrice,
@@ -344,6 +526,7 @@ namespace GesN.Web.Controllers
                         Name = viewModel.Name,
                         Description = viewModel.Description,
                         CategoryId = viewModel.CategoryId,
+                        Category = categoryName,
                         Price = viewModel.Price,
                         QuantityPrice = viewModel.QuantityPrice,
                         UnitPrice = viewModel.UnitPrice,
@@ -364,6 +547,7 @@ namespace GesN.Web.Controllers
                         Name = viewModel.Name,
                         Description = viewModel.Description,
                         CategoryId = viewModel.CategoryId,
+                        Category = categoryName,
                         Price = viewModel.Price,
                         QuantityPrice = viewModel.QuantityPrice,
                         UnitPrice = viewModel.UnitPrice,
@@ -381,14 +565,14 @@ namespace GesN.Web.Controllers
                     _ => throw new ArgumentException("Tipo de produto inválido")
                 };
 
-                var productId = await _productService.CreateAsync(product);
+                var newProduct = await _productService.CreateAsync(product);
 
                 return Json(new { 
                     success = true, 
                     message = "Produto criado com sucesso!", 
-                    productId = productId,
+                    productId = newProduct.Id,
                     productType = (int)viewModel.ProductType,
-                    redirectUrl = Url.Action("FormularioEdicao", new { id = productId })
+                    redirectUrl = Url.Action("FormularioEdicao", new { id = newProduct.Id })
                 });
             }
             catch (InvalidOperationException ex)
@@ -428,11 +612,20 @@ namespace GesN.Web.Controllers
                     return Json(new { success = false, message = "Produto não encontrado" });
                 }
 
+                // Buscar o nome da categoria se CategoryId foi fornecido
+                string? categoryName = null;
+                if (!string.IsNullOrWhiteSpace(viewModel.CategoryId))
+                {
+                    var category = await _productCategoryService.GetCategoryByIdAsync(viewModel.CategoryId);
+                    categoryName = category?.Name;
+                }
+
                 // Atualizar propriedades
                 existingProduct.SKU = viewModel.SKU;
                 existingProduct.Name = viewModel.Name;
                 existingProduct.Description = viewModel.Description;
                 existingProduct.CategoryId = viewModel.CategoryId;
+                existingProduct.Category = categoryName;
                 existingProduct.Price = viewModel.Price;
                 existingProduct.QuantityPrice = viewModel.QuantityPrice;
                 existingProduct.UnitPrice = viewModel.UnitPrice;
@@ -607,7 +800,7 @@ namespace GesN.Web.Controllers
 
         // GET: Product/_Grid
         [HttpGet]
-        public async Task<IActionResult> _Grid(string? searchTerm = null, bool showInactive = false, ProductType? productType = null, string? categoryId = null, string? supplierId = null, bool showLowStock = false, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> _Grid(string? searchTerm = null, bool showInactive = false, ProductType? productType = null, string? categoryId = null, string? supplierId = null, bool showLowStock = false)
         {
             try
             {
@@ -637,24 +830,38 @@ namespace GesN.Web.Controllers
                     products = products.Where(p => p.CategoryId == categoryId);
                 }
 
-                // Paginação
-                var totalItems = products.Count();
-                var pagedProducts = products
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
+                // Retornar todos os produtos filtrados (sem paginação server-side)
+                var allProducts = products.ToList();
 
-                ViewBag.CurrentPage = page;
-                ViewBag.PageSize = pageSize;
-                ViewBag.TotalItems = totalItems;
-                ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+                // Converter entidades para ViewModels
+                var productViewModels = allProducts.Select(p => new ProductViewModel
+                {
+                    Id = p.Id,
+                    SKU = p.SKU,
+                    Name = p.Name,
+                    Description = p.Description,
+                    ProductType = p.ProductType,
+                    CategoryId = p.CategoryId,
+                    CategoryName = p.Category,
+                    Price = p.Price,
+                    QuantityPrice = p.QuantityPrice,
+                    UnitPrice = p.UnitPrice,
+                    Cost = p.Cost,
+                    ImageUrl = p.ImageUrl,
+                    Note = p.Note,
+                    AssemblyTime = p.AssemblyTime,
+                    AssemblyInstructions = p.AssemblyInstructions,
+                    StateCode = (int)p.StateCode,
+                    CreatedAt = p.CreatedAt,
+                    ModifiedAt = p.LastModifiedAt
+                }).ToList();
 
-                return PartialView("_Grid", pagedProducts);
+                return PartialView("_Grid", productViewModels);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao carregar grid de produtos");
-                return PartialView("_Grid", new List<Product>());
+                return PartialView("_Grid", new List<ProductViewModel>());
             }
         }
 
@@ -873,6 +1080,37 @@ namespace GesN.Web.Controllers
             }
         }
 
+        // GET: Product/GetProductCost/5
+        [HttpGet]
+        public async Task<IActionResult> GetProductCost(string id)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    return Json(new { success = false, message = "ID do produto é obrigatório" });
+                }
+
+                var product = await _productService.GetByIdAsync(id);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = "Produto não encontrado" });
+                }
+
+                return Json(new { 
+                    success = true,
+                    cost = product.Cost,
+                    name = product.Name,
+                    sku = product.SKU
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter custo do produto: {ProductId}", id);
+                return Json(new { success = false, message = "Erro ao obter custo do produto" });
+            }
+        }
+
         #endregion
 
         #region Private Methods
@@ -901,17 +1139,13 @@ namespace GesN.Web.Controllers
         {
             try
             {
-                // TODO: Implementar quando IProductCategoryService.GetAllAsync() estiver disponível
-                // var categories = await _productCategoryService.GetAllAsync();
-                // return categories.Select(c => new CategorySelectionViewModel
-                // {
-                //     Value = c.Id,
-                //     Text = c.Name,
-                //     IsSelected = false
-                // }).ToList();
-                
-                await Task.CompletedTask;
-                return new List<CategorySelectionViewModel>();
+                var categories = await _productCategoryService.GetAllCategoriesAsync();
+                return categories.Select(c => new CategorySelectionViewModel
+                {
+                    Value = c.Id,
+                    Text = c.Name,
+                    IsSelected = false
+                }).ToList();
             }
             catch (Exception ex)
             {
@@ -932,5 +1166,6 @@ namespace GesN.Web.Controllers
         }
 
         #endregion
+
     }
 } 

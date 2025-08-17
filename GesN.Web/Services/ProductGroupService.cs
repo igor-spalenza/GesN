@@ -10,21 +10,21 @@ namespace GesN.Web.Services
     {
         private readonly IProductRepository _productRepository;
         private readonly IProductGroupItemRepository _groupItemRepository;
-        private readonly IProductGroupOptionRepository _groupOptionRepository;
         private readonly IProductGroupExchangeRuleRepository _exchangeRuleRepository;
+        private readonly IProductCategoryRepository _productCategoryRepository;
         private readonly ILogger<ProductGroupService> _logger;
 
         public ProductGroupService(
             IProductRepository productRepository,
             IProductGroupItemRepository groupItemRepository,
-            IProductGroupOptionRepository groupOptionRepository,
             IProductGroupExchangeRuleRepository exchangeRuleRepository,
+            IProductCategoryRepository productCategoryRepository,
             ILogger<ProductGroupService> logger)
         {
             _productRepository = productRepository;
             _groupItemRepository = groupItemRepository;
-            _groupOptionRepository = groupOptionRepository;
             _exchangeRuleRepository = exchangeRuleRepository;
+            _productCategoryRepository = productCategoryRepository;
             _logger = logger;
         }
 
@@ -107,11 +107,7 @@ namespace GesN.Web.Services
             if (!await HasValidItemsAsync(productGroup.Id))
                 return false;
 
-            // Verificar se todas as opções obrigatórias estão configuradas
-            var requiredOptions = await _groupOptionRepository.GetRequiredByGroupAsync(productGroup.Id);
-            if (requiredOptions.Any() && !await HasRequiredOptionsAsync(productGroup.Id))
-                return false;
-
+            // ProductGroupOption was removed from system - no option validation needed
             return true;
         }
 
@@ -121,11 +117,7 @@ namespace GesN.Web.Services
             return items.Any();
         }
 
-        public async Task<bool> HasRequiredOptionsAsync(string productGroupId)
-        {
-            var requiredOptions = await _groupOptionRepository.GetRequiredByGroupAsync(productGroupId);
-            return requiredOptions.Any();
-        }
+        // HasRequiredOptionsAsync method removed - ProductGroupOption was removed from system
 
         // Cálculos
         public async Task<decimal> CalculateBasePriceAsync(string productGroupId)
@@ -236,6 +228,99 @@ namespace GesN.Web.Services
             return await _groupItemRepository.GetByProductGroupIdAsync(productGroupId);
         }
 
+        // Método para buscar itens do grupo com dados do produto/categoria carregados
+        public async Task<IEnumerable<ProductGroupItem>> GetGroupItemsWithProductDataAsync(string productGroupId)
+        {
+            var groupItems = await _groupItemRepository.GetByProductGroupIdAsync(productGroupId);
+            
+            // Carregar dados do produto ou categoria para cada item
+            var itemsWithData = new List<ProductGroupItem>();
+            foreach (var item in groupItems)
+            {
+                // Carregar produto se tiver ProductId
+                if (!string.IsNullOrWhiteSpace(item.ProductId))
+                {
+                    var product = await _productRepository.GetByIdAsync(item.ProductId);
+                    if (product != null)
+                    {
+                        item.Product = product;
+                        itemsWithData.Add(item);
+                    }
+                }
+                // Carregar categoria se tiver ProductCategoryId
+                else if (!string.IsNullOrWhiteSpace(item.ProductCategoryId))
+                {
+                    var category = await _productCategoryRepository.GetByIdAsync(item.ProductCategoryId);
+                    if (category != null)
+                    {
+                        item.ProductCategory = category;
+                        itemsWithData.Add(item);
+                    }
+                }
+                // Se não tem nem produto nem categoria, adicionar mesmo assim mas sem dados extras
+                else
+                {
+                    itemsWithData.Add(item);
+                }
+            }
+            
+            return itemsWithData;
+        }
+
+        public async Task<ProductGroupItem?> GetGroupItemByIdAsync(string itemId)
+        {
+            return await _groupItemRepository.GetByIdAsync(itemId);
+        }
+
+        /// <summary>
+        /// Busca um ProductGroupItem pelo ID e carrega seus dados relacionados (Product ou ProductCategory)
+        /// </summary>
+        public async Task<ProductGroupItem?> GetGroupItemWithDataByIdAsync(string itemId)
+        {
+            var item = await _groupItemRepository.GetByIdAsync(itemId);
+            if (item == null) return null;
+
+            // Carregar produto se tiver ProductId
+            if (!string.IsNullOrWhiteSpace(item.ProductId))
+            {
+                var product = await _productRepository.GetByIdAsync(item.ProductId);
+                if (product != null)
+                {
+                    item.Product = product;
+                }
+            }
+            // Carregar categoria se tiver ProductCategoryId
+            else if (!string.IsNullOrWhiteSpace(item.ProductCategoryId))
+            {
+                var category = await _productCategoryRepository.GetByIdAsync(item.ProductCategoryId);
+                if (category != null)
+                {
+                    item.ProductCategory = category;
+                }
+            }
+
+            return item;
+        }
+
+        /// <summary>
+        /// Obtém o nome de exibição de um ProductGroupItem (Product ou ProductCategory)
+        /// </summary>
+        public string GetGroupItemDisplayName(ProductGroupItem? item)
+        {
+            if (item?.Product != null)
+            {
+                return item.Product.Name + (string.IsNullOrWhiteSpace(item.Product.SKU) ? "" : $" - {item.Product.SKU}");
+            }
+            else if (item?.ProductCategory != null)
+            {
+                return item.ProductCategory.Name + " (Categoria)";
+            }
+            else
+            {
+                return "Item não identificado";
+            }
+        }
+
         public async Task<bool> AddGroupItemAsync(ProductGroupItem item)
         {
             try
@@ -276,56 +361,17 @@ namespace GesN.Web.Services
             }
         }
 
-        // Gerenciamento de opções do grupo
-        public async Task<IEnumerable<ProductGroupOption>> GetGroupOptionsAsync(string productGroupId)
-        {
-            return await _groupOptionRepository.GetByProductGroupIdAsync(productGroupId);
-        }
 
-        public async Task<bool> AddGroupOptionAsync(ProductGroupOption option)
-        {
-            try
-            {
-                var optionId = await _groupOptionRepository.CreateAsync(option);
-                return !string.IsNullOrEmpty(optionId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao adicionar opção ao grupo");
-                return false;
-            }
-        }
-
-        public async Task<bool> UpdateGroupOptionAsync(ProductGroupOption option)
-        {
-            try
-            {
-                return await _groupOptionRepository.UpdateAsync(option);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao atualizar opção do grupo: {OptionId}", option.Id);
-                return false;
-            }
-        }
-
-        public async Task<bool> RemoveGroupOptionAsync(string optionId)
-        {
-            try
-            {
-                return await _groupOptionRepository.DeleteAsync(optionId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao remover opção do grupo: {OptionId}", optionId);
-                return false;
-            }
-        }
 
         // Gerenciamento de regras de troca
         public async Task<IEnumerable<ProductGroupExchangeRule>> GetExchangeRulesAsync(string productGroupId)
         {
             return await _exchangeRuleRepository.GetByProductGroupIdAsync(productGroupId);
+        }
+
+        public async Task<ProductGroupExchangeRule?> GetExchangeRuleByIdAsync(string ruleId)
+        {
+            return await _exchangeRuleRepository.GetByIdAsync(ruleId);
         }
 
         public async Task<bool> AddExchangeRuleAsync(ProductGroupExchangeRule rule)

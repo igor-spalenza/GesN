@@ -1,4 +1,4 @@
-@model IEnumerable<GesN.Web.Models.Entities.Sales.OrderEntry>
+@model GesN.Web.Models.ViewModels.Sales.OrderEntryIndexViewModel
 @using GesN.Web.Models.Enumerators
 <div class="table-responsive">
     <table class="table table-striped table-hover">
@@ -14,13 +14,13 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var item in Model.Orders)
             {
                 <tr>
                     <td>@item.NumberSequence</td>
-                    <td>@item.Customer?.FullName</td>
+                    <td>@item.CustomerName</td>
                     <td>@item.OrderDate.ToString("dd/MM/yyyy")</td>
-                    <td>@(item.DeliveryDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                    <td>@item.DeliveryDate.ToString("dd/MM/yyyy")</td>
                     <td>@item.TotalAmount.ToString("C")</td>
                     <td>@item.Status</td>
                     <td>

@@ -3,6 +3,7 @@ using GesN.Web.Interfaces.Services;
 using GesN.Web.Models.Entities.Production;
 using Microsoft.AspNetCore.Authorization;
 using GesN.Web.Models.Enumerators;
+using GesN.Web.Models.ViewModels.Production;
 
 namespace GesN.Web.Controllers
 {
@@ -10,21 +11,41 @@ namespace GesN.Web.Controllers
     public class ProductComponentController : Controller
     {
         private readonly IProductComponentService _productComponentService;
+        private readonly IProductComponentHierarchyService _productComponentHierarchyService;
         private readonly IProductService _productService;
+        private readonly ILogger<ProductComponentController> _logger;
 
         public ProductComponentController(
             IProductComponentService productComponentService,
-            IProductService productService)
+            IProductComponentHierarchyService productComponentHierarchyService,
+            IProductService productService,
+            ILogger<ProductComponentController> logger)
         {
             _productComponentService = productComponentService;
+            _productComponentHierarchyService = productComponentHierarchyService;
             _productService = productService;
+            _logger = logger;
         }
 
         // GET: ProductComponent
         public async Task<IActionResult> Index()
         {
             var components = await _productComponentService.GetAllAsync();
-            return View(components);
+            
+            var viewModel = new ProductComponentIndexViewModel
+            {
+                Components = components.Select(c => c.ToViewModel()).ToList(),
+                Statistics = new ProductComponentStatisticsViewModel
+                {
+                    TotalComponents = components.Count(),
+                    ActiveComponents = components.Count(c => c.StateCode == ObjectState.Active),
+                    InactiveComponents = components.Count(c => c.StateCode == ObjectState.Inactive),
+                    TotalAdditionalCosts = components.Sum(c => c.AdditionalCost),
+                    AverageAdditionalCost = components.Any() ? components.Average(c => c.AdditionalCost) : 0
+                }
+            };
+            
+            return View(viewModel);
         }
 
         // GET: ProductComponent/Details/5
@@ -37,48 +58,51 @@ namespace GesN.Web.Controllers
             if (component == null)
                 return NotFound();
 
-            return View(component);
+            var viewModel = component.ToDetailsViewModel();
+            return PartialView("_Details", viewModel);
         }
 
         // GET: ProductComponent/Create
-        public async Task<IActionResult> Create(string? compositeProductId = null)
+        public async Task<IActionResult> Create()
         {
-            await PopulateDropdownsAsync();
-            
-            var component = new ProductComponent();
-            if (!string.IsNullOrEmpty(compositeProductId))
-            {
-                component.CompositeProductId = compositeProductId;
-            }
-            
-            return View(component);
+            var viewModel = new CreateProductComponentViewModel();
+            return PartialView("_CreateComponent", viewModel);
         }
 
         // POST: ProductComponent/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProductComponent component)
+        public async Task<IActionResult> Create(CreateProductComponentViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var component = viewModel.ToEntity();
                     await _productComponentService.CreateAsync(component);
-                    TempData["SuccessMessage"] = "Componente criado com sucesso!";
-                    return RedirectToAction(nameof(Index));
+                    
+                    return Json(new { success = true, message = "Componente criado com sucesso!" });
                 }
                 catch (InvalidOperationException ex)
                 {
-                    ModelState.AddModelError("", ex.Message);
+                    return Json(new { success = false, message = ex.Message });
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Erro interno do servidor.");
+                    _logger.LogError(ex, "Erro ao criar componente");
+                    return Json(new { success = false, message = "Erro interno do servidor." });
                 }
             }
 
-            await PopulateDropdownsAsync();
-            return View(component);
+            // Se chegou aqui, há erros de validação
+            var errors = ModelState
+                .Where(x => x.Value.Errors.Count > 0)
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            return Json(new { success = false, errors = errors });
         }
 
         // GET: ProductComponent/Edit/5
@@ -91,140 +115,95 @@ namespace GesN.Web.Controllers
             if (component == null)
                 return NotFound();
 
-            await PopulateDropdownsAsync();
-            return View(component);
+            var viewModel = component.ToEditViewModel();
+            return PartialView("_EditComponent", viewModel);
         }
 
         // POST: ProductComponent/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, ProductComponent component)
+        public async Task<IActionResult> Edit(string id, EditProductComponentViewModel viewModel)
         {
-            if (id != component.Id)
-                return NotFound();
+            if (id != viewModel.Id)
+                return Json(new { success = false, message = "ID inconsistente." });
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var success = await _productComponentService.UpdateAsync(component);
+                    var existingComponent = await _productComponentService.GetByIdAsync(id);
+                    if (existingComponent == null)
+                        return Json(new { success = false, message = "Componente não encontrado." });
+
+                    var updatedComponent = viewModel.UpdateEntity(existingComponent);
+                    var success = await _productComponentService.UpdateAsync(updatedComponent);
+                    
                     if (success)
                     {
-                        TempData["SuccessMessage"] = "Componente atualizado com sucesso!";
-                        return RedirectToAction(nameof(Index));
+                        return Json(new { 
+                            success = true, 
+                            message = "Componente atualizado com sucesso!",
+                            componentName = updatedComponent.Name
+                        });
                     }
                     else
                     {
-                        ModelState.AddModelError("", "Componente não encontrado.");
+                        return Json(new { success = false, message = "Falha ao atualizar componente." });
                     }
                 }
                 catch (InvalidOperationException ex)
                 {
-                    ModelState.AddModelError("", ex.Message);
+                    return Json(new { success = false, message = ex.Message });
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Erro interno do servidor.");
+                    _logger.LogError(ex, "Erro ao atualizar componente {ComponentId}", id);
+                    return Json(new { success = false, message = "Erro interno do servidor." });
                 }
             }
 
-            await PopulateDropdownsAsync();
-            return View(component);
-        }
+            // Se chegou aqui, há erros de validação
+            var errors = ModelState
+                .Where(x => x.Value.Errors.Count > 0)
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
 
-        // GET: ProductComponent/Delete/5
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-                return NotFound();
-
-            var component = await _productComponentService.GetByIdAsync(id);
-            if (component == null)
-                return NotFound();
-
-            return View(component);
+            return Json(new { success = false, errors = errors });
         }
 
         // POST: ProductComponent/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> Delete(string id)
         {
             try
             {
                 var success = await _productComponentService.DeleteAsync(id);
                 if (success)
                 {
-                    TempData["SuccessMessage"] = "Componente excluído com sucesso!";
+                    return Json(new { success = true, message = "Componente excluído com sucesso!" });
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Componente não encontrado.";
+                    return Json(new { success = false, message = "Componente não encontrado." });
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Erro ao excluir componente.";
+                _logger.LogError(ex, "Erro ao excluir componente {ComponentId}", id);
+                return Json(new { success = false, message = "Erro ao excluir componente." });
             }
-
-            return RedirectToAction(nameof(Index));
         }
 
-        // GET: ProductComponent/ByComposite/5
-        public async Task<IActionResult> ByComposite(string compositeProductId)
+        // GET: ProductComponent/Grid
+        public async Task<IActionResult> Grid()
         {
-            if (string.IsNullOrEmpty(compositeProductId))
-                return BadRequest();
-
-            var components = await _productComponentService.GetByCompositeProductIdAsync(compositeProductId);
-            ViewBag.CompositeProductId = compositeProductId;
+            var components = await _productComponentService.GetAllAsync();
+            var viewModels = components.Select(c => c.ToViewModel()).ToList();
             
-            return View("Index", components);
-        }
-
-        // AJAX: Check if component can be created
-        [HttpPost]
-        public async Task<IActionResult> CanCreateComponent(string compositeProductId, string componentProductId)
-        {
-            try
-            {
-                var canCreate = await _productComponentService.CanCreateComponentAsync(compositeProductId, componentProductId);
-                return Json(new { success = true, canCreate });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        // AJAX: Calculate component cost
-        [HttpGet]
-        public async Task<IActionResult> CalculateComponentCost(string compositeProductId)
-        {
-            try
-            {
-                var cost = await _productComponentService.CalculateComponentCostAsync(compositeProductId);
-                return Json(new { success = true, cost });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        // AJAX: Calculate assembly time
-        [HttpGet]
-        public async Task<IActionResult> CalculateAssemblyTime(string compositeProductId)
-        {
-            try
-            {
-                var time = await _productComponentService.CalculateAssemblyTimeAsync(compositeProductId);
-                return Json(new { success = true, time });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
+            return PartialView("_Grid", viewModels);
         }
 
         // AJAX: Search components
@@ -233,24 +212,70 @@ namespace GesN.Web.Controllers
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(term))
+                {
+                    return Json(new List<object>());
+                }
+
                 var components = await _productComponentService.SearchAsync(term);
-                return PartialView("_ComponentList", components);
+                var result = components.Select(c => new {
+                    id = c.Id,
+                    name = c.Name,
+                    description = c.Description,
+                    hierarchyName = c.ProductComponentHierarchy?.Name
+                }).Take(10);
+
+                return Json(result);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return PartialView("_ComponentList", new List<ProductComponent>());
+                _logger.LogError(ex, "Erro ao buscar componentes com termo: {Term}", term);
+                return Json(new List<object>());
             }
         }
 
-        private async Task PopulateDropdownsAsync()
-        {
-            // Buscar produtos compostos (tipo Composite)
-            var compositeProducts = await _productService.GetByTypeAsync(ProductType.Composite);
-            ViewBag.CompositeProducts = compositeProducts.Select(p => new { p.Id, p.Name });
 
-            // Buscar todos os produtos para componentes
-            var allProducts = await _productService.GetAllAsync();
-            ViewBag.ComponentProducts = allProducts.Select(p => new { p.Id, p.Name });
+
+
+
+
+
+
+
+        /// <summary>
+        /// Endpoint para autocomplete de ProductComponentHierarchy
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> BuscarHierarchyAutocomplete(string termo)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(termo) || termo.Length < 2)
+                    return Json(new List<object>());
+
+                // Buscar hierarquias que correspondem ao termo
+                var hierarchies = await _productComponentHierarchyService.SearchAsync(termo);
+                
+                var result = hierarchies
+                    .Where(h => h.StateCode == ObjectState.Active)
+                    .Take(10) // Limitar a 10 resultados
+                    .Select(h => new ProductComponentHierarchyAutocompleteViewModel
+                    {
+                        Id = h.Id,
+                        Name = h.Name,
+                        Description = h.Description
+                    })
+                    .ToList();
+
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar hierarquias para autocomplete com termo: {Termo}", termo);
+                return Json(new List<object>());
+            }
         }
+
+
     }
 } 

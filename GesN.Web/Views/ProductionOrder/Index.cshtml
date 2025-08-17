@@ -1,8 +1,10 @@
-@model IEnumerable<GesN.Web.Models.Entities.Production.ProductionOrder>
+@model GesN.Web.Models.ViewModels.Production.ProductionOrderIndexViewModel
 
 @{
     ViewData["Title"] = "Ordens de Produção";
 }
+
+<link href="~/css/ProductionDomain.css" rel="stylesheet" />
 
 <div class="container-fluid">
     <!-- Status Cards -->
@@ -113,7 +115,7 @@
                         </div>
                     </div>
 
-                    @if (Model.Any())
+                    @if (Model.Orders.Any())
                     {
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped" id="ordersTable">
@@ -130,14 +132,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var order in Model)
+                                    @foreach (var order in Model.Orders)
                                     {
                                         <tr class="@(order.Status == ProductionOrderStatus.Failed ? "table-danger" : order.Status == ProductionOrderStatus.Completed ? "table-success" : "")">
                                             <td>
                                                 <small class="text-muted">#@order.Id.Substring(0, 8)</small>
                                             </td>
                                             <td>
-                                                <strong>@order.Product?.Name</strong>
+                                                <strong>@order.ProductName</strong>
                                                 @if (!string.IsNullOrEmpty(order.OrderId))
                                                 {
                                                     <br><small class="text-muted">Pedido: #@order.OrderId</small>
@@ -279,112 +281,5 @@
 </div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function() {
-            var table = $('#ordersTable').DataTable({
-                "language": {
-                    "url": "/lib/datatables.net/pt-br.json"
-                },
-                "order": [[5, "asc"], [3, "asc"]],
-                "pageLength": 25,
-                "columnDefs": [
-                    { "orderable": false, "targets": [7] }
-                ]
-            });
-
-            // Filtros
-            $('#statusFilter, #priorityFilter').on('change', function() {
-                applyFilters();
-            });
-
-            $('#searchInput').on('keyup', function() {
-                table.search(this.value).draw();
-            });
-
-            $('#clearFilters').on('click', function() {
-                $('#statusFilter, #priorityFilter').val('');
-                $('#searchInput').val('');
-                table.search('').columns().search('').draw();
-            });
-
-            function applyFilters() {
-                var statusFilter = $('#statusFilter').val();
-                var priorityFilter = $('#priorityFilter').val();
-                
-                table.column(3).search(statusFilter).draw();
-                table.column(4).search(priorityFilter).draw();
-            }
-        });
-
-        // Funções de controle de produção
-        function startProduction(orderId) {
-            var assignedTo = prompt('Responsável pela produção:');
-            if (assignedTo) {
-                $.post('@Url.Action("StartProduction")', {
-                    id: orderId,
-                    assignedTo: assignedTo
-                }).done(function(result) {
-                    if (result.success) {
-                        showSuccess(result.message);
-                        location.reload();
-                    } else {
-                        showError(result.message);
-                    }
-                });
-            }
-        }
-
-        function completeProduction(orderId) {
-            var actualTime = prompt('Tempo real gasto (horas):');
-            $.post('@Url.Action("CompleteProduction")', {
-                id: orderId,
-                actualTime: actualTime
-            }).done(function(result) {
-                if (result.success) {
-                    showSuccess(result.message);
-                    location.reload();
-                } else {
-                    showError(result.message);
-                }
-            });
-        }
-
-        function pauseProduction(orderId) {
-            var reason = prompt('Motivo da pausa:');
-            if (reason) {
-                $.post('@Url.Action("PauseProduction")', {
-                    id: orderId,
-                    reason: reason
-                }).done(function(result) {
-                    if (result.success) {
-                        showSuccess(result.message);
-                        location.reload();
-                    } else {
-                        showError(result.message);
-                    }
-                });
-            }
-        }
-
-        function resumeProduction(orderId) {
-            $.post('@Url.Action("ResumeProduction")', {
-                id: orderId
-            }).done(function(result) {
-                if (result.success) {
-                    showSuccess(result.message);
-                    location.reload();
-                } else {
-                    showError(result.message);
-                }
-            });
-        }
-
-        function showSuccess(message) {
-            toastr.success(message);
-        }
-
-        function showError(message) {
-            toastr.error(message);
-        }
-    </script>
+    <script src="~/js/ProductionOrder.js" asp-append-version="true"></script>
 } 

@@ -38,14 +38,19 @@ namespace GesN.Web.Models.Enumerators
         Urgent      // Urgente
     }
 
+
+
     /// <summary>
-    /// Tipo de opção em grupo de produtos
+    /// Status da demanda de produção
     /// Valores como TEXT no banco de dados
     /// </summary>
-    public enum ProductGroupOptionType
+    public enum DemandStatus
     {
-        Single,     // Seleção única
-        Multiple    // Seleção múltipla
+        Pending,        // Pendente
+        Confirmed,      // Confirmado
+        Produced,       // Produzido
+        Ending,         // Finalizando
+        Delivered       // Entregue
     }
 
     /// <summary>

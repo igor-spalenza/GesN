@@ -1,0 +1,211 @@
+@model GesN.Web.Models.ViewModels.Production.EditProductComponentHierarchyViewModel
+
+<div data-hierarchy-name="@Model.Name">
+<form id="editHierarchyForm" method="post" asp-action="Edit">
+    @Html.HiddenFor(m => m.Id)
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">@Html.DisplayNameFor(m => m.Name) <span class="text-danger">*</span></label>
+                <input asp-for="Name" class="form-control" placeholder="Digite o nome da hierarquia" maxlength="200">
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">@Html.DisplayNameFor(m => m.Description)</label>
+                <textarea asp-for="Description" class="form-control" rows="3" 
+                          placeholder="Descreva o propósito e uso desta hierarquia (opcional)" maxlength="1000"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+                <small class="form-text text-muted">Máximo 1000 caracteres</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <label asp-for="Notes" class="form-label">@Html.DisplayNameFor(m => m.Notes)</label>
+                <textarea asp-for="Notes" class="form-control" rows="2" 
+                          placeholder="Observações internas sobre esta hierarquia (opcional)" maxlength="2000"></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+                <small class="form-text text-muted">Máximo 2000 caracteres</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status da Hierarquia -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-toggle-on"></i> Status e Configurações</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="StateCode" class="form-label">@Html.DisplayNameFor(m => m.StateCode)</label>
+                        <select asp-for="StateCode" class="form-control form-select">
+                            <option value="1" selected="@(Model.StateCode == GesN.Web.Models.Enumerators.ObjectState.Active)">Ativa</option>
+                            <option value="0" selected="@(Model.StateCode == GesN.Web.Models.Enumerators.ObjectState.Inactive)">Inativa</option>
+                        </select>
+                        <span asp-validation-for="StateCode" class="text-danger"></span>
+                        <small class="form-text text-muted">
+                            Hierarquias inativas não podem ser usadas em novos produtos, mas continuam funcionando em produtos existentes
+                        </small>
+                    </div>
+
+                    <!-- Informações Estatísticas (readonly) -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="info-box bg-light">
+                                <span class="info-box-icon bg-info"><i class="fas fa-puzzle-piece"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Componentes</span>
+                                    <span class="info-box-number">@Model.ComponentCount</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-box bg-light">
+                                <span class="info-box-icon bg-success"><i class="fas fa-boxes"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Uso em Produtos</span>
+                                    <span class="info-box-number">@Model.UsageCount</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-box bg-light">
+                                <span class="info-box-icon bg-warning"><i class="fas fa-exclamation-triangle"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Alterações</span>
+                                    <span class="info-box-number">@(Model.CanChangeActiveStatus ? "Permitidas" : "Bloqueadas")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações de Auditoria -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-history"></i> Informações de Auditoria</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Criado em</label>
+                                <input type="text" class="form-control" value="@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Criado por</label>
+                                <input type="text" class="form-control" value="@Model.CreatedBy" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    @if (Model.LastModifiedAt.HasValue)
+                    {
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Última modificação</label>
+                                    <input type="text" class="form-control" value="@Model.LastModifiedAt.Value.ToString("dd/MM/yyyy HH:mm")" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Modificado por</label>
+                                    <input type="text" class="form-control" value="@Model.LastModifiedBy" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações do formulário -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted">
+                    @if (!string.IsNullOrEmpty(Model.OriginalName) && Model.OriginalName != Model.Name)
+                    {
+                        <small>
+                            <i class="fas fa-info-circle"></i> Nome será alterado de "@Model.OriginalName" para "@Model.Name"
+                        </small>
+                    }
+                </div>
+                <div>
+                    <button type="button" class="btn btn-secondary me-2" onclick="hierarchyManager.fecharAba('hierarchy-@Model.Id')">
+                        <i class="fas fa-times"></i> Fechar
+                    </button>
+                    <button type="submit" class="btn btn-primary" @(Model.IsReadonly ? "disabled" : "")>
+                        <i class="fas fa-save"></i> Salvar Alterações
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+
+<script>
+    // Lógica específica para edição (executa apenas uma vez por aba)
+    (function() {
+        // Aguarda um pouco para garantir que o hierarchyManager já inicializou o formulário
+        setTimeout(function() {
+            // Procura o formulário na aba atual
+            const activeTabPane = $('.tab-pane.active');
+            const form = activeTabPane.find('#editHierarchyForm');
+            
+            if (form.length === 0) {
+                // Se não encontrou na aba ativa, procura no documento
+                const form = $('#editHierarchyForm');
+                if (form.length === 0) return;
+            }
+            
+            // Avisos sobre mudanças críticas
+            form.find('#StateCode').off('change.editForm').on('change.editForm', function() {
+                const newValue = $(this).val();
+                const currentValue = '@((int)Model.StateCode)';
+                
+                if (newValue !== currentValue) {
+                    if (newValue === '0') { // Inativando
+                        if (@Model.UsageCount > 0) {
+                            toastr.warning('Atenção: Esta hierarquia está sendo usada em ' + @Model.UsageCount + ' produto(s). Inativá-la pode afetar a funcionalidade desses produtos.');
+                        }
+                    } else { // Ativando
+                        toastr.info('A hierarquia será reativada e ficará disponível para uso em novos produtos.');
+                    }
+                }
+            });
+            
+            // Contador de caracteres
+            form.find('#Description').off('input.editForm').on('input.editForm', function() {
+                const current = $(this).val().length;
+                const max = 1000;
+                $(this).siblings('.form-text').text(`${current}/${max} caracteres`);
+            });
+            
+            form.find('#Notes').off('input.editForm').on('input.editForm', function() {
+                const current = $(this).val().length;
+                const max = 2000;
+                $(this).siblings('.form-text').text(`${current}/${max} caracteres`);
+            });
+        }, 200);
+    })();
+</script> 

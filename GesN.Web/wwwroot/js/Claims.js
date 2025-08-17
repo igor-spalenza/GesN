@@ -676,7 +676,7 @@ var claimsManager = {
 };
 
 // Inicializar quando o documento estiver pronto
-$(document).ready(function() {
+$(function() {
     console.log('Document ready: Inicializando ClaimsManager');
     claimsManager.init();
     console.log('Document ready: ClaimsManager inicializado');
