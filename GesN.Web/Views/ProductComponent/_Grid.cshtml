@@ -1,0 +1,91 @@
+@model List<GesN.Web.Models.ViewModels.Production.ProductComponentViewModel>
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped" id="components-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Hierarquia</th>
+                    <th>Custo Adicional</th>
+                    <th>Status</th>
+                    <th>Criado em</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var component in Model)
+                {
+                    <tr>
+                        <td>
+                            <strong>@component.Name</strong>
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(component.Description))
+                            {
+                                <span class="text-muted">@component.Description</span>
+                            }
+                            else
+                            {
+                                <em class="text-muted">-</em>
+                            }
+                        </td>
+                        <td>
+                            <span class="badge badge-secondary">
+                                @(component.ProductComponentHierarchyName ?? "Não definida")
+                            </span>
+                        </td>
+                        <td>
+                            <span class="text-success font-weight-bold">
+                                @component.FormattedAdditionalCost
+                            </span>
+                        </td>
+                        <td>
+                            @if (component.StateCode == GesN.Web.Models.Enumerators.ObjectState.Active)
+                            {
+                                <span class="badge badge-success">✅ Ativo</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">❌ Inativo</span>
+                            }
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                @component.FormattedCreatedAt
+                            </small>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-warning" title="Detalhes"
+                                        onclick="productComponentsManager.verDetalhes('@component.Id')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" title="Editar"
+                                        onclick="productComponentsManager.editarComponente('@component.Id', '@component.Name')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" title="Excluir"
+                                        onclick="productComponentsManager.excluirComponente('@component.Id', '@component.Name')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        Nenhum componente cadastrado. 
+        <button type="button" class="btn btn-link p-0" onclick="productComponentsManager.novoComponenteModal()">
+            Clique aqui para criar o primeiro
+        </button>.
+    </div>
+} 

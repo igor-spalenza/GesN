@@ -1,0 +1,34 @@
+@model GesN.Web.Models.ViewModels.Sales.OrderEntryIndexViewModel
+@using GesN.Web.Models.Enumerators
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Cliente</th>
+                <th>Data</th>
+                <th>Entrega</th>
+                <th>Valor Total</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Orders)
+            {
+                <tr>
+                    <td>@item.NumberSequence</td>
+                    <td>@item.CustomerName</td>
+                    <td>@item.OrderDate.ToString("dd/MM/yyyy")</td>
+                    <td>@item.DeliveryDate.ToString("dd/MM/yyyy")</td>
+                    <td>@item.TotalAmount.ToString("C")</td>
+                    <td>@item.Status</td>
+                    <td>
+                                                        <button class="btn btn-sm btn-outline-primary" onclick="ordersManager.abrirEdicao('@item.Id', '@item.NumberSequence')">Editar</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="ordersManager.abrirDetalhes('@item.Id')">Detalhes</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div> 

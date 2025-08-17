@@ -6,6 +6,29 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-GesN.Web-3fbcea1e-6b7e-4eec-8775-0d1a07170825</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <!-- Configurações aprimoradas para resolver conflitos de assets definitivamente -->
+    <StaticWebAssetsEnabled>true</StaticWebAssetsEnabled>
+    <GenerateStaticWebAssetsManifest>false</GenerateStaticWebAssetsManifest>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <StaticWebAssetsCompression>false</StaticWebAssetsCompression>
+    <StaticWebAssetsDisableProjectBuildPropsFileGeneration>true</StaticWebAssetsDisableProjectBuildPropsFileGeneration>
+    <DisableStaticWebAssetsBuildPropsFileGeneration>true</DisableStaticWebAssetsBuildPropsFileGeneration>
+    <DisableStaticWebAssetsBasePathGeneration>true</DisableStaticWebAssetsBasePathGeneration>
+    <!-- Desabilitar descoberta automática de assets comprimidos -->
+    <EnableWebAssetsBuildCompression>false</EnableWebAssetsBuildCompression>
+    <EnableWebAssetsPublishCompression>false</EnableWebAssetsPublishCompression>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <!-- Configurações específicas para Debug -->
+    <StaticWebAssetsCompression>false</StaticWebAssetsCompression>
+    <PrecompressStaticWebAssets>false</PrecompressStaticWebAssets>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <!-- Manter compressão desabilitada mesmo em Release para evitar conflitos -->
+    <StaticWebAssetsCompression>false</StaticWebAssetsCompression>
+    <PrecompressStaticWebAssets>false</PrecompressStaticWebAssets>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +43,6 @@
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.4" />
-
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.4" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2" />
@@ -29,11 +51,50 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Context\DIAGRAMS\" />
     <Folder Include="Data\Database\" />
     <Folder Include="Models\Entities\Financial\" />
     <Folder Include="Models\Entities\Production\" />
+    <Folder Include="Models\DTOs\" />
     <Folder Include="Models\ViewModels\Financial\" />
     <Folder Include="Models\ViewModels\Production\" />
   </ItemGroup>
+
+  <!-- Configurações avançadas para evitar duplicação de assets -->
+  <ItemGroup>
+    <Compile Remove="TokenStore\**" />
+    <Content Remove="TokenStore\**" />
+    <EmbeddedResource Remove="TokenStore\**" />
+    <None Remove="TokenStore\**" />
+    
+    <!-- Excluir arquivos de mapa e duplicados -->
+    <StaticWebAsset Remove="wwwroot\lib\**\*.min.js.map" />
+    <StaticWebAsset Remove="wwwroot\lib\**\*.js.map" />
+    <StaticWebAsset Remove="wwwroot\lib\**\*.min.css.map" />
+    <StaticWebAsset Remove="wwwroot\lib\**\*.css.map" />
+    <StaticWebAsset Remove="wwwroot\lib\**\*.map" />
+    
+    <!-- Excluir arquivos duplicados específicos que podem causar conflito -->
+    <Content Remove="wwwroot\lib\**\*.min.js.map" />
+    <Content Remove="wwwroot\lib\**\*.js.map" />
+    <Content Remove="wwwroot\lib\**\*.min.css.map" />
+    <Content Remove="wwwroot\lib\**\*.css.map" />
+    <Content Remove="wwwroot\lib\**\*.map" />
+    
+    <!-- Excluir arquivos temporários e de backup -->
+    <None Remove="wwwroot\lib\**\*.bak" />
+    <None Remove="wwwroot\lib\**\*.tmp" />
+    <Content Remove="wwwroot\lib\**\*.bak" />
+    <Content Remove="wwwroot\lib\**\*.tmp" />
+  </ItemGroup>
+
+  <!-- Target customizado para limpeza completa quando necessário -->
+  <Target Name="CleanStaticWebAssets" BeforeTargets="Build">
+    <ItemGroup>
+      <FilesToDelete Include="$(BaseIntermediateOutputPath)**\staticwebassets*.*" />
+      <FilesToDelete Include="$(BaseIntermediateOutputPath)**\rpswa*.*" />
+    </ItemGroup>
+    <Delete Files="@(FilesToDelete)" ContinueOnError="true" />
+  </Target>
 
 </Project>

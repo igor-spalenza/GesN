@@ -27,4 +27,7 @@ RUN dotnet publish "./GesN.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+RUN mkdir -p /app/Data/Database && \
+	chown -R app:app /app/Data && \
+	chmod -R 755 /app/Data
 ENTRYPOINT ["dotnet", "GesN.Web.dll"]

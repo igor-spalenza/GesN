@@ -1,0 +1,109 @@
+@using GesN.Web.Models.ViewModels.Production
+@using GesN.Web.Models.Enumerators
+@model EditIngredientViewModel
+
+<div class="row" id="editIngredientContainer" data-ingredient-name="@Model.Name">
+    <div class="col-md-12">
+        <h2>Edição de Ingrediente</h2>
+        <form id="editIngredientForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Name"></label>
+                        <input asp-for="Name" class="form-control" required maxlength="100" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Unit"></label>
+                        <select asp-for="Unit" class="form-control" required>
+                            <option value="">Selecione...</option>
+                            @foreach (ProductionUnit unit in Enum.GetValues<ProductionUnit>())
+                            {
+                                <option value="@unit">@EnumHelper.GetDescription(unit)</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Unit" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Description"></label>
+                <textarea asp-for="Description" class="form-control" rows="3" maxlength="500"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="CostPerUnit"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input asp-for="CostPerUnit" class="form-control" step="0.01" min="0" required />
+                        </div>
+                        <span asp-validation-for="CostPerUnit" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="SupplierId">Fornecedor</label>
+                        <select asp-for="SupplierId" class="form-control" id="SupplierId">
+                            <option value="">Selecione um fornecedor...</option>
+                            <!-- Opções carregadas via JavaScript -->
+                        </select>
+                        <span asp-validation-for="SupplierId" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="MinStock"></label>
+                        <input asp-for="MinStock" class="form-control" step="0.01" min="0" required />
+                        <span asp-validation-for="MinStock" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="CurrentStock"></label>
+                        <input asp-for="CurrentStock" class="form-control" step="0.01" min="0" required />
+                        <span asp-validation-for="CurrentStock" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ExpirationDays"></label>
+                <input asp-for="ExpirationDays" class="form-control" min="0" />
+                <small class="form-text text-muted">Deixe em branco se o ingrediente não expira</small>
+                <span asp-validation-for="ExpirationDays" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="IsActive"></label>
+                <select asp-for="IsActive" class="form-control">
+                    <option value="true">Ativo</option>
+                    <option value="false">Inativo</option>
+                </select>
+                <span asp-validation-for="IsActive" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mt-3">
+                <button type="submit" class="btn btn-primary" id="btnSalvarIngredient">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Inicializar formulário de edição
+    ingredientsManager.initializeEditForm('@Model.SupplierId');
+});
+</script> 

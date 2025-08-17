@@ -1,0 +1,28 @@
+@model IEnumerable<GesN.Web.Models.ViewModels.Sales.OrderEntryItemViewModel>
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Preço Unitário</th>
+            <th>Desconto</th>
+            <th>Impostos</th>
+            <th>Subtotal</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@(item.ProductName ?? item.ProductId)</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("C")</td>
+                <td>@item.DiscountAmount.ToString("C")</td>
+                <td>@item.TaxAmount.ToString("C")</td>
+                <td>@item.Subtotal.ToString("C")</td>
+                <td>@item.TotalPrice.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table> 

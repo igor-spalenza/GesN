@@ -1,0 +1,172 @@
+@using GesN.Web.Models.ViewModels.Production
+@using GesN.Web.Models.Enumerators
+@model IngredientDetailsViewModel
+
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="bi bi-info-circle"></i> Detalhes do Ingrediente
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nome</label>
+                    <p class="form-control-plaintext">@Model.Name</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Unidade</label>
+                    <p class="form-control-plaintext">
+                        <span class="badge bg-info">@EnumHelper.GetDescription(Model.Unit)</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Descrição</label>
+            <p class="form-control-plaintext">
+                @if (!string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    @Model.Description
+                }
+                else
+                {
+                    <span class="text-muted">Sem descrição</span>
+                }
+            </p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Custo por Unidade</label>
+                    <p class="form-control-plaintext">
+                        <strong class="text-success">@Model.CostPerUnit.ToString("C")</strong>
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Fornecedor</label>
+                    <p class="form-control-plaintext">
+                        @if (!string.IsNullOrWhiteSpace(Model.SupplierName))
+                        {
+                            @Model.SupplierName
+                        }
+                        else
+                        {
+                            <span class="text-muted">Não informado</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Estoque Atual</label>
+                    <p class="form-control-plaintext">
+                        <strong class="@(Model.CurrentStock <= Model.MinStock ? "text-warning" : "text-primary")">
+                            @Model.CurrentStock.ToString("N2") @EnumHelper.GetDescription(Model.Unit)
+                        </strong>
+                        @if (Model.CurrentStock <= Model.MinStock)
+                        {
+                            <span class="badge bg-warning text-dark ms-2">Estoque Baixo</span>
+                        }
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Estoque Mínimo</label>
+                    <p class="form-control-plaintext">
+                        <strong class="text-warning">@Model.MinStock.ToString("N2") @EnumHelper.GetDescription(Model.Unit)</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Dias para Expiração</label>
+                    <p class="form-control-plaintext">
+                        @if (Model.ExpirationDays.HasValue && Model.ExpirationDays > 0)
+                        {
+                            <span>@Model.ExpirationDays dias</span>
+                            @if (Model.ExpirationDays <= 7)
+                            {
+                                <span class="badge bg-danger ms-2">Perecível</span>
+                            }
+                            else if (Model.ExpirationDays <= 30)
+                            {
+                                <span class="badge bg-warning text-dark ms-2">Atenção</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">Não expira</span>
+                        }
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Status</label>
+                    <p class="form-control-plaintext">
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">Ativo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inativo</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metadados -->
+        <hr />
+        <h6 class="text-muted">Informações de Auditoria</h6>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Criado em</label>
+                    <p class="form-control-plaintext">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Última modificação</label>
+                    <p class="form-control-plaintext">
+                        @if (Model.LastModifiedAt.HasValue)
+                        {
+                            @Model.LastModifiedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                        }
+                        else
+                        {
+                            <span class="text-muted">Nunca modificado</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <i class="bi bi-x"></i> Fechar
+    </button>
+    <button type="button" class="btn btn-primary" onclick="ingredientsManager.editarIngredient('@Model.Id')">
+        <i class="bi bi-pencil"></i> Editar
+    </button>
+</div> 

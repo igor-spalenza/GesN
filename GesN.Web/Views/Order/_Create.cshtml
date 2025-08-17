@@ -1,0 +1,54 @@
+@model GesN.Web.Models.ViewModels.Sales.CreateOrderEntryViewModel
+
+<form id="createOrderForm">
+    @Html.AntiForgeryToken()
+    
+    <div class="row" id="createOrderContainer">
+        <div class="col-md-12">
+            <h4>Identificação do Cliente</h4>
+            
+            <div class="form-group mb-3">
+                <div class="floating-input-group">
+                    <input type="text" 
+                           id="CustomerName" 
+                           name="CustomerName"
+                           class="form-control floating-input autocomplete-input" 
+                           placeholder=" " 
+                           autocomplete="off"
+                           data-order-context="create" />
+                    <input type="hidden" 
+                           asp-for="CustomerId" 
+                           id="CustomerId" />
+                    <label for="CustomerName" class="floating-label">
+                        <i class="fas fa-user text-primary"></i>
+                        Cliente *
+                    </label>
+                    <span asp-validation-for="CustomerId" class="field-validation-valid text-danger"></span>
+                    <div class="form-text">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            Digite o nome, sobrenome ou telefone para buscar clientes
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="orderType" class="form-label">Tipo de Pedido *</label>
+                <select id="orderType" name="Type" class="form-select" required>
+                    <option value="">Selecione o tipo de pedido</option>
+                    @foreach (var type in Enum.GetValues(typeof(GesN.Web.Models.Enumerators.OrderType)))
+                    {
+                        <option value="@((int)type)">@type</option>
+                    }
+                </select>
+            </div>
+
+            <button type="button" class="btn btn-sales" id="btnAnotarOrder" onclick="ordersManager.salvarNovoModal()">
+                <i class="fas fa-plus"></i> Criar Pedido
+            </button>
+        </div>
+    </div>
+</form>
+
+<div id="orderCreateValidation" class="text-danger mt-2"></div> 

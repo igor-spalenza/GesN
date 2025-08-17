@@ -116,6 +116,22 @@ namespace GesN.Web.Services
             }
         }
 
+        public async Task<IEnumerable<Customer>> SearchCustomersForAutocompleteAsync(string searchTerm)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                    return Enumerable.Empty<Customer>();
+
+                return await _customerRepository.SearchForAutocompleteAsync(searchTerm);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao pesquisar clientes para autocomplete: {SearchTerm}", searchTerm);
+                return Enumerable.Empty<Customer>();
+            }
+        }
+
         public async Task<string> CreateCustomerAsync(Customer customer, string createdBy)
         {
             try

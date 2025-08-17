@@ -28,4 +28,40 @@
         Ativo = 1,
         Inativo = 2
     }
+
+    /// <summary>
+    /// Unidades de medida para produção
+    /// Usado em ingredientes, produtos e receitas
+    /// </summary>
+    public enum ProductionUnit
+    {
+        // Peso
+        Gramas,
+        Quilogramas,
+        Toneladas,
+        
+        // Volume
+        Mililitros,
+        Litros,
+        
+        // Quantidade
+        Unidades,
+        Pacotes,
+        Caixas,
+        Duzias,
+        Centenas,
+        
+        // Comprimento
+        Centimetros,
+        Metros,
+        
+        // Área
+        MetrosQuadrados,
+        
+        // Outros
+        Porcoes,
+        Fatias,
+        Colheres,
+        Xicaras
+    }
 }

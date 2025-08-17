@@ -34,6 +34,42 @@ namespace GesN.Web.Infrastructure.Configuration
             services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<IContractRepository, ContractRepository>();
             services.AddScoped<IContractService, ContractService>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IOrderItemRepository, OrderItemRepository>();
+
+            // Domínio Production
+            services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+            services.AddScoped<IProductCategoryService, ProductCategoryService>();
+            services.AddScoped<ISupplierRepository, SupplierRepository>();
+            services.AddScoped<ISupplierService, SupplierService>();
+            services.AddScoped<IIngredientRepository, IngredientRepository>();
+            services.AddScoped<IIngredientService, IngredientService>();
+            services.AddScoped<IProductIngredientRepository, ProductIngredientRepository>();
+            services.AddScoped<IProductIngredientService, ProductIngredientService>();
+
+            // Sprint 4 - Advanced Production Entities
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IProductComponentRepository, ProductComponentRepository>();
+            services.AddScoped<IProductComponentService, ProductComponentService>();
+            services.AddScoped<IProductGroupRepository, ProductGroupRepository>();
+            services.AddScoped<IProductGroupItemRepository, ProductGroupItemRepository>();
+            services.AddScoped<IProductGroupItemService, ProductGroupItemService>();
+            services.AddScoped<IProductGroupExchangeRuleRepository, ProductGroupExchangeRuleRepository>();
+            services.AddScoped<IProductGroupExchangeRuleService, ProductGroupExchangeRuleService>();
+            services.AddScoped<IProductGroupService, ProductGroupService>();
+            services.AddScoped<IOrderItemService, OrderItemService>();
+            services.AddScoped<IProductionOrderRepository, ProductionOrderRepository>();
+            services.AddScoped<IProductionOrderService, ProductionOrderService>();
+
+            // Sprint 4 - Composite Product Support (Demand & Hierarchy)
+            services.AddScoped<IDemandRepository, DemandRepository>();
+            services.AddScoped<IDemandService, DemandService>();
+            services.AddScoped<IProductComponentHierarchyRepository, ProductComponentHierarchyRepository>();
+            services.AddScoped<IProductComponentHierarchyService, ProductComponentHierarchyService>();
+            services.AddScoped<ICompositeProductXHierarchyRepository, CompositeProductXHierarchyRepository>();
+            services.AddScoped<ICompositeProductXHierarchyService, CompositeProductXHierarchyService>();
 
             // Legados
             services.AddScoped<IClienteService, ClienteService>();

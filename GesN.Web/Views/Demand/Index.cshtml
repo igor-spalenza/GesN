@@ -1,0 +1,224 @@
+@model GesN.Web.Models.ViewModels.Production.DemandIndexViewModel
+@{
+    ViewData["Title"] = "Gerenciar Demandas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/css/ProductionDomain.css" rel="stylesheet" />
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-tasks"></i> Demandas de Produção
+            </h1>
+            <p class="mb-0">Gerencie as demandas de produção do sistema</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button type="button" class="btn btn-primary" onclick="Demand.showCreateModal()">
+                <i class="fas fa-plus"></i> Nova Demanda
+            </button>
+        </div>
+    </div>
+
+    <!-- Estatísticas Dashboard -->
+    <div class="row mb-4">
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pendente</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.PendingCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Confirmado</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.ConfirmedCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Em Produção</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.ProducedCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-cogs fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="card border-left-secondary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Finalizando</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.EndingCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Entregue</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.DeliveredCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-truck fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Atrasado</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.OverdueCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow mb-4" id="filters-card" style="@(Model.ShowFilters ? "" : "display: none;")">
+        <div class="card-body">
+            <form method="get" action="@Url.Action("Index")">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="searchTerm" class="form-label">Buscar</label>
+                        <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                               value="@Model.SearchTerm" placeholder="Buscar por produto, quantidade...">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="statusFilter" class="form-label">Status</label>
+                        <select class="form-control" id="statusFilter" name="statusFilter">
+                            <option value="">Todos</option>
+                            @foreach (var status in Model.AvailableStatuses)
+                            {
+                                <option value="@status.Value" selected="@(status.Value == Model.StatusFilter?.ToString())">@status.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="productIdFilter" class="form-label">Produto</label>
+                        <select class="form-control" id="productIdFilter" name="productIdFilter">
+                            <option value="">Todos</option>
+                            @foreach (var product in Model.AvailableProducts)
+                            {
+                                <option value="@product.Value" selected="@(product.Value == Model.ProductIdFilter)">@product.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="startDateFilter" class="form-label">Data Inicial</label>
+                        <input type="date" class="form-control" id="startDateFilter" name="startDateFilter" 
+                               value="@Model.StartDateFilter?.ToString("yyyy-MM-dd")">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="endDateFilter" class="form-label">Data Final</label>
+                        <input type="date" class="form-control" id="endDateFilter" name="endDateFilter" 
+                               value="@Model.EndDateFilter?.ToString("yyyy-MM-dd")">
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="showOverdueOnly" name="showOverdueOnly" 
+                                   value="true" @(Model.ShowOverdueOnly ? "checked" : "")>
+                            <label class="form-check-label" for="showOverdueOnly">
+                                Só Atrasados
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-search"></i> Filtrar
+                        </button>
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Limpar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Grid de Demandas -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Lista de Demandas</h6>
+            <div class="dropdown no-arrow">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleFilters()">
+                    <i class="fas fa-filter"></i> Filtros
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="demands-grid">
+                @await Html.PartialAsync("_Grid", Model)
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Genérico -->
+<div class="modal fade" id="genericModal" tabindex="-1" aria-labelledby="genericModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="genericModalLabel">Modal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="genericModalBody">
+                <!-- Conteúdo será carregado dinamicamente -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/Demand.js"></script>
+} 

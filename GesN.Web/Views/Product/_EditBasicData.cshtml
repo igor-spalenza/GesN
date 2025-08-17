@@ -1,0 +1,232 @@
+@using GesN.Web.Models.ViewModels.Production
+@model EditProductViewModel
+
+@{
+    if (Model == null) 
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            Dados do produto não encontrados. Tente recarregar a página.
+        </div>
+        return;
+    }
+}
+
+<form id="formEditProduct" enctype="application/x-www-form-urlencoded">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.ProductType)
+    
+    <!-- Informações Básicas -->
+    <div class="product-form-card">
+        <div class="card-header">
+            <h6 class="card-title mb-0">
+                <i class="fas fa-box"></i> Informações Básicas
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="floating-input-group">
+                        <input asp-for="SKU" class="floating-input" placeholder=" " />
+                        <label asp-for="SKU" class="floating-label">Código (SKU)</label>
+                        <span asp-validation-for="SKU" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="floating-input-group">
+                        <input asp-for="Name" class="floating-input" placeholder=" " required />
+                        <label asp-for="Name" class="floating-label">Nome do Produto</label>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="floating-input-group">
+                        <textarea asp-for="Description" class="floating-textarea" placeholder=" " rows="3"></textarea>
+                        <label asp-for="Description" class="floating-label">Descrição</label>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="floating-input-group">
+                        <input type="text" class="floating-input" value="@(Model.ProductTypeDisplay ?? "N/A")" readonly disabled />
+                        <label class="floating-label">Tipo de Produto</label>
+                        <small class="form-text text-muted mt-1">O tipo não pode ser alterado após a criação</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="floating-input-group">
+                        <input type="text" class="form-control floating-input category-autocomplete" 
+                               id="CategoryName-@Model.Id" 
+                               name="CategoryName"
+                               value="@Model.Category"
+                               placeholder=" " 
+                               autocomplete="off"
+                               data-context="edit"
+                               data-product-id="@Model.Id" />
+                        <input asp-for="CategoryId" type="hidden" id="CategoryId-@Model.Id" />
+                        <label for="CategoryName-@Model.Id" class="floating-label">
+                            <i class="fas fa-tags text-primary"></i>
+                            Categoria
+                        </label>
+                        <span asp-validation-for="CategoryId" class="field-validation-valid text-danger"></span>
+                        <div class="form-text">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                Digite para buscar por categorias disponíveis
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="floating-input-group">
+                        <input asp-for="ImageUrl" type="url" class="floating-input" placeholder=" " />
+                        <label asp-for="ImageUrl" class="floating-label">URL da Imagem</label>
+                        <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="floating-input-group floating-input-group-addon">
+                        <span class="input-group-text">R$</span>
+                        <input asp-for="QuantityPrice" type="number" step="0.01" class="floating-input" placeholder=" " />
+                        <label asp-for="QuantityPrice" class="floating-label">Preço por Quantidade</label>
+                        <span asp-validation-for="QuantityPrice" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="floating-input-group">
+                        <textarea asp-for="Note" class="floating-textarea" placeholder=" " rows="3"></textarea>
+                        <label asp-for="Note" class="floating-label">Observações</label>
+                        <span asp-validation-for="Note" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preços e Custos -->
+    <div class="product-form-card">
+        <div class="card-header">
+            <h6 class="card-title mb-0">
+                <i class="fas fa-dollar-sign"></i> Preços e Custos
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="floating-input-group floating-input-group-addon">
+                        <span class="input-group-text">R$</span>
+                        <input asp-for="Price" type="number" step="0.01" class="floating-input" placeholder=" " />
+                        <label asp-for="Price" class="floating-label">Preço de Venda</label>
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="floating-input-group floating-input-group-addon">
+                        <span class="input-group-text">R$</span>
+                        <input asp-for="UnitPrice" type="number" step="0.01" class="floating-input" placeholder=" " />
+                        <label asp-for="UnitPrice" class="floating-label">Preço Unitário</label>
+                        <span asp-validation-for="UnitPrice" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="floating-input-group floating-input-group-addon">
+                        <span class="input-group-text">R$</span>
+                        <input asp-for="Cost" type="number" step="0.01" class="floating-input" placeholder=" " />
+                        <label asp-for="Cost" class="floating-label">Custo</label>
+                        <span asp-validation-for="Cost" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            @if (Model.Price > 0 && Model.Cost > 0)
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="alert alert-info">
+                            <strong>Margem de Lucro:</strong> 
+                            <span id="marginDisplay">@(Model.ProfitMarginDisplay ?? "N/A")</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Informações de Montagem -->
+    <div class="product-form-card">
+        <div class="card-header">
+            <h6 class="card-title mb-0">
+                <i class="fas fa-tools"></i> Informações de Montagem
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="floating-input-group floating-input-group-addon suffix">
+                        <input asp-for="AssemblyTime" type="number" class="floating-input" placeholder=" " />
+                        <span class="input-group-text">min</span>
+                        <label asp-for="AssemblyTime" class="floating-label">Tempo de Montagem</label>
+                        <span asp-validation-for="AssemblyTime" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="floating-input-group">
+                        <textarea asp-for="AssemblyInstructions" class="floating-textarea" placeholder=" " rows="4"></textarea>
+                        <label asp-for="AssemblyInstructions" class="floating-label">Instruções de Montagem</label>
+                        <span asp-validation-for="AssemblyInstructions" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status -->
+    <div class="product-form-card">
+        <div class="card-header">
+            <h6 class="card-title mb-0">
+                <i class="fas fa-toggle-on"></i> Status
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="modern-switch">
+                        <input class="form-check-input" type="checkbox" asp-for="IsActive" />
+                        <label class="form-check-label" asp-for="IsActive">
+                            Produto Ativo
+                        </label>
+                        <small class="text-muted ms-auto">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Ativo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inativo</span>
+                            }
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+ 

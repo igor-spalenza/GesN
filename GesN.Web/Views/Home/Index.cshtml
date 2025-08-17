@@ -10,7 +10,10 @@
 <br />
 <div class="home">
     <div class="home-logo">
-        <img class="logo-gesn" src="~/img/logo-gesn.svg" alt="Logomarca GesN" />
+    @* <div class="center"> *@
+        <span id="logo">
+            <img class="logo-gesn" src="~/img/logo-gesn.svg" alt="Logomarca GesN" />
+        </span>
         @* <h3>Sua plataforma de administração online!</h3> *@
     </div>
     @* <div class="home-logo">
@@ -20,7 +23,7 @@
 
 <br />
 
-@if (SignInManager.IsSignedIn(User))
+@* @if (SignInManager.IsSignedIn(User))
 {
     <div class="text-center">
         <a class="btn btn-sales btn-lg-home" asp-area="" asp-controller="Pedido" asp-action="Index">Ferramenta de Vendas</a>
@@ -34,4 +37,4 @@
             <a class="btn btn-primary btn-lg-home ms-2" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin</a>
         }
     </div>
-}
+} *@

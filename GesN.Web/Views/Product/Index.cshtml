@@ -1,0 +1,84 @@
+@using GesN.Web.Models.ViewModels.Production
+@model ProductIndexViewModel
+
+<link href="~/css/ProductDomain.css" rel="stylesheet" />
+
+@{
+    ViewData["Title"] = "Produtos";
+}
+
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- Conteúdo Principal -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <!-- Navegação por Abas -->
+                    <ul class="nav nav-tabs card-header-tabs" id="productTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="tab-lista-produtos" data-bs-toggle="tab" data-bs-target="#lista-produtos" type="button" role="tab">
+                                <i class="fas fa-list"></i> Lista de Produtos
+                            </button>
+
+                                <!-- Botão Novo Produto -->
+                                <div class="d-grid">
+                                    <button type="button" class="btn btn-primary" onclick="productManager.novoProduct()">
+                                        <i class="fas fa-plus"></i> Novo Produto
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btnHomeProdutos" title="Início">
+                                        <i class="fas fa-home"></i>
+                                    </button>
+                                </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <!-- Conteúdo das Abas -->
+                    <div class="tab-content" id="productTabsContent">
+                        <!-- Aba Lista de Produtos -->
+                        <div class="tab-pane fade show active" id="lista-produtos" role="tabpanel">
+                            <div id="lista-produtos-container">
+                                <!-- Conteúdo carregado via AJAX -->
+                                @if (Model.Products.Any())
+                                {
+                                    @await Html.PartialAsync("_Grid", Model.Products)
+                                }
+                                else
+                                {
+                                    <div class="d-flex justify-content-center my-5">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Carregando...</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <!-- Abas de edição dinâmicas serão adicionadas aqui via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Formulários (usado apenas para criação e detalhes) -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Produto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Conteúdo carregado via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/Product.js" asp-append-version="true"></script>
+    <script src="~/js/CompositeProduct.js" asp-append-version="true"></script>
+    <script src="~/js/ProductGroup.js" asp-append-version="true"></script>
+} 

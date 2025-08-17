@@ -23,25 +23,90 @@ body {
 
 .home {
     display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
 }
 
-.home-logo {
-    width: 50%;
+.index-main {
+    display: flex !important;
+    width: 100%;
 }
 
-.teste {
-    margin-left: 16px;
-    margin-top: 7px;
+.menu-lateral-fixo {
+    width: 20%;
 }
 
-.logo-gpn {
-    margin-right: 30px;
+.conteudo-dinamico {
     width: 80%;
 }
 
-logo-gesn {
-    margin-right: 0px;
+.home-logo {
     width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#logo {
+    display: block;
+    width: 100%;
+}
+
+.logo-gesn {
+    width: 100%;
+    min-height: 200px;
+    max-height: 50vh;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 767px) {
+    .home {
+        min-height: 40vh;
+        padding: 20px;
+    }
+    
+    .logo-gesn {
+        width: 90%;
+        max-height: 40vh;
+    }
+}
+
+@media (max-width: 479px) {
+    .logo-gesn {
+        width: 60%;
+        max-height: 35vh;
+    }
+}
+
+/* Responsividade específica para altura baixa */
+@media (max-height: 600px) {
+    .home {
+        min-height: 30vh;
+    }
+    
+    .logo-gesn {
+        max-height: 25vh;
+    }
+}
+
+@media (max-height: 480px) {
+    .logo-gesn {
+        max-height: 20vh;
+    }
+}
+
+/* Responsividade combinada para mobile com altura baixa */
+@media (max-width: 479px) and (max-height: 600px) {
+    .logo-gesn {
+        width: 70%;
+        max-height: 22vh;
+    }
 }
 
 .logo-cliente {
@@ -54,31 +119,6 @@ logo-gesn {
     padding: .99rem 6rem;
     font-size: 1.25rem;
     border-radius: .3rem;
-}
-
-.btn-sales {
-    color: #fff;
-    background-color: #007a86;
-    border-color: #198754;
-}
-
-.btn-sales:hover {
-    color: #fff;
-    background-color: #005159;
-    border-color: #146c43;
-}
-
-.venda-main {
-    display: flex !important;
-    width: 100%;
-}
-
-.venda-lateral-fixa {
-    width: 20%;
-}
-
-.venda-conteudo-dinamico {
-    width: 80%;
 }
 
 .vendas-principal {
@@ -146,7 +186,7 @@ logo-gesn {
     color: white !important;
 }
 
-/* Estilos espec�ficos para autocomplete em modal */
+/* Estilos específicos para autocomplete em modal */
 
 .autocomplete-modal-menu {
     z-index: 9999999 !important;
@@ -180,5 +220,4 @@ logo-gesn {
     border: none !important;
     margin: 0 !important;
 }
-/* Estilo para o autocomplete */
 

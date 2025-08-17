@@ -10,6 +10,7 @@ namespace GesN.Web.Interfaces.Services
         Task<Customer?> GetCustomerByDocumentAsync(string documentNumber);
         Task<IEnumerable<Customer>> GetActiveCustomersAsync();
         Task<IEnumerable<Customer>> SearchCustomersAsync(string searchTerm);
+        Task<IEnumerable<Customer>> SearchCustomersForAutocompleteAsync(string searchTerm);
         Task<string> CreateCustomerAsync(Customer customer, string createdBy);
         Task<bool> UpdateCustomerAsync(Customer customer, string modifiedBy);
         Task<bool> DeleteCustomerAsync(string id);

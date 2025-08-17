@@ -3,10 +3,6 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "library": "jqueryui@1.14.1",
-      "destination": "wwwroot/lib/jqueryui/"
-    },
-    {
       "library": "toastr.js@2.1.4",
       "destination": "wwwroot/lib/toastr.js/"
     },
@@ -20,15 +16,38 @@
       "files": [
         "js/select2.min.js",
         "css/select2.min.css",
-        "js/i18n/pt-BR.min.js"
+        "js/i18n/pt-br.min.js"
       ]
     },
     {
-      "provider": "cdnjs",
       "library": "jquery.mask@1.14.16",
       "destination": "wwwroot/lib/jquery.mask/",
       "files": [
         "jquery.mask.min.js"
+      ]
+    },
+    {
+      "library": "datatables.net@2.3.2",
+      "destination": "wwwroot/lib/datatables.net/",
+      "files": [
+        "dataTables.min.js"
+      ]
+    },
+    {
+      "library": "datatables.net-bs5@2.3.2",
+      "destination": "wwwroot/lib/datatables.net-bs5/",
+      "files": [
+        "dataTables.bootstrap5.min.js",
+        "dataTables.bootstrap5.min.css"
+      ]
+    },
+    {
+      "provider": "cdnjs",
+      "library": "autocomplete.js@0.38.1",
+      "destination": "wwwroot/lib/autocomplete.js/",
+      "files": [
+        "autocomplete.min.js",
+        "autocomplete.js"
       ]
     }
   ]

@@ -1,0 +1,133 @@
+﻿@model IEnumerable<GesN.Web.Models.ViewModels.Sales.OrderEntryViewModel>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h5 class="mb-0">Lista de Pedidos</h5>
+        <small class="text-muted">@Model.Count() pedido(s) encontrado(s)</small>
+    </div>
+    <div class="d-flex gap-2">
+        <!-- Botões de Ação -->
+        <button type="button" class="btn btn-outline-secondary" onclick="ordersManager.carregarListaOrders()">
+            <i class="bi bi-arrow-clockwise"></i> 
+        </button>
+        <button type="button" class="btn btn-success" onclick="ordersManager.novoOrderModal()">
+            <i class="bi bi-plus"></i> Novo
+        </button>
+        <button type="button" class="btn btn-outline-primary" onclick="ordersManager.exportarPedidos()">
+            <i class="bi bi-download"></i> Exportar
+        </button>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table id="ordersTable" class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Número</th>
+                    <th>Cliente</th>
+                    <th>Data</th>
+                    <th>Entrega</th>
+                    <th>Tipo</th>
+                    <th>Valor Total</th>
+                    <th>Status</th>
+                    <th width="140">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr data-order-id="@item.Id">
+                        <td>
+                            <strong>@item.NumberSequence</strong>
+                            <small class="text-muted d-block">@item.FormattedCreatedAt</small>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                    @(item.CustomerName?.Substring(0, Math.Min(2, item.CustomerName.Length)).ToUpper() ?? "N/A")
+                                </div>
+                                <div>
+                                    <strong>@(item.CustomerName ?? "N/A")</strong>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span>@item.FormattedOrderDate</span>
+                        </td>
+                        <td>
+                            <span>@item.FormattedDeliveryDate</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-@(item.Type == GesN.Web.Models.Enumerators.OrderType.Order ? "primary" : "info")">
+                                @item.TypeDisplay
+                            </span>
+                        </td>
+                        <td>
+                            <strong>@item.TotalAmount.ToString("C")</strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-@(GetStatusColor(item.Status))">
+                                @item.StatusDisplay
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm" 
+                                        onclick="ordersManager.abrirDetalhes('@item.Id')" 
+                                        title="Visualizar">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                        onclick="ordersManager.abrirEdicao('@item.Id', '@item.NumberSequence')" 
+                                        title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                @if (item.Status == GesN.Web.Models.Enumerators.OrderStatus.Draft)
+                                {
+                                    <button type="button" class="btn btn-outline-danger btn-sm" 
+                                            onclick="ordersManager.excluirPedido('@item.Id', '@item.NumberSequence')" 
+                                            title="Excluir">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="text-center py-5">
+        <div class="mb-3">
+            <i class="bi bi-cart3 display-1 text-muted"></i>
+        </div>
+        <h5 class="text-muted">Nenhum pedido encontrado</h5>
+        <p class="text-muted">Comece criando seu primeiro pedido!</p>
+        <button type="button" class="btn btn-primary" onclick="ordersManager.novoOrderModal()">
+            <i class="bi bi-plus"></i> Criar Primeiro Pedido
+        </button>
+    </div>
+}
+
+@functions {
+    string GetStatusColor(GesN.Web.Models.Enumerators.OrderStatus status)
+    {
+        return status switch
+        {
+            GesN.Web.Models.Enumerators.OrderStatus.Draft => "secondary",
+            GesN.Web.Models.Enumerators.OrderStatus.Confirmed => "primary",
+            GesN.Web.Models.Enumerators.OrderStatus.InProduction => "warning",
+            GesN.Web.Models.Enumerators.OrderStatus.ReadyForDelivery => "info",
+            GesN.Web.Models.Enumerators.OrderStatus.InDelivery => "dark",
+            GesN.Web.Models.Enumerators.OrderStatus.Delivered => "success",
+            GesN.Web.Models.Enumerators.OrderStatus.Cancelled => "danger",
+            GesN.Web.Models.Enumerators.OrderStatus.Completed => "success",
+            _ => "secondary"
+        };
+    }
+} 

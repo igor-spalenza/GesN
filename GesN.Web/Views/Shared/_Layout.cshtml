@@ -8,10 +8,10 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/GesN.Web.styles.css" asp-append-version="true" />
-        <link rel="stylesheet" href="~/lib/jqueryui/themes/base/jquery-ui.min.css">
         <link rel="stylesheet" href="~/lib/toastr.js/toastr.min.css" />
         <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+        <link rel="stylesheet" href="~/lib/datatables.net-bs5/dataTables.bootstrap5.min.css" />
         
         @* Include Admin.css for Admin area pages *@
         @if (ViewContext.RouteData.Values["area"]?.ToString() == "Admin")
@@ -36,7 +36,7 @@
                                 @ViewData["App"]
                                 @* <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a> *@
                             </li>
-                            <li class="nav-item">
+                            @* <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Cliente" asp-action="Index">Cliente</a>
                             </li>
                             <li class="nav-item">
@@ -45,6 +45,86 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="Index">Customer</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">Order</a>
+                            </li> *@
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="ProdutoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Produto
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="ProdutoDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Product" asp-action="Index">Produtos</a></li>
+                                    @* | ProductGroupItem | ProductGroupExchangeRule | CompositeProductXHierarchy | ProductIngredient | *@
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="ProductCategory" asp-action="Index">Categorias</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="ProductComponentHierarchy" asp-action="Index">Hierarquias</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="ProductComponent" asp-action="Index">Componentes</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="VendasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Vendas
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="VendasDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Order" asp-action="Index">Entrada de Venda</a></li>
+                                    @* | OrderItem | Contract | Address | FiscalData | Demand | *@
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Customer" asp-action="Index">Clientes</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Contract" asp-action="Index">--- Futuro Contratos ---</a></li>
+                                </ul>
+                            </li>
+                            
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="ProducaoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Produção
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="ProducaoDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Demand" asp-action="Index">Demandas de Venda</a></li>
+                                    @* | ProductComposition |  *@
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="ProductionOrder" asp-action="Index">Ordens de Produção</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="ComprasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Compras
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="ComprasDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Ingredient" asp-action="Index">Ingredientes</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Supplier" asp-action="Index">Fornecedores</a></li>
+                                </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="FinanceiroDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Financeiro
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="FinanceiroDropdown">
+                                <li><a class="dropdown-item" asp-area="" asp-controller="FinancialTransaction" asp-action="Index">FinancialTransaction</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="TransactionCategory" asp-action="Index">TransactionCategory</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="PaymentMethod" asp-action="Index">PaymentMethod</a></li>
+                            </ul>
+                        </li>
+                            @* <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Produtos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Ingredient" asp-action="Index">Ingredientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductCategory" asp-action="Index">Categorias</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductComponent" asp-action="Index">Componentes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductGroup" asp-action="Index">Grupos de Produto</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Supplier" asp-action="Index">Fornecedores</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductionOrder" asp-action="Index">Ordens de Produção</a>
+                            </li> *@
                         </ul>
                         <partial name="_LoginPartial" />
                     </div>
@@ -63,19 +143,37 @@
             </div>
         </footer>
         <script src="~/lib/jquery/dist/jquery.min.js"></script>
-        <script src="~/lib/jqueryui/jquery-ui.min.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+        <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
         <script src="~/lib/select2/js/select2.min.js"></script>
         <script src="~/lib/select2/js/i18n/pt-br.min.js"></script>
+        <script src="~/lib/autocomplete.js/autocomplete.min.js"></script>
         <script src="~/lib/jquery.mask/jquery.mask.min.js"></script>
+        <script src="~/lib/datatables.net/dataTables.min.js"></script>
+        <script src="~/lib/datatables.net-bs5/dataTables.bootstrap5.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
-        <script src="~/js/Users.js" asp-append-version="true"></script>
         <script src="~/lib/toastr.js/toastr.min.js"></script>
 
         <!-- Modal Container -->
         <div class="modal fade" id="modalContainer" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Produtos -->
+        <div class="modal fade" id="modalProduct" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Conteúdo será carregado via AJAX -->
+                    </div>
                 </div>
             </div>
         </div>

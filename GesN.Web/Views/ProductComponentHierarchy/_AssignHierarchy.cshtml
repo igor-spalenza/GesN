@@ -1,0 +1,85 @@
+@model GesN.Web.Models.ViewModels.Production.AssignHierarchyToProductViewModel
+
+<div class="card">
+    <div class="card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-link"></i> Associar Hierarquia Existente
+        </h6>
+    </div>
+    <div class="card-body">
+        <form id="formAssignHierarchy" method="post">
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.ProductId)
+
+            @if (Model.AvailableHierarchies?.Any() == true)
+            {
+                <div class="row">
+                    <!-- Seleção de Hierarquia -->
+                    <div class="col-12 mb-3">
+                        <div class="floating-input-group">
+                            <select asp-for="HierarchyId" class="form-select floating-select" required>
+                                <option value="">Selecione uma hierarquia...</option>
+                                @foreach (var hierarchy in Model.AvailableHierarchies)
+                                {
+                                    <option value="@hierarchy.Value">@hierarchy.Text</option>
+                                }
+                            </select>
+                            <label asp-for="HierarchyId" class="floating-label">
+                                <i class="fas fa-sitemap text-primary"></i>
+                                Hierarquia Disponível
+                            </label>
+                            <span asp-validation-for="HierarchyId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações sobre Associação -->
+                <div class="alert alert-info">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle fa-2x text-primary me-3"></i>
+                        <div>
+                            <h6 class="mb-1">
+                                <i class="fas fa-link"></i>
+                                Associação de Hierarquia
+                            </h6>
+                            <p class="mb-0">
+                                Ao associar uma hierarquia existente, esta será vinculada ao produto composto
+                                e poderá ser utilizada para organizar os componentes de forma estruturada.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Mensagem quando não há hierarquias disponíveis -->
+                <div class="alert alert-warning">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning me-3"></i>
+                        <div>
+                            <h6 class="mb-1">
+                                <i class="fas fa-exclamation-circle"></i>
+                                Nenhuma Hierarquia Disponível
+                            </h6>
+                            <p class="mb-0">
+                                Não existem hierarquias ativas disponíveis para associação a este produto.
+                                <br />
+                                <strong>Sugestão:</strong> Crie uma nova hierarquia ou verifique se existem 
+                                hierarquias inativas que podem ser reativadas.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão para criar nova hierarquia (implementar redirecionamento) -->
+                <div class="text-center">
+                    <button type="button" class="btn btn-outline-primary" 
+                            onclick="CompositeProduct.showCreateHierarchyModal('@Model.ProductId')">
+                        <i class="fas fa-plus"></i>
+                        Criar Nova Hierarquia
+                    </button>
+                </div>
+            }
+        </form>
+    </div>
+</div> 

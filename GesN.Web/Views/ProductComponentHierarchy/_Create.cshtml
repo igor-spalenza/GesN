@@ -1,0 +1,121 @@
+@model GesN.Web.Models.ViewModels.Production.CreateProductComponentHierarchyViewModel
+
+<form id="createHierarchyForm" method="post" asp-action="Create">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">@Html.DisplayNameFor(m => m.Name) <span class="text-danger">*</span></label>
+                <input asp-for="Name" class="form-control" placeholder="Digite o nome da hierarquia" maxlength="200">
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">@Html.DisplayNameFor(m => m.Description)</label>
+                <textarea asp-for="Description" class="form-control" rows="3" 
+                          placeholder="Descreva o propósito e uso desta hierarquia (opcional)" maxlength="1000"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+                <small class="form-text text-muted">Máximo 1000 caracteres</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="mb-3">
+                <label asp-for="Notes" class="form-label">@Html.DisplayNameFor(m => m.Notes)</label>
+                <textarea asp-for="Notes" class="form-control" rows="2" 
+                          placeholder="Observações internas sobre esta hierarquia (opcional)" maxlength="2000"></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+                <small class="form-text text-muted">Máximo 2000 caracteres</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Opções de Criação -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-cog"></i> Opções de Criação</h6>
+                </div>
+                <div class="card-body">
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="createAsActive" name="IsActive" value="true" checked>
+                        <label class="form-check-label" for="createAsActive">
+                            <strong>Criar como ativa</strong>
+                            <br><small class="text-muted">A hierarquia ficará disponível para uso imediatamente</small>
+                        </label>
+                    </div>
+
+                    <!-- Criação a partir de Template (futuro) -->
+                    @if (Model.AvailableTemplates != null && Model.AvailableTemplates.Any())
+                    {
+                        <div class="mb-3">
+                            <label asp-for="TemplateId" class="form-label">Criar a partir de Template</label>
+                            <select asp-for="TemplateId" class="form-control form-select" asp-items="Model.AvailableTemplates">
+                                <option value="">Criar hierarquia vazia</option>
+                            </select>
+                            <span asp-validation-for="TemplateId" class="text-danger"></span>
+                            <small class="form-text text-muted">Templates pré-definidos facilitam a criação de hierarquias comuns</small>
+                        </div>
+                    }
+
+                    <!-- Duplicação de Hierarquia Existente -->
+                    @if (Model.AvailableHierarchies != null && Model.AvailableHierarchies.Any())
+                    {
+                        <div class="mb-3">
+                            <label asp-for="SourceHierarchyId" class="form-label">Duplicar Hierarquia Existente</label>
+                            <select asp-for="SourceHierarchyId" class="form-control form-select" asp-items="Model.AvailableHierarchies">
+                                <option value="">Criar hierarquia nova</option>
+                            </select>
+                            <span asp-validation-for="SourceHierarchyId" class="text-danger"></span>
+                            <small class="form-text text-muted">Copia a estrutura de uma hierarquia existente</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Criar Hierarquia
+        </button>
+    </div>
+</form>
+
+<script>
+    // Lógica específica para esta view
+    $(document).ready(function() {
+        // Atualizar campos baseado na seleção de template ou hierarquia existente
+        $('#TemplateId, #SourceHierarchyId').on('change', function() {
+            const templateId = $('#TemplateId').val();
+            const sourceHierarchyId = $('#SourceHierarchyId').val();
+
+            // Se selecionou template, limpa hierarquia
+            if (templateId && sourceHierarchyId) {
+                if ($(this).attr('id') === 'TemplateId') {
+                    $('#SourceHierarchyId').val('');
+                } else {
+                    $('#TemplateId').val('');
+                }
+            }
+
+            // Atualizar placeholder do nome baseado na seleção
+            if (templateId) {
+                $('#Name').attr('placeholder', 'Nome será preenchido automaticamente pelo template');
+            } else if (sourceHierarchyId) {
+                $('#Name').attr('placeholder', 'Ex: Cópia de [Nome da Hierarquia Original]');
+            } else {
+                $('#Name').attr('placeholder', 'Digite o nome da hierarquia');
+            }
+        });
+    });
+</script> 

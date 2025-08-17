@@ -8,6 +8,7 @@ const clientesManager = {
     init: function() {
         this.configurarAutoInicializacao();
         this.configurarEventos();
+        this.inicializarDataTable();
     },
     
     /**
@@ -32,6 +33,35 @@ const clientesManager = {
         // Delegação de eventos para elementos dinâmicos
         $(document).on('change', 'select[name="DocumentType"]', function() {
             clientesManager.alterarTipoDocumento($(this));
+        });
+    },
+
+    /**
+     * Inicializa DataTable para a tabela de clientes
+     */
+    inicializarDataTable: function() {
+        $(function() {
+            if ($('#customersTable').length) {
+                $('#customersTable').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json"
+                    },
+                    "responsive": true,
+                    "pageLength": 10,
+                    "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
+                    "order": [[0, "asc"]],
+                    "columnDefs": [
+                        {
+                            "targets": -1,
+                            "orderable": false,
+                            "searchable": false
+                        }
+                    ],
+                    "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                           "<'row'<'col-sm-12'tr>>" +
+                           "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+                });
+            }
         });
     },
     
@@ -140,7 +170,15 @@ const clientesManager = {
             url: '/Customer/ListaClientes',
             type: 'GET',
             success: function(data) {
+                // Destruir DataTable existente se houver
+                if ($.fn.DataTable.isDataTable('#customersTable')) {
+                    $('#customersTable').DataTable().destroy();
+                }
+                
                 $('#lista-clientes-container').html(data);
+                
+                // Reinicializar DataTable
+                clientesManager.inicializarDataTable();
             },
             error: function() {
                 toastr.error('Erro ao carregar lista de clientes');
@@ -157,8 +195,16 @@ const clientesManager = {
             type: 'GET',
             data: { status: status },
             success: function(data) {
+                // Destruir DataTable existente se houver
+                if ($.fn.DataTable.isDataTable('#customersTable')) {
+                    $('#customersTable').DataTable().destroy();
+                }
+                
                 $('#lista-clientes-container').html(data);
                 toastr.info(`Clientes filtrados por status: ${status}`);
+                
+                // Reinicializar DataTable
+                clientesManager.inicializarDataTable();
             },
             error: function() {
                 toastr.error('Erro ao filtrar clientes');
@@ -175,8 +221,16 @@ const clientesManager = {
             type: 'GET',
             data: { documentType: tipo },
             success: function(data) {
+                // Destruir DataTable existente se houver
+                if ($.fn.DataTable.isDataTable('#customersTable')) {
+                    $('#customersTable').DataTable().destroy();
+                }
+                
                 $('#lista-clientes-container').html(data);
                 toastr.info(`Clientes filtrados por tipo: ${tipo}`);
+                
+                // Reinicializar DataTable
+                clientesManager.inicializarDataTable();
             },
             error: function() {
                 toastr.error('Erro ao filtrar clientes');
@@ -195,8 +249,16 @@ const clientesManager = {
             type: 'GET',
             data: { termo: termo },
             success: function(data) {
+                // Destruir DataTable existente se houver
+                if ($.fn.DataTable.isDataTable('#customersTable')) {
+                    $('#customersTable').DataTable().destroy();
+                }
+                
                 $('#lista-clientes-container').html(data);
                 toastr.info(`Busca realizada para: "${termo}"`);
+                
+                // Reinicializar DataTable
+                clientesManager.inicializarDataTable();
             },
             error: function() {
                 toastr.error('Erro ao buscar clientes');
@@ -386,7 +448,7 @@ const clientesManager = {
 window.clientesManager = clientesManager;
 
 // Auto-inicialização quando o DOM estiver pronto
-$(document).ready(function() {
+$(function() {
     // Debug: verificar se o objeto clientesManager existe
     console.log('clientesManager carregado:', typeof clientesManager);
     console.log('novoClienteModal função existe:', typeof clientesManager.novoClienteModal);
