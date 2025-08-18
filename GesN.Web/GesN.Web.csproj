@@ -52,6 +52,7 @@
 
   <ItemGroup>
     <Folder Include="Context\DIAGRAMS\" />
+    <Folder Include="Context\FAST DOCS\" />
     <Folder Include="Data\Database\" />
     <Folder Include="Models\Entities\Financial\" />
     <Folder Include="Models\Entities\Production\" />
