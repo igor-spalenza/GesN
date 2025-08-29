@@ -1,0 +1,318 @@
+// ===================================
+// SITE PRINCIPAL - GesN
+// ===================================
+
+// Importar dependências
+@import 'variables';
+@import 'mixins';
+
+// Estilos base do site
+html {
+  font-size: 14px;
+}
+
+body {
+  margin-bottom: 60px;
+  font-family: $font-family-base;
+}
+
+// ===================================
+// NAVEGAÇÃO E HEADER
+// ===================================
+.navbar-brand {
+  font-weight: 600;
+}
+
+// ===================================
+// FLOATING LABELS (Sistema Atual)
+// ===================================
+.floating-input-group {
+  @include floating-label;
+  margin-bottom: 1rem;
+
+  // Suporte para input groups com addons
+  &.floating-input-group-addon {
+    .floating-input {
+      padding-left: 2.5rem;
+
+      + .floating-label {
+        left: 2.5rem;
+      }
+    }
+
+    .input-group-text {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      z-index: 3;
+    }
+  }
+}
+
+// ===================================
+// AUTOCOMPLETE STYLING
+// ===================================
+.algolia-autocomplete {
+  width: 100% !important;
+
+  .aa-dropdown-menu {
+    background: $bg-white;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow-lg;
+    margin-top: 2px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: $z-index-dropdown;
+
+    .aa-suggestion {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid lighten($border-color, 5%);
+      cursor: pointer;
+      transition: $transition-base;
+
+      &:hover,
+      &.aa-cursor {
+        background-color: lighten($primary-color, 45%);
+      }
+
+      .suggestion-title {
+        font-weight: 500;
+        color: $text-dark;
+      }
+
+      .suggestion-subtitle {
+        font-size: $font-size-sm;
+        color: $text-muted;
+        margin-top: 0.25rem;
+      }
+    }
+
+    .aa-empty {
+      padding: 1rem;
+      text-align: center;
+      color: $text-muted;
+      font-style: italic;
+    }
+  }
+}
+
+// ===================================
+// CARDS E CONTAINERS
+// ===================================
+.card {
+  @include card-variant;
+  
+  &.card-hover {
+    @include hover-lift;
+  }
+}
+
+// ===================================
+// BOTÕES CUSTOMIZADOS
+// ===================================
+.btn-outline-primary {
+  @include button-variant(transparent, $primary-color, $primary-color, $primary-color);
+  color: $primary-color;
+  
+  &:hover {
+    color: white;
+  }
+}
+
+// ===================================
+// TABS PERSONALIZADAS
+// ===================================
+.nav-tabs {
+  border-bottom: 2px solid $border-color;
+
+  .nav-link {
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: $text-muted;
+    font-weight: 500;
+    padding: 0.75rem 1.25rem;
+    transition: $transition-base;
+
+    &:hover {
+      border-bottom-color: lighten($primary-color, 20%);
+      color: $primary-color;
+    }
+
+    &.active {
+      background: transparent;
+      border-bottom-color: $primary-color;
+      color: $primary-color;
+      font-weight: 600;
+    }
+
+    // Botão de fechar aba
+    .btn-close {
+      font-size: 0.7rem;
+      opacity: 0.6;
+      transition: $transition-base;
+
+      &:hover {
+        opacity: 1;
+        background-color: rgba($danger-color, 0.1);
+      }
+    }
+  }
+}
+
+.tab-content {
+  padding: 1.5rem 0;
+}
+
+// ===================================
+// TABLES RESPONSIVAS
+// ===================================
+.table {
+  th {
+    font-weight: 600;
+    border-bottom: 2px solid $border-color;
+    position: relative;
+
+    // Handles de redimensionamento
+    .resize-handle {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 5px;
+      height: 100%;
+      cursor: col-resize;
+      background: transparent;
+
+      &:hover {
+        background: rgba($primary-color, 0.3);
+      }
+    }
+
+    &.resizing {
+      background-color: rgba($primary-color, 0.1);
+    }
+  }
+
+  .user-select-none {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}
+
+// ===================================
+// BADGES E STATUS
+// ===================================
+.badge {
+  &.badge-status-active {
+    background-color: $success-color;
+  }
+
+  &.badge-status-inactive {
+    background-color: $secondary-color;
+  }
+
+  &.badge-type-simple {
+    background-color: $info-color;
+  }
+
+  &.badge-type-composite {
+    background-color: $warning-color;
+    color: $text-dark;
+  }
+
+  &.badge-type-group {
+    background-color: $primary-color;
+  }
+}
+
+// ===================================
+// MODAIS CUSTOMIZADOS
+// ===================================
+.modal {
+  .modal-header {
+    background-color: $bg-light;
+    border-bottom: 2px solid $border-color;
+
+    .modal-title {
+      font-weight: 600;
+      color: $text-dark;
+
+      i {
+        margin-right: 0.5rem;
+        color: $primary-color;
+      }
+    }
+  }
+
+  .modal-footer {
+    background-color: $bg-light;
+    border-top: 1px solid $border-color;
+  }
+}
+
+// ===================================
+// LOADING STATES
+// ===================================
+.spinner-border {
+  &.text-primary {
+    color: $primary-color !important;
+  }
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(white, 0.8);
+  @include center-flex;
+  z-index: $z-index-modal;
+}
+
+// ===================================
+// UTILITIES
+// ===================================
+.text-truncate {
+  @include text-truncate;
+}
+
+// Margin e padding helpers dinâmicos
+@each $prop, $abbrev in (margin: m, padding: p) {
+  @each $size, $value in $spacers {
+    .#{$abbrev}-#{$size} { #{$prop}: $value !important; }
+    .#{$abbrev}t-#{$size} { #{$prop}-top: $value !important; }
+    .#{$abbrev}r-#{$size} { #{$prop}-right: $value !important; }
+    .#{$abbrev}b-#{$size} { #{$prop}-bottom: $value !important; }
+    .#{$abbrev}l-#{$size} { #{$prop}-left: $value !important; }
+    .#{$abbrev}x-#{$size} {
+      #{$prop}-left: $value !important;
+      #{$prop}-right: $value !important;
+    }
+    .#{$abbrev}y-#{$size} {
+      #{$prop}-top: $value !important;
+      #{$prop}-bottom: $value !important;
+    }
+  }
+}
+
+// Responsividade
+@include media-breakpoint-down(md) {
+  html {
+    font-size: 13px;
+  }
+
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .nav-tabs .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: $font-size-sm;
+  }
+}

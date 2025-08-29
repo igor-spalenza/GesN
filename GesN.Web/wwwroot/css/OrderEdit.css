@@ -1,0 +1,45 @@
+/* ========================================
+   OrderEdit.css - Estilos para edição de pedidos
+   ======================================== */
+
+/* Layout das 3 colunas principais */
+.order-data, 
+.order-items, 
+.product-catalog {
+    min-height: 600px;
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    margin-bottom: 15px;
+}
+
+/* Coluna 1 - Dados do pedido */
+.order-data {
+    background-color: #f8f9fa;
+}
+
+/* Coluna 2 - Itens do pedido */
+.order-items {
+    background-color: #ffffff;
+}
+
+/* Coluna 3 - Catálogo de produtos */
+.product-catalog {
+    background-color: #ffffff;
+    padding: 0; /* O padding será controlado pela partial */
+}
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+    .order-data, 
+    .order-items, 
+    .product-catalog {
+        margin-bottom: 20px;
+        min-height: auto;
+    }
+}
+
+
+
+
+

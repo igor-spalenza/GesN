@@ -1,0 +1,154 @@
+@model GesN.Web.Models.ViewModels.Production.ProductCatalogViewModel
+
+<div class="product-catalog">
+    <!-- Header -->
+    <div class="catalog-header bg-primary text-white p-3">
+        <h5><i class="fas fa-shopping-cart"></i> Catálogo De Produtos</h5>
+    </div>
+    
+    <!-- Tabs de Categorias -->
+    <ul class="nav nav-tabs" id="categoryTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-todos" type="button" data-category="" data-category-name="Todos">
+                Todos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-bolos" type="button" data-category="bolos" data-category-name="Bolos">
+                Bolos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-salgados" type="button" data-category="salgados" data-category-name="Salgados">
+                Salgados
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-doces" type="button" data-category="doces" data-category-name="Doces">
+                Doces
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-kits" type="button" data-category="kits" data-category-name="Kits">
+                Kits
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-cardapios" type="button" data-category="cardapios" data-category-name="Cardápios">
+                Cardápios
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-servicos" type="button" data-category="servicos" data-category-name="Serviços">
+                Serviços
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-terceirizados" type="button" data-category="terceirizados" data-category-name="Terceirizados">
+                Terceirizados
+            </button>
+        </li>
+    </ul>
+    
+    <!-- Busca -->
+    <div class="search-section bg-light p-3">
+        <div class="row">
+            <div class="col-8">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-arrow-up"></i></span>
+                    <input type="text" class="form-control" id="product-search" placeholder="Produto">
+                </div>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-outline-secondary w-100" id="search-btn">
+                    <i class="fas fa-search"></i> Pesquisar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lista de Produtos -->
+    <div id="products-list" class="products-container p-3">
+        <div class="d-flex justify-content-center my-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando produtos...</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Paginação -->
+    <div class="catalog-footer d-flex justify-content-between align-items-center p-3 bg-light">
+        <div class="pagination-info">
+            <small class="text-muted">
+                <span id="pagination-range">1-5 of 10</span>
+            </small>
+        </div>
+        <div class="pagination-controls">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="prev-page" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="next-page">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        <div class="page-size-selector">
+            <select class="form-select form-select-sm" id="page-size">
+                <option value="5" selected>5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<style>
+.product-catalog {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.catalog-header {
+    flex-shrink: 0;
+}
+
+.nav-tabs {
+    flex-shrink: 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.search-section {
+    flex-shrink: 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.products-container {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 300px;
+}
+
+.catalog-footer {
+    flex-shrink: 0;
+    border-top: 1px solid #dee2e6;
+}
+
+.nav-tabs .nav-link {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+</style>
+
+
+
+
+

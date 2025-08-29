@@ -1,0 +1,727 @@
+// ===================================
+// DOMÍNIO DE ORDERS/PEDIDOS - GesN
+// ===================================
+
+@import '../variables';
+@import '../mixins';
+
+// ===================================
+// VARIÁVEIS ESPECÍFICAS DO ORDER
+// ===================================
+$order-primary: #28a745;
+$order-secondary: #6c757d;
+$order-draft: #ffc107;
+$order-confirmed: #17a2b8;
+$order-in-progress: #fd7e14;
+$order-completed: #28a745;
+$order-cancelled: #dc3545;
+
+// Status colors mapping
+$order-status-colors: (
+  'Draft': $order-draft,
+  'Confirmed': $order-confirmed,
+  'InProgress': $order-in-progress,
+  'Completed': $order-completed,
+  'Cancelled': $order-cancelled
+);
+
+// ===================================
+// CONTAINERS E LAYOUTS
+// ===================================
+.order-container {
+  .order-header {
+    background: linear-gradient(135deg, lighten($order-primary, 40%), lighten($order-primary, 45%));
+    border-radius: $border-radius;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: $box-shadow;
+
+    .order-title {
+      color: $order-primary;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .order-subtitle {
+      color: $text-muted;
+      font-size: $font-size-sm;
+    }
+  }
+
+  .order-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+
+    .stat-card {
+      @include card-variant;
+      @include hover-lift;
+      padding: 1.25rem;
+      text-align: center;
+      transition: $transition-base;
+
+      .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        
+        &.stat-total { color: $order-primary; }
+        &.stat-draft { color: $order-draft; }
+        &.stat-confirmed { color: $order-confirmed; }
+        &.stat-completed { color: $order-completed; }
+      }
+
+      .stat-number {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: $text-dark;
+      }
+
+      .stat-label {
+        font-size: $font-size-sm;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+}
+
+// ===================================
+// SISTEMA DE ABAS MÚLTIPLAS (CORE FEATURE)
+// ===================================
+.order-tabs-system {
+  background: $bg-white;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  overflow: hidden;
+
+  // Container principal das abas
+  #orderTabs {
+    background: $bg-light;
+    border-bottom: 1px solid $border-color;
+    padding: 0.5rem 0.5rem 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    
+    // Scrollbar horizontal customizada
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: lighten($order-primary, 20%);
+      border-radius: 2px;
+    }
+
+    .nav-item {
+      display: inline-block;
+      
+      .nav-link {
+        display: flex;
+        align-items: center;
+        background: transparent;
+        border: 1px solid transparent;
+        border-bottom: none;
+        border-radius: $border-radius-sm $border-radius-sm 0 0;
+        color: $text-muted;
+        font-size: $font-size-sm;
+        font-weight: 500;
+        padding: 0.5rem 0.75rem;
+        margin-right: 0.25rem;
+        position: relative;
+        transition: $transition-base;
+        white-space: nowrap;
+        
+        &:hover {
+          background: rgba($order-primary, 0.1);
+          border-color: rgba($order-primary, 0.2);
+          color: $order-primary;
+          text-decoration: none;
+        }
+
+        &.active {
+          background: $bg-white;
+          border-color: $border-color $border-color transparent;
+          color: $order-primary;
+          font-weight: 600;
+          
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: $order-primary;
+          }
+        }
+
+        // Botão de fechar aba
+        .btn-close {
+          background: none;
+          border: none;
+          font-size: 0.7rem;
+          margin-left: 0.5rem;
+          opacity: 0.5;
+          padding: 0;
+          width: auto;
+          height: auto;
+          transition: $transition-base;
+          
+          &:hover {
+            opacity: 1;
+            background-color: rgba($danger-color, 0.1);
+            border-radius: 50%;
+            transform: scale(1.1);
+          }
+          
+          &::before {
+            content: '×';
+            font-weight: bold;
+            color: $text-muted;
+          }
+        }
+        
+        // Indicador de mudanças não salvas
+        &[data-dirty="true"] {
+          &::before {
+            content: '•';
+            color: $warning-color;
+            font-size: 1.2rem;
+            margin-right: 0.25rem;
+          }
+        }
+      }
+    }
+  }
+
+  // Conteúdo das abas
+  #orderTabsContent {
+    min-height: 600px;
+    background: $bg-white;
+
+    .tab-pane {
+      padding: 1.5rem;
+      
+      &.fade {
+        transition: opacity 0.2s ease-in-out;
+      }
+    }
+    
+    // Loading state dentro das abas
+    .loading-content {
+      @include center-flex;
+      min-height: 300px;
+      
+      .spinner-border {
+        color: $order-primary;
+      }
+    }
+  }
+}
+
+// ===================================
+// GRID DE ORDERS COM REDIMENSIONAMENTO
+// ===================================
+.orders-grid {
+  .orders-table-container {
+    background: $bg-white;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow;
+    overflow: hidden;
+
+    .table {
+      margin-bottom: 0;
+
+      thead th {
+        background: $bg-light;
+        font-weight: 600;
+        border-bottom: 2px solid $border-color;
+        position: relative;
+        vertical-align: middle;
+        
+        // Sistema de redimensionamento
+        .resize-handle {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 5px;
+          height: 100%;
+          cursor: col-resize;
+          background: transparent;
+          z-index: 10;
+
+          &:hover {
+            background: rgba($order-primary, 0.3);
+          }
+
+          &:active {
+            background: rgba($order-primary, 0.5);
+          }
+        }
+
+        // Estado durante redimensionamento
+        &.resizing {
+          background-color: rgba($order-primary, 0.1);
+          
+          .resize-handle {
+            background: rgba($order-primary, 0.5);
+          }
+        }
+      }
+
+      tbody {
+        tr {
+          &:hover {
+            background-color: rgba($order-primary, 0.05);
+          }
+
+          // Highlight para rows recém-criados/atualizados
+          &.order-row-highlight {
+            animation: order-highlight 2s ease-in-out;
+          }
+        }
+
+        .order-number {
+          font-family: $font-family-monospace;
+          font-weight: 600;
+          color: $order-primary;
+        }
+
+        .order-customer {
+          font-weight: 500;
+          
+          .customer-info {
+            font-size: $font-size-sm;
+            color: $text-muted;
+          }
+        }
+
+        .order-value {
+          font-family: $font-family-monospace;
+          font-weight: 600;
+          text-align: right;
+        }
+
+        .order-status {
+          .badge {
+            @each $status, $color in $order-status-colors {
+              &.badge-#{to-lower-case($status)} {
+                background-color: $color;
+                color: white;
+                
+                @if $status == 'Draft' {
+                  color: $text-dark;
+                }
+              }
+            }
+          }
+        }
+
+        .order-actions {
+          white-space: nowrap;
+          
+          .btn-group {
+            .btn {
+              padding: 0.25rem 0.5rem;
+              font-size: $font-size-sm;
+              
+              &.btn-outline-primary {
+                border-color: rgba($order-primary, 0.5);
+                color: $order-primary;
+                
+                &:hover {
+                  background-color: $order-primary;
+                  border-color: $order-primary;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Utilitários para redimensionamento
+  .user-select-none {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}
+
+// ===================================
+// MODAIS DE ORDER
+// ===================================
+.order-modal {
+  .modal-header {
+    background: linear-gradient(135deg, lighten($order-primary, 45%), lighten($order-primary, 50%));
+    border-bottom: 2px solid lighten($order-primary, 20%);
+
+    .modal-title {
+      color: darken($order-primary, 10%);
+      font-weight: 600;
+
+      i {
+        margin-right: 0.5rem;
+        color: $order-primary;
+      }
+    }
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    
+    // Form sections
+    .form-section {
+      margin-bottom: 2rem;
+      
+      .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: $text-dark;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid $border-color;
+        
+        i {
+          color: $order-primary;
+          margin-right: 0.5rem;
+        }
+      }
+    }
+
+    // Customer selection area
+    .customer-selection {
+      background: lighten($order-primary, 48%);
+      border: 1px dashed lighten($order-primary, 20%);
+      border-radius: $border-radius;
+      padding: 1rem;
+      
+      .customer-autocomplete-container {
+        position: relative;
+      }
+    }
+  }
+
+  .modal-footer {
+    background: $bg-light;
+    border-top: 1px solid $border-color;
+    
+    .btn-primary {
+      background-color: $order-primary;
+      border-color: $order-primary;
+      
+      &:hover {
+        background-color: darken($order-primary, 10%);
+        border-color: darken($order-primary, 10%);
+      }
+    }
+  }
+}
+
+// ===================================
+// AUTOCOMPLETE ESPECÍFICO PARA CUSTOMER
+// ===================================
+.customer-autocomplete {
+  .aa-dropdown-menu {
+    background: $bg-white;
+    border: 1px solid lighten($order-primary, 20%);
+    border-radius: $border-radius;
+    box-shadow: 0 4px 12px rgba($order-primary, 0.15);
+    margin-top: 2px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: $z-index-dropdown + 10;
+
+    .aa-suggestion {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid lighten($border-color, 5%);
+      cursor: pointer;
+      transition: $transition-base;
+
+      &:hover,
+      &.aa-cursor {
+        background-color: lighten($order-primary, 45%);
+      }
+
+      .suggestion-title {
+        font-weight: 500;
+        color: $text-dark;
+        font-size: $font-size-base;
+      }
+
+      .suggestion-subtitle {
+        font-size: $font-size-sm;
+        color: $text-muted;
+        margin-top: 0.25rem;
+        
+        i {
+          margin-right: 0.25rem;
+          color: $order-primary;
+        }
+      }
+    }
+
+    .aa-empty {
+      padding: 1rem;
+      text-align: center;
+      color: $text-muted;
+      font-style: italic;
+      
+      &::before {
+        content: '🔍 ';
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
+// ===================================
+// FLOATING LABELS CUSTOMIZADAS PARA ORDER
+// ===================================
+.order-form {
+  .floating-input-group {
+    @include floating-label;
+    margin-bottom: 1.25rem;
+
+    .floating-input,
+    .floating-select,
+    .floating-textarea {
+      &:focus,
+      &.has-value {
+        border-color: $order-primary;
+        box-shadow: 0 0 0 0.2rem rgba($order-primary, 0.25);
+
+        + .floating-label {
+          color: $order-primary;
+        }
+      }
+    }
+
+    // Suporte específico para autocomplete
+    &.customer-autocomplete-group {
+      .floating-input {
+        padding-right: 2.5rem;
+      }
+
+      &::after {
+        content: '👤';
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $text-muted;
+        pointer-events: none;
+        z-index: 3;
+      }
+
+      &.has-value::after {
+        color: $order-primary;
+      }
+    }
+  }
+
+  // Seções do formulário
+  .customer-info-section {
+    background: lighten($order-primary, 48%);
+    border-left: 4px solid $order-primary;
+    padding: 1rem;
+    border-radius: $border-radius;
+    margin-bottom: 1.5rem;
+
+    .section-icon {
+      color: $order-primary;
+      font-size: 1.2rem;
+      margin-right: 0.5rem;
+    }
+  }
+
+  .order-details-section {
+    .date-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      
+      @include media-breakpoint-down(md) {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}
+
+// ===================================
+// LOADING E FEEDBACK STATES
+// ===================================
+.order-loading {
+  @include loading-spinner(1.5rem, $order-primary);
+}
+
+.order-success-feedback {
+  color: $order-completed;
+  font-weight: 600;
+  
+  &::before {
+    content: '✓ ';
+    margin-right: 0.25rem;
+  }
+}
+
+.order-error-feedback {
+  color: $order-cancelled;
+  font-weight: 500;
+  
+  &::before {
+    content: '⚠ ';
+    margin-right: 0.25rem;
+  }
+}
+
+// ===================================
+// RESPONSIVIDADE
+// ===================================
+@include media-breakpoint-down(lg) {
+  .order-container {
+    .order-stats {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+  }
+  
+  .order-tabs-system {
+    #orderTabs .nav-item .nav-link {
+      font-size: 0.8rem;
+      padding: 0.4rem 0.6rem;
+    }
+  }
+}
+
+@include media-breakpoint-down(md) {
+  .order-form {
+    .order-details-section .date-inputs {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .orders-grid .orders-table-container {
+    overflow-x: auto;
+    
+    .table {
+      min-width: 800px;
+    }
+  }
+  
+  // Abas em telas pequenas - comportamento de scroll
+  .order-tabs-system #orderTabs {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+// ===================================
+// ANIMAÇÕES ESPECÍFICAS
+// ===================================
+@keyframes order-highlight {
+  0% { background-color: transparent; }
+  25% { background-color: rgba($order-primary, 0.1); }
+  75% { background-color: rgba($order-primary, 0.05); }
+  100% { background-color: transparent; }
+}
+
+.order-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// Tab transition
+.tab-pane.show.active {
+  animation: slideInFromRight 0.2s ease-in-out;
+}
+
+@keyframes slideInFromRight {
+  from { 
+    opacity: 0; 
+    transform: translateX(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+// ===================================
+// ESTADOS ESPECIAIS
+// ===================================
+.order-draft-mode {
+  border-left: 4px solid $order-draft;
+  background: lighten($order-draft, 45%);
+}
+
+.order-editing-mode {
+  border-left: 4px solid $order-in-progress;
+  background: lighten($order-in-progress, 45%);
+}
+
+.order-completed-mode {
+  border-left: 4px solid $order-completed;
+  background: lighten($order-completed, 45%);
+}
+
+// ===================================
+// UTILITÁRIOS ESPECÍFICOS DE ORDER
+// ===================================
+.order-number-display {
+  font-family: $font-family-monospace;
+  font-weight: 700;
+  color: $order-primary;
+  font-size: 1.1rem;
+}
+
+.customer-display {
+  .customer-name {
+    font-weight: 600;
+    color: $text-dark;
+  }
+  
+  .customer-contact {
+    font-size: $font-size-sm;
+    color: $text-muted;
+    
+    i {
+      margin-right: 0.25rem;
+      width: 12px;
+    }
+  }
+}
+
+.order-timeline {
+  .timeline-item {
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.5rem;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: $order-primary;
+    }
+    
+    .timeline-content {
+      font-size: $font-size-sm;
+      color: $text-muted;
+    }
+  }
+}

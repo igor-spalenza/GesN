@@ -1,0 +1,149 @@
+// ===================================
+// MIXINS UTILITÁRIOS - GesN
+// ===================================
+
+// Mixin para media queries responsivas
+@mixin media-breakpoint-up($name) {
+  $min: map-get($breakpoints, $name);
+  @if $min != 0 {
+    @media (min-width: $min) {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@mixin media-breakpoint-down($name) {
+  $max: map-get($breakpoints, $name) - 0.02;
+  @media (max-width: $max) {
+    @content;
+  }
+}
+
+// Mixin para centralizar elementos
+@mixin center-flex($direction: row) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: center;
+  align-items: center;
+}
+
+// Mixin para botões customizados
+@mixin button-variant($background, $border: $background, $hover-background: darken($background, 7.5%), $hover-border: darken($border, 10%)) {
+  color: contrast-color($background);
+  background-color: $background;
+  border-color: $border;
+
+  &:hover {
+    color: contrast-color($hover-background);
+    background-color: $hover-background;
+    border-color: $hover-border;
+  }
+
+  &:focus,
+  &.focus {
+    box-shadow: 0 0 0 0.2rem rgba($border, 0.5);
+  }
+}
+
+// Mixin para cards com sombra
+@mixin card-variant($bg: $bg-white, $border: $border-color) {
+  background-color: $bg;
+  border: 1px solid $border;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+}
+
+// Mixin para floating labels
+@mixin floating-label {
+  position: relative;
+
+  .floating-label {
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    color: $text-muted;
+    font-size: $font-size-base;
+    pointer-events: none;
+    transition: $transition-base;
+    z-index: 2;
+  }
+
+  .floating-input,
+  .floating-select,
+  .floating-textarea {
+    background: transparent;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    padding: 1rem 0.75rem 0.25rem;
+    font-size: $font-size-base;
+    transition: $transition-base;
+
+    &:focus,
+    &.has-value {
+      outline: 0;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 0.2rem rgba($primary-color, 0.25);
+
+      + .floating-label {
+        top: 0.25rem;
+        font-size: $font-size-sm;
+        color: $primary-color;
+      }
+    }
+
+    &.is-invalid {
+      border-color: $danger-color;
+      box-shadow: 0 0 0 0.2rem rgba($danger-color, 0.25);
+
+      + .floating-label {
+        color: $danger-color;
+      }
+    }
+  }
+}
+
+// Mixin para animações de loading
+@mixin loading-spinner($size: 1rem, $color: $primary-color) {
+  display: inline-block;
+  width: $size;
+  height: $size;
+  border: 2px solid rgba($color, 0.3);
+  border-radius: 50%;
+  border-top-color: $color;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Mixin para truncar texto
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Mixin para hover elevação
+@mixin hover-lift {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $box-shadow-lg;
+  }
+}
+
+// Função para calcular contraste automático de cor
+@function contrast-color($background) {
+  @if lightness($background) > 50% {
+    @return $text-dark;
+  } @else {
+    @return $text-light;
+  }
+}

@@ -729,6 +729,62 @@ namespace GesN.Web.Controllers
             }
         }
 
+        // GET: Product/CatalogProducts - Para uso no catálogo de edição de pedidos
+        [HttpGet]
+        public async Task<IActionResult> CatalogProducts(
+            string? category = null,
+            string? search = null,
+            int page = 1,
+            int pageSize = 5)
+        {
+            try
+            {
+                var allProducts = await _productService.GetActiveAsync();
+                
+                // Aplicar filtros
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    allProducts = allProducts.Where(p =>
+                        p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(p.SKU) && p.SKU.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                        (p.Description?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
+                }
+
+                if (!string.IsNullOrWhiteSpace(category))
+                {
+                    // Filtrar por nome da categoria (assumindo que categoria é o nome, não o ID)
+                    allProducts = allProducts.Where(p =>
+                        !string.IsNullOrWhiteSpace(p.Category) &&
+                        p.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
+                }
+
+                var totalProducts = allProducts.Count();
+                
+                // Aplicar paginação
+                var paginatedProducts = allProducts
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var viewModel = new ProductCatalogViewModel
+                {
+                    Products = paginatedProducts,
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalProducts = totalProducts,
+                    CurrentCategory = category,
+                    SearchTerm = search
+                };
+
+                return PartialView("_ProductList", viewModel.Products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar catálogo de produtos");
+                return PartialView("_ProductList", new List<Product>());
+            }
+        }
+
         // GET: Product/BuscarProduct
         [HttpGet]
         public async Task<IActionResult> BuscarProduct(string termo)

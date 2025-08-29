@@ -26,16 +26,23 @@ Tudo no catálogo começa com a entidade `Product`. Ela é a base para qualquer 
     -   "Lata de Coca-Cola 350ml"
     -   "Coxinha comum"
     -   "Pão de queijo"
--   **Relacionamentos:** Pode estar associado a `Ingredients` para controle de matéria-prima e baixa de estoque (ex: uma "Porção de Batata Frita" consome X gramas de "Batata Crua" e Y ml de "Óleo").
+-   **Relacionamentos:** Pode estar associado a N `Ingredients` para controle de matéria-prima e baixa de estoque (ex: uma "Porção de Batata Frita" consome X gramas de "Batata Crua" e Y ml de "Óleo").
 
-### b) `ProductType.Composite` (Produto Composto)
+### b) `ProductType.Composite` (Produto Composto / Configurável)
 
-Representa um produto que é fabricado a partir de uma "receita" fixa de outros componentes de produto (que podem ser simples ou até mesmo outros compostos).
+Representa um **único item vendável** cuja composição interna é parametrizável e definida no momento do pedido. É o conceito de "Monte o seu...".
 
--   **Definição:** Um item cuja composição é pré-definida e não pode ser alterada pelo vendedor no momento da venda.
+-   **Definição:** Um produto que, embora vendido como uma unidade, ele possui uma parametrização flexível que na visão de Vendas fornece a possibilidade de escolher as opções de composição parametrizadas para o Produto no Catálogo de Produtos. O administrador define as regras de montagem (ex: "escolha 1 massa e 2 recheios") através da associação com a tabela , e o vendedor faz as escolhas.
 -   **Exemplos:**
-    -   "Hambúrguer X-Salada"
-    -   "Cesta de Café da Manhã Padrão"
+    -   "Bolo de Festa (20 pessoas)"
+    -   "Pizza Meio a Meio"
+    -   "Sanduíche customizável"
+-   **Mecanismo de Funcionamento:** Utiliza a tabela `ProductComponent` para definir sua estrutura. Cada registro em `ProductComponent` representa um "slot" na receita.
+    -   **Exemplo de `ProductComponent` para o "Bolo de Festa":**
+        -   Registro 1: `CompositeProductId` (ID do Bolo), `ComponentProductId` (ID da **Categoria** "Massas de Bolo"), `Quantity`: 1.
+        -   Registro 2: `CompositeProductId` (ID do Bolo), `ComponentProductId` (ID da **Categoria** "Recheios de Bolo"), `Quantity`: 2.
+        -   Registro 3: `CompositeProductId` (ID do Bolo), `ComponentProductId` (ID da **Categoria** "Coberturas"), `Quantity`: 1.
+    -   *(Nota: A implementação exata de como `ProductComponent` aponta para uma categoria precisa ser detalhada, mas o conceito é este).*
 -   **Tabela de Apoio:** `ProductComponent`
     -   Esta tabela faz a ligação: "Qual produto composto (`CompositeProductId`) é feito de quais componentes (`ComponentProductId`) e em qual quantidade (`Quantity`)?"
     -   **Exemplo de `ProductComponent`:**
