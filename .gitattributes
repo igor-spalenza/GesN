@@ -4,6 +4,18 @@
 * text=auto
 
 ###############################################################################
+# Force specific line endings for TypeScript/JavaScript files  
+###############################################################################
+*.ts text eol=crlf
+*.js text eol=crlf
+*.json text eol=crlf
+*.css text eol=crlf
+*.scss text eol=crlf
+*.html text eol=crlf
+*.cshtml text eol=crlf
+*.cs text eol=crlf
+
+###############################################################################
 # Set default behavior for command prompt diff.
 #
 # This is need for earlier builds of msysgit that does not have it on by

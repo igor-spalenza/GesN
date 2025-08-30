@@ -735,7 +735,8 @@ namespace GesN.Web.Controllers
             string? category = null,
             string? search = null,
             int page = 1,
-            int pageSize = 5)
+            int pageSize = 8,
+            bool returnJson = false)
         {
             try
             {
@@ -776,11 +777,82 @@ namespace GesN.Web.Controllers
                     SearchTerm = search
                 };
 
+                // Retornar JSON se solicitado (para TypeScript)
+                if (returnJson)
+                {
+                    var catalogData = new
+                    {
+                        success = true,
+                        message = "Produtos carregados com sucesso",
+                        data = new
+                        {
+                            products = paginatedProducts.Select(p => new
+                            {
+                                id = p.Id,
+                                name = p.Name,
+                                description = p.Description,
+                                sku = p.SKU,
+                                price = p.Price,
+                                unitPrice = p.UnitPrice,
+                                cost = p.Cost,
+                                categoryId = p.CategoryId,
+                                categoryName = p.Category,
+                                productType = p.ProductType.ToString(),
+                                imageUrl = p.ImageUrl,
+                                assemblyTime = p.AssemblyTime,
+                                isActive = p.StateCode == ObjectState.Active,
+                                createdAt = p.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss")
+                            }),
+                            currentPage = page,
+                            totalProducts = totalProducts,
+                            totalPages = (int)Math.Ceiling((double)totalProducts / pageSize),
+                            hasNextPage = page < Math.Ceiling((double)totalProducts / pageSize),
+                            hasPreviousPage = page > 1,
+                            filters = new
+                            {
+                                category = category,
+                                search = search,
+                                page = page,
+                                pageSize = pageSize
+                            }
+                        }
+                    };
+
+                    return Json(catalogData);
+                }
+
+                // Retornar partial view (comportamento original)
                 return PartialView("_ProductList", viewModel.Products);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao carregar catálogo de produtos");
+                
+                if (returnJson)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Erro ao carregar produtos: " + ex.Message,
+                        data = new
+                        {
+                            products = new List<object>(),
+                            currentPage = 1,
+                            totalProducts = 0,
+                            totalPages = 0,
+                            hasNextPage = false,
+                            hasPreviousPage = false,
+                            filters = new
+                            {
+                                category = category,
+                                search = search,
+                                page = page,
+                                pageSize = pageSize
+                            }
+                        }
+                    });
+                }
+
                 return PartialView("_ProductList", new List<Product>());
             }
         }

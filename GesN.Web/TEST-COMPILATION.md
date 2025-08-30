@@ -42,3 +42,4 @@ dotnet build
 ✅ **Type safety em todas as operações**
 
 **A migração está pronta para produção!**
+

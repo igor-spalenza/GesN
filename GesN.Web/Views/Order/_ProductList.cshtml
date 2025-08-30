@@ -2,76 +2,56 @@
 
 @if (Model?.Any() == true)
 {
-    <div class="product-list">
+    <div class="products-list-clean">
         @foreach (var product in Model)
         {
-            <div class="product-item d-flex justify-content-between align-items-center py-2 border-bottom" 
-                 data-product-id="@product.Id" 
-                 data-product-type="@product.ProductType"
-                 data-product-price="@product.UnitPrice">
-                
-                <div class="product-info flex-grow-1">
-                    <div class="product-name">
-                        <strong>@product.Name</strong>
-                        @if (product.ProductType != GesN.Web.Models.Enumerators.ProductType.Simple)
-                        {
-                            <span class="badge badge-sm bg-secondary ms-1">
-                                @(product.ProductType == GesN.Web.Models.Enumerators.ProductType.Composite ? "Composto" : "Grupo")
-                            </span>
-                        }
-                    </div>
-                    
-                    @if (!string.IsNullOrEmpty(product.Description))
-                    {
-                        <div class="product-description">
-                            <small class="text-muted">@product.Description</small>
+            <div class="product-list-item" data-product-id="@product.Id" data-product-type="@product.ProductType">
+                <div class="product-row">
+                    <div class="product-main-info">
+                        <div class="product-name-section">
+                            <h6 class="product-name">@product.Name</h6>
+                            @if (product.ProductType != GesN.Web.Models.Enumerators.ProductType.Simple)
+                            {
+                                <span class="product-type-badge type-@(product.ProductType.ToString().ToLower())">
+                                    @(product.ProductType == GesN.Web.Models.Enumerators.ProductType.Composite ? "Composto" : "Grupo")
+                                </span>
+                            }
                         </div>
-                    }
-                    
-                    <div class="product-details mt-1">
-                        <small class="text-success fw-bold">
-                            @product.UnitPrice.ToString("C")
-                        </small>
                         
-                        @if (!string.IsNullOrEmpty(product.SKU))
+                        @if (!string.IsNullOrWhiteSpace(product.Description))
                         {
-                            <small class="text-muted ms-2">SKU: @product.SKU</small>
+                            <p class="product-description">@product.Description</p>
                         }
                         
-                        @if (product.AssemblyTime > 0)
-                        {
-                            <small class="text-info ms-2">
-                                <i class="fas fa-clock"></i> @product.GetAssemblyTimeInfo()
-                            </small>
-                        }
+                        <div class="product-meta">
+                            @if (!string.IsNullOrWhiteSpace(product.SKU))
+                            {
+                                <span class="product-sku">
+                                    <i class="fas fa-barcode"></i> @product.SKU
+                                </span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(product.Category))
+                            {
+                                <span class="product-category">
+                                    <i class="fas fa-folder"></i> @product.Category
+                                </span>
+                            }
+                        </div>
                     </div>
-                </div>
-                
-                <div class="product-actions ms-3">
-                    @if (product.ProductType == GesN.Web.Models.Enumerators.ProductType.Simple)
-                    {
-                        <!-- Produto Simples - Adicionar direto -->
-                        <button type="button" 
-                                class="btn btn-primary btn-sm btn-add-simple-product"
+                    
+                    <div class="product-price-action">
+                        <div class="price-display">
+                            <span class="currency-symbol">R$</span>
+                            <span class="price-value">@product.UnitPrice.ToString("N2")</span>
+                        </div>
+                        <button class="btn btn-add-modern btn-add-to-cart" 
                                 data-product-id="@product.Id"
                                 data-product-name="@product.Name"
-                                data-product-price="@product.UnitPrice"
-                                title="Adicionar ao carrinho">
+                                data-product-price="@product.UnitPrice">
                             <i class="fas fa-plus"></i>
+                            <span class="btn-text">Adicionar</span>
                         </button>
-                    }
-                    else
-                    {
-                        <!-- Produto Composto/Grupo - Configurar -->
-                        <button type="button" 
-                                class="btn btn-warning btn-sm btn-configure-product"
-                                data-product-id="@product.Id"
-                                data-product-name="@product.Name"
-                                data-product-type="@product.ProductType"
-                                title="Configurar produto">
-                            <i class="fas fa-cog"></i>
-                        </button>
-                    }
+                    </div>
                 </div>
             </div>
         }
@@ -79,51 +59,14 @@
 }
 else
 {
-    <div class="empty-state text-center py-5">
-        <div class="text-muted">
-            <i class="fas fa-search fa-3x mb-3"></i>
-            <h5>Nenhum produto encontrado</h5>
-            <p>Tente ajustar os filtros ou termo de busca.</p>
+    <div class="catalog-empty-modern">
+        <div class="empty-illustration">
+            <i class="fas fa-boxes"></i>
         </div>
+        <h6 class="empty-title">Nenhum produto encontrado</h6>
+        <p class="empty-subtitle">Tente ajustar os filtros ou buscar por outros termos</p>
+        <button class="btn btn-outline-primary btn-sm" onclick="window.productCatalogManager?.clearFilters()">
+            <i class="fas fa-refresh"></i> Limpar Filtros
+        </button>
     </div>
 }
-
-<style>
-.product-item:hover {
-    background-color: #f8f9fa;
-}
-
-.product-name strong {
-    font-size: 0.95rem;
-}
-
-.product-description {
-    max-width: 300px;
-}
-
-.product-actions .btn {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.badge-sm {
-    font-size: 0.65rem;
-}
-
-.empty-state {
-    color: #6c757d;
-}
-
-.empty-state i {
-    opacity: 0.3;
-}
-</style>
-
-
-
-
-

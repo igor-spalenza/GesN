@@ -9,56 +9,72 @@
 <link href="~/css/SalesDomain.css" rel="stylesheet" />
 
 <div class="index-main">
-
-    <!--
-    <div class="container-fluid menu-lateral-fixo">
-        <h1>Vendas</h1><br />
-
-        <button type="button" class="btn btn-sales mb-3" onclick="ordersManager.novoOrderModal()">
-            Novo Pedido
-        </button><br />
-
-        <h3 class="text-lg font-semibold mb-2">Lembretes</h3>
-        <p class="text-sm">Sem lembretes no momento.</p>
-    </div> 
-    -->
     
-    <div class="conteudo-dinamico">
+    <!-- Layout Principal com Catálogo Lateral -->
+    <div class="order-workspace" id="orderWorkspace">
+        
+        <!-- Área Principal das Abas -->
+        <div class="tabs-area" id="tabsArea">
+            <div class="conteudo-dinamico">
 
+                <!-- Abas de Navegação -->
+                <ul class="nav nav-tabs" id="orderTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#lista-orders" type="button" role="tab">
+                            Página Inicial
+                        </button>
+                    </li>
+                </ul>
 
-        <!-- Abas de Navegação -->
-        <ul class="nav nav-tabs" id="orderTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#lista-orders" type="button" role="tab">
-                    Página Inicial
-                </button>
-            </li>
-        </ul>
+                <!-- Conteúdo das Abas -->
+                <div class="tab-content" id="orderTabsContent">
+                    <div class="tab-pane fade show active" id="lista-orders" role="tabpanel">
+                        <div class="container-fluid mt-3">
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <h2>@status</h2>
+                                </div>
+                            </div>
 
-        <!-- Conteúdo das Abas -->
-        <div class="tab-content" id="orderTabsContent">
-            <div class="tab-pane fade show active" id="lista-orders" role="tabpanel">
-                <div class="container-fluid mt-3">
-                    <div class="row mb-3">
-                        <div class="col">
-                            <h2>@status</h2>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-body">
-                            <div id="lista-orders-container">
-                                <div class="d-flex justify-content-center my-5">
-                                    <div class="spinner-border" role="status">
-                                        <span class="visually-hidden">Carregando...</span>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div id="lista-orders-container">
+                                        <div class="d-flex justify-content-center my-5">
+                                            <div class="spinner-border" role="status">
+                                                <span class="visually-hidden">Carregando...</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
+        
+        <!-- Catálogo Lateral (Slide Panel) -->
+        <div class="catalog-sidebar" id="catalogSidebar">
+            <!-- Botão Fechar Catálogo -->
+            <button class="catalog-close-btn" onclick="window.productCatalogManager?.hideCatalog()" title="Fechar Catálogo">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="catalog-sidebar-content">
+                @await Html.PartialAsync("_ProductCatalog", new GesN.Web.Models.ViewModels.Production.ProductCatalogViewModel())
+            </div>
+        </div>
+        
+        <!-- Backdrop para mobile -->
+        <div class="catalog-backdrop" onclick="window.productCatalogManager?.hideCatalog()"></div>
+        
+    </div>
+
+    <!-- Botão Toggle Flutuante para mostrar catálogo -->
+    <button class="catalog-toggle-btn hidden" id="catalogToggleBtn" onclick="window.productCatalogManager?.toggleCatalog()" title="Mostrar Catálogo de Produtos">
+        <i class="fas fa-store"></i>
+    </button>
 
         <div class="modal fade" id="orderModal" tabindex="-1">
             <div class="modal-dialog modal-lg">
@@ -79,6 +95,10 @@
 
 
 @section Scripts {
-    <script src="~/js/Order.js" asp-append-version="true"></script>
-    <script src="~/js/OrderEdit.js" asp-append-version="true"></script>
+    <script src="~/js/interfaces/common.js" asp-append-version="true"></script>
+    <script src="~/js/interfaces/order.js" asp-append-version="true"></script>
+    <script src="~/js/interfaces/product-catalog.js" asp-append-version="true"></script>
+    <script src="~/js/managers/OrderManager.js" asp-append-version="true"></script>
+    <script src="~/js/managers/ProductCatalogManager.js" asp-append-version="true"></script>
+
 } 

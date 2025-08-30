@@ -93,3 +93,4 @@ ls wwwroot/css/site.css
 - [ ] ✅ Console sem erros JavaScript
 
 **🎉 Se todos os itens estão ✅, a migração está pronta!**
+

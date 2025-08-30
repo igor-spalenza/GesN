@@ -94,6 +94,19 @@ else
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+// 🔧 CONFIGURAÇÃO PARA DEBUG TYPESCRIPT - Serve arquivos TypeScript para Source Maps
+if (app.Environment.IsDevelopment())
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+            Path.Combine(builder.Environment.ContentRootPath, "TypeScript")),
+        RequestPath = "/TypeScript",
+        ServeUnknownFileTypes = true,
+        DefaultContentType = "text/plain"
+    });
+}
+
 app.UseRouting();
 
 app.UseAuthentication();

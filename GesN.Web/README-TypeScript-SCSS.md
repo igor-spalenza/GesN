@@ -159,3 +159,4 @@ dotnet build
 
 ---
 **🎉 Implementação concluída! O projeto está pronto para usar TypeScript e SCSS.**
+

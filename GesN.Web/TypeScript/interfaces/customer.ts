@@ -2,14 +2,16 @@
 // INTERFACES DE CUSTOMER - GesN
 // ===================================
 
-import { ApiResponse, DocumentType, EntityStatus } from './common';
+// Import removido - definições globais
+
+// ⚠️ Tipos removidos - já definidos em common.ts
 
 // Dados do formulário de cliente
-export interface CustomerFormData {
+interface CustomerFormData {
     name: string;
     email?: string;
     phone?: string;
-    documentType: DocumentType;
+    documentType: 'CPF' | 'CNPJ';
     documentNumber: string;
     address?: string;
     city?: string;
@@ -20,42 +22,55 @@ export interface CustomerFormData {
 }
 
 // Cliente completo (com ID)
-export interface Customer extends CustomerFormData {
+interface Customer {
     id: number;
+    name: string;
+    email?: string;
+    phone?: string;
+    documentType: 'CPF' | 'CNPJ';
+    documentNumber: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    notes?: string;
+    isActive: boolean;
     createdAt: string;
     updatedAt?: string;
-    status: EntityStatus;
+    status: 'Active' | 'Inactive';
+    value?: string; // Para compatibilidade com autocomplete
 }
 
 // Resposta ao salvar cliente
-export interface CustomerSaveResponse {
+interface CustomerSaveResponse {
     id: number;
     name: string;
     documentNumber: string;
 }
 
 // Item do autocomplete de cliente
-export interface CustomerAutocompleteItem {
+interface CustomerAutocompleteItem {
     id: number;
     label: string;
     value: string;
     phone?: string;
     email?: string;
-    documentType: DocumentType;
-    documentNumber: string;
+    documentType?: 'CPF' | 'CNPJ';
+    documentNumber?: string;
+    data?: Customer; // Dados completos do cliente
 }
 
 // Configuração do cliente manager
-export interface CustomerManagerConfig {
+interface CustomerManagerConfig {
     baseUrl: string;
     modalSelector: string;
     gridSelector: string;
     maxNameLength: number;
-    documentMasks: Record<DocumentType, string>;
+    documentMasks: Record<'CPF' | 'CNPJ', string>;
 }
 
 // Estado interno do cliente manager
-export interface CustomerManagerState {
+interface CustomerManagerState {
     currentEditingId: number | null;
     lastLoadedData: Customer | null;
     validationErrors: Record<string, string[]>;
@@ -63,16 +78,16 @@ export interface CustomerManagerState {
 }
 
 // Filtros específicos do cliente
-export interface CustomerFilters {
+interface CustomerFilters {
     search?: string;
-    status?: EntityStatus;
-    documentType?: DocumentType;
+    status?: 'Active' | 'Inactive';
+    documentType?: 'CPF' | 'CNPJ';
     city?: string;
     state?: string;
 }
 
 // Estatísticas do cliente
-export interface CustomerStatistics {
+interface CustomerStatistics {
     totalCustomers: number;
     activeCustomers: number;
     inactiveCustomers: number;
@@ -82,7 +97,7 @@ export interface CustomerStatistics {
 }
 
 // Opções para exportação
-export interface CustomerExportOptions {
+interface CustomerExportOptions {
     format: 'excel' | 'csv' | 'pdf';
     filters?: CustomerFilters;
     includeInactive?: boolean;
@@ -90,9 +105,10 @@ export interface CustomerExportOptions {
 }
 
 // Resultado da busca de clientes
-export interface CustomerSearchResult {
+interface CustomerSearchResult {
     customers: Customer[];
     totalCount: number;
     currentPage: number;
     totalPages: number;
 }
+

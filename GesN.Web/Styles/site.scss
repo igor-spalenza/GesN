@@ -316,3 +316,10 @@ body {
     font-size: $font-size-sm;
   }
 }
+
+// ===================================
+// IMPORTAR DOMÍNIOS ESPECÍFICOS
+// ===================================
+@import 'domains/ProductDomain';
+@import 'domains/OrderDomain';
+

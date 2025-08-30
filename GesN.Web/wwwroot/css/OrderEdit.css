@@ -1,45 +1,868 @@
-/* ========================================
-   OrderEdit.css - Estilos para edição de pedidos
-   ======================================== */
+/* ===================================
+   ORDER EDIT - LAYOUT MODERNO E BALANCEADO
+   ===================================*/
 
-/* Layout das 3 colunas principais */
-.order-data, 
-.order-items, 
-.product-catalog {
-    min-height: 600px;
-    padding: 15px;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-    margin-bottom: 15px;
+/* ===================================
+   CONTAINER PRINCIPAL
+   ===================================*/
+.container-fluid {
+    padding: 1rem;
+    max-width: 100%;
 }
 
-/* Coluna 1 - Dados do pedido */
-.order-data {
-    background-color: #f8f9fa;
+#editOrderContainer {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    min-height: calc(100vh - 120px);
+    width: 100%;
+    overflow-x: hidden;
 }
 
-/* Coluna 2 - Itens do pedido */
+/* ===================================
+   LAYOUT DAS 3 COLUNAS - BALANCEADO
+   ===================================*/
+.row {
+    margin: 0;
+    /* gap removido - usar Bootstrap gutters nativos */
+}
+
+/* Layout 2-colunas na view de edição */
+.row .col-md-6.order-data,
+.row .col-md-6.order-items {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+/* Catálogo agora será lateral no Index - remover estilos conflitantes */
+
+/* Colunas da view de edição (2 colunas apenas) */
+.order-data,
 .order-items {
-    background-color: #ffffff;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 0;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
 }
 
-/* Coluna 3 - Catálogo de produtos */
+/* Product catalog no Index - layout slide */
 .product-catalog {
-    background-color: #ffffff;
-    padding: 0; /* O padding será controlado pela partial */
+    background: white;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: none;
+    box-sizing: border-box;
 }
 
-/* Responsividade para mobile */
-@media (max-width: 768px) {
-    .order-data, 
-    .order-items, 
-    .product-catalog {
-        margin-bottom: 20px;
-        min-height: auto;
+/* ===================================
+   COLUNA 1 - DADOS DO PEDIDO
+   ===================================*/
+.order-data {
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+
+.column-header {
+    padding: 1rem;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    margin: 0;
+}
+
+.order-header {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    color: white;
+}
+
+.column-header h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.column-content {
+    padding: 1rem;
+    flex: 1;
+}
+
+.column-content .form-group {
+    margin-bottom: 1.2rem;
+}
+
+.column-content label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+    display: block;
+}
+
+.column-content .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 0.4rem;
+    padding: 0.65rem 0.8rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.column-content .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.column-content .form-control[readonly] {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+}
+
+.column-content .btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 0.4rem;
+    box-shadow: 0 2px 6px rgba(13, 110, 253, 0.3);
+    transition: all 0.2s ease;
+}
+
+.column-content .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+}
+
+/* ===================================
+   COLUNA 2 - ORDER ITEMS (SIMPLIFICADA)
+   ===================================*/
+.order-items {
+    background: linear-gradient(135deg, #fff 0%, #fffbf0 100%);
+}
+
+.order-items-header {
+    background: linear-gradient(135deg, #ffc107 0%, #ffcd39 100%);
+    color: white;
+    padding: 1rem;
+    margin: 0;
+    border-bottom: 2px solid rgba(255, 193, 7, 0.3);
+}
+
+.order-items-header h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.order-items-header .badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 0.8rem;
+}
+
+.order-items-list {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.order-item-card {
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 0.4rem;
+    padding: 0.9rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.order-item-card:hover {
+    border-color: #ffc107;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+    transform: translateY(-1px);
+}
+
+.item-main-info {
+    flex: 1;
+}
+
+.item-product-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.4rem;
+}
+
+.item-details {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+}
+
+.item-details span {
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.item-details i {
+    font-size: 0.75rem;
+    width: 12px;
+}
+
+.item-total {
+    font-weight: 700;
+    color: #28a745 !important;
+}
+
+.item-actions .btn-group-vertical .btn {
+    border-radius: 0.25rem;
+    margin-bottom: 0.2rem;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+.order-items-summary {
+    background: #f8f9fa;
+    border-radius: 0.4rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.summary-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.summary-value {
+    font-weight: 700;
+    color: #212529;
+}
+
+.summary-value.currency {
+    color: #28a745;
+    font-family: monospace;
+    font-size: 1.1rem;
+}
+
+.order-items-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+.order-items-empty .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #dee2e6;
+}
+
+.order-items-empty .empty-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.order-items-empty .empty-message {
+    font-size: 0.9rem;
+    max-width: 250px;
+}
+
+/* ===================================
+   COLUNA 3 - CATÁLOGO MODERNO
+   ===================================*/
+.product-catalog,
+.product-catalog-modern {
+    background: linear-gradient(135deg, #fff 0%, #f0f8ff 100%);
+}
+
+/* Header Moderno do Catálogo */
+.catalog-header-modern {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 1rem;
+    border-bottom: 2px solid rgba(40, 167, 69, 0.3);
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.catalog-title {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.catalog-quick-search {
+    margin: 0;
+}
+
+.search-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 0.4rem;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.8rem;
+    color: #6c757d;
+    z-index: 2;
+    font-size: 0.9rem;
+}
+
+.search-input {
+    border: none;
+    padding: 0.6rem 0.8rem 0.6rem 2.2rem;
+    font-size: 0.9rem;
+    flex: 1;
+    background: transparent;
+}
+
+.search-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.btn-search {
+    background: #28a745;
+    border: none;
+    color: white;
+    padding: 0.6rem 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.btn-search:hover {
+    background: #20c997;
+    transform: scale(1.05);
+}
+
+/* Categorias como Chips Modernos */
+.catalog-categories {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 0.8rem;
+}
+
+.categories-scroll {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    scrollbar-width: thin;
+}
+
+.categories-scroll::-webkit-scrollbar {
+    height: 3px;
+}
+
+.categories-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.categories-scroll::-webkit-scrollbar-thumb {
+    background: #dee2e6;
+    border-radius: 1.5px;
+}
+
+.category-chip {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 1.5rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #495057;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.category-chip:hover {
+    background: #e3f2fd;
+    border-color: #2196f3;
+    color: #1976d2;
+    transform: translateY(-1px);
+}
+
+.category-chip.active {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-color: #28a745;
+    color: white;
+    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+}
+
+.category-chip i {
+    font-size: 0.75rem;
+}
+
+/* Lista de Produtos Moderna */
+.catalog-products-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.products-list-modern {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.products-list-clean {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.product-list-item {
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 0.4rem;
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.product-list-item:hover {
+    border-color: #28a745;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.15);
+    transform: translateY(-1px);
+}
+
+.product-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    gap: 0.8rem;
+}
+
+.product-main-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.product-name-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.3rem;
+}
+
+.product-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #212529;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.product-type-badge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.product-type-badge.type-composite {
+    background: #fd7e14;
+    color: white;
+}
+
+.product-type-badge.type-group {
+    background: #6f42c1;
+    color: white;
+}
+
+.product-description {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin: 0 0 0.3rem 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-meta {
+    display: flex;
+    gap: 0.8rem;
+    font-size: 0.75rem;
+    color: #8e8e93;
+}
+
+.product-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.product-meta i {
+    font-size: 0.7rem;
+    width: 10px;
+}
+
+.product-price-action {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.price-display {
+    text-align: right;
+}
+
+.currency-symbol {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-right: 0.2rem;
+}
+
+.price-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #28a745;
+    font-family: 'Segoe UI', monospace;
+}
+
+.btn-add-modern {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    color: white;
+    padding: 0.5rem 0.8rem;
+    border-radius: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s ease;
+    min-width: 90px;
+    justify-content: center;
+}
+
+.btn-add-modern:hover {
+    background: linear-gradient(135deg, #20c997 0%, #198754 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(40, 167, 69, 0.4);
+}
+
+.btn-add-modern:active {
+    transform: translateY(0);
+}
+
+.btn-add-modern i {
+    font-size: 0.75rem;
+}
+
+.btn-text {
+    font-size: 0.8rem;
+}
+
+/* Estados do Catálogo */
+.products-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.loading-spinner-modern .spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #28a745;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.catalog-empty-modern {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+.empty-illustration {
+    font-size: 3rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.empty-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.empty-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+    max-width: 250px;
+    line-height: 1.4;
+}
+
+/* Footer com Paginação */
+.catalog-footer-modern {
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 0.8rem;
+}
+
+.pagination-modern {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.85rem;
+}
+
+.pagination-info {
+    color: #6c757d;
+    font-family: monospace;
+    min-width: 80px;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-pagination {
+    background: white;
+    border: 1px solid #dee2e6;
+    color: #6c757d;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.3rem;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-pagination:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination-current {
+    font-weight: 600;
+    color: #28a745;
+    padding: 0.3rem 0.6rem;
+    background: rgba(40, 167, 69, 0.1);
+    border-radius: 0.3rem;
+    min-width: 60px;
+    text-align: center;
+}
+
+.pagination-size .form-select {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.5rem;
+    width: 70px;
+    border-color: #dee2e6;
+}
+
+/* ===================================
+   RESPONSIVIDADE APRIMORADA
+   ===================================*/
+@media (max-width: 1199.98px) {
+    .product-name {
+        max-width: 150px;
+    }
+    
+    .item-details {
+        flex-direction: column;
+        gap: 0.2rem;
     }
 }
 
+@media (max-width: 767.98px) {
+    #editOrderContainer {
+        padding: 1rem;
+    }
 
+    /* Layout de edição - 2 colunas empilhadas em mobile */
+    .order-data,
+    .order-items {
+        min-height: auto;
+        max-height: 400px;
+        margin-bottom: 1rem;
+    }
+    
+    .order-items-list {
+        max-height: 300px;
+    }
+    
+    .product-row {
+        flex-direction: column;
+        gap: 0.8rem;
+        text-align: center;
+    }
+    
+    .product-price-action {
+        align-items: center;
+        flex-direction: row;
+        gap: 1rem;
+    }
+    
+    .catalog-quick-search {
+        margin-top: 0.5rem;
+    }
+    
+    .pagination-modern {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .pagination-controls {
+        order: -1;
+    }
+}
 
+/* ===================================
+   ANIMAÇÕES E EFEITOS
+   ===================================*/
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
+.order-item-card,
+.product-list-item {
+    animation: slideInUp 0.3s ease-out;
+}
 
+.order-item-card.just-added {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-color: #28a745;
+    animation: pulse 0.6s ease-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+/* ===================================
+   MODO ESCURO (PREPARAÇÃO)
+   ===================================*/
+@media (prefers-color-scheme: dark) {
+    /* Implementar futuramente se necessário */
+}
+
+/* ===================================
+   UTILITÁRIOS ESPECÍFICOS
+   ===================================*/
+.btn-group-vertical .btn {
+    border-radius: 0.25rem !important;
+}
+
+.badge-sm {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+}
+
+.text-currency {
+    font-family: 'Segoe UI', monospace;
+    font-weight: 600;
+}
+
+/* Scroll personalizado para as listas */
+.order-items-list::-webkit-scrollbar,
+.products-list-modern::-webkit-scrollbar {
+    width: 4px;
+}
+
+.order-items-list::-webkit-scrollbar-track,
+.products-list-modern::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.order-items-list::-webkit-scrollbar-thumb {
+    background: #ffc107;
+    border-radius: 2px;
+}
+
+.products-list-modern::-webkit-scrollbar-thumb {
+    background: #28a745;
+    border-radius: 2px;
+}
+
+.order-items-list::-webkit-scrollbar-thumb:hover,
+.products-list-modern::-webkit-scrollbar-thumb:hover {
+    opacity: 0.8;
+}

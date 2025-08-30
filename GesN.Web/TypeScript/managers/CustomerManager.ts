@@ -2,25 +2,10 @@
 // CUSTOMER MANAGER - GesN (TypeScript)
 // ===================================
 
-import { 
-    ApiResponse, 
-    ManagerConfig, 
-    AjaxOptions, 
-    ModalConfig, 
-    ValidationError,
-    DataTableConfig 
-} from '../interfaces/common';
+// Imports removidos - interfaces carregadas globalmente via script tags
+// As interfaces estão definidas em arquivos separados que serão carregados antes
 
-import {
-    CustomerFormData,
-    Customer,
-    CustomerSaveResponse,
-    CustomerAutocompleteItem,
-    CustomerManagerConfig,
-    CustomerManagerState,
-    CustomerFilters,
-    CustomerStatistics
-} from '../interfaces/customer';
+// ⚠️ Tipos removidos - já definidos em common.ts
 
 class CustomerManager {
     private config: CustomerManagerConfig;
@@ -436,8 +421,8 @@ class CustomerManager {
         // Remove máscara anterior
         $documentNumber.unmask();
 
-        const documentType = tipoDocumento === '0' || tipoDocumento === 'CPF' ? 'CPF' : 'CNPJ';
-        const mask = this.config.documentMasks[documentType];
+        const documentType: 'CPF' | 'CNPJ' = tipoDocumento === '0' || tipoDocumento === 'CPF' ? 'CPF' : 'CNPJ';
+        const mask = this.config.documentMasks[documentType as keyof typeof this.config.documentMasks];
 
         $documentNumber.mask(mask, {
             placeholder: mask
@@ -580,4 +565,4 @@ $(function() {
     customerManager.init();
 });
 
-export default CustomerManager;
+// Export removido - usando disponibilização global

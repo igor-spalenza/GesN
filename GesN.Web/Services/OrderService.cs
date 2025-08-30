@@ -15,17 +15,20 @@ namespace GesN.Web.Services
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderItemRepository _orderItemRepository;
         private readonly ICustomerRepository _customerRepository;
+        private readonly IProductRepository _productRepository;
         private readonly ILogger<OrderService> _logger;
 
         public OrderService(
             IOrderRepository orderRepository,
             IOrderItemRepository orderItemRepository,
             ICustomerRepository customerRepository,
+            IProductRepository productRepository,
             ILogger<OrderService> logger)
         {
             _orderRepository = orderRepository;
             _orderItemRepository = orderItemRepository;
             _customerRepository = customerRepository;
+            _productRepository = productRepository;
             _logger = logger;
         }
 
@@ -56,9 +59,8 @@ namespace GesN.Web.Services
                 
                 if (order != null)
                 {
-                    // Carrega os itens do pedido
-                    var items = await _orderItemRepository.GetByOrderIdAsync(id);
-                    order.Items = items.ToList();
+                    // Carrega os itens do pedido com dados dos produtos
+                    order = await LoadOrderWithProductsAsync(order);
                 }
 
                 return order;
@@ -84,9 +86,8 @@ namespace GesN.Web.Services
                 
                 if (order != null)
                 {
-                    // Carrega os itens do pedido
-                    var items = await _orderItemRepository.GetByOrderIdAsync(order.Id);
-                    order.Items = items.ToList();
+                    // Carrega os itens do pedido com dados dos produtos
+                    order = await LoadOrderWithProductsAsync(order);
                 }
 
                 return order;
@@ -577,6 +578,45 @@ namespace GesN.Web.Services
             {
                 _logger.LogError(ex, "Erro ao validar dados do pedido");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Carrega um pedido com os dados dos produtos nos OrderItems
+        /// </summary>
+        /// <param name="order">Pedido a ser carregado com dados dos produtos</param>
+        /// <returns>Pedido com dados dos produtos carregados</returns>
+        private async Task<OrderEntry> LoadOrderWithProductsAsync(OrderEntry order)
+        {
+            try
+            {
+                // Carrega os itens do pedido
+                var items = await _orderItemRepository.GetByOrderIdAsync(order.Id);
+                var itemsList = items.ToList();
+
+                // Para cada item, carrega os dados do produto
+                foreach (var item in itemsList)
+                {
+                    if (!string.IsNullOrEmpty(item.ProductId))
+                    {
+                        var product = await _productRepository.GetByIdAsync(item.ProductId);
+                        if (product != null)
+                        {
+                            item.Product = product;
+                        }
+                    }
+                }
+
+                order.Items = itemsList;
+                return order;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar dados dos produtos para o pedido: {OrderId}", order.Id);
+                // Em caso de erro, retorna o pedido sem os dados dos produtos
+                var items = await _orderItemRepository.GetByOrderIdAsync(order.Id);
+                order.Items = items.ToList();
+                return order;
             }
         }
     }

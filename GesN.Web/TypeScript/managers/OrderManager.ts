@@ -3,24 +3,10 @@
 // Migração 1:1 do Order.js mantendo compatibilidade total
 // ===================================
 
-import {
-    Order,
-    OrderTab,
-    OrderTabsState,
-    OrderManagerState,
-    OrderManagerConfig,
-    OrderFormData,
-    OrderSaveResponse,
-    CustomerAutocompleteItem,
-    ResizeConfig,
-    ColumnWidths,
-    OrderDataTableConfig,
-    FloatingLabelConfig,
-    AutocompleteConfig,
-    LoadingState
-} from '../interfaces/order';
+// Imports removidos - interfaces carregadas globalmente via script tags
+// As interfaces estão definidas em arquivos separados que serão carregados antes
 
-import { ApiResponse, AjaxOptions } from '../interfaces/common';
+// ⚠️ Tipos removidos - já definidos em common.ts
 
 class OrderManager {
     // ===================================
@@ -80,6 +66,44 @@ class OrderManager {
             activeClass: 'has-value',
             errorClass: 'is-invalid'
         };
+
+        // Configurar event listeners para controle do catálogo
+        this.setupCatalogIntegration();
+    }
+
+    /**
+     * Configura integração com o catálogo lateral
+     */
+    private setupCatalogIntegration(): void {
+        // Event listener para mudança de abas
+        $(document).on('shown.bs.tab', 'button[data-bs-toggle="tab"]', (e) => {
+            const target = $(e.target);
+            const targetId = target.data('bs-target') || target.attr('href');
+            const orderId = target.data('order-id');
+            
+            if (typeof window.productCatalogManager !== 'undefined') {
+                if (targetId === '#lista-orders') {
+                    // Aba principal - esconder catálogo e botão toggle
+                    window.productCatalogManager.hideCatalog();
+                    $('#catalogToggleBtn').addClass('hidden');
+                    console.log('🏠 Página inicial ativa - catálogo escondido');
+                } else if (orderId) {
+                    // Aba de edição - trocar contexto do catálogo e mostrar botão toggle
+                    window.productCatalogManager.switchContext(orderId);
+                    $('#catalogToggleBtn').removeClass('hidden');
+                    console.log('📝 Contexto do catálogo alterado para pedido:', orderId);
+                }
+            }
+        });
+
+        // Event listener para escape key (fechar catálogo)
+        $(document).on('keydown', (e) => {
+            if (e.key === 'Escape' && typeof window.productCatalogManager !== 'undefined') {
+                window.productCatalogManager.hideCatalog();
+            }
+        });
+
+        console.log('🔗 Integração com catálogo configurada');
     }
 
     // ===================================
@@ -230,8 +254,8 @@ class OrderManager {
             templates: {
                 suggestion: (suggestion: CustomerAutocompleteItem): string => {
                     return '<div class="autocomplete-suggestion">' +
-                           '<div class="suggestion-title">' + (suggestion.data.value || suggestion.value) + '</div>' +
-                           (suggestion.data.phone ? '<div class="suggestion-subtitle">' + suggestion.data.phone + '</div>' : '') +
+                           '<div class="suggestion-title">' + (suggestion.data?.value || suggestion.value) + '</div>' +
+                           (suggestion.data?.phone ? '<div class="suggestion-subtitle">' + suggestion.data.phone + '</div>' : '') +
                            '</div>';
                 }
             }
@@ -334,18 +358,32 @@ class OrderManager {
             data: formData,
             processData: false,
             contentType: false,
-            success: (response: ApiResponse<OrderSaveResponse>) => {
-                if (response.success && response.data) {
-                    $(this.config.modalSelector).modal('hide');
-                    this.showToast('success', response.message || 'Pedido criado com sucesso!');
+                    success: (response: OrderSaveResponse) => {
+            // 🔍 DEBUG: Vamos analisar a resposta real
+            console.log('=== DEBUG RESPONSE ===');
+            console.log('Resposta completa:', response);
+            console.log('response.success:', response.success, typeof response.success);
+            console.log('response.id:', response.id);
+            console.log('response.numberSequence:', response.numberSequence);
+            console.log('response.message:', response.message);
+            console.log('=====================');
+            
+            if (response.success) {
+                $(this.config.modalSelector).modal('hide');
+                this.showToast('success', response.message || 'Pedido criado com sucesso!');
 
-                    if (response.data.id) {
-                        // Chama o método de edição passando também o numberSequence
-                        this.abrirEdicao(response.data.id, response.data.numberSequence);
-                    }
+                console.log('✅ Abrindo edição com:', response.id, response.numberSequence);
+                
+                if (response.id) {
+                    // Chama o método de edição passando ID e numberSequence
+                    this.abrirEdicao(response.id, response.numberSequence);
                 } else {
-                    this.showToast('error', response.message || 'Não foi possível criar o pedido');
+                    console.log('❌ ID não encontrado no response');
                 }
+            } else {
+                console.log('❌ Success = false - mostrando erro');
+                this.showToast('error', response.message || 'Não foi possível criar o pedido');
+            }
             },
             error: (xhr: JQueryXHR, status: string, error: string) => {
                 console.error('Erro ao salvar pedido:', error);
@@ -359,7 +397,7 @@ class OrderManager {
         });
     }
 
-    public abrirEdicao(orderId: number, numberSequence?: string): void {
+    public abrirEdicao(orderId: string | number, numberSequence?: string): void {
         // Verifica se a aba já existe usando o orderId como identificador
         const existingTabId = `order-${orderId}`;
         const existingTab = $(`#${existingTabId}-tab`);
@@ -406,6 +444,15 @@ class OrderManager {
             .done((data: string) => {
                 $(`#conteudo-${tabId}`).html(data);
                 
+                // Preparar contexto do catálogo para esta aba
+                if (typeof window.productCatalogManager !== 'undefined') {
+                    // Apenas trocar contexto, não mostrar automaticamente
+                    window.productCatalogManager.switchContext(orderId);
+                    // Mostrar botão toggle
+                    $('#catalogToggleBtn').removeClass('hidden');
+                    console.log('Contexto do catálogo preparado para pedido:', orderId);
+                }
+                
                 // Se numberSequence não foi fornecido, extrai do conteúdo carregado
                 if (!numberSequence) {
                     const numberSequenceElement = $(`#conteudo-${tabId}`).find('[data-number-sequence]');
@@ -426,7 +473,7 @@ class OrderManager {
         tabTrigger.show();
     }
 
-    public abrirDetalhes(orderId: number): void {
+    public abrirDetalhes(orderId: string | number): void {
         const $modal = $(this.config.modalSelector);
         $modal.find('.modal-title').text('Detalhes do Pedido');
         $modal.find('.modal-dialog').removeClass('modal-lg').addClass('modal-xl');
@@ -443,14 +490,28 @@ class OrderManager {
     }
 
     public fecharAba(tabId: string): void {
+        // Extrair orderId do tabId para limpeza de estado
+        const orderId = tabId.replace('order-', '');
+        
+        // Limpar estado salvo do catálogo para esta aba
+        if (typeof window.productCatalogManager !== 'undefined' && orderId) {
+            window.productCatalogManager.clearStateForOrder(orderId);
+            console.log('Estado do catálogo limpo para pedido:', orderId);
+        }
+        
         // Remove a aba e seu conteúdo
         $(`#${tabId}-tab`).parent().remove(); // Remove o <li> que contém o button
         $(`#${tabId}`).remove(); // Remove o conteúdo da aba
         
         this.qtdAbasAbertas--;
         
-        // Se não há mais abas abertas, volta para a aba principal
+        // Se não há mais abas abertas, volta para a aba principal e esconde catálogo
         if (this.qtdAbasAbertas === 0) {
+            // Esconder catálogo
+            if (typeof window.productCatalogManager !== 'undefined') {
+                window.productCatalogManager.hideCatalog();
+            }
+            
             const mainTab = new bootstrap.Tab(document.getElementById('main-tab')!);
             mainTab.show();
         } else {
@@ -464,15 +525,15 @@ class OrderManager {
     }
 
     // Método para verificar se um pedido já está aberto
-    public isPedidoAberto(orderId: number): boolean {
+    public isPedidoAberto(orderId: string | number): boolean {
         return $(`#order-${orderId}-tab`).length > 0;
     }
 
     // Método para obter lista de pedidos abertos
-    public getPedidosAbertos(): number[] {
-        const abertos: number[] = [];
+    public getPedidosAbertos(): (string | number)[] {
+        const abertos: (string | number)[] = [];
         $(`${this.config.tabsSelector} button[data-order-id]`).each((index: number, element: Element) => {
-            const orderId = $(element).data('order-id') as number;
+            const orderId = $(element).data('order-id') as (string | number);
             if (orderId) {
                 abertos.push(orderId);
             }
@@ -485,7 +546,7 @@ class OrderManager {
         this.showToast('info', 'Funcionalidade de exportação em desenvolvimento...');
     }
 
-    public excluirPedido(orderId: number, orderNumber: string): void {
+    public excluirPedido(orderId: string | number, orderNumber: string): void {
         if (confirm(`Tem certeza que deseja excluir o pedido ${orderNumber}?\n\nEsta ação não pode ser desfeita.`)) {
             $.ajax({
                 url: `${this.config.baseUrl}/Delete/${orderId}`,
@@ -714,5 +775,4 @@ $(function() {
     });
 });
 
-export default OrderManager;
-export { ordersManager };
+// Exports removidos - usando disponibilização global

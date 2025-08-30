@@ -2,13 +2,13 @@
 // INTERFACES DE ORDER - GesN
 // ===================================
 
-import { ApiResponse, EntityStatus } from './common';
+// Import removido - definições globais
 
 // ===================================
 // ENTIDADES CORE
 // ===================================
 
-export interface Order {
+interface Order {
     id: number;
     numberSequence: string;
     customerId: number;
@@ -24,7 +24,7 @@ export interface Order {
     updatedAt?: string;
 }
 
-export interface OrderItem {
+interface OrderItem {
     id: number;
     orderId: number;
     productId: number;
@@ -35,27 +35,20 @@ export interface OrderItem {
     notes?: string;
 }
 
-export interface Customer {
-    id: number;
-    name: string;
-    value?: string;
-    phone?: string;
-    email?: string;
-    documentNumber?: string;
-}
+// ⚠️ Interface Customer removida - já definida em customer.ts
 
 // ===================================
 // ENUMS E TIPOS
 // ===================================
 
-export type OrderType = 'Sale' | 'Purchase' | 'Production' | 'Transfer';
-export type OrderStatus = 'Draft' | 'Confirmed' | 'InProgress' | 'Completed' | 'Cancelled';
+type OrderType = 'Sale' | 'Purchase' | 'Production' | 'Transfer';
+type OrderStatus = 'Draft' | 'Confirmed' | 'InProgress' | 'Completed' | 'Cancelled';
 
 // ===================================
 // FORMULÁRIOS
 // ===================================
 
-export interface OrderFormData {
+interface OrderFormData {
     customerId: number;
     customerName: string;
     orderDate: string;
@@ -64,30 +57,24 @@ export interface OrderFormData {
     notes?: string;
 }
 
-export interface OrderSaveResponse {
-    id: number;
+interface OrderSaveResponse {
+    id: string; // ✅ Corrigido: ID é string UUID, não number
     numberSequence: string;
     message?: string;
+    success: boolean; // ✅ Adicionado: Resposta inclui success diretamente
 }
 
 // ===================================
 // AUTOCOMPLETE
 // ===================================
 
-export interface CustomerAutocompleteItem {
-    id: number;
-    label: string;
-    value: string;
-    phone?: string;
-    email?: string;
-    data: Customer;
-}
+// ⚠️ Interface CustomerAutocompleteItem removida - já definida em customer.ts
 
 // ===================================
 // SISTEMA DE ABAS
 // ===================================
 
-export interface OrderTab {
+interface OrderTab {
     id: string;
     orderId: number;
     numberSequence: string;
@@ -96,7 +83,7 @@ export interface OrderTab {
     lastModified?: Date;
 }
 
-export interface OrderTabsState {
+interface OrderTabsState {
     openTabs: Map<number, OrderTab>;
     activeTabId: string | null;
     tabCounter: number;
@@ -107,7 +94,7 @@ export interface OrderTabsState {
 // DATATABLES
 // ===================================
 
-export interface OrderDataTableConfig {
+interface OrderDataTableConfig {
     language: {
         url: string;
     };
@@ -120,7 +107,7 @@ export interface OrderDataTableConfig {
     drawCallback: () => void;
 }
 
-export interface DataTableColumnDef {
+interface DataTableColumnDef {
     targets: number[];
     orderable?: boolean;
     searchable?: boolean;
@@ -130,7 +117,7 @@ export interface DataTableColumnDef {
 // SISTEMA DE REDIMENSIONAMENTO
 // ===================================
 
-export interface ResizeConfig {
+interface ResizeConfig {
     minWidths: Record<number, number>;
     storageKey: string;
     isDragging: boolean;
@@ -139,7 +126,7 @@ export interface ResizeConfig {
     startWidth: number;
 }
 
-export interface ColumnWidths {
+interface ColumnWidths {
     [columnIndex: number]: string;
 }
 
@@ -147,14 +134,14 @@ export interface ColumnWidths {
 // ESTADO DO MANAGER
 // ===================================
 
-export interface OrderManagerState {
+interface OrderManagerState {
     contador: number;
     qtdAbasAbertas: number;
     resizeConfig: ResizeConfig;
     tabsState: OrderTabsState;
 }
 
-export interface OrderManagerConfig {
+interface OrderManagerConfig {
     baseUrl: string;
     modalSelector: string;
     gridSelector: string;
@@ -167,7 +154,7 @@ export interface OrderManagerConfig {
 // EVENTOS E CALLBACKS
 // ===================================
 
-export interface OrderEventHandlers {
+interface OrderEventHandlers {
     onOrderCreated?: (order: OrderSaveResponse) => void;
     onOrderUpdated?: (orderId: number) => void;
     onOrderDeleted?: (orderId: number) => void;
@@ -180,7 +167,7 @@ export interface OrderEventHandlers {
 // FILTROS E BUSCA
 // ===================================
 
-export interface OrderFilters {
+interface OrderFilters {
     search?: string;
     status?: OrderStatus;
     orderType?: OrderType;
@@ -189,7 +176,7 @@ export interface OrderFilters {
     dateTo?: string;
 }
 
-export interface OrderListResponse {
+interface OrderListResponse {
     orders: Order[];
     totalCount: number;
     filteredCount: number;
@@ -199,7 +186,7 @@ export interface OrderListResponse {
 // FLOATING LABELS
 // ===================================
 
-export interface FloatingLabelConfig {
+interface FloatingLabelConfig {
     containerClass: string;
     inputClass: string;
     labelClass: string;
@@ -211,7 +198,7 @@ export interface FloatingLabelConfig {
 // MODAL CONFIG
 // ===================================
 
-export interface OrderModalConfig {
+interface OrderModalConfig {
     selector: string;
     sizes: {
         create: 'lg' | 'xl';
@@ -224,7 +211,7 @@ export interface OrderModalConfig {
 // AUTOCOMPLETE CONFIG
 // ===================================
 
-export interface AutocompleteConfig {
+interface AutocompleteConfig {
     minLength: number;
     endpoint: string;
     hint: boolean;
@@ -237,7 +224,7 @@ export interface AutocompleteConfig {
 // UTILITÁRIOS
 // ===================================
 
-export interface AjaxErrorResponse {
+interface AjaxErrorResponse {
     responseJSON?: {
         message?: string;
         errors?: Record<string, string[]>;
@@ -246,7 +233,7 @@ export interface AjaxErrorResponse {
     statusText: string;
 }
 
-export interface LoadingState {
+interface OrderLoadingState {
     isLoading: boolean;
     message?: string;
     target?: string;
@@ -256,7 +243,7 @@ export interface LoadingState {
 // VALIDAÇÃO
 // ===================================
 
-export interface OrderValidationErrors {
+interface OrderValidationErrors {
     customerId?: string[];
     customerName?: string[];
     orderDate?: string[];
@@ -264,7 +251,7 @@ export interface OrderValidationErrors {
     general?: string[];
 }
 
-export interface ValidationResult {
+interface ValidationResult {
     isValid: boolean;
     errors: OrderValidationErrors;
 }

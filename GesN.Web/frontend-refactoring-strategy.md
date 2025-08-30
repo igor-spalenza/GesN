@@ -289,3 +289,4 @@ export class ProductCardComponent {
 ---
 
 **🚀 Este workflow permite aproveitar o poder do v0 mesmo em projetos ASP.NET Core!**
+

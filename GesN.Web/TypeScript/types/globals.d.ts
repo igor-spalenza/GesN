@@ -161,6 +161,7 @@ interface Window {
     clientesManager: any;
     productManager: any;
     ordersManager: any;
+    productCatalogManager: any;
     toastr: typeof toastr;
     bootstrap: typeof bootstrap;
 }

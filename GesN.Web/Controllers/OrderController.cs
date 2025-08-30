@@ -781,5 +781,123 @@ namespace GesN.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+        /// <summary>
+        /// Adiciona um produto ao carrinho do pedido
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> AdicionarProdutoAoCarrinho([FromBody] AdicionarProdutoRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.OrderId) || string.IsNullOrEmpty(request.ProductId))
+                {
+                    return Json(new { success = false, message = "Dados incompletos" });
+                }
+
+                // Verifica se o pedido existe
+                var order = await _orderService.GetOrderByIdAsync(request.OrderId);
+                if (order == null)
+                {
+                    return Json(new { success = false, message = "Pedido não encontrado" });
+                }
+
+                // Buscar dados do produto para preencher o OrderItem
+                var productService = HttpContext.RequestServices.GetRequiredService<IProductService>();
+                var product = await productService.GetByIdAsync(request.ProductId);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = "Produto não encontrado" });
+                }
+
+                // Criar OrderItem
+                var orderItemService = HttpContext.RequestServices.GetRequiredService<IOrderItemService>();
+                var orderItem = new OrderItem
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    OrderId = request.OrderId,
+                    ProductId = request.ProductId,
+                    Quantity = request.Quantity > 0 ? request.Quantity : 1,
+                    UnitPrice = product.UnitPrice,
+                    DiscountAmount = 0,
+                    TaxAmount = 0,
+                    Notes = "",
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = User.Identity?.Name ?? "Sistema"
+                };
+
+                await orderItemService.CreateAsync(orderItem);
+
+                // Recarregar os itens do pedido para retornar
+                var updatedOrder = await _orderService.GetOrderByIdAsync(request.OrderId);
+                var itemsViewModel = updatedOrder?.Items?.Select(i => new OrderEntryItemViewModel
+                {
+                    Id = i.Id,
+                    ProductId = i.ProductId,
+                    ProductName = i.Product?.Name,
+                    Quantity = i.Quantity,
+                    UnitPrice = i.UnitPrice,
+                    DiscountAmount = i.DiscountAmount,
+                    TaxAmount = i.TaxAmount,
+                    Notes = i.Notes
+                }).ToList() ?? new List<OrderEntryItemViewModel>();
+
+                return Json(new { 
+                    success = true, 
+                    message = $"Produto '{product.Name}' adicionado ao carrinho!",
+                    totalItems = itemsViewModel.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao adicionar produto ao carrinho");
+                return Json(new { success = false, message = "Erro interno do servidor" });
+            }
+        }
+
+        /// <summary>
+        /// Recarrega a partial view dos itens do pedido
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> RecarregarItens(string orderId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(orderId))
+                {
+                    return PartialView("_OrderItems", new List<OrderEntryItemViewModel>());
+                }
+
+                var order = await _orderService.GetOrderByIdAsync(orderId);
+                var itemsViewModel = order?.Items?.Select(i => new OrderEntryItemViewModel
+                {
+                    Id = i.Id,
+                    ProductId = i.ProductId,
+                    ProductName = i.Product?.Name,
+                    Quantity = i.Quantity,
+                    UnitPrice = i.UnitPrice,
+                    DiscountAmount = i.DiscountAmount,
+                    TaxAmount = i.TaxAmount,
+                    Notes = i.Notes
+                }).ToList() ?? new List<OrderEntryItemViewModel>();
+
+                return PartialView("_OrderItems", itemsViewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao recarregar itens do pedido");
+                return PartialView("_OrderItems", new List<OrderEntryItemViewModel>());
+            }
+        }
+    }
+
+    /// <summary>
+    /// Request para adicionar produto ao carrinho
+    /// </summary>
+    public class AdicionarProdutoRequest
+    {
+        public string OrderId { get; set; } = string.Empty;
+        public string ProductId { get; set; } = string.Empty;
+        public int Quantity { get; set; } = 1;
     }
 } 

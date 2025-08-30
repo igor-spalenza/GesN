@@ -3,7 +3,7 @@
 // ===================================
 
 // Resposta padrão da API
-export interface ApiResponse<T = unknown> {
+interface ApiResponse<T = unknown> {
     success: boolean;
     message?: string;
     data?: T;
@@ -11,14 +11,14 @@ export interface ApiResponse<T = unknown> {
 }
 
 // Configuração base para managers
-export interface ManagerConfig {
+interface ManagerConfig {
     baseUrl: string;
     modalSelector?: string;
     gridSelector?: string;
 }
 
 // Opções para requisições AJAX
-export interface AjaxOptions {
+interface AjaxOptions {
     type?: 'GET' | 'POST' | 'PUT' | 'DELETE';
     data?: any;
     dataType?: string;
@@ -28,13 +28,13 @@ export interface AjaxOptions {
 }
 
 // Estados de loading
-export interface LoadingState {
+interface LoadingState {
     isLoading: boolean;
     loadingMessage?: string;
 }
 
 // Configuração de modal
-export interface ModalConfig {
+interface ModalConfig {
     selector: string;
     title: string;
     size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -42,7 +42,7 @@ export interface ModalConfig {
 }
 
 // Configuração de DataTable
-export interface DataTableConfig {
+interface DataTableConfig {
     pageLength?: number;
     lengthMenu?: (number | string)[][];
     order?: [number, string][];
@@ -54,7 +54,7 @@ export interface DataTableConfig {
 }
 
 // Erro personalizado para validação
-export class ValidationError extends Error {
+class ValidationError extends Error {
     constructor(
         message: string, 
         public errors?: Record<string, string[]>
@@ -65,7 +65,7 @@ export class ValidationError extends Error {
 }
 
 // Erro de negócio
-export class BusinessError extends Error {
+class BusinessError extends Error {
     constructor(message: string) {
         super(message);
         this.name = 'BusinessError';
@@ -73,12 +73,12 @@ export class BusinessError extends Error {
 }
 
 // Tipos utilitários
-export type DocumentType = 'CPF' | 'CNPJ';
-export type EntityStatus = 'Active' | 'Inactive';
-export type ProductType = 'Simple' | 'Composite' | 'Group';
+type GesNDocumentType = 'CPF' | 'CNPJ';
+type GesNEntityStatus = 'Active' | 'Inactive';
+type ProductType = 'Simple' | 'Composite' | 'Group';
 
 // Interface para paginação
-export interface PaginationInfo {
+interface PaginationInfo {
     currentPage: number;
     totalPages: number;
     pageSize: number;
@@ -86,9 +86,9 @@ export interface PaginationInfo {
 }
 
 // Interface para filtros
-export interface FilterOptions {
+interface FilterOptions {
     search?: string;
-    status?: EntityStatus;
+    status?: GesNEntityStatus;
     page?: number;
     pageSize?: number;
 }

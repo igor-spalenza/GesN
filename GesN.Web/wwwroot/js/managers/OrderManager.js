@@ -1,7 +1,11 @@
+"use strict";
 // ===================================
 // ORDER MANAGER - GesN (TypeScript)
 // Migração 1:1 do Order.js mantendo compatibilidade total
 // ===================================
+// Imports removidos - interfaces carregadas globalmente via script tags
+// As interfaces estão definidas em arquivos separados que serão carregados antes
+// ⚠️ Tipos removidos - já definidos em common.ts
 class OrderManager {
     constructor() {
         // ===================================
@@ -51,6 +55,40 @@ class OrderManager {
             activeClass: 'has-value',
             errorClass: 'is-invalid'
         };
+        // Configurar event listeners para controle do catálogo
+        this.setupCatalogIntegration();
+    }
+    /**
+     * Configura integração com o catálogo lateral
+     */
+    setupCatalogIntegration() {
+        // Event listener para mudança de abas
+        $(document).on('shown.bs.tab', 'button[data-bs-toggle="tab"]', (e) => {
+            const target = $(e.target);
+            const targetId = target.data('bs-target') || target.attr('href');
+            const orderId = target.data('order-id');
+            if (typeof window.productCatalogManager !== 'undefined') {
+                if (targetId === '#lista-orders') {
+                    // Aba principal - esconder catálogo e botão toggle
+                    window.productCatalogManager.hideCatalog();
+                    $('#catalogToggleBtn').addClass('hidden');
+                    console.log('🏠 Página inicial ativa - catálogo escondido');
+                }
+                else if (orderId) {
+                    // Aba de edição - trocar contexto do catálogo e mostrar botão toggle
+                    window.productCatalogManager.switchContext(orderId);
+                    $('#catalogToggleBtn').removeClass('hidden');
+                    console.log('📝 Contexto do catálogo alterado para pedido:', orderId);
+                }
+            }
+        });
+        // Event listener para escape key (fechar catálogo)
+        $(document).on('keydown', (e) => {
+            if (e.key === 'Escape' && typeof window.productCatalogManager !== 'undefined') {
+                window.productCatalogManager.hideCatalog();
+            }
+        });
+        console.log('🔗 Integração com catálogo configurada');
     }
     // ===================================
     // MÉTODOS PRINCIPAIS (ASSINATURA IDÊNTICA)
@@ -188,8 +226,8 @@ class OrderManager {
                 templates: {
                     suggestion: (suggestion) => {
                         return '<div class="autocomplete-suggestion">' +
-                            '<div class="suggestion-title">' + (suggestion.data.value || suggestion.value) + '</div>' +
-                            (suggestion.data.phone ? '<div class="suggestion-subtitle">' + suggestion.data.phone + '</div>' : '') +
+                            '<div class="suggestion-title">' + (suggestion.data?.value || suggestion.value) + '</div>' +
+                            (suggestion.data?.phone ? '<div class="suggestion-subtitle">' + suggestion.data.phone + '</div>' : '') +
                             '</div>';
                     }
                 }
@@ -278,15 +316,28 @@ class OrderManager {
             processData: false,
             contentType: false,
             success: (response) => {
-                if (response.success && response.data) {
+                // 🔍 DEBUG: Vamos analisar a resposta real
+                console.log('=== DEBUG RESPONSE ===');
+                console.log('Resposta completa:', response);
+                console.log('response.success:', response.success, typeof response.success);
+                console.log('response.id:', response.id);
+                console.log('response.numberSequence:', response.numberSequence);
+                console.log('response.message:', response.message);
+                console.log('=====================');
+                if (response.success) {
                     $(this.config.modalSelector).modal('hide');
                     this.showToast('success', response.message || 'Pedido criado com sucesso!');
-                    if (response.data.id) {
-                        // Chama o método de edição passando também o numberSequence
-                        this.abrirEdicao(response.data.id, response.data.numberSequence);
+                    console.log('✅ Abrindo edição com:', response.id, response.numberSequence);
+                    if (response.id) {
+                        // Chama o método de edição passando ID e numberSequence
+                        this.abrirEdicao(response.id, response.numberSequence);
+                    }
+                    else {
+                        console.log('❌ ID não encontrado no response');
                     }
                 }
                 else {
+                    console.log('❌ Success = false - mostrando erro');
                     this.showToast('error', response.message || 'Não foi possível criar o pedido');
                 }
             },
@@ -341,6 +392,14 @@ class OrderManager {
         $.get(`${this.config.baseUrl}/EditPartial/${orderId}`)
             .done((data) => {
             $(`#conteudo-${tabId}`).html(data);
+            // Preparar contexto do catálogo para esta aba
+            if (typeof window.productCatalogManager !== 'undefined') {
+                // Apenas trocar contexto, não mostrar automaticamente
+                window.productCatalogManager.switchContext(orderId);
+                // Mostrar botão toggle
+                $('#catalogToggleBtn').removeClass('hidden');
+                console.log('Contexto do catálogo preparado para pedido:', orderId);
+            }
             // Se numberSequence não foi fornecido, extrai do conteúdo carregado
             if (!numberSequence) {
                 const numberSequenceElement = $(`#conteudo-${tabId}`).find('[data-number-sequence]');
@@ -374,12 +433,23 @@ class OrderManager {
         });
     }
     fecharAba(tabId) {
+        // Extrair orderId do tabId para limpeza de estado
+        const orderId = tabId.replace('order-', '');
+        // Limpar estado salvo do catálogo para esta aba
+        if (typeof window.productCatalogManager !== 'undefined' && orderId) {
+            window.productCatalogManager.clearStateForOrder(orderId);
+            console.log('Estado do catálogo limpo para pedido:', orderId);
+        }
         // Remove a aba e seu conteúdo
         $(`#${tabId}-tab`).parent().remove(); // Remove o <li> que contém o button
         $(`#${tabId}`).remove(); // Remove o conteúdo da aba
         this.qtdAbasAbertas--;
-        // Se não há mais abas abertas, volta para a aba principal
+        // Se não há mais abas abertas, volta para a aba principal e esconde catálogo
         if (this.qtdAbasAbertas === 0) {
+            // Esconder catálogo
+            if (typeof window.productCatalogManager !== 'undefined') {
+                window.productCatalogManager.hideCatalog();
+            }
             const mainTab = new bootstrap.Tab(document.getElementById('main-tab'));
             mainTab.show();
         }
@@ -598,6 +668,5 @@ $(function () {
         $(this).find('.modal-dialog').removeClass('modal-xl').addClass('modal-lg');
     });
 });
-export default OrderManager;
-export { ordersManager };
+// Exports removidos - usando disponibilização global
 //# sourceMappingURL=OrderManager.js.map

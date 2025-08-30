@@ -190,3 +190,4 @@ O sistema de Orders do GesN agora possui:
 - `README-TypeScript-SCSS.md` - Guia geral do setup
 
 **🚀 Parabéns! Você agora tem um sistema moderno e maintível!**
+

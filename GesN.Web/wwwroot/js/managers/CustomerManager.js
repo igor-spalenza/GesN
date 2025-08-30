@@ -1,7 +1,10 @@
+"use strict";
 // ===================================
 // CUSTOMER MANAGER - GesN (TypeScript)
 // ===================================
-import { ValidationError } from '../interfaces/common';
+// Imports removidos - interfaces carregadas globalmente via script tags
+// As interfaces estão definidas em arquivos separados que serão carregados antes
+// ⚠️ Tipos removidos - já definidos em common.ts
 class CustomerManager {
     constructor() {
         this.config = {
@@ -451,5 +454,5 @@ window.clientesManager = customerManager; // Alias para compatibilidade
 $(function () {
     customerManager.init();
 });
-export default CustomerManager;
+// Export removido - usando disponibilização global
 //# sourceMappingURL=CustomerManager.js.map

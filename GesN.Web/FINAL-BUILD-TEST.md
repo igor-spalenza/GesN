@@ -42,3 +42,4 @@ Após build, verifique se existem:
 ✅ **SCSS organizado e reutilizável**
 
 **🚀 PRONTO PARA PRODUÇÃO! 🚀**
+
