@@ -183,7 +183,7 @@ declare interface CatalogSlideControl {
     slideDirection: 'in' | 'out';
 }
 
-declare type ProductType = 'simples' | 'montagem';
+
 
 class ProductCatalogManager {
     // ===================================
@@ -289,7 +289,7 @@ class ProductCatalogManager {
                 code: 'INIT_ERROR',
                 message: 'Erro ao inicializar catálogo de produtos',
                 details: error,
-                timestamp: new Date()
+                timestamp: Date.now()
             });
         }
     }
@@ -382,7 +382,7 @@ class ProductCatalogManager {
                 code: 'INITIAL_LOAD_ERROR',
                 message: 'Erro ao carregar catálogo inicial',
                 details: error,
-                timestamp: new Date()
+                timestamp: Date.now()
             });
         }
     }
@@ -424,7 +424,7 @@ class ProductCatalogManager {
                 this.handleLoadSuccess(response.data);
                 
                 // Notificar eventos
-                this.events.onProductLoaded?.(response.data.products);
+                this.events.onProductsLoaded?.(response.data);
             } else {
                 throw new Error(response.message || 'Erro desconhecido ao carregar produtos');
             }
@@ -551,7 +551,7 @@ class ProductCatalogManager {
                 code: 'CATEGORY_FILTER_ERROR',
                 message: 'Erro ao filtrar produtos por categoria',
                 details: error,
-                timestamp: new Date()
+                timestamp: Date.now()
             });
         }
     }
@@ -594,7 +594,7 @@ class ProductCatalogManager {
                 code: 'SEARCH_ERROR',
                 message: 'Erro ao buscar produtos',
                 details: error,
-                timestamp: new Date()
+                timestamp: Date.now()
             });
         }
     }
@@ -651,7 +651,7 @@ class ProductCatalogManager {
                 // Notificar evento
                 const product = this.findProductById(productId);
                 if (product) {
-                    this.events.onProductAdded?.(product);
+                    this.events.onAddToCart?.(productId, quantity);
                 }
                 
             } else {
@@ -665,7 +665,7 @@ class ProductCatalogManager {
                 code: 'ADD_TO_CART_ERROR',
                 message: 'Erro ao adicionar produto ao carrinho',
                 details: error,
-                timestamp: new Date()
+                timestamp: Date.now()
             });
         } finally {
             // Restaurar botão
@@ -773,7 +773,7 @@ class ProductCatalogManager {
                 code: 'PAGINATION_ERROR',
                 message: 'Erro ao navegar entre páginas',
                 details: error,
-                timestamp: new Date()
+                timestamp: Date.now()
             });
         }
     }
@@ -858,12 +858,12 @@ class ProductCatalogManager {
         return `
             <div class="catalog-pagination">
                 <div class="pagination-info">
-                    <small>${pagination.paginationInfo}</small>
+                    <small>${((pagination.currentPage - 1) * pagination.pageSize) + 1}-${Math.min(pagination.currentPage * pagination.pageSize, pagination.totalProducts)} de ${pagination.totalProducts}</small>
                 </div>
                 <div class="pagination-controls">
                     <button class="btn btn-sm btn-outline-primary pagination-btn" 
                             data-page="${pagination.currentPage - 1}" 
-                            ${!pagination.hasPrevious ? 'disabled' : ''}>
+                            ${!pagination.hasPreviousPage ? 'disabled' : ''}>
                         <i class="fas fa-chevron-left"></i>
                     </button>
                     <span class="pagination-current">
@@ -871,7 +871,7 @@ class ProductCatalogManager {
                     </span>
                     <button class="btn btn-sm btn-outline-primary pagination-btn" 
                             data-page="${pagination.currentPage + 1}" 
-                            ${!pagination.hasNext ? 'disabled' : ''}>
+                            ${!pagination.hasNextPage ? 'disabled' : ''}>
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
@@ -925,6 +925,23 @@ class ProductCatalogManager {
                 ` : ''}
             </div>
         `;
+    }
+
+    private renderPagination(pagination: ProductCatalogPagination): void {
+        // Atualizar informações de paginação no footer
+        const paginationInfo = pagination.totalProducts > 0 
+            ? `${((pagination.currentPage - 1) * pagination.pageSize) + 1}-${Math.min(pagination.currentPage * pagination.pageSize, pagination.totalProducts)} de ${pagination.totalProducts}`
+            : '0-0 de 0';
+        
+        $('#pagination-range').text(paginationInfo);
+        $('#current-page').text(pagination.currentPage.toString());
+        
+        // Controles de navegação
+        $('#prev-page').prop('disabled', !pagination.hasPreviousPage);
+        $('#next-page').prop('disabled', !pagination.hasNextPage);
+        
+        // Atualizar seletor de página
+        $('#page-size').val(pagination.pageSize.toString());
     }
 
     private renderError(error: ProductCatalogError): string {
@@ -1037,21 +1054,20 @@ class ProductCatalogManager {
 
     private getCachedData(key: string): ProductCatalogCache | null {
         const cached = this.cache.get(key);
-        if (cached && cached.expiration > new Date()) {
+        if (cached && cached.expiry > Date.now()) {
             return cached;
         }
         return null;
     }
 
     private setCachedData(key: string, data: ProductCatalogData): void {
-        const expiration = new Date();
-        expiration.setMinutes(expiration.getMinutes() + 5); // Cache por 5 minutos
+        const expiry = Date.now() + (5 * 60 * 1000); // Cache por 5 minutos
 
         this.cache.set(key, {
             key,
             data,
-            timestamp: new Date(),
-            expiration
+            timestamp: Date.now(),
+            expiry
         });
     }
 
@@ -1061,12 +1077,10 @@ class ProductCatalogManager {
 
     private getProductTypeDisplay(type: ProductType): string {
         switch (type) {
-            case 'Simple':
+            case 'simples':
                 return 'Simples';
-            case 'Composite':
-                return 'Composto';
-            case 'Group':
-                return 'Grupo';
+            case 'montagem':
+                return 'Montagem';
             default:
                 return 'Produto';
         }
@@ -1087,14 +1101,11 @@ class ProductCatalogManager {
             currentPage: data.currentPage,
             totalPages: data.totalPages,
             pageSize: this.config.pageSize,
-            totalItems: data.totalProducts,
-            hasNext: data.hasNextPage,
-            hasPrevious: data.hasPreviousPage,
+            totalProducts: data.totalProducts,
+            hasNextPage: data.hasNextPage,
+            hasPreviousPage: data.hasPreviousPage,
             startItem,
-            endItem,
-            paginationInfo: data.totalProducts > 0 
-                ? `${startItem}-${endItem} de ${data.totalProducts}` 
-                : '0-0 de 0'
+            endItem
         };
     }
 
@@ -1108,13 +1119,12 @@ class ProductCatalogManager {
     private parseProductType(productTypeString: string): ProductType {
         switch (productTypeString?.toLowerCase()) {
             case 'simple':
-                return 'Simple';
+                return 'simples';
             case 'composite':
-                return 'Composite';
             case 'group':
-                return 'Group';
+                return 'montagem';
             default:
-                return 'Simple';
+                return 'simples';
         }
     }
 

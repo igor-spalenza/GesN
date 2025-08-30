@@ -592,3 +592,4 @@ namespace GesN.Web.Infrastructure.Mapping
 
 **🚀 Quer que eu comece criando essas classes base agora?** 
 **Recomendo começar pela ApiResponse<T> e depois as exceções!** 🎯
+

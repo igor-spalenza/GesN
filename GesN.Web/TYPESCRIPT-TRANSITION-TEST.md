@@ -139,3 +139,4 @@ console.log('Contador:', ordersManager.contador);
 ```
 
 **🚀 Execute estes testes e confirme que tudo está funcionando com TypeScript!**
+

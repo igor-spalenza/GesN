@@ -64,3 +64,4 @@ end_of_line = crlf
 # Shell scripts
 [*.sh]
 end_of_line = lf
+
