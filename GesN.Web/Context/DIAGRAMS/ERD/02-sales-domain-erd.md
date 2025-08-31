@@ -1,121 +1,121 @@
-# 💰 ERD - DOMÍNIO DE VENDAS
+﻿# ðŸ’° ERD - DOMÃNIO DE VENDAS
 
-## 🎯 Visão Geral
-Diagrama Entity-Relationship completo do Domínio de Vendas, mostrando o fluxo de Customer → OrderEntry → OrderItem → Product e suas integrações com os domínios de Produção e Financeiro. Este domínio é responsável por capturar e gerenciar transações comerciais.
+## ðŸŽ¯ VisÃ£o Geral
+Diagrama Entity-Relationship completo do DomÃ­nio de Vendas, mostrando o fluxo de Customer â†’ OrderEntry â†’ OrderItem â†’ Product e suas integraÃ§Ãµes com os domÃ­nios de ProduÃ§Ã£o e Financeiro. Este domÃ­nio Ã© responsÃ¡vel por capturar e gerenciar transaÃ§Ãµes comerciais.
 
-## 🗄️ Diagrama de Entidades e Relacionamentos
+## ðŸ—„ï¸ Diagrama de Entidades e Relacionamentos
 
 ```mermaid
 erDiagram
-    %% === DOMÍNIO DE VENDAS ===
+    %% === DOMÃNIO DE VENDAS ===
     
     %% === CLIENTE ===
     CUSTOMER {
-        string Id PK "GUID único"
-        string Name "Nome/Razão Social"
+        string Id PK "GUID Ãºnico"
+        string Name "Nome/RazÃ£o Social"
         string Document "CPF/CNPJ"
         string Email "Email principal"
         string Phone "Telefone principal"
-        string Address "Endereço completo"
+        string Address "EndereÃ§o completo"
         string City "Cidade"
         string State "Estado"
         string ZipCode "CEP"
         string CustomerType "Individual|Company"
         string StateCode "Active|Inactive"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
-        string Notes "Observações"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
+        string Notes "ObservaÃ§Ãµes"
     }
 
     %% === PEDIDO PRINCIPAL ===
     ORDER_ENTRY {
-        string Id PK "GUID único"
-        string OrderNumber "Número sequencial"
+        string Id PK "GUID Ãºnico"
+        string OrderNumber "NÃºmero sequencial"
         string CustomerId FK "Cliente"
         datetime OrderDate "Data do pedido"
         datetime DeliveryDate "Data de entrega"
         datetime RequestedDate "Data solicitada"
         string OrderType "Delivery|Pickup"
-        string DeliveryAddress "Endereço de entrega"
+        string DeliveryAddress "EndereÃ§o de entrega"
         decimal TotalValue "Valor total calculado"
         string OrderStatus "Pending|Confirmed|InProduction|ReadyForDelivery|Delivered|Invoiced|Cancelled"
-        string PaymentTerms "Condições de pagamento"
-        string PaymentMethod "Método de pagamento"
-        string Notes "Observações"
+        string PaymentTerms "CondiÃ§Ãµes de pagamento"
+        string PaymentMethod "MÃ©todo de pagamento"
+        string Notes "ObservaÃ§Ãµes"
         string StateCode "Active|Inactive"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
-        string CreatedBy "Usuário criador"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
+        string CreatedBy "UsuÃ¡rio criador"
     }
 
     %% === ITEM DO PEDIDO ===
     ORDER_ITEM {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string OrderEntryId FK "Pedido pai"
         string ProductId FK "Produto"
         int Quantity "Quantidade solicitada"
-        decimal UnitPrice "Preço unitário"
-        decimal TotalPrice "Preço total (Qty * Unit)"
-        string ProductConfiguration "JSON com configurações"
+        decimal UnitPrice "PreÃ§o unitÃ¡rio"
+        decimal TotalPrice "PreÃ§o total (Qty * Unit)"
+        string ProductConfiguration "JSON com configuraÃ§Ãµes"
         string ItemStatus "Pending|Confirmed|InProduction|Completed"
-        string Notes "Observações do item"
-        int LineNumber "Número da linha"
+        string Notes "ObservaÃ§Ãµes do item"
+        int LineNumber "NÃºmero da linha"
         string StateCode "Active|Inactive"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
     }
 
-    %% === INTEGRAÇÕES COM OUTROS DOMÍNIOS ===
+    %% === INTEGRAÃ‡Ã•ES COM OUTROS DOMÃNIOS ===
 
-    %% PRODUTO (DOMÍNIO DE PRODUTO)
+    %% PRODUTO (DOMÃNIO DE PRODUTO)
     PRODUCT {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string ProductType "Simple|Composite|Group"
         string Name "Nome do produto"
-        decimal Price "Preço base"
+        decimal Price "PreÃ§o base"
         decimal Cost "Custo do produto"
         string CategoryId FK "Categoria"
         string StateCode "Active|Inactive"
     }
 
-    %% DEMANDA (DOMÍNIO DE PRODUÇÃO)
+    %% DEMANDA (DOMÃNIO DE PRODUÃ‡ÃƒO)
     DEMAND {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string OrderItemId FK "Item do pedido origem"
         string ProductId FK "Produto a ser produzido"
         int Quantity "Quantidade a produzir"
         datetime RequiredDate "Data limite"
         string DemandStatus "Pending|Confirmed|InProduction|Completed|Cancelled"
-        string Notes "Observações"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
+        string Notes "ObservaÃ§Ãµes"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
     }
 
-    %% COMPOSIÇÃO DO PRODUTO (DOMÍNIO DE PRODUÇÃO)
+    %% COMPOSIÃ‡ÃƒO DO PRODUTO (DOMÃNIO DE PRODUÃ‡ÃƒO)
     PRODUCT_COMPOSITION {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string DemandId FK "Demanda pai"
         string ProductComponentId FK "Componente"
         string HierarchyName "Nome da hierarquia"
         int Quantity "Quantidade do componente"
         string Status "Pending|InProgress|Completed"
-        datetime StartTime "Início da produção"
-        datetime CompletionTime "Fim da produção"
-        string Notes "Observações"
+        datetime StartTime "InÃ­cio da produÃ§Ã£o"
+        datetime CompletionTime "Fim da produÃ§Ã£o"
+        string Notes "ObservaÃ§Ãµes"
     }
 
-    %% CONTA A RECEBER (DOMÍNIO FINANCEIRO)
+    %% CONTA A RECEBER (DOMÃNIO FINANCEIRO)
     ACCOUNT_RECEIVABLE {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string OrderEntryId FK "Pedido origem"
         string CustomerId FK "Cliente"
         decimal TotalAmount "Valor total a receber"
-        decimal PaidAmount "Valor já recebido"
+        decimal PaidAmount "Valor jÃ¡ recebido"
         datetime DueDate "Data de vencimento"
         string AccountStatus "Pending|PartiallyPaid|Paid|Overdue|Cancelled"
-        string PaymentTerms "Condições de pagamento"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
+        string PaymentTerms "CondiÃ§Ãµes de pagamento"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
     }
 
     %% ==========================================
@@ -124,23 +124,23 @@ erDiagram
 
     %% FLUXO PRINCIPAL DE VENDAS
     CUSTOMER ||--o{ ORDER_ENTRY : "faz pedidos"
-    ORDER_ENTRY ||--o{ ORDER_ITEM : "contém itens"
+    ORDER_ENTRY ||--o{ ORDER_ITEM : "contÃ©m itens"
     ORDER_ITEM }o--|| PRODUCT : "referencia produto"
 
     %% ==========================================
-    %% INTEGRAÇÕES COM OUTROS DOMÍNIOS
+    %% INTEGRAÃ‡Ã•ES COM OUTROS DOMÃNIOS
     %% ==========================================
 
-    %% VENDAS → PRODUÇÃO (Customer-Supplier)
+    %% VENDAS â†’ PRODUÃ‡ÃƒO (Customer-Supplier)
     ORDER_ITEM ||--o{ DEMAND : "gera demandas"
-    DEMAND ||--o{ PRODUCT_COMPOSITION : "detalha composição"
+    DEMAND ||--o{ PRODUCT_COMPOSITION : "detalha composiÃ§Ã£o"
 
-    %% VENDAS → FINANCEIRO (Customer-Supplier)
+    %% VENDAS â†’ FINANCEIRO (Customer-Supplier)
     ORDER_ENTRY ||--o{ ACCOUNT_RECEIVABLE : "gera contas a receber"
     CUSTOMER ||--o{ ACCOUNT_RECEIVABLE : "deve pagar"
 
     %% ==========================================
-    %% STYLING POR DOMÍNIO
+    %% STYLING POR DOMÃNIO
     %% ==========================================
     
     %% VENDAS = Laranja (#f36b21)
@@ -169,7 +169,7 @@ erDiagram
         border-color "#00a86b"
     }
 
-    %% PRODUÇÃO = Dourado (#fba81d)
+    %% PRODUÃ‡ÃƒO = Dourado (#fba81d)
     DEMAND {
         background-color "#fba81d"
         color "black"
@@ -190,67 +190,67 @@ erDiagram
     }
 ```
 
-## 📋 Detalhes das Entidades
+## ðŸ“‹ Detalhes das Entidades
 
-### **👤 CUSTOMER**
-- **Propósito**: Representar clientes pessoa física ou jurídica
+### **ðŸ‘¤ CUSTOMER**
+- **PropÃ³sito**: Representar clientes pessoa fÃ­sica ou jurÃ­dica
 - **Tipos**: Individual (CPF) ou Company (CNPJ) 
-- **Características**: Dados de contato, endereçamento, observações
+- **CaracterÃ­sticas**: Dados de contato, endereÃ§amento, observaÃ§Ãµes
 - **Relacionamentos**: 1:N com OrderEntry, 1:N com AccountReceivable
 
-### **📄 ORDER_ENTRY**
-- **Propósito**: Cabeçalho do pedido de venda
-- **Status Flow**: Pending → Confirmed → InProduction → ReadyForDelivery → Delivered → Invoiced
-- **Características**: Datas (pedido/entrega), endereço, condições de pagamento
+### **ðŸ“„ ORDER_ENTRY**
+- **PropÃ³sito**: CabeÃ§alho do pedido de venda
+- **Status Flow**: Pending â†’ Confirmed â†’ InProduction â†’ ReadyForDelivery â†’ Delivered â†’ Invoiced
+- **CaracterÃ­sticas**: Datas (pedido/entrega), endereÃ§o, condiÃ§Ãµes de pagamento
 - **Relacionamentos**: N:1 com Customer, 1:N com OrderItem, 1:N com AccountReceivable
 
-### **📦 ORDER_ITEM**
-- **Propósito**: Item específico dentro de um pedido
-- **Características**: Quantidade, preços, configuração de produtos
-- **Integração Crítica**: Gera automaticamente registros de Demand
+### **ðŸ“¦ ORDER_ITEM**
+- **PropÃ³sito**: Item especÃ­fico dentro de um pedido
+- **CaracterÃ­sticas**: Quantidade, preÃ§os, configuraÃ§Ã£o de produtos
+- **IntegraÃ§Ã£o CrÃ­tica**: Gera automaticamente registros de Demand
 - **Relacionamentos**: N:1 com OrderEntry, N:1 com Product, 1:N com Demand
 
-### **🔗 Entidades de Integração**
+### **ðŸ”— Entidades de IntegraÃ§Ã£o**
 
-#### **PRODUCT** *(Referência do Domínio de Produto)*
+#### **PRODUCT** *(ReferÃªncia do DomÃ­nio de Produto)*
 - **Relacionamento**: 1:N com OrderItem
-- **Tipos**: Simple, Composite, Group (impacta criação de Demands)
+- **Tipos**: Simple, Composite, Group (impacta criaÃ§Ã£o de Demands)
 
-#### **DEMAND** *(Gerada no Domínio de Produção)*
+#### **DEMAND** *(Gerada no DomÃ­nio de ProduÃ§Ã£o)*
 - **Relacionamento**: N:1 com OrderItem (origem)
-- **Propósito**: Traduzir item de venda em ordem de produção
-- **Status Inicial**: Sempre "Pending" na criação
+- **PropÃ³sito**: Traduzir item de venda em ordem de produÃ§Ã£o
+- **Status Inicial**: Sempre "Pending" na criaÃ§Ã£o
 
-#### **PRODUCT_COMPOSITION** *(Detalhamento de Produção)*
+#### **PRODUCT_COMPOSITION** *(Detalhamento de ProduÃ§Ã£o)*
 - **Relacionamento**: N:1 com Demand
-- **Propósito**: Detalhar componentes específicos para produtos compostos
+- **PropÃ³sito**: Detalhar componentes especÃ­ficos para produtos compostos
 
-#### **ACCOUNT_RECEIVABLE** *(Gerada no Domínio Financeiro)*
+#### **ACCOUNT_RECEIVABLE** *(Gerada no DomÃ­nio Financeiro)*
 - **Relacionamento**: N:1 com OrderEntry (origem)
-- **Propósito**: Controlar valores a receber do cliente
+- **PropÃ³sito**: Controlar valores a receber do cliente
 
-## 🔄 Fluxos de Integração Críticos
+## ðŸ”„ Fluxos de IntegraÃ§Ã£o CrÃ­ticos
 
-### **📊 Criação de OrderItem → Demand (Automática)**
+### **ðŸ“Š CriaÃ§Ã£o de OrderItem â†’ Demand (AutomÃ¡tica)**
 
-**Regra de Negócio**:
+**Regra de NegÃ³cio**:
 ```
 1 OrderItem pode gerar 1:N Demand dependendo do ProductType:
 
-- ProductType.Simple: 1 OrderItem → 1 Demand
-- ProductType.Composite: 1 OrderItem → 1 Demand + N ProductComposition
-- ProductType.Group: 1 OrderItem → N Demand (um por produto concreto no grupo)
+- ProductType.Simple: 1 OrderItem â†’ 1 Demand
+- ProductType.Composite: 1 OrderItem â†’ 1 Demand + N ProductComposition
+- ProductType.Group: 1 OrderItem â†’ N Demand (um por produto concreto no grupo)
 ```
 
 **Processo**:
 1. OrderItem criado/editado
 2. Sistema identifica Product.ProductType
 3. **Simple**: Cria 1 Demand com quantity = OrderItem.Quantity
-4. **Composite**: Cria 1 Demand + ProductComposition baseada em configuração
+4. **Composite**: Cria 1 Demand + ProductComposition baseada em configuraÃ§Ã£o
 5. **Group**: Explode grupo e cria 1 Demand por produto concreto
 6. Todas Demands iniciam com DemandStatus = "Pending"
 
-### **💰 Criação de OrderEntry → AccountReceivable (Automática)**
+### **ðŸ’° CriaÃ§Ã£o de OrderEntry â†’ AccountReceivable (AutomÃ¡tica)**
 
 **Processo**:
 1. OrderEntry confirmado (OrderStatus = "Confirmed")
@@ -258,48 +258,48 @@ erDiagram
    - TotalAmount = OrderEntry.TotalValue
    - DueDate baseada em PaymentTerms
    - AccountStatus = "Pending"
-3. Se pagamento parcelado: cria múltiplas AccountReceivable
+3. Se pagamento parcelado: cria mÃºltiplas AccountReceivable
 
-### **📈 Sincronização de Status**
+### **ðŸ“ˆ SincronizaÃ§Ã£o de Status**
 
-**OrderEntry.OrderStatus ↔ Demand.DemandStatus**:
+**OrderEntry.OrderStatus â†” Demand.DemandStatus**:
 ```
-OrderEntry "Confirmed" → Todas Demands passam para "Confirmed"
-OrderEntry "InProduction" → Demands passam para "InProduction"
-OrderEntry "Cancelled" → Demands passam para "Cancelled"
+OrderEntry "Confirmed" â†’ Todas Demands passam para "Confirmed"
+OrderEntry "InProduction" â†’ Demands passam para "InProduction"
+OrderEntry "Cancelled" â†’ Demands passam para "Cancelled"
 ```
 
-## 📊 Regras de Validação Críticas
+## ðŸ“Š Regras de ValidaÃ§Ã£o CrÃ­ticas
 
 ### **OrderEntry**
-- Não pode ser confirmado sem Customer e pelo menos 1 OrderItem
-- TotalValue = Σ(OrderItem.TotalPrice)
+- NÃ£o pode ser confirmado sem Customer e pelo menos 1 OrderItem
+- TotalValue = Î£(OrderItem.TotalPrice)
 - DeliveryDate >= OrderDate
 - Status "Cancelled" cancela todas Demands e AccountReceivables relacionadas
 
 ### **OrderItem**
 - Product deve estar ativo (StateCode = "Active")
 - Quantity > 0
-- UnitPrice deve ser >= Product.Cost (validação de margem)
-- ProductConfiguration obrigatória para ProductType.Composite
+- UnitPrice deve ser >= Product.Cost (validaÃ§Ã£o de margem)
+- ProductConfiguration obrigatÃ³ria para ProductType.Composite
 
-### **Integrações**
-- Demand só pode ser cancelada se OrderItem for cancelado
-- AccountReceivable só pode ser cancelada se OrderEntry for cancelado
+### **IntegraÃ§Ãµes**
+- Demand sÃ³ pode ser cancelada se OrderItem for cancelado
+- AccountReceivable sÃ³ pode ser cancelada se OrderEntry for cancelado
 - ProductComposition gerada automaticamente baseada em ProductConfiguration
 
-## 🎯 Eventos de Domínio Gerados
+## ðŸŽ¯ Eventos de DomÃ­nio Gerados
 
 - **OrderCreated**: Nova OrderEntry criada
-- **OrderConfirmed**: OrderEntry confirmada → Gera Demands + AccountReceivable
-- **OrderItemAdded**: Novo OrderItem → Gera Demand correspondente
-- **OrderItemUpdated**: OrderItem modificado → Atualiza Demand relacionada
-- **OrderCancelled**: OrderEntry cancelada → Cancela Demands + AccountReceivables
-- **OrderDelivered**: OrderEntry entregue → Atualiza status de produção
+- **OrderConfirmed**: OrderEntry confirmada â†’ Gera Demands + AccountReceivable
+- **OrderItemAdded**: Novo OrderItem â†’ Gera Demand correspondente
+- **OrderItemUpdated**: OrderItem modificado â†’ Atualiza Demand relacionada
+- **OrderCancelled**: OrderEntry cancelada â†’ Cancela Demands + AccountReceivables
+- **OrderDelivered**: OrderEntry entregue â†’ Atualiza status de produÃ§Ã£o
 
 ---
 
 **Arquivo**: `02-sales-domain-erd.md`  
-**Domínio**: Vendas (#f36b21)  
+**DomÃ­nio**: Vendas (#f36b21)  
 **Tipo**: Entity-Relationship Diagram  
-**Nível**: Detalhado + Integrações entre Domínios
+**NÃ­vel**: Detalhado + IntegraÃ§Ãµes entre DomÃ­nios

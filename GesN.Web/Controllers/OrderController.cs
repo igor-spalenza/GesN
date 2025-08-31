@@ -5,6 +5,7 @@ using GesN.Web.Models.ViewModels.Sales;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace GesN.Web.Controllers
@@ -856,37 +857,184 @@ namespace GesN.Web.Controllers
         }
 
         /// <summary>
-        /// Recarrega a partial view dos itens do pedido
+        /// [MIGRADO] Método movido para OrderItemController.ReloadItems
+        /// Mantido temporariamente para compatibilidade
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> RecarregarItens(string orderId)
         {
+            // Redirecionar para OrderItemController
+            return RedirectToAction("ReloadItems", "OrderItem", new { orderId = orderId });
+        }
+
+        // GET: Order/CompositeProductModal
+        // GET: Order/ProductCatalog - Endpoint para carregar catálogo seguindo padrão _Grid.cshtml
+        [HttpGet]
+        public async Task<IActionResult> ProductCatalog(string? category = null, string? search = null)
+        {
             try
             {
-                if (string.IsNullOrEmpty(orderId))
-                {
-                    return PartialView("_OrderItems", new List<OrderEntryItemViewModel>());
-                }
-
-                var order = await _orderService.GetOrderByIdAsync(orderId);
-                var itemsViewModel = order?.Items?.Select(i => new OrderEntryItemViewModel
-                {
-                    Id = i.Id,
-                    ProductId = i.ProductId,
-                    ProductName = i.Product?.Name,
-                    Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice,
-                    DiscountAmount = i.DiscountAmount,
-                    TaxAmount = i.TaxAmount,
-                    Notes = i.Notes
-                }).ToList() ?? new List<OrderEntryItemViewModel>();
-
-                return PartialView("_OrderItems", itemsViewModel);
+                // Usar ProductController para obter dados (reutilizando lógica existente)
+                var catalogResult = await GetProductCatalogData(category, search);
+                
+                return PartialView("_ProductCatalog", catalogResult);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao recarregar itens do pedido");
-                return PartialView("_OrderItems", new List<OrderEntryItemViewModel>());
+                _logger.LogError(ex, "Erro ao carregar catálogo de produtos");
+                var emptyViewModel = new GesN.Web.Models.ViewModels.Production.ProductCatalogViewModel
+                {
+                    Products = new List<GesN.Web.Models.Entities.Production.Product>(),
+                    TotalProducts = 0
+                };
+                return PartialView("_ProductCatalog", emptyViewModel);
+            }
+        }
+
+        private async Task<GesN.Web.Models.ViewModels.Production.ProductCatalogViewModel> GetProductCatalogData(string? category, string? search)
+        {
+            // Obter produtos ativos usando o padrão do projeto
+            var productService = HttpContext.RequestServices.GetRequiredService<IProductService>();
+            var allProducts = await productService.GetActiveAsync();
+            
+            // Aplicar filtros nas entidades Product
+            var filteredProducts = allProducts.AsEnumerable();
+            
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                filteredProducts = filteredProducts.Where(p =>
+                    p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrWhiteSpace(p.SKU) && p.SKU.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                    (p.Description?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
+            }
+
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                filteredProducts = filteredProducts.Where(p =>
+                    !string.IsNullOrWhiteSpace(p.Category) &&
+                    p.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // ProductCatalogViewModel espera IEnumerable<Product> (entidades)
+            var viewModel = new GesN.Web.Models.ViewModels.Production.ProductCatalogViewModel
+            {
+                Products = filteredProducts, // Usar entidades Product diretamente
+                CurrentCategory = category,
+                SearchTerm = search,
+                TotalProducts = filteredProducts.Count()
+            };
+
+            return viewModel;
+        }
+
+        public async Task<IActionResult> CompositeProductModal(string productId, int initialQuantity = 1)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(productId))
+                    return BadRequest("ProductId é obrigatório");
+
+                // Buscar dados do produto composto com hierarquias
+                // Aqui você pode usar seu ProductService para obter os dados completos
+                // Por agora, vou retornar um objeto dinâmico como exemplo
+                
+                var productData = new
+                {
+                    id = productId,
+                    name = "Produto Composto Exemplo",
+                    sku = "COMP-001",
+                    unitPrice = 100.00m,
+                    assemblyTime = 2,
+                    initialQuantity = initialQuantity,
+                    hierarchies = new[]
+                    {
+                        new
+                        {
+                            id = "hier1",
+                            name = "Componente Principal",
+                            isOptional = false,
+                            minQuantity = 1,
+                            maxQuantity = 5,
+                            assemblyOrder = 1,
+                            components = new[]
+                            {
+                                new
+                                {
+                                    id = "comp1",
+                                    name = "Componente A",
+                                    description = "Descrição do componente A",
+                                    additionalCost = 15.50m
+                                }
+                            }
+                        }
+                    }
+                };
+
+                return PartialView("_CompositeProductModal", productData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar modal de produto composto: {ProductId}", productId);
+                return PartialView("_Error", "Erro ao carregar configuração do produto");
+            }
+        }
+
+        // GET: Order/GroupProductModal
+        public async Task<IActionResult> GroupProductModal(string productId, int initialQuantity = 1)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(productId))
+                    return BadRequest("ProductId é obrigatório");
+
+                // Buscar dados do grupo de produtos
+                // Aqui você pode usar seu ProductGroupService para obter os dados completos
+                // Por agora, vou retornar um objeto dinâmico como exemplo
+                
+                var productData = new
+                {
+                    id = productId,
+                    name = "Grupo de Produtos Exemplo",
+                    sku = "GROUP-001",
+                    totalItems = 3,
+                    requiredItems = 2,
+                    optionalItems = 1,
+                    initialQuantity = initialQuantity,
+                    groupItems = new[]
+                    {
+                        new
+                        {
+                            id = "groupitem1",
+                            displayName = "Item Principal",
+                            itemType = "Produto",
+                            isOptional = false,
+                            minQuantity = 1,
+                            maxQuantity = 10,
+                            defaultQuantity = 1,
+                            extraPrice = 0.0m,
+                            productOptions = new[]
+                            {
+                                new
+                                {
+                                    id = "prod1",
+                                    name = "Produto 1",
+                                    description = "Descrição do produto 1",
+                                    price = 50.0m,
+                                    effectivePrice = 50.0m,
+                                    isAvailable = true
+                                }
+                            }
+                        }
+                    },
+                    exchangeRules = new object[] { }
+                };
+
+                return PartialView("_GroupProductModal", productData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar modal de grupo de produtos: {ProductId}", productId);
+                return PartialView("_Error", "Erro ao carregar configuração do grupo");
             }
         }
     }
@@ -899,5 +1047,29 @@ namespace GesN.Web.Controllers
         public string OrderId { get; set; } = string.Empty;
         public string ProductId { get; set; } = string.Empty;
         public int Quantity { get; set; } = 1;
+    }
+
+    /// <summary>
+    /// Request específico para adicionar produto simples ao carrinho
+    /// </summary>
+    public class AddSimpleProductRequest
+    {
+        [Required(ErrorMessage = "O ID do pedido é obrigatório")]
+        public string OrderId { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "O ID do produto é obrigatório")]
+        public string ProductId { get; set; } = string.Empty;
+
+        [Range(1, int.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
+        public int Quantity { get; set; } = 1;
+
+        [Range(0, double.MaxValue, ErrorMessage = "O desconto não pode ser negativo")]
+        public decimal DiscountAmount { get; set; } = 0;
+
+        [Range(0, double.MaxValue, ErrorMessage = "Os impostos não podem ser negativos")]
+        public decimal TaxAmount { get; set; } = 0;
+
+        [StringLength(500, ErrorMessage = "As observações devem ter no máximo {1} caracteres")]
+        public string? Notes { get; set; }
     }
 } 

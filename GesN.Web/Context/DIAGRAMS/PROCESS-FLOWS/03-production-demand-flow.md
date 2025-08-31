@@ -1,69 +1,69 @@
-# 🏭 FLUXOGRAMA - PROCESSO DE PRODUÇÃO
+﻿# ðŸ­ FLUXOGRAMA - PROCESSO DE PRODUÃ‡ÃƒO
 
-## 🎯 Visão Geral
-Fluxograma completo do processo de criação automática de demandas a partir de OrderItems e gerenciamento de produção através de ProductComposition e ProductionOrder. Mostra como 1 OrderItem pode gerar 1:N Demands dependendo do tipo de produto.
+## ðŸŽ¯ VisÃ£o Geral
+Fluxograma completo do processo de criaÃ§Ã£o automÃ¡tica de demandas a partir de OrderItems e gerenciamento de produÃ§Ã£o atravÃ©s de ProductComposition e ProductionOrder. Mostra como 1 OrderItem pode gerar 1:N Demands dependendo do tipo de produto.
 
-## 🔄 Fluxo de Criação Automática de Demandas
+## ðŸ”„ Fluxo de CriaÃ§Ã£o AutomÃ¡tica de Demandas
 
 ```mermaid
 flowchart TD
     %% === TRIGGER INICIAL ===
-    A[⚡ TRIGGER:<br/>OrderItem criado/editado] --> B{🎯 Identificar<br/>Product.ProductType}
+    A[âš¡ TRIGGER:<br/>OrderItem criado/editado] --> B{ðŸŽ¯ Identificar<br/>Product.ProductType}
     
     %% === FLUXOS POR TIPO DE PRODUTO ===
     
     %% PRODUTO SIMPLES
-    B -->|Simple| C1[📦 Produto Simples]
-    C1 --> C2[🏭 Criar 1 Demand<br/>Quantity = OrderItem.Quantity]
-    C2 --> C3[📋 DemandStatus: Pending<br/>ProductionOrderId: null]
-    C3 --> C4[✅ Demand Simples criada]
+    B -->|Simple| C1[ðŸ“¦ Produto Simples]
+    C1 --> C2[ðŸ­ Criar 1 Demand<br/>Quantity = OrderItem.Quantity]
+    C2 --> C3[ðŸ“‹ DemandStatus: Pending<br/>ProductionOrderId: null]
+    C3 --> C4[âœ… Demand Simples criada]
     
     %% PRODUTO COMPOSTO  
-    B -->|Composite| D1[🧩 Produto Composto]
-    D1 --> D2[🏭 Criar 1 Demand<br/>Quantity = OrderItem.Quantity]
-    D2 --> D3[📄 Analisar ProductConfiguration<br/>JSON do OrderItem]
-    D3 --> D4[🔍 Para cada componente configurado]
-    D4 --> D5[🧩 Criar ProductComposition<br/>vinculada à Demand]
-    D5 --> D6[📋 Status: Pending<br/>HierarchyName + ComponentName]
-    D6 --> D7{🔄 Mais componentes?}
+    B -->|Composite| D1[ðŸ§© Produto Composto]
+    D1 --> D2[ðŸ­ Criar 1 Demand<br/>Quantity = OrderItem.Quantity]
+    D2 --> D3[ðŸ“„ Analisar ProductConfiguration<br/>JSON do OrderItem]
+    D3 --> D4[ðŸ” Para cada componente configurado]
+    D4 --> D5[ðŸ§© Criar ProductComposition<br/>vinculada Ã  Demand]
+    D5 --> D6[ðŸ“‹ Status: Pending<br/>HierarchyName + ComponentName]
+    D6 --> D7{ðŸ”„ Mais componentes?}
     D7 -->|Sim| D4
-    D7 -->|Não| D8[✅ Demand Composta<br/>+ ProductComposition criadas]
+    D7 -->|NÃ£o| D8[âœ… Demand Composta<br/>+ ProductComposition criadas]
     
     %% PRODUTO GRUPO
-    B -->|Group| E1[📦 Grupo de Produtos]
-    E1 --> E2[🔍 Analisar configuração<br/>do grupo no OrderItem]
-    E2 --> E3[📊 Explodir grupo em<br/>produtos concretos]
-    E3 --> E4[📋 Para cada produto concreto]
-    E4 --> E5{🎯 Produto concreto<br/>é Simple ou Composite?}
+    B -->|Group| E1[ðŸ“¦ Grupo de Produtos]
+    E1 --> E2[ðŸ” Analisar configuraÃ§Ã£o<br/>do grupo no OrderItem]
+    E2 --> E3[ðŸ“Š Explodir grupo em<br/>produtos concretos]
+    E3 --> E4[ðŸ“‹ Para cada produto concreto]
+    E4 --> E5{ðŸŽ¯ Produto concreto<br/>Ã© Simple ou Composite?}
     
-    E5 -->|Simple| E6[🏭 Criar Demand Simple<br/>para este produto]
-    E5 -->|Composite| E7[🏭 Criar Demand Composite<br/>+ ProductComposition]
+    E5 -->|Simple| E6[ðŸ­ Criar Demand Simple<br/>para este produto]
+    E5 -->|Composite| E7[ðŸ­ Criar Demand Composite<br/>+ ProductComposition]
     
-    E6 --> E8[✅ Demand criada]
+    E6 --> E8[âœ… Demand criada]
     E7 --> E8
-    E8 --> E9{🔄 Mais produtos<br/>no grupo?}
+    E8 --> E9{ðŸ”„ Mais produtos<br/>no grupo?}
     E9 -->|Sim| E4
-    E9 -->|Não| E10[✅ N Demands criadas<br/>para o grupo]
+    E9 -->|NÃ£o| E10[âœ… N Demands criadas<br/>para o grupo]
     
-    %% === CONSOLIDAÇÃO ===
-    C4 --> F[📊 Todas Demands criadas<br/>com Status: Pending]
+    %% === CONSOLIDAÃ‡ÃƒO ===
+    C4 --> F[ðŸ“Š Todas Demands criadas<br/>com Status: Pending]
     D8 --> F
     E10 --> F
     
-    F --> G[🔔 Notificar sistema<br/>de novas demandas]
-    G --> H[📋 Aguardar OrderEntry<br/>Status: SentToProduction]
+    F --> G[ðŸ”” Notificar sistema<br/>de novas demandas]
+    G --> H[ðŸ“‹ Aguardar OrderEntry<br/>Status: SentToProduction]
     
     %% === AGRUPAMENTO EM PRODUCTION ORDER ===
-    H --> I[⚡ TRIGGER:<br/>OrderStatus = SentToProduction]
-    I --> J[🏭 Criar ProductionOrder]
-    J --> K[📊 Agrupar Demands relacionadas]
-    K --> L[🔄 Para cada Demand do pedido]
-    L --> M[🔗 Vincular à ProductionOrder<br/>DemandStatus: Confirmed]
-    M --> N{🔄 Mais Demands?}
+    H --> I[âš¡ TRIGGER:<br/>OrderStatus = SentToProduction]
+    I --> J[ðŸ­ Criar ProductionOrder]
+    J --> K[ðŸ“Š Agrupar Demands relacionadas]
+    K --> L[ðŸ”„ Para cada Demand do pedido]
+    L --> M[ðŸ”— Vincular Ã  ProductionOrder<br/>DemandStatus: Confirmed]
+    M --> N{ðŸ”„ Mais Demands?}
     N -->|Sim| L
-    N -->|Não| O[✅ ProductionOrder criada<br/>Status: Scheduled]
+    N -->|NÃ£o| O[âœ… ProductionOrder criada<br/>Status: Scheduled]
     
-    O --> P[🎯 Produção pode iniciar]
+    O --> P[ðŸŽ¯ ProduÃ§Ã£o pode iniciar]
     
     %% === STYLING POR TIPO ===
     
@@ -75,7 +75,7 @@ flowchart TD
     classDef simpleStyle fill:#a7f3d0,stroke:#00a86b,stroke-width:2px,color:black
     class C1,C2,C3,C4,E6,E8 simpleStyle
     
-    %% PRODUTO COMPOSTO = Verde médio  
+    %% PRODUTO COMPOSTO = Verde mÃ©dio  
     classDef compositeStyle fill:#6ee7b7,stroke:#00a86b,stroke-width:2px,color:black
     class D1,D2,D3,D4,D5,D6,D7,D8,E7 compositeStyle
     
@@ -88,17 +88,17 @@ flowchart TD
     class J,K,L,M,N,O productionStyle
 ```
 
-## 📋 Detalhamento da Geração por Tipo de Produto
+## ðŸ“‹ Detalhamento da GeraÃ§Ã£o por Tipo de Produto
 
-### **🔷 Geração para Produto Simples**
+### **ðŸ”· GeraÃ§Ã£o para Produto Simples**
 
-#### **Regra de Conversão 1:1:**
+#### **Regra de ConversÃ£o 1:1:**
 ```
-1 OrderItem (Simple) → 1 Demand
+1 OrderItem (Simple) â†’ 1 Demand
 
 Exemplo:
 OrderItem: 50x "Coxinha Comum"
-↓
+â†“
 Demand: {
   OrderItemId: OrderItem.Id,
   ProductId: "coxinha-comum",
@@ -109,31 +109,31 @@ Demand: {
 }
 ```
 
-#### **Características:**
-- ✅ Processo mais direto
-- ✅ Sem ProductComposition necessária
-- ✅ Tempo de processamento: ~50ms
-- ✅ Não requer configuração adicional
+#### **CaracterÃ­sticas:**
+- âœ… Processo mais direto
+- âœ… Sem ProductComposition necessÃ¡ria
+- âœ… Tempo de processamento: ~50ms
+- âœ… NÃ£o requer configuraÃ§Ã£o adicional
 
-### **🔶 Geração para Produto Composto**
+### **ðŸ”¶ GeraÃ§Ã£o para Produto Composto**
 
 #### **Processo Detalhado:**
 ```mermaid
 flowchart TD
-    A[🧩 OrderItem Composto] --> B[📄 Ler ProductConfiguration<br/>JSON]
-    B --> C[🔍 Parse configuração<br/>por hierarquia]
-    C --> D[📋 Para cada hierarquia]
+    A[ðŸ§© OrderItem Composto] --> B[ðŸ“„ Ler ProductConfiguration<br/>JSON]
+    B --> C[ðŸ” Parse configuraÃ§Ã£o<br/>por hierarquia]
+    C --> D[ðŸ“‹ Para cada hierarquia]
     
-    D --> E[🏷️ Extrair HierarchyName]
-    E --> F[🧩 Para cada componente<br/>selecionado na hierarquia]
-    F --> G[🔧 Criar ProductComposition]
-    G --> H[📊 Definir propriedades]
-    H --> I{🔄 Mais componentes<br/>na hierarquia?}
+    D --> E[ðŸ·ï¸ Extrair HierarchyName]
+    E --> F[ðŸ§© Para cada componente<br/>selecionado na hierarquia]
+    F --> G[ðŸ”§ Criar ProductComposition]
+    G --> H[ðŸ“Š Definir propriedades]
+    H --> I{ðŸ”„ Mais componentes<br/>na hierarquia?}
     
     I -->|Sim| F
-    I -->|Não| J{🔄 Mais hierarquias?}
+    I -->|NÃ£o| J{ðŸ”„ Mais hierarquias?}
     J -->|Sim| D
-    J -->|Não| K[✅ Todas ProductComposition<br/>criadas]
+    J -->|NÃ£o| K[âœ… Todas ProductComposition<br/>criadas]
     
     classDef compositeStyle fill:#6ee7b7,stroke:#00a86b,stroke-width:2px,color:black
     class A,B,C,D,E,F,G,H,I,J,K compositeStyle
@@ -217,29 +217,29 @@ Para o exemplo acima, gera 4 ProductComposition:
    }
 ```
 
-### **🔸 Geração para Grupo de Produtos**
+### **ðŸ”¸ GeraÃ§Ã£o para Grupo de Produtos**
 
-#### **Processo de Explosão:**
+#### **Processo de ExplosÃ£o:**
 ```mermaid
 flowchart TD
-    A[📦 OrderItem Group] --> B[📊 Analisar configuração<br/>do grupo]
-    B --> C[🔍 Para cada item configurado]
+    A[ðŸ“¦ OrderItem Group] --> B[ðŸ“Š Analisar configuraÃ§Ã£o<br/>do grupo]
+    B --> C[ðŸ” Para cada item configurado]
     
-    C --> D{🎯 Item é produto<br/>Simple ou Composite?}
+    C --> D{ðŸŽ¯ Item Ã© produto<br/>Simple ou Composite?}
     
-    D -->|Simple| E1[📦 Criar Demand Simple]
-    E1 --> E2[✅ Demand: ProductId + Quantity]
+    D -->|Simple| E1[ðŸ“¦ Criar Demand Simple]
+    E1 --> E2[âœ… Demand: ProductId + Quantity]
     
-    D -->|Composite| F1[🧩 Criar Demand Composite]
-    F1 --> F2[📄 Processar configuração<br/>específica do item]
-    F2 --> F3[🧩 Gerar ProductComposition<br/>para o item]
+    D -->|Composite| F1[ðŸ§© Criar Demand Composite]
+    F1 --> F2[ðŸ“„ Processar configuraÃ§Ã£o<br/>especÃ­fica do item]
+    F2 --> F3[ðŸ§© Gerar ProductComposition<br/>para o item]
     
-    E2 --> G[📊 Adicionar à lista<br/>de Demands]
+    E2 --> G[ðŸ“Š Adicionar Ã  lista<br/>de Demands]
     F3 --> G
     
-    G --> H{🔄 Mais itens<br/>no grupo?}
+    G --> H{ðŸ”„ Mais itens<br/>no grupo?}
     H -->|Sim| C
-    H -->|Não| I[✅ N Demands criadas]
+    H -->|NÃ£o| I[âœ… N Demands criadas]
     
     classDef groupStyle fill:#10b981,stroke:#00a86b,stroke-width:2px,color:white
     class A,B,C,D,G,H,I groupStyle
@@ -251,28 +251,28 @@ flowchart TD
     class F1,F2,F3 compositeStyle
 ```
 
-#### **Exemplo Prático Completo:**
+#### **Exemplo PrÃ¡tico Completo:**
 ```
 OrderItem: 1x "Kit Festa 50 pessoas"
 
-Configuração final do grupo:
-├── 1x Bolo p/ 50 pessoas (Composite)
-│   ├── Massa: Chocolate
-│   ├── Recheio: Brigadeiro + Morango
-│   └── Cobertura: Chantilly
-├── 400x Coxinha (Simple)
-├── 50x Torta de Frango (Simple) 
-├── 150x Cajuzinho (Simple)
-├── 25x Torta de Morango (Simple)
-└── 3x Refrigerante 2L (Simple)
+ConfiguraÃ§Ã£o final do grupo:
+â”œâ”€â”€ 1x Bolo p/ 50 pessoas (Composite)
+â”‚   â”œâ”€â”€ Massa: Chocolate
+â”‚   â”œâ”€â”€ Recheio: Brigadeiro + Morango
+â”‚   â””â”€â”€ Cobertura: Chantilly
+â”œâ”€â”€ 400x Coxinha (Simple)
+â”œâ”€â”€ 50x Torta de Frango (Simple) 
+â”œâ”€â”€ 150x Cajuzinho (Simple)
+â”œâ”€â”€ 25x Torta de Morango (Simple)
+â””â”€â”€ 3x Refrigerante 2L (Simple)
 
 Demands geradas:
 
 1. Demand (Composite): 1x Bolo p/ 50 pessoas
-   ├── ProductComposition: Massa Chocolate
-   ├── ProductComposition: Recheio Brigadeiro
-   ├── ProductComposition: Recheio Morango
-   └── ProductComposition: Cobertura Chantilly
+   â”œâ”€â”€ ProductComposition: Massa Chocolate
+   â”œâ”€â”€ ProductComposition: Recheio Brigadeiro
+   â”œâ”€â”€ ProductComposition: Recheio Morango
+   â””â”€â”€ ProductComposition: Cobertura Chantilly
 
 2. Demand (Simple): 400x Coxinha
 3. Demand (Simple): 50x Torta de Frango  
@@ -283,70 +283,70 @@ Demands geradas:
 Total: 6 Demands (1 Composite + 5 Simple)
 ```
 
-## 🏭 Processo de Execução de Produção
+## ðŸ­ Processo de ExecuÃ§Ã£o de ProduÃ§Ã£o
 
-### **📋 Agrupamento em ProductionOrder**
+### **ðŸ“‹ Agrupamento em ProductionOrder**
 
 ```mermaid
 flowchart TD
-    A[⚡ OrderStatus = SentToProduction] --> B[🔍 Localizar todas Demands<br/>do OrderEntry]
-    B --> C[🏭 Criar ProductionOrder]
+    A[âš¡ OrderStatus = SentToProduction] --> B[ðŸ” Localizar todas Demands<br/>do OrderEntry]
+    B --> C[ðŸ­ Criar ProductionOrder]
     
-    C --> D[📊 Para cada Demand encontrada]
-    D --> E[🔗 Atualizar DemandId.ProductionOrderId]
-    E --> F[📈 DemandStatus: Pending → Confirmed]
-    F --> G{🔄 Mais Demands?}
+    C --> D[ðŸ“Š Para cada Demand encontrada]
+    D --> E[ðŸ”— Atualizar DemandId.ProductionOrderId]
+    E --> F[ðŸ“ˆ DemandStatus: Pending â†’ Confirmed]
+    F --> G{ðŸ”„ Mais Demands?}
     
     G -->|Sim| D
-    G -->|Não| H[📋 ProductionOrder.Status: Scheduled]
-    H --> I[⏰ Calcular tempo total<br/>estimado de produção]
-    I --> J[💰 Calcular custo total<br/>estimado]
-    J --> K[✅ ProductionOrder pronta<br/>para iniciar produção]
+    G -->|NÃ£o| H[ðŸ“‹ ProductionOrder.Status: Scheduled]
+    H --> I[â° Calcular tempo total<br/>estimado de produÃ§Ã£o]
+    I --> J[ðŸ’° Calcular custo total<br/>estimado]
+    J --> K[âœ… ProductionOrder pronta<br/>para iniciar produÃ§Ã£o]
     
     classDef productionStyle fill:#fba81d,stroke:#fba81d,stroke-width:2px,color:black
     class A,B,C,D,E,F,G,H,I,J,K productionStyle
 ```
 
-### **⚙️ Execução de Demandas**
+### **âš™ï¸ ExecuÃ§Ã£o de Demandas**
 
 ```mermaid
 flowchart TD
-    A[🚀 Produção inicia<br/>ProductionOrder] --> B[📋 Selecionar Demand<br/>Status: Confirmed]
-    B --> C[📈 DemandStatus: Confirmed → InProduction]
+    A[ðŸš€ ProduÃ§Ã£o inicia<br/>ProductionOrder] --> B[ðŸ“‹ Selecionar Demand<br/>Status: Confirmed]
+    B --> C[ðŸ“ˆ DemandStatus: Confirmed â†’ InProduction]
     
-    C --> D{🎯 Demand é Simple<br/>ou Composite?}
+    C --> D{ðŸŽ¯ Demand Ã© Simple<br/>ou Composite?}
     
     %% SIMPLE
-    D -->|Simple| E1[📦 Produção direta]
-    E1 --> E2[⏰ Registrar StartTime]
-    E2 --> E3[🏭 Executar produção]
-    E3 --> E4[⏰ Registrar CompletionTime]
-    E4 --> E5[📈 DemandStatus: InProduction → Ready]
+    D -->|Simple| E1[ðŸ“¦ ProduÃ§Ã£o direta]
+    E1 --> E2[â° Registrar StartTime]
+    E2 --> E3[ðŸ­ Executar produÃ§Ã£o]
+    E3 --> E4[â° Registrar CompletionTime]
+    E4 --> E5[ðŸ“ˆ DemandStatus: InProduction â†’ Ready]
     
     %% COMPOSITE  
-    D -->|Composite| F1[🧩 Listar ProductComposition<br/>da Demand]
-    F1 --> F2[📊 Ordenar por HierarchyName<br/>conforme AssemblyOrder]
-    F2 --> F3[🔧 Para cada ProductComposition]
+    D -->|Composite| F1[ðŸ§© Listar ProductComposition<br/>da Demand]
+    F1 --> F2[ðŸ“Š Ordenar por HierarchyName<br/>conforme AssemblyOrder]
+    F2 --> F3[ðŸ”§ Para cada ProductComposition]
     
-    F3 --> F4[📈 Status: Pending → InProgress]
-    F4 --> F5[⏰ StartTime = now()]
-    F5 --> F6[🏭 Executar tarefa específica]
-    F6 --> F7[⏰ CompletionTime = now()]
-    F7 --> F8[📈 Status: InProgress → Completed]
-    F8 --> F9{🔄 Mais ProductComposition?}
+    F3 --> F4[ðŸ“ˆ Status: Pending â†’ InProgress]
+    F4 --> F5[â° StartTime = now()]
+    F5 --> F6[ðŸ­ Executar tarefa especÃ­fica]
+    F6 --> F7[â° CompletionTime = now()]
+    F7 --> F8[ðŸ“ˆ Status: InProgress â†’ Completed]
+    F8 --> F9{ðŸ”„ Mais ProductComposition?}
     
     F9 -->|Sim| F3
-    F9 -->|Não| F10[✔️ Verificar se todas<br/>estão Completed]
-    F10 --> F11[📈 DemandStatus: InProduction → Ready]
+    F9 -->|NÃ£o| F10[âœ”ï¸ Verificar se todas<br/>estÃ£o Completed]
+    F10 --> F11[ðŸ“ˆ DemandStatus: InProduction â†’ Ready]
     
-    %% CONSOLIDAÇÃO
-    E5 --> G[✅ Demand concluída]
+    %% CONSOLIDAÃ‡ÃƒO
+    E5 --> G[âœ… Demand concluÃ­da]
     F11 --> G
     
-    G --> H{🔄 Mais Demands<br/>na ProductionOrder?}
+    G --> H{ðŸ”„ Mais Demands<br/>na ProductionOrder?}
     H -->|Sim| B
-    H -->|Não| I[📈 ProductionOrder.Status:<br/>InProgress → Completed]
-    I --> J[🎉 Produção finalizada]
+    H -->|NÃ£o| I[ðŸ“ˆ ProductionOrder.Status:<br/>InProgress â†’ Completed]
+    I --> J[ðŸŽ‰ ProduÃ§Ã£o finalizada]
     
     %% STYLING
     classDef productionStyle fill:#fba81d,stroke:#fba81d,stroke-width:2px,color:black
@@ -359,23 +359,23 @@ flowchart TD
     class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11 compositeStyle
 ```
 
-## 📊 Estados e Transições de Status
+## ðŸ“Š Estados e TransiÃ§Ãµes de Status
 
-### **🎯 Demand Status Flow:**
+### **ðŸŽ¯ Demand Status Flow:**
 ```mermaid
 stateDiagram-v2
     [*] --> Pending : OrderItem criado
     Pending --> Confirmed : OrderStatus = SentToProduction
-    Confirmed --> InProduction : Produção inicia
+    Confirmed --> InProduction : ProduÃ§Ã£o inicia
     InProduction --> Finalizando : Componentes prontos
-    Finalizando --> Ready : Finalização/embalagem
+    Finalizando --> Ready : FinalizaÃ§Ã£o/embalagem
     Ready --> Delivered : Produto entregue
     
     Pending --> Cancelled : OrderItem cancelado
     Confirmed --> Cancelled : Pedido cancelado
-    InProduction --> Cancelled : Problemas produção
+    InProduction --> Cancelled : Problemas produÃ§Ã£o
     
-    Delivered --> [*] : Processo concluído
+    Delivered --> [*] : Processo concluÃ­do
     Cancelled --> [*] : Processo cancelado
     
     %% Styling
@@ -392,7 +392,7 @@ stateDiagram-v2
     class Cancelled cancelled
 ```
 
-### **🔧 ProductComposition Status Flow:**
+### **ðŸ”§ ProductComposition Status Flow:**
 ```mermaid
 stateDiagram-v2
     [*] --> Pending : Demand criada
@@ -402,50 +402,50 @@ stateDiagram-v2
     Pending --> Cancelled : Demand cancelada
     InProgress --> Cancelled : Problema na tarefa
     
-    Completed --> [*] : Tarefa concluída
+    Completed --> [*] : Tarefa concluÃ­da
     Cancelled --> [*] : Tarefa cancelada
 ```
 
-## 🚨 Regras de Negócio e Validações
+## ðŸš¨ Regras de NegÃ³cio e ValidaÃ§Ãµes
 
-### **Criação de Demands:**
-- ✅ OrderItem deve ter Product ativo
-- ✅ ProductConfiguration deve ser válida (para Composite)
-- ✅ RequiredDate = OrderEntry.DeliveryDate - Product.AssemblyTime
-- ✅ Uma Demand só pode ter uma ProductionOrder
+### **CriaÃ§Ã£o de Demands:**
+- âœ… OrderItem deve ter Product ativo
+- âœ… ProductConfiguration deve ser vÃ¡lida (para Composite)
+- âœ… RequiredDate = OrderEntry.DeliveryDate - Product.AssemblyTime
+- âœ… Uma Demand sÃ³ pode ter uma ProductionOrder
 
 ### **ProductComposition:**
-- ✅ Só criada para ProductType.Composite
-- ✅ HierarchyName preservado mesmo se hierarquia for alterada
-- ✅ Quantidade deve respeitar configuração do OrderItem
-- ✅ Status individual por componente
+- âœ… SÃ³ criada para ProductType.Composite
+- âœ… HierarchyName preservado mesmo se hierarquia for alterada
+- âœ… Quantidade deve respeitar configuraÃ§Ã£o do OrderItem
+- âœ… Status individual por componente
 
 ### **ProductionOrder:**
-- ✅ Só pode agrupar Demands com status Confirmed
-- ✅ Todas Demands devem ter mesmo RequiredDate (±1 dia)
-- ✅ Capacidade máxima de produção respeitada
-- ✅ Ingredientes disponíveis validados
+- âœ… SÃ³ pode agrupar Demands com status Confirmed
+- âœ… Todas Demands devem ter mesmo RequiredDate (Â±1 dia)
+- âœ… Capacidade mÃ¡xima de produÃ§Ã£o respeitada
+- âœ… Ingredientes disponÃ­veis validados
 
 ### **Consumo de Ingredientes:**
-- ✅ Validar estoque antes de iniciar produção
-- ✅ Reservar ingredientes ao confirmar Demand
-- ✅ Consumir ingredientes ao completar ProductComposition
-- ✅ Atualizar IngredientStock automaticamente
+- âœ… Validar estoque antes de iniciar produÃ§Ã£o
+- âœ… Reservar ingredientes ao confirmar Demand
+- âœ… Consumir ingredientes ao completar ProductComposition
+- âœ… Atualizar IngredientStock automaticamente
 
-## 🎯 Eventos de Domínio Gerados
+## ðŸŽ¯ Eventos de DomÃ­nio Gerados
 
 - **DemandCreated**: Nova demanda gerada automaticamente
-- **ProductCompositionCreated**: Tarefa específica criada
-- **DemandStatusChanged**: Mudança de status de demanda
+- **ProductCompositionCreated**: Tarefa especÃ­fica criada
+- **DemandStatusChanged**: MudanÃ§a de status de demanda
 - **ProductionOrderCreated**: Agrupamento de demandas
-- **ProductionStarted**: Início de processamento
-- **ComponentCompleted**: Componente específico finalizado
+- **ProductionStarted**: InÃ­cio de processamento
+- **ComponentCompleted**: Componente especÃ­fico finalizado
 - **DemandCompleted**: Demanda totalmente finalizada
 - **IngredientConsumed**: Consumo de ingrediente registrado
 
 ---
 
 **Arquivo**: `03-production-demand-flow.md`  
-**Domínio**: Produção (#fba81d)  
+**DomÃ­nio**: ProduÃ§Ã£o (#fba81d)  
 **Tipo**: Process Flowchart  
-**Foco**: Geração Automática de Demands + Execução de Produção
+**Foco**: GeraÃ§Ã£o AutomÃ¡tica de Demands + ExecuÃ§Ã£o de ProduÃ§Ã£o

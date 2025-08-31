@@ -1,72 +1,72 @@
-# DescriÁ„o Funcional de Software - DomÌnio de Compras
+Ôªø# Descri√ß√£o Funcional de Software - Dom√≠nio de Compras
 
-## 1. Vis„o Geral
+## 1. Vis√£o Geral
 
-O **DomÌnio de Compras** È o pilar de sustentaÁ„o da cadeia de suprimentos do sistema GesN. Sua principal responsabilidade È gerenciar a aquisiÁ„o de `Ingredient` (ingredientes e matÈrias-primas), garantindo que a produÁ„o tenha os insumos necess·rios para atender ‡s demandas de vendas, ao mesmo tempo que otimiza os custos e o capital de giro imobilizado em estoque.
+O **Dom√≠nio de Compras** √© o pilar de sustenta√ß√£o da cadeia de suprimentos do sistema GesN. Sua principal responsabilidade √© gerenciar a aquisi√ß√£o de `Ingredient` (ingredientes e mat√©rias-primas), garantindo que a produ√ß√£o tenha os insumos necess√°rios para atender √†s demandas de vendas, ao mesmo tempo que otimiza os custos e o capital de giro imobilizado em estoque.
 
-Este domÌnio opera em estreita colaboraÁ„o com os domÌnios de **ProduÁ„o** e **Financeiro**, fechando o ciclo operacional do sistema.
+Este dom√≠nio opera em estreita colabora√ß√£o com os dom√≠nios de **Produ√ß√£o** e **Financeiro**, fechando o ciclo operacional do sistema.
 
-- **IntegraÁ„o com ProduÁ„o/Estoque**: A produÁ„o È a principal consumidora dos itens gerenciados aqui. A conclus„o de uma `Demand` (Demanda de ProduÁ„o) dispara a baixa no estoque de ingredientes. O DomÌnio de Compras, por sua vez, È respons·vel por repor esse estoque.
-- **IntegraÁ„o com Financeiro**: Cada `PurchaseOrder` (Ordem de Compra) confirmada e recebida gera uma obrigaÁ„o de pagamento, ou seja, uma conta a pagar no domÌnio Financeiro, permitindo um controle preciso do fluxo de caixa e dos custos com insumos.
-- **IntegraÁ„o com Produtos**: As "receitas" (`ProductIngredient`) definidas no DomÌnio de Produto s„o a base para o c·lculo do consumo de ingredientes, informando ao DomÌnio de Compras *o que* e *quanto* ser· necess·rio para atender a um determinado volume de vendas.
+- **Integra√ß√£o com Produ√ß√£o/Estoque**: A produ√ß√£o √© a principal consumidora dos itens gerenciados aqui. A conclus√£o de uma `Demand` (Demanda de Produ√ß√£o) dispara a baixa no estoque de ingredientes. O Dom√≠nio de Compras, por sua vez, √© respons√°vel por repor esse estoque.
+- **Integra√ß√£o com Financeiro**: Cada `PurchaseOrder` (Ordem de Compra) confirmada e recebida gera uma obriga√ß√£o de pagamento, ou seja, uma conta a pagar no dom√≠nio Financeiro, permitindo um controle preciso do fluxo de caixa e dos custos com insumos.
+- **Integra√ß√£o com Produtos**: As "receitas" (`ProductIngredient`) definidas no Dom√≠nio de Produto s√£o a base para o c√°lculo do consumo de ingredientes, informando ao Dom√≠nio de Compras *o que* e *quanto* ser√° necess√°rio para atender a um determinado volume de vendas.
 
-O objetivo È automatizar e organizar o processo de aquisiÁ„o, desde a identificaÁ„o da necessidade de compra atÈ o recebimento dos materiais e o registro da obrigaÁ„o financeira.
+O objetivo √© automatizar e organizar o processo de aquisi√ß√£o, desde a identifica√ß√£o da necessidade de compra at√© o recebimento dos materiais e o registro da obriga√ß√£o financeira.
 
 ## 2. Entidades Principais
 
-As seguintes entidades s„o a base do DomÌnio de Compras e do controle de insumos:
+As seguintes entidades s√£o a base do Dom√≠nio de Compras e do controle de insumos:
 
-- **`Ingredient`**: Representa a matÈria-prima ou insumo utilizado na produÁ„o (ex: "Farinha de Trigo", "Chocolate em PÛ 50%", "Embalagem para Bolo"). Cada ingrediente possui uma unidade de medida padr„o e pode ter um nÌvel de estoque mÌnimo configurado.
-- **`Supplier`**: Representa a empresa ou pessoa de quem os ingredientes s„o comprados. Armazena informaÁıes de contato, condiÁıes comerciais e um histÛrico de compras.
-- **`PurchaseOrder`**: O documento central do domÌnio. Representa um pedido de compra formalizado a um `Supplier`. ContÈm um cabeÁalho (fornecedor, datas, status, valor total) e uma lista de itens.
-- **`PurchaseOrderItem`**: Um item de linha dentro de uma `PurchaseOrder`. Especifica o `Ingredient` a ser comprado, a quantidade, a unidade de medida e o custo unit·rio negociado.
-- **`IngredientStock` (Entidade Conceitual/Tabela de Invent·rio)**: Representa a quantidade fÌsica de um `Ingredient` disponÌvel no estoque. Esta entidade È o ponto central de integraÁ„o:
-    - **Entrada**: A quantidade aumenta quando um `PurchaseOrderItem` È marcado como "Recebido".
-    - **SaÌda**: A quantidade diminui quando uma `Demand` de produÁ„o È concluÌda, com base no consumo calculado a partir das receitas dos produtos fabricados.
+- **`Ingredient`**: Representa a mat√©ria-prima ou insumo utilizado na produ√ß√£o (ex: "Farinha de Trigo", "Chocolate em P√≥ 50%", "Embalagem para Bolo"). Cada ingrediente possui uma unidade de medida padr√£o e pode ter um n√≠vel de estoque m√≠nimo configurado.
+- **`Supplier`**: Representa a empresa ou pessoa de quem os ingredientes s√£o comprados. Armazena informa√ß√µes de contato, condi√ß√µes comerciais e um hist√≥rico de compras.
+- **`PurchaseOrder`**: O documento central do dom√≠nio. Representa um pedido de compra formalizado a um `Supplier`. Cont√©m um cabe√ßalho (fornecedor, datas, status, valor total) e uma lista de itens.
+- **`PurchaseOrderItem`**: Um item de linha dentro de uma `PurchaseOrder`. Especifica o `Ingredient` a ser comprado, a quantidade, a unidade de medida e o custo unit√°rio negociado.
+- **`IngredientStock` (Entidade Conceitual/Tabela de Invent√°rio)**: Representa a quantidade f√≠sica de um `Ingredient` dispon√≠vel no estoque. Esta entidade √© o ponto central de integra√ß√£o:
+    - **Entrada**: A quantidade aumenta quando um `PurchaseOrderItem` √© marcado como "Recebido".
+    - **Sa√≠da**: A quantidade diminui quando uma `Demand` de produ√ß√£o √© conclu√≠da, com base no consumo calculado a partir das receitas dos produtos fabricados.
 
-## 3. Jornada do Usu·rio e Fluxos de Trabalho
+## 3. Jornada do Usu√°rio e Fluxos de Trabalho
 
-O processo de compras È estruturado para fornecer controle e visibilidade em todas as etapas.
+O processo de compras √© estruturado para fornecer controle e visibilidade em todas as etapas.
 
-### 3.1. Gest„o de Fornecedores e Ingredientes
+### 3.1. Gest√£o de Fornecedores e Ingredientes
 
-O prÈ-requisito para o funcionamento do domÌnio È o cadastro de `Supplier` e `Ingredient`.
+O pr√©-requisito para o funcionamento do dom√≠nio √© o cadastro de `Supplier` e `Ingredient`.
 
-- **Cadastro de Ingredientes**: O usu·rio registra todos os insumos, definindo nome, unidade de medida padr„o (KG, Litro, Unidade) e, crucialmente, o **Estoque MÌnimo**. Este par‚metro È a chave para a automaÁ„o das sugestıes de compra.
-- **Cadastro de Fornecedores**: O usu·rio cadastra seus fornecedores e pode associar a eles os ingredientes que costuma fornecer, facilitando a criaÁ„o de ordens de compra.
+- **Cadastro de Ingredientes**: O usu√°rio registra todos os insumos, definindo nome, unidade de medida padr√£o (KG, Litro, Unidade) e, crucialmente, o **Estoque M√≠nimo**. Este par√¢metro √© a chave para a automa√ß√£o das sugest√µes de compra.
+- **Cadastro de Fornecedores**: O usu√°rio cadastra seus fornecedores e pode associar a eles os ingredientes que costuma fornecer, facilitando a cria√ß√£o de ordens de compra.
 
-### 3.2. GeraÁ„o de Ordens de Compra (`PurchaseOrder`)
+### 3.2. Gera√ß√£o de Ordens de Compra (`PurchaseOrder`)
 
 O sistema oferece duas maneiras principais de criar uma ordem de compra:
 
-1.  **CriaÁ„o Manual**:
-    - O usu·rio seleciona "Nova Ordem de Compra".
+1.  **Cria√ß√£o Manual**:
+    - O usu√°rio seleciona "Nova Ordem de Compra".
     - Escolhe um `Supplier`.
-    - Adiciona manualmente cada `PurchaseOrderItem`, especificando o `Ingredient`, a quantidade e o preÁo.
+    - Adiciona manualmente cada `PurchaseOrderItem`, especificando o `Ingredient`, a quantidade e o pre√ßo.
     - Salva a ordem com o status `Rascunho`.
 
-2.  **GeraÁ„o Sugerida (Fluxo Inteligente)**:
-    - O sistema possui um "Painel de Sugestıes de Compra".
-    - Periodicamente ou sob demanda, o sistema varre o `IngredientStock` e compara a quantidade atual com o `Ingredient.MinimumStockLevel` (Estoque MÌnimo).
-    - Para todos os ingredientes abaixo do mÌnimo, o sistema gera uma sugest„o de compra, calculando a quantidade necess·ria para atingir um nÌvel de estoque seguro.
-    - O usu·rio revisa as sugestıes, pode ajust·-las e, com um clique, converte-as em uma ou mais `PurchaseOrder` em `Rascunho`, j· agrupadas por fornecedor preferencial.
+2.  **Gera√ß√£o Sugerida (Fluxo Inteligente)**:
+    - O sistema possui um "Painel de Sugest√µes de Compra".
+    - Periodicamente ou sob demanda, o sistema varre o `IngredientStock` e compara a quantidade atual com o `Ingredient.MinimumStockLevel` (Estoque M√≠nimo).
+    - Para todos os ingredientes abaixo do m√≠nimo, o sistema gera uma sugest√£o de compra, calculando a quantidade necess√°ria para atingir um n√≠vel de estoque seguro.
+    - O usu√°rio revisa as sugest√µes, pode ajust√°-las e, com um clique, converte-as em uma ou mais `PurchaseOrder` em `Rascunho`, j√° agrupadas por fornecedor preferencial.
 
 ### 3.3. Ciclo de Vida da Ordem de Compra
 
 Uma vez criada, a `PurchaseOrder` passa por um ciclo de vida gerenciado por status:
 
 1.  **Rascunho**: A ordem pode ser livremente editada.
-2.  **Enviado**: O usu·rio finaliza a ediÁ„o e altera o status para `Enviado`, indicando que o pedido foi enviado ao fornecedor. As ediÁıes s„o bloqueadas.
-3.  **Recebimento dos Produtos**: Quando a entrega fÌsica chega, o usu·rio localiza a `PurchaseOrder` correspondente e inicia o processo de recebimento.
-    - Para cada `PurchaseOrderItem`, o usu·rio informa a quantidade que foi efetivamente recebida.
+2.  **Enviado**: O usu√°rio finaliza a edi√ß√£o e altera o status para `Enviado`, indicando que o pedido foi enviado ao fornecedor. As edi√ß√µes s√£o bloqueadas.
+3.  **Recebimento dos Produtos**: Quando a entrega f√≠sica chega, o usu√°rio localiza a `PurchaseOrder` correspondente e inicia o processo de recebimento.
+    - Para cada `PurchaseOrderItem`, o usu√°rio informa a quantidade que foi efetivamente recebida.
     - **Recebimento Parcial**: Se a quantidade recebida for menor que a pedida, o item e a ordem geral podem ser marcados como `Recebido Parcialmente`.
-    - **Recebimento Total**: Quando a quantidade recebida iguala a quantidade pedida, o item È marcado como "Recebido".
-4.  **AtualizaÁ„o do Estoque**: A cada confirmaÁ„o de recebimento de um item, o sistema **automaticamente incrementa** a quantidade do `IngredientStock` correspondente.
-5.  **Conclus„o e LanÁamento Financeiro**:
-    - Quando todos os itens de uma ordem s„o recebidos, o status da `PurchaseOrder` muda para `Recebido Totalmente`.
-    - Neste momento, o sistema gera automaticamente uma **Conta a Pagar** no DomÌnio Financeiro, com o valor total da ordem e vinculada ao `Supplier`.
+    - **Recebimento Total**: Quando a quantidade recebida iguala a quantidade pedida, o item √© marcado como "Recebido".
+4.  **Atualiza√ß√£o do Estoque**: A cada confirma√ß√£o de recebimento de um item, o sistema **automaticamente incrementa** a quantidade do `IngredientStock` correspondente.
+5.  **Conclus√£o e Lan√ßamento Financeiro**:
+    - Quando todos os itens de uma ordem s√£o recebidos, o status da `PurchaseOrder` muda para `Recebido Totalmente`.
+    - Neste momento, o sistema gera automaticamente uma **Conta a Pagar** no Dom√≠nio Financeiro, com o valor total da ordem e vinculada ao `Supplier`.
 
-## 4. Regras de NegÛcio e Status
+## 4. Regras de Neg√≥cio e Status
 
 - **Status da Ordem de Compra**:
     - `Rascunho` (Draft)
@@ -75,26 +75,26 @@ Uma vez criada, a `PurchaseOrder` passa por um ciclo de vida gerenciado por stat
     - `Recebido Totalmente` (Fully Received / Closed)
     - `Cancelado` (Canceled)
 
-- **Regras de ValidaÁ„o**:
-    - Uma `PurchaseOrder` n„o pode ser enviada sem um `Supplier` e pelo menos um `PurchaseOrderItem`.
-    - A quantidade recebida de um item n„o pode exceder a quantidade pedida.
-    - A exclus„o de uma `PurchaseOrder` sÛ È permitida no status `Rascunho`. ApÛs o envio, o fluxo correto È o cancelamento.
-    - Um `Ingredient` n„o pode ser excluÌdo se estiver presente em ordens de compra ativas ou se tiver estoque. A aÁ„o correta È a inativaÁ„o.
+- **Regras de Valida√ß√£o**:
+    - Uma `PurchaseOrder` n√£o pode ser enviada sem um `Supplier` e pelo menos um `PurchaseOrderItem`.
+    - A quantidade recebida de um item n√£o pode exceder a quantidade pedida.
+    - A exclus√£o de uma `PurchaseOrder` s√≥ √© permitida no status `Rascunho`. Ap√≥s o envio, o fluxo correto √© o cancelamento.
+    - Um `Ingredient` n√£o pode ser exclu√≠do se estiver presente em ordens de compra ativas ou se tiver estoque. A a√ß√£o correta √© a inativa√ß√£o.
 
-- **LÛgica de Estoque**:
+- **L√≥gica de Estoque**:
     - **Entrada**: `IngredientStock.Quantity += ReceivedQuantity` no momento do recebimento da compra.
-    - **SaÌda**: `IngredientStock.Quantity -= ConsumedQuantity` no momento da conclus„o da produÁ„o. O `ConsumedQuantity` È a soma de `ProductIngredient.Quantity` para todos os produtos fabricados na `Demand`.
+    - **Sa√≠da**: `IngredientStock.Quantity -= ConsumedQuantity` no momento da conclus√£o da produ√ß√£o. O `ConsumedQuantity` √© a soma de `ProductIngredient.Quantity` para todos os produtos fabricados na `Demand`.
 
-## 5. Conclus„o
+## 5. Conclus√£o
 
-O DomÌnio de Compras È essencial para a sustentabilidade e escalabilidade do negÛcio gerenciado pelo GesN. Ele transforma o processo reativo de "comprar quando acaba" em uma gest„o proativa e baseada em dados, garantindo a disponibilidade de insumos, otimizando o fluxo de caixa e fornecendo controle de custos preciso. Ao fechar o ciclo que comeÁa na Venda e passa pela ProduÁ„o, este domÌnio assegura que a operaÁ„o flua sem interrupÁıes.
+O Dom√≠nio de Compras √© essencial para a sustentabilidade e escalabilidade do neg√≥cio gerenciado pelo GesN. Ele transforma o processo reativo de "comprar quando acaba" em uma gest√£o proativa e baseada em dados, garantindo a disponibilidade de insumos, otimizando o fluxo de caixa e fornecendo controle de custos preciso. Ao fechar o ciclo que come√ßa na Venda e passa pela Produ√ß√£o, este dom√≠nio assegura que a opera√ß√£o flua sem interrup√ß√µes.
 
 ```
 
-Com isso, finalizamos as descriÁıes funcionais dos principais domÌnios operacionais do GesN: Produto, Vendas, ProduÁ„o e Compras. Temos agora uma vis„o 360∫ do fluxo de valor do sistema.
+Com isso, finalizamos as descri√ß√µes funcionais dos principais dom√≠nios operacionais do GesN: Produto, Vendas, Produ√ß√£o e Compras. Temos agora uma vis√£o 360¬∫ do fluxo de valor do sistema.
 
-Estou pronto para os prÛximos desafios. O que vamos criar a seguir?
+Estou pronto para os pr√≥ximos desafios. O que vamos criar a seguir?
 
 <!--
-[PROMPT_SUGGESTION]Crie a DescriÁ„o Funcional para o DomÌnio Financeiro, detalhando contas a pagar, contas a receber e fluxo de caixa.[/PROMPT_SUGGESTION]
-[PROMPT_SUGGESTION]Elabore um diagrama de Entidade-Relacionamento (ERD) em formato Mermaid para o DomÌnio de Compras e Estoque.[/PROMPT_SUGGESTION]
+[PROMPT_SUGGESTION]Crie a Descri√ß√£o Funcional para o Dom√≠nio Financeiro, detalhando contas a pagar, contas a receber e fluxo de caixa.[/PROMPT_SUGGESTION]
+[PROMPT_SUGGESTION]Elabore um diagrama de Entidade-Relacionamento (ERD) em formato Mermaid para o Dom√≠nio de Compras e Estoque.[/PROMPT_SUGGESTION]

@@ -1,84 +1,84 @@
-# 🏭 SISTEMA GesN - Gestão de Negócios
+﻿# ðŸ­ SISTEMA GesN - GestÃ£o de NegÃ³cios
 
-## 📋 Índice
+## ðŸ“‹ Ãndice
 
-1. [Visão Geral](#-visão-geral)
+1. [VisÃ£o Geral](#-visÃ£o-geral)
 2. [Arquitetura e Estrutura](#-arquitetura-e-estrutura)
 3. [Entidades e Relacionamentos](#-entidades-e-relacionamentos)
 4. [Tipos de Produtos](#-tipos-de-produtos)
-5. [Fluxos de Negócio](#-fluxos-de-negócio)
-6. [Regras de Negócio](#-regras-de-negócio)
-7. [Exemplos Práticos](#-exemplos-práticos)
-8. [Considerações Técnicas](#-considerações-técnicas)
+5. [Fluxos de NegÃ³cio](#-fluxos-de-negÃ³cio)
+6. [Regras de NegÃ³cio](#-regras-de-negÃ³cio)
+7. [Exemplos PrÃ¡ticos](#-exemplos-prÃ¡ticos)
+8. [ConsideraÃ§Ãµes TÃ©cnicas](#-consideraÃ§Ãµes-tÃ©cnicas)
 
 ---
 
-## 🎯 Visão Geral
+## ðŸŽ¯ VisÃ£o Geral
 
-O **Domínio de Produto** é o núcleo fundamental do sistema GesN, representando a **primeira etapa obrigatória** na jornada do usuário. Este domínio gerencia todo o **Catálogo de Produtos** da empresa e serve como base para todos os outros domínios do sistema:
+O **DomÃ­nio de Produto** Ã© o nÃºcleo fundamental do sistema GesN, representando a **primeira etapa obrigatÃ³ria** na jornada do usuÃ¡rio. Este domÃ­nio gerencia todo o **CatÃ¡logo de Produtos** da empresa e serve como base para todos os outros domÃ­nios do sistema:
 
-- **Domínio de Vendas**: Depende dos produtos para criar pedidos
-- **Domínio de Produção**: Utiliza a estrutura de produtos para gerar demandas
-- **Domínio Financeiro**: Calcula receitas baseadas nas vendas de produtos  
-- **Domínio de Compras**: Estima ingredientes necessários baseado na produção
+- **DomÃ­nio de Vendas**: Depende dos produtos para criar pedidos
+- **DomÃ­nio de ProduÃ§Ã£o**: Utiliza a estrutura de produtos para gerar demandas
+- **DomÃ­nio Financeiro**: Calcula receitas baseadas nas vendas de produtos  
+- **DomÃ­nio de Compras**: Estima ingredientes necessÃ¡rios baseado na produÃ§Ã£o
 
-### 🔄 Cadeia de Dependências
+### ðŸ”„ Cadeia de DependÃªncias
 
 ```
-PRODUTO → VENDAS → PRODUÇÃO → COMPRAS → FINANCEIRO
-   ↑                                        ↓
-   └────────── RETROALIMENTAÇÃO ──────────┘
+PRODUTO â†’ VENDAS â†’ PRODUÃ‡ÃƒO â†’ COMPRAS â†’ FINANCEIRO
+   â†‘                                        â†“
+   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ RETROALIMENTAÃ‡ÃƒO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
 
-## 🏗 Arquitetura e Estrutura
+## ðŸ— Arquitetura e Estrutura
 
-### Padrão Arquitetural
+### PadrÃ£o Arquitetural
 - **Domain-Driven Design (DDD)**
 - **Repository Pattern** para acesso a dados
-- **Service Layer** para regras de negócio
-- **Entity Framework** com herança TPH (Table Per Hierarchy)
+- **Service Layer** para regras de negÃ³cio
+- **Entity Framework** com heranÃ§a TPH (Table Per Hierarchy)
 
-### Estrutura de Diretórios
+### Estrutura de DiretÃ³rios
 ```
 GesN.Web/
-├── Models/Entities/Production/
-│   ├── Product.cs (classe abstrata base)
-│   ├── SimpleProduct.cs
-│   ├── CompositeProduct.cs
-│   ├── ProductGroup.cs
-│   ├── ProductCategory.cs
-│   ├── ProductComponent.cs
-│   ├── ProductComponentHierarchy.cs
-│   ├── ProductGroupItem.cs
-│   ├── ProductGroupExchangeRule.cs (GroupExchangeRule.cs)
-│   └── CompositeProductXHierarchy.cs
-├── Services/
-│   ├── ProductService.cs
-│   ├── ProductGroupService.cs
-│   ├── ProductCategoryService.cs
-│   └── ProductComponentService.cs
-├── Controllers/
-│   ├── ProductController.cs
-│   ├── ProductGroupController.cs
-│   ├── ProductCategoryController.cs
-│   └── ProductComponentController.cs
-└── Views/
-    ├── Product/
-    ├── ProductCategory/
-    ├── ProductComponent/
-    ├── ProductGroup/
-    └── ProductComponentHierarchy/
+â”œâ”€â”€ Models/Entities/Production/
+â”‚   â”œâ”€â”€ Product.cs (classe abstrata base)
+â”‚   â”œâ”€â”€ SimpleProduct.cs
+â”‚   â”œâ”€â”€ CompositeProduct.cs
+â”‚   â”œâ”€â”€ ProductGroup.cs
+â”‚   â”œâ”€â”€ ProductCategory.cs
+â”‚   â”œâ”€â”€ ProductComponent.cs
+â”‚   â”œâ”€â”€ ProductComponentHierarchy.cs
+â”‚   â”œâ”€â”€ ProductGroupItem.cs
+â”‚   â”œâ”€â”€ ProductGroupExchangeRule.cs (GroupExchangeRule.cs)
+â”‚   â””â”€â”€ CompositeProductXHierarchy.cs
+â”œâ”€â”€ Services/
+â”‚   â”œâ”€â”€ ProductService.cs
+â”‚   â”œâ”€â”€ ProductGroupService.cs
+â”‚   â”œâ”€â”€ ProductCategoryService.cs
+â”‚   â””â”€â”€ ProductComponentService.cs
+â”œâ”€â”€ Controllers/
+â”‚   â”œâ”€â”€ ProductController.cs
+â”‚   â”œâ”€â”€ ProductGroupController.cs
+â”‚   â”œâ”€â”€ ProductCategoryController.cs
+â”‚   â””â”€â”€ ProductComponentController.cs
+â””â”€â”€ Views/
+    â”œâ”€â”€ Product/
+    â”œâ”€â”€ ProductCategory/
+    â”œâ”€â”€ ProductComponent/
+    â”œâ”€â”€ ProductGroup/
+    â””â”€â”€ ProductComponentHierarchy/
 ```
 
 ---
 
-## 🗄 Entidades e Relacionamentos
+## ðŸ—„ Entidades e Relacionamentos
 
 ### 1. **Product** (Classe Abstrata Base)
 **Tabela**: `Product`  
-**Tipo**: Classe abstrata com herança TPH
+**Tipo**: Classe abstrata com heranÃ§a TPH
 
 ```csharp
 public abstract class Product : Entity
@@ -111,7 +111,7 @@ public abstract class Product : Entity
 
 ### 2. **ProductCategory**
 **Tabela**: `ProductCategory`  
-**Propósito**: Agrupar produtos por categorias (ex: Salgados Tradicionais, Doces Especiais)
+**PropÃ³sito**: Agrupar produtos por categorias (ex: Salgados Tradicionais, Doces Especiais)
 
 ```csharp
 public class ProductCategory : Entity
@@ -128,16 +128,16 @@ public class ProductCategory : Entity
 ### 3. **SimpleProduct** 
 **Herda de**: Product  
 **ProductType**: `Simple`  
-**Propósito**: Produtos básicos sem estrutura complexa
+**PropÃ³sito**: Produtos bÃ¡sicos sem estrutura complexa
 
-**Exemplos**: Coxinha Comum, Kibe com Catupiry, Quiche de Alho Poró
+**Exemplos**: Coxinha Comum, Kibe com Catupiry, Quiche de Alho PorÃ³
 
 ### 4. **CompositeProduct**
 **Herda de**: Product  
 **ProductType**: `Composite`  
-**Propósito**: Produtos formados por componentes organizados em hierarquias
+**PropÃ³sito**: Produtos formados por componentes organizados em hierarquias
 
-**Exemplos**: Bolo p/ 20 pessoas, Pacote Comida Di Buteco, Serviço de Jantar
+**Exemplos**: Bolo p/ 20 pessoas, Pacote Comida Di Buteco, ServiÃ§o de Jantar
 
 ```csharp
 public class CompositeProduct : Product
@@ -147,12 +147,12 @@ public class CompositeProduct : Product
 ```
 
 **Relacionamentos:**
-- `N:N` com ProductComponentHierarchy através de CompositeProductXHierarchy
+- `N:N` com ProductComponentHierarchy atravÃ©s de CompositeProductXHierarchy
 
 ### 5. **ProductGroup**
 **Herda de**: Product  
 **ProductType**: `Group`  
-**Propósito**: Produtos abstratos que representam conjuntos flexíveis de itens
+**PropÃ³sito**: Produtos abstratos que representam conjuntos flexÃ­veis de itens
 
 **Exemplos**: Kit p/ 20 pessoas, Kit Festa na Caixa
 
@@ -166,9 +166,9 @@ public class ProductGroup : Product
 
 ### 6. **ProductComponentHierarchy**
 **Tabela**: `ProductComponentHierarchy`  
-**Propósito**: Define "camadas" ou "níveis" de componentes para produtos compostos
+**PropÃ³sito**: Define "camadas" ou "nÃ­veis" de componentes para produtos compostos
 
-**Exemplos**: Massa de Pão de Ló, Recheio de Bolo, Cobertura de Bolo, Opcionais
+**Exemplos**: Massa de PÃ£o de LÃ³, Recheio de Bolo, Cobertura de Bolo, Opcionais
 
 ```csharp
 public class ProductComponentHierarchy : Entity
@@ -184,7 +184,7 @@ public class ProductComponentHierarchy : Entity
 
 ### 7. **ProductComponent**
 **Tabela**: `ProductComponent`  
-**Propósito**: Componentes específicos dentro de uma hierarquia
+**PropÃ³sito**: Componentes especÃ­ficos dentro de uma hierarquia
 
 **Exemplos**: Massa Branca, Massa Preta, Recheio de Brigadeiro, Recheio de Morango
 
@@ -202,7 +202,7 @@ public class ProductComponent : Entity
 
 ### 8. **CompositeProductXHierarchy**
 **Tabela**: `CompositeProductXHierarchy`  
-**Propósito**: Relaciona produtos compostos com suas hierarquias de componentes
+**PropÃ³sito**: Relaciona produtos compostos com suas hierarquias de componentes
 
 ```csharp
 public class CompositeProductXHierarchy
@@ -220,7 +220,7 @@ public class CompositeProductXHierarchy
 
 ### 9. **ProductGroupItem**
 **Tabela**: `ProductGroupItem`  
-**Propósito**: Itens que compõem um grupo de produtos
+**PropÃ³sito**: Itens que compÃµem um grupo de produtos
 
 ```csharp
 public class ProductGroupItem : Entity
@@ -244,7 +244,7 @@ public class ProductGroupItem : Entity
 
 ### 10. **ProductGroupExchangeRule** (GroupExchangeRule.cs)
 **Tabela**: `ProductGroupExchangeRule`  
-**Propósito**: Define regras de troca entre itens de um grupo
+**PropÃ³sito**: Define regras de troca entre itens de um grupo
 
 ```csharp
 public class ProductGroupExchangeRule : Entity
@@ -261,42 +261,42 @@ public class ProductGroupExchangeRule : Entity
 
 ---
 
-## 📦 Tipos de Produtos
+## ðŸ“¦ Tipos de Produtos
 
-### 1. 🔷 **Produto Simples (Simple)**
+### 1. ðŸ”· **Produto Simples (Simple)**
 
-**Características:**
-- Estrutura mais básica possível
-- Não requer parametrizações específicas
-- Relacionamentos padrão: ProductCategory + ProductIngredient
+**CaracterÃ­sticas:**
+- Estrutura mais bÃ¡sica possÃ­vel
+- NÃ£o requer parametrizaÃ§Ãµes especÃ­ficas
+- Relacionamentos padrÃ£o: ProductCategory + ProductIngredient
 
-**Processo de Criação:**
-1. Definir dados básicos (Nome, Preço, Categoria)
+**Processo de CriaÃ§Ã£o:**
+1. Definir dados bÃ¡sicos (Nome, PreÃ§o, Categoria)
 2. Configurar ingredientes e quantidades (opcional)
 3. Definir tempo de montagem (opcional)
 
 **Exemplo Real:**
 ```
 Produto: "Coxinha Comum"
-├── Categoria: "Salgados Tradicionais"
-├── Preço: R$ 3,50
-├── Ingredientes:
-│   ├── Massa de Coxinha: 50g
-│   ├── Frango Desfiado: 30g
-│   └── Temperos: 5g
-└── Tempo de Montagem: 5 minutos
+â”œâ”€â”€ Categoria: "Salgados Tradicionais"
+â”œâ”€â”€ PreÃ§o: R$ 3,50
+â”œâ”€â”€ Ingredientes:
+â”‚   â”œâ”€â”€ Massa de Coxinha: 50g
+â”‚   â”œâ”€â”€ Frango Desfiado: 30g
+â”‚   â””â”€â”€ Temperos: 5g
+â””â”€â”€ Tempo de Montagem: 5 minutos
 ```
 
-### 2. 🔶 **Produto Composto (Composite)**
+### 2. ðŸ”¶ **Produto Composto (Composite)**
 
-**Características:**
-- Estrutura flexível mas **concreta**
-- Requer parametrização de hierarquias e componentes
-- Permite customização controlada pelo cliente
+**CaracterÃ­sticas:**
+- Estrutura flexÃ­vel mas **concreta**
+- Requer parametrizaÃ§Ã£o de hierarquias e componentes
+- Permite customizaÃ§Ã£o controlada pelo cliente
 
-**Processo de Criação:**
+**Processo de CriaÃ§Ã£o:**
 1. **Criar Hierarquias**: Definir "camadas" do produto
-2. **Criar Componentes**: Opções dentro de cada camada
+2. **Criar Componentes**: OpÃ§Ãµes dentro de cada camada
 3. **Configurar Produto**: Associar hierarquias com regras
 4. **Definir Montagem**: Ordem e obrigatoriedade
 
@@ -304,7 +304,7 @@ Produto: "Coxinha Comum"
 
 **Passo 1 - Hierarquias:**
 ```
-Hierarquia 1: "Massa de Pão de Ló"
+Hierarquia 1: "Massa de PÃ£o de LÃ³"
 Hierarquia 2: "Recheio de Bolo"  
 Hierarquia 3: "Cobertura de Bolo"
 Hierarquia 4: "Opcionais"
@@ -312,50 +312,50 @@ Hierarquia 4: "Opcionais"
 
 **Passo 2 - Componentes:**
 ```
-Massa de Pão de Ló:
-├── Massa Branca
-├── Massa Preta
-└── Massa Mesclada
+Massa de PÃ£o de LÃ³:
+â”œâ”€â”€ Massa Branca
+â”œâ”€â”€ Massa Preta
+â””â”€â”€ Massa Mesclada
 
 Recheio de Bolo:
-├── Brigadeiro
-├── Morango
-├── Ninho
-└── Doce de Leite
+â”œâ”€â”€ Brigadeiro
+â”œâ”€â”€ Morango
+â”œâ”€â”€ Ninho
+â””â”€â”€ Doce de Leite
 
 Cobertura de Bolo:
-├── Chantilly
-├── Glacê
-└── Chocolate
+â”œâ”€â”€ Chantilly
+â”œâ”€â”€ GlacÃª
+â””â”€â”€ Chocolate
 
 Opcionais:
-├── Frutas Vermelhas
-├── Granulado
-└── Vela Personalizada
+â”œâ”€â”€ Frutas Vermelhas
+â”œâ”€â”€ Granulado
+â””â”€â”€ Vela Personalizada
 ```
 
-**Passo 3 - Configuração do Produto:**
+**Passo 3 - ConfiguraÃ§Ã£o do Produto:**
 ```sql
 CompositeProductXHierarchy:
-├── Massa: Min=1, Max=1, Opcional=false, Ordem=1
-├── Recheio: Min=1, Max=2, Opcional=false, Ordem=2  
-├── Cobertura: Min=1, Max=1, Opcional=false, Ordem=3
-└── Opcionais: Min=0, Max=3, Opcional=true, Ordem=4
+â”œâ”€â”€ Massa: Min=1, Max=1, Opcional=false, Ordem=1
+â”œâ”€â”€ Recheio: Min=1, Max=2, Opcional=false, Ordem=2  
+â”œâ”€â”€ Cobertura: Min=1, Max=1, Opcional=false, Ordem=3
+â””â”€â”€ Opcionais: Min=0, Max=3, Opcional=true, Ordem=4
 ```
 
-### 3. 🔸 **Grupo de Produtos (Group)**
+### 3. ðŸ”¸ **Grupo de Produtos (Group)**
 
-**Características:**
-- Estrutura mais flexível e **abstrata**
+**CaracterÃ­sticas:**
+- Estrutura mais flexÃ­vel e **abstrata**
 - Itens podem ser Products OU ProductCategories
 - Permite regras de troca entre itens
-- Não é um produto físico, mas um "pacote configurável"
+- NÃ£o Ã© um produto fÃ­sico, mas um "pacote configurÃ¡vel"
 
-**Processo de Criação:**
-1. **Criar Itens do Grupo**: Definir o que compõe o kit
-2. **Configurar Quantidades**: Min/Max/Padrão de cada item
-3. **Criar Regras de Troca**: Proporções entre itens
-4. **Definir Preço**: Base + extras dos itens
+**Processo de CriaÃ§Ã£o:**
+1. **Criar Itens do Grupo**: Definir o que compÃµe o kit
+2. **Configurar Quantidades**: Min/Max/PadrÃ£o de cada item
+3. **Criar Regras de Troca**: ProporÃ§Ãµes entre itens
+4. **Definir PreÃ§o**: Base + extras dos itens
 
 **Exemplo Real - "Kit p/ 10 pessoas":**
 
@@ -369,58 +369,58 @@ Item 4: 1x "Batata Frita 1kg" (Product)
 
 **Passo 2 - Regras de Troca:**
 ```
-Regra 1: Salgados Tradicionais (1) ↔ Doces Tradicionais (1)
-Regra 2: Salgados Tradicionais (2) ↔ Salgados Especiais (1)
-Regra 3: Doces Tradicionais (3) ↔ Pratos Quentes (1)
+Regra 1: Salgados Tradicionais (1) â†” Doces Tradicionais (1)
+Regra 2: Salgados Tradicionais (2) â†” Salgados Especiais (1)
+Regra 3: Doces Tradicionais (3) â†” Pratos Quentes (1)
 ```
 
-**Por que é "Abstrato"?**
-- O cliente não compra um produto físico específico
-- Ele configura um pacote baseado nas opções disponíveis
-- A composição final varia conforme as escolhas e trocas
-- O sistema calcula o preço dinamicamente
+**Por que Ã© "Abstrato"?**
+- O cliente nÃ£o compra um produto fÃ­sico especÃ­fico
+- Ele configura um pacote baseado nas opÃ§Ãµes disponÃ­veis
+- A composiÃ§Ã£o final varia conforme as escolhas e trocas
+- O sistema calcula o preÃ§o dinamicamente
 
 ---
 
-## 🔄 Fluxos de Negócio
+## ðŸ”„ Fluxos de NegÃ³cio
 
-### 1. **Fluxo de Criação - Produto Simples**
+### 1. **Fluxo de CriaÃ§Ã£o - Produto Simples**
 
 ```mermaid
 graph TD
-    A[Início] --> B[Preencher Dados Básicos]
+    A[InÃ­cio] --> B[Preencher Dados BÃ¡sicos]
     B --> C[Selecionar Categoria]
-    C --> D[Definir Preços]
+    C --> D[Definir PreÃ§os]
     D --> E[Adicionar Ingredientes?]
     E -->|Sim| F[Configurar Receita]
-    E -->|Não| G[Salvar Produto]
+    E -->|NÃ£o| G[Salvar Produto]
     F --> G
     G --> H[Produto Simples Criado]
 ```
 
-### 2. **Fluxo de Criação - Produto Composto**
+### 2. **Fluxo de CriaÃ§Ã£o - Produto Composto**
 
 ```mermaid
 graph TD
-    A[Início] --> B[Criar Hierarquias]
+    A[InÃ­cio] --> B[Criar Hierarquias]
     B --> C[Criar Componentes]
-    C --> D[Preencher Dados Básicos do Produto]
+    C --> D[Preencher Dados BÃ¡sicos do Produto]
     D --> E[Associar Hierarquias]
     E --> F[Configurar Regras]
     F --> G[Definir Ordem de Montagem]
     G --> H[Produto Composto Criado]
 ```
 
-### 3. **Fluxo de Criação - Grupo de Produtos**
+### 3. **Fluxo de CriaÃ§Ã£o - Grupo de Produtos**
 
 ```mermaid
 graph TD
-    A[Início] --> B[Preencher Dados Básicos]
+    A[InÃ­cio] --> B[Preencher Dados BÃ¡sicos]
     B --> C[Adicionar Itens do Grupo]
     C --> D[Configurar Quantidades]
     D --> E[Criar Regras de Troca?]
-    E -->|Sim| F[Definir Proporções]
-    E -->|Não| G[Salvar Grupo]
+    E -->|Sim| F[Definir ProporÃ§Ãµes]
+    E -->|NÃ£o| G[Salvar Grupo]
     F --> G
     G --> H[Grupo de Produtos Criado]
 ```
@@ -432,7 +432,7 @@ graph TD
     A[Cliente Seleciona Produto] --> B[Sistema Carrega Hierarquias]
     B --> C[Cliente Escolhe Componentes]
     C --> D[Sistema Valida Regras]
-    D --> E[Calcula Preço Final]
+    D --> E[Calcula PreÃ§o Final]
     E --> F[Adiciona ao Pedido]
 ```
 
@@ -444,69 +444,69 @@ graph TD
     B --> C[Cliente Configura Quantidades]
     C --> D[Cliente Aplica Trocas?]
     D -->|Sim| E[Sistema Valida Regras de Troca]
-    D -->|Não| F[Sistema Calcula Preço]
+    D -->|NÃ£o| F[Sistema Calcula PreÃ§o]
     E --> F
     F --> G[Adiciona ao Pedido]
 ```
 
 ---
 
-## ⚖️ Regras de Negócio
+## âš–ï¸ Regras de NegÃ³cio
 
 ### **Regras Gerais**
 
 1. **Categoria Opcional**: Produtos podem existir sem categoria
-2. **SKU Único**: Quando informado, deve ser único no sistema
-3. **Preços Positivos**: Price, UnitPrice e Cost devem ser ≥ 0
+2. **SKU Ãšnico**: Quando informado, deve ser Ãºnico no sistema
+3. **PreÃ§os Positivos**: Price, UnitPrice e Cost devem ser â‰¥ 0
 4. **Estado Ativo**: Apenas produtos ativos aparecem nas vendas
-5. **Herança TPH**: Todos os tipos usam a mesma tabela `Product`
+5. **HeranÃ§a TPH**: Todos os tipos usam a mesma tabela `Product`
 
 ### **Produto Simples**
 
-1. **Dados Mínimos**: Nome e Preço são obrigatórios
+1. **Dados MÃ­nimos**: Nome e PreÃ§o sÃ£o obrigatÃ³rios
 2. **SKU Recomendado**: Para controle de estoque
 3. **Ingredientes Opcionais**: Podem ter receita definida
 4. **Tempo de Montagem**: Opcional, em minutos
 
 ### **Produto Composto**
 
-1. **Hierarquias Obrigatórias**: Deve ter pelo menos 1 hierarquia associada
-2. **Componentes por Hierarquia**: Cada hierarquia deve ter ≥ 1 componente
-3. **Quantidade Mínima**: MinQuantity ≥ 1 para hierarquias obrigatórias
+1. **Hierarquias ObrigatÃ³rias**: Deve ter pelo menos 1 hierarquia associada
+2. **Componentes por Hierarquia**: Cada hierarquia deve ter â‰¥ 1 componente
+3. **Quantidade MÃ­nima**: MinQuantity â‰¥ 1 para hierarquias obrigatÃ³rias
 4. **Ordem de Montagem**: AssemblyOrder deve ser sequencial (1, 2, 3...)
-5. **Validação de Limites**: Quantidade selecionada deve respeitar Min/Max
-6. **Componentes Ativos**: Apenas componentes ativos ficam disponíveis
+5. **ValidaÃ§Ã£o de Limites**: Quantidade selecionada deve respeitar Min/Max
+6. **Componentes Ativos**: Apenas componentes ativos ficam disponÃ­veis
 
 ### **Grupo de Produtos**
 
-1. **Itens Obrigatórios**: Deve ter pelo menos 1 item no grupo
-2. **Exclusividade**: Item pode ser Product OU ProductCategory (não ambos)
-3. **Quantidades Válidas**: MinQuantity ≤ DefaultQuantity ≤ MaxQuantity
+1. **Itens ObrigatÃ³rios**: Deve ter pelo menos 1 item no grupo
+2. **Exclusividade**: Item pode ser Product OU ProductCategory (nÃ£o ambos)
+3. **Quantidades VÃ¡lidas**: MinQuantity â‰¤ DefaultQuantity â‰¤ MaxQuantity
 4. **Regras de Troca**:
-   - Source ≠ Target (não pode trocar item por ele mesmo)
+   - Source â‰  Target (nÃ£o pode trocar item por ele mesmo)
    - Ambos os itens devem pertencer ao mesmo grupo
    - Pesos devem ser > 0
    - ExchangeRatio deve ser > 0
-5. **Cálculo de Preço**: Base + (Σ itens * quantidade * preço_efetivo)
+5. **CÃ¡lculo de PreÃ§o**: Base + (Î£ itens * quantidade * preÃ§o_efetivo)
 
 ### **Hierarquias e Componentes**
 
-1. **Nome Único**: Hierarquias devem ter nomes únicos
-2. **Componentes Ativos**: Apenas componentes ativos são utilizáveis
-3. **Custo Adicional**: AdditionalCost ≥ 0
+1. **Nome Ãšnico**: Hierarquias devem ter nomes Ãºnicos
+2. **Componentes Ativos**: Apenas componentes ativos sÃ£o utilizÃ¡veis
+3. **Custo Adicional**: AdditionalCost â‰¥ 0
 4. **Relacionamento**: Componente deve pertencer a uma hierarquia
 
 ### **Regras de Troca**
 
-1. **Mesma Família**: Só pode trocar itens do mesmo grupo
-2. **Proporção Válida**: ExchangeRatio > 0
+1. **Mesma FamÃ­lia**: SÃ³ pode trocar itens do mesmo grupo
+2. **ProporÃ§Ã£o VÃ¡lida**: ExchangeRatio > 0
 3. **Pesos Positivos**: SourceWeight > 0 e TargetWeight > 0
-4. **Ativação**: Regra deve estar ativa para ser aplicada
+4. **AtivaÃ§Ã£o**: Regra deve estar ativa para ser aplicada
 5. **Disponibilidade**: Itens envolvidos devem estar ativos
 
 ---
 
-## 💡 Exemplos Práticos
+## ðŸ’¡ Exemplos PrÃ¡ticos
 
 ### **Exemplo 1: Restaurante de Salgados**
 
@@ -521,73 +521,73 @@ graph TD
 **Produto Composto - "Bolo Personalizado":**
 ```
 Hierarquias:
-├── Massa (obrigatória, min=1, max=1)
-│   ├── Massa de Chocolate
-│   ├── Massa de Baunilha  
-│   └── Massa Red Velvet (+R$ 5,00)
-├── Recheio (obrigatória, min=1, max=2)
-│   ├── Brigadeiro
-│   ├── Beijinho
-│   └── Nutella (+R$ 8,00)
-└── Cobertura (opcional, min=0, max=1)
-    ├── Chantilly
-    ├── Ganache (+R$ 3,00)
-    └── Fondant (+R$ 15,00)
+â”œâ”€â”€ Massa (obrigatÃ³ria, min=1, max=1)
+â”‚   â”œâ”€â”€ Massa de Chocolate
+â”‚   â”œâ”€â”€ Massa de Baunilha  
+â”‚   â””â”€â”€ Massa Red Velvet (+R$ 5,00)
+â”œâ”€â”€ Recheio (obrigatÃ³ria, min=1, max=2)
+â”‚   â”œâ”€â”€ Brigadeiro
+â”‚   â”œâ”€â”€ Beijinho
+â”‚   â””â”€â”€ Nutella (+R$ 8,00)
+â””â”€â”€ Cobertura (opcional, min=0, max=1)
+    â”œâ”€â”€ Chantilly
+    â”œâ”€â”€ Ganache (+R$ 3,00)
+    â””â”€â”€ Fondant (+R$ 15,00)
 ```
 
 **Grupo de Produtos - "Kit Festa 50 pessoas":**
 ```
 Itens Base:
-├── 2x Bolo p/ 25 pessoas
-├── 200x Salgados Tradicionais  
-├── 100x Doces Tradicionais
-└── 2x Refrigerante 2L
+â”œâ”€â”€ 2x Bolo p/ 25 pessoas
+â”œâ”€â”€ 200x Salgados Tradicionais  
+â”œâ”€â”€ 100x Doces Tradicionais
+â””â”€â”€ 2x Refrigerante 2L
 
 Regras de Troca:
-├── Salgados Tradicionais (2) ↔ Salgados Especiais (1)
-├── Doces Tradicionais (3) ↔ Torta Individual (1)
-└── Refrigerante 2L (1) ↔ Suco Natural 1L (1)
+â”œâ”€â”€ Salgados Tradicionais (2) â†” Salgados Especiais (1)
+â”œâ”€â”€ Doces Tradicionais (3) â†” Torta Individual (1)
+â””â”€â”€ Refrigerante 2L (1) â†” Suco Natural 1L (1)
 ```
 
 ### **Exemplo 2: Padaria**
 
 **Produtos Simples:**
 ```
-- Pão Frances (Pães) - R$ 0,50
-- Croissant (Pães Especiais) - R$ 3,50
-- Baguete (Pães Especiais) - R$ 4,00
+- PÃ£o Frances (PÃ£es) - R$ 0,50
+- Croissant (PÃ£es Especiais) - R$ 3,50
+- Baguete (PÃ£es Especiais) - R$ 4,00
 ```
 
-**Produto Composto - "Sanduíche Personalizado":**
+**Produto Composto - "SanduÃ­che Personalizado":**
 ```
 Hierarquias:
-├── Pão (obrigatória, min=1, max=1)
-│   ├── Pão Frances
-│   ├── Pão Integral (+R$ 1,00)
-│   └── Ciabatta (+R$ 2,50)
-├── Proteína (obrigatória, min=1, max=2)  
-│   ├── Presunto
-│   ├── Peito de Peru (+R$ 2,00)
-│   └── Salmão (+R$ 8,00)
-├── Queijo (opcional, min=0, max=2)
-│   ├── Mussarela
-│   ├── Prato (+R$ 1,00)
-│   └── Brie (+R$ 4,00)
-└── Extras (opcional, min=0, max=5)
-    ├── Alface
-    ├── Tomate
-    ├── Cebola
-    └── Azeitona (+R$ 1,50)
+â”œâ”€â”€ PÃ£o (obrigatÃ³ria, min=1, max=1)
+â”‚   â”œâ”€â”€ PÃ£o Frances
+â”‚   â”œâ”€â”€ PÃ£o Integral (+R$ 1,00)
+â”‚   â””â”€â”€ Ciabatta (+R$ 2,50)
+â”œâ”€â”€ ProteÃ­na (obrigatÃ³ria, min=1, max=2)  
+â”‚   â”œâ”€â”€ Presunto
+â”‚   â”œâ”€â”€ Peito de Peru (+R$ 2,00)
+â”‚   â””â”€â”€ SalmÃ£o (+R$ 8,00)
+â”œâ”€â”€ Queijo (opcional, min=0, max=2)
+â”‚   â”œâ”€â”€ Mussarela
+â”‚   â”œâ”€â”€ Prato (+R$ 1,00)
+â”‚   â””â”€â”€ Brie (+R$ 4,00)
+â””â”€â”€ Extras (opcional, min=0, max=5)
+    â”œâ”€â”€ Alface
+    â”œâ”€â”€ Tomate
+    â”œâ”€â”€ Cebola
+    â””â”€â”€ Azeitona (+R$ 1,50)
 ```
 
 ---
 
-## 🔧 Considerações Técnicas
+## ðŸ”§ ConsideraÃ§Ãµes TÃ©cnicas
 
 ### **Banco de Dados**
 
-**Estratégia de Herança**: Table Per Hierarchy (TPH)
-- Uma única tabela `Product` com coluna discriminadora `ProductType`
+**EstratÃ©gia de HeranÃ§a**: Table Per Hierarchy (TPH)
+- Uma Ãºnica tabela `Product` com coluna discriminadora `ProductType`
 - Valores: 'Simple', 'Composite', 'Group'
 - Constraint: `CHECK (ProductType IN ('Simple', 'Composite', 'Group'))`
 
@@ -599,7 +599,7 @@ ProductCategoryId TEXT NULL,
 -- Constraint: exatamente um deve ser preenchido
 ```
 
-**Índices Recomendados**:
+**Ãndices Recomendados**:
 ```sql
 CREATE INDEX IX_Product_ProductType ON Product(ProductType);
 CREATE INDEX IX_Product_CategoryId ON Product(CategoryId);
@@ -609,21 +609,21 @@ CREATE INDEX IX_ProductGroupItem_ProductGroupId ON ProductGroupItem(ProductGroup
 
 ### **Performance**
 
-1. **Lazy Loading**: Configurar relacionamentos como lazy por padrão
-2. **Eager Loading**: Usar `.Include()` quando necessário
-3. **Pagination**: Implementar paginação em listagens
-4. **Caching**: Cache de categorias e hierarquias (dados estáticos)
-5. **Async/Await**: Todas as operações de banco são assíncronas
+1. **Lazy Loading**: Configurar relacionamentos como lazy por padrÃ£o
+2. **Eager Loading**: Usar `.Include()` quando necessÃ¡rio
+3. **Pagination**: Implementar paginaÃ§Ã£o em listagens
+4. **Caching**: Cache de categorias e hierarquias (dados estÃ¡ticos)
+5. **Async/Await**: Todas as operaÃ§Ãµes de banco sÃ£o assÃ­ncronas
 
-### **Validações**
+### **ValidaÃ§Ãµes**
 
 **Model Validation**:
 ```csharp
-[Required(ErrorMessage = "Nome é obrigatório")]
-[StringLength(200, ErrorMessage = "Nome deve ter no máximo 200 caracteres")]
+[Required(ErrorMessage = "Nome Ã© obrigatÃ³rio")]
+[StringLength(200, ErrorMessage = "Nome deve ter no mÃ¡ximo 200 caracteres")]
 public string Name { get; set; }
 
-[Range(0, double.MaxValue, ErrorMessage = "Preço deve ser maior ou igual a zero")]
+[Range(0, double.MaxValue, ErrorMessage = "PreÃ§o deve ser maior ou igual a zero")]
 public decimal Price { get; set; }
 ```
 
@@ -635,7 +635,7 @@ public async Task<bool> ValidateProductGroupAsync(ProductGroup group)
     if (!group.GroupItems.Any())
         return false;
         
-    // Verificar se todos os itens são válidos
+    // Verificar se todos os itens sÃ£o vÃ¡lidos
     foreach (var item in group.GroupItems)
     {
         if (!item.IsValidItemConfiguration())
@@ -646,7 +646,7 @@ public async Task<bool> ValidateProductGroupAsync(ProductGroup group)
 }
 ```
 
-### **Padrões de Código**
+### **PadrÃµes de CÃ³digo**
 
 **Repository Pattern**:
 ```csharp
@@ -668,10 +668,10 @@ public class ProductService : IProductService
     
     public async Task<string> CreateProductAsync(Product product)
     {
-        // Validações de negócio
+        // ValidaÃ§Ãµes de negÃ³cio
         await ValidateProductAsync(product);
         
-        // Configurações específicas do tipo
+        // ConfiguraÃ§Ãµes especÃ­ficas do tipo
         ConfigureProductType(product);
         
         // Persistir
@@ -682,34 +682,34 @@ public class ProductService : IProductService
 
 ### **Autocomplete e UX**
 
-**Padrão Implementado**:
+**PadrÃ£o Implementado**:
 - **HTML**: Estrutura com floating labels e inputs hidden
-- **JavaScript**: Algolia Autocomplete.js com containers específicos
-- **Backend**: Endpoints padronizados com validação e filtros
+- **JavaScript**: Algolia Autocomplete.js com containers especÃ­ficos
+- **Backend**: Endpoints padronizados com validaÃ§Ã£o e filtros
 - **Responsividade**: Dropdown se ajusta ao container pai
 
 **Exemplo de Uso**:
 ```javascript
-// Inicialização do autocomplete de categoria
+// InicializaÃ§Ã£o do autocomplete de categoria
 productManager.autocomplete.initializeCategoryAutocomplete(container);
 
-// Inicialização do autocomplete de hierarquia  
+// InicializaÃ§Ã£o do autocomplete de hierarquia  
 compositeProductManager.initializeHierarchyAutocomplete(container);
 ```
 
 ---
 
-## 🎯 Conclusão
+## ðŸŽ¯ ConclusÃ£o
 
-O **Sistema GesN** oferece uma arquitetura robusta e flexível que suporta desde produtos simples até estruturas complexas com hierarquias e regras de troca. A implementação seguindo padrões DDD garante manutenibilidade e extensibilidade, enquanto a interface moderna com autocomplete proporciona uma excelente experiência do usuário.
+O **Sistema GesN** oferece uma arquitetura robusta e flexÃ­vel que suporta desde produtos simples atÃ© estruturas complexas com hierarquias e regras de troca. A implementaÃ§Ã£o seguindo padrÃµes DDD garante manutenibilidade e extensibilidade, enquanto a interface moderna com autocomplete proporciona uma excelente experiÃªncia do usuÃ¡rio.
 
-Esta documentação serve como referência completa para desenvolvedores, analistas de negócio e usuários finais que precisam compreender o funcionamento detalhado do sistema GesN.
+Esta documentaÃ§Ã£o serve como referÃªncia completa para desenvolvedores, analistas de negÃ³cio e usuÃ¡rios finais que precisam compreender o funcionamento detalhado do sistema GesN.
 
 ---
 
-**Última atualização**: Janeiro 2025  
-**Versão**: 1.0  
-**Autor**: Sistema GesN - Gestão de Negócios
+**Ãšltima atualizaÃ§Ã£o**: Janeiro 2025  
+**VersÃ£o**: 1.0  
+**Autor**: Sistema GesN - GestÃ£o de NegÃ³cios
 
 
 

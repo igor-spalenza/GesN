@@ -1,25 +1,25 @@
-# 🏭 EVENT STORMING - DOMÍNIO DE PRODUÇÃO
+﻿# ðŸ­ EVENT STORMING - DOMÃNIO DE PRODUÃ‡ÃƒO
 
-## 🎯 Visão Geral
-Event Storming do Domínio de Produção mapeando o fluxo desde a geração automática de demandas até a finalização da produção, incluindo orquestração de tarefas complexas, consumo de ingredientes, integração com Google Calendar, e coordenação com domínios de Vendas e Compras.
+## ðŸŽ¯ VisÃ£o Geral
+Event Storming do DomÃ­nio de ProduÃ§Ã£o mapeando o fluxo desde a geraÃ§Ã£o automÃ¡tica de demandas atÃ© a finalizaÃ§Ã£o da produÃ§Ã£o, incluindo orquestraÃ§Ã£o de tarefas complexas, consumo de ingredientes, integraÃ§Ã£o com Google Calendar, e coordenaÃ§Ã£o com domÃ­nios de Vendas e Compras.
 
-## 🎨 Convenções Visuais
-- **📋 [Comando]** - Azul - Ação executada por usuário/sistema
-- **⚡ Evento** - Laranja - Fato que aconteceu no domínio
-- **👤 (Ator)** - Verde - Quem executa o comando
-- **📊 {Agregado}** - Roxo - Entidade que processa comando
-- **🔄 Política** - Cinza - Regra "quando X então Y"
-- **⚠️ (!Hotspot!)** - Rosa - Complexidade/problema identificado
-- **🌐 <Sistema Externo>** - Vermelho - Integração externa
+## ðŸŽ¨ ConvenÃ§Ãµes Visuais
+- **ðŸ“‹ [Comando]** - Azul - AÃ§Ã£o executada por usuÃ¡rio/sistema
+- **âš¡ Evento** - Laranja - Fato que aconteceu no domÃ­nio
+- **ðŸ‘¤ (Ator)** - Verde - Quem executa o comando
+- **ðŸ“Š {Agregado}** - Roxo - Entidade que processa comando
+- **ðŸ”„ PolÃ­tica** - Cinza - Regra "quando X entÃ£o Y"
+- **âš ï¸ (!Hotspot!)** - Rosa - Complexidade/problema identificado
+- **ðŸŒ <Sistema Externo>** - Vermelho - IntegraÃ§Ã£o externa
 
-## ⚡ Event Storming Timeline
+## âš¡ Event Storming Timeline
 
-### **🔄 Fluxo Principal - Da Demanda à Produção**
+### **ðŸ”„ Fluxo Principal - Da Demanda Ã  ProduÃ§Ã£o**
 
 ```mermaid
 journey
     title Production Domain Event Timeline
-    section Geração Automática
+    section GeraÃ§Ã£o AutomÃ¡tica
       OrderConfirmed (Sales)              : 5: Sistema
       [CreateDemandsFromOrderItems]        : 4: Sistema
       DemandCreated                        : 5: Sistema
@@ -36,7 +36,7 @@ journey
       [CreateGoogleCalendarEvent]          : 4: Sistema
       ProductionEventCreated               : 5: Sistema
       
-    section Execução
+    section ExecuÃ§Ã£o
       [StartProduction]                    : 4: Operador
       ProductionStarted                    : 5: Sistema
       [ProcessProductComposition]          : 3: Operador
@@ -45,7 +45,7 @@ journey
       [CompleteProduction]                 : 4: Operador
       ProductionCompleted                  : 5: Sistema
       
-    section Finalização
+    section FinalizaÃ§Ã£o
       [QualityCheck]                       : 4: Supervisor
       QualityApproved                      : 5: Sistema
       [MarkAsReady]                        : 4: Sistema
@@ -53,644 +53,644 @@ journey
       OrderReadyForDelivery                : 5: Sistema
 ```
 
-### **📋 Comandos por Ator**
+### **ðŸ“‹ Comandos por Ator**
 
-#### **🤖 Sistema (Automático - Triggered by Sales)**
+#### **ðŸ¤– Sistema (AutomÃ¡tico - Triggered by Sales)**
 ```
 [CreateDemandsFromOrderItems]
-├── Trigger: OrderConfirmed event from Sales domain
-├── Input: OrderItems[], OrderEntry data
-├── Complex Logic: Different strategy per ProductType
-├── Simple: 1 OrderItem → 1 Demand
-├── Composite: 1 OrderItem → 1 Demand + N ProductComposition
-├── Group: 1 OrderItem → N Demands (exploded products)
-├── Output: DemandIds[]
-└── Events: DemandCreated (per demand)
+â”œâ”€â”€ Trigger: OrderConfirmed event from Sales domain
+â”œâ”€â”€ Input: OrderItems[], OrderEntry data
+â”œâ”€â”€ Complex Logic: Different strategy per ProductType
+â”œâ”€â”€ Simple: 1 OrderItem â†’ 1 Demand
+â”œâ”€â”€ Composite: 1 OrderItem â†’ 1 Demand + N ProductComposition
+â”œâ”€â”€ Group: 1 OrderItem â†’ N Demands (exploded products)
+â”œâ”€â”€ Output: DemandIds[]
+â””â”€â”€ Events: DemandCreated (per demand)
 
 [AnalyzeProductType]
-├── Trigger: DemandCreated
-├── Input: DemandId, ProductId, ProductConfiguration
-├── Cross-domain: Query Product domain for type and configuration
-├── Decision: Determine production strategy
-├── Output: ProductionStrategy
-└── Events: ProductCompositionRequired (if Composite)
+â”œâ”€â”€ Trigger: DemandCreated
+â”œâ”€â”€ Input: DemandId, ProductId, ProductConfiguration
+â”œâ”€â”€ Cross-domain: Query Product domain for type and configuration
+â”œâ”€â”€ Decision: Determine production strategy
+â”œâ”€â”€ Output: ProductionStrategy
+â””â”€â”€ Events: ProductCompositionRequired (if Composite)
 
 [CreateProductComposition]
-├── Trigger: ProductCompositionRequired
-├── Input: DemandId, ProductConfiguration JSON
-├── Complex parsing: Extract component selections and quantities
-├── Cross-domain: Validate components with Product domain
-├── Output: ProductCompositionIds[]
-└── Events: ProductCompositionCreated (per task)
+â”œâ”€â”€ Trigger: ProductCompositionRequired
+â”œâ”€â”€ Input: DemandId, ProductConfiguration JSON
+â”œâ”€â”€ Complex parsing: Extract component selections and quantities
+â”œâ”€â”€ Cross-domain: Validate components with Product domain
+â”œâ”€â”€ Output: ProductCompositionIds[]
+â””â”€â”€ Events: ProductCompositionCreated (per task)
 
 [GroupDemandsIntoProductionOrder]
-├── Trigger: Multiple DemandCreated events (batch processing)
-├── Input: DemandIds[], Grouping criteria
-├── Grouping logic: By delivery date, product type, capacity
-├── Output: ProductionOrderId
-└── Events: ProductionOrderCreated
+â”œâ”€â”€ Trigger: Multiple DemandCreated events (batch processing)
+â”œâ”€â”€ Input: DemandIds[], Grouping criteria
+â”œâ”€â”€ Grouping logic: By delivery date, product type, capacity
+â”œâ”€â”€ Output: ProductionOrderId
+â””â”€â”€ Events: ProductionOrderCreated
 
 [ReserveIngredients]
-├── Trigger: ProductionScheduled
-├── Input: ProductionOrderId, Ingredient requirements
-├── Cross-domain: Check availability with Purchasing domain
-├── Reserve logic: Allocate ingredients for production
-├── Output: ReservationIds[]
-└── Events: IngredientsReserved, LowStockAlert (if needed)
+â”œâ”€â”€ Trigger: ProductionScheduled
+â”œâ”€â”€ Input: ProductionOrderId, Ingredient requirements
+â”œâ”€â”€ Cross-domain: Check availability with Purchasing domain
+â”œâ”€â”€ Reserve logic: Allocate ingredients for production
+â”œâ”€â”€ Output: ReservationIds[]
+â””â”€â”€ Events: IngredientsReserved, LowStockAlert (if needed)
 
 [UpdateOrderStatus]
-├── Trigger: DemandReady, ProductionCompleted
-├── Input: DemandId, NewStatus
-├── Cross-domain: Update order status in Sales domain
-├── Sync logic: All demands ready → Order ready
-├── Output: StatusUpdateResult
-└── Events: OrderStatusSyncRequested
+â”œâ”€â”€ Trigger: DemandReady, ProductionCompleted
+â”œâ”€â”€ Input: DemandId, NewStatus
+â”œâ”€â”€ Cross-domain: Update order status in Sales domain
+â”œâ”€â”€ Sync logic: All demands ready â†’ Order ready
+â”œâ”€â”€ Output: StatusUpdateResult
+â””â”€â”€ Events: OrderStatusSyncRequested
 ```
 
-#### **👥 Supervisores (Production Managers)**
+#### **ðŸ‘¥ Supervisores (Production Managers)**
 ```
 [ScheduleProduction]
-├── Input: ProductionOrderId, ScheduledDate, AssignedTeam
-├── Validations: Team availability, Resource capacity, Ingredient availability
-├── Capacity check: Production line availability
-├── Output: ScheduleId
-└── Events: ProductionScheduled
+â”œâ”€â”€ Input: ProductionOrderId, ScheduledDate, AssignedTeam
+â”œâ”€â”€ Validations: Team availability, Resource capacity, Ingredient availability
+â”œâ”€â”€ Capacity check: Production line availability
+â”œâ”€â”€ Output: ScheduleId
+â””â”€â”€ Events: ProductionScheduled
 
 [StartProductionOrder]
-├── Input: ProductionOrderId
-├── Validations: All resources ready, Team assigned, Ingredients available
-├── Pre-checks: Quality control setup, Equipment ready
-├── Output: ProductionSessionId
-└── Events: ProductionStarted
+â”œâ”€â”€ Input: ProductionOrderId
+â”œâ”€â”€ Validations: All resources ready, Team assigned, Ingredients available
+â”œâ”€â”€ Pre-checks: Quality control setup, Equipment ready
+â”œâ”€â”€ Output: ProductionSessionId
+â””â”€â”€ Events: ProductionStarted
 
 [AssignProductionTasks]
-├── Input: ProductionOrderId, TaskAssignments[], OperatorIds[]
-├── Validations: Operator qualifications, Task dependencies
-├── Workflow: Define task execution order
-├── Output: TaskAssignmentIds[]
-└── Events: ProductionTasksAssigned
+â”œâ”€â”€ Input: ProductionOrderId, TaskAssignments[], OperatorIds[]
+â”œâ”€â”€ Validations: Operator qualifications, Task dependencies
+â”œâ”€â”€ Workflow: Define task execution order
+â”œâ”€â”€ Output: TaskAssignmentIds[]
+â””â”€â”€ Events: ProductionTasksAssigned
 
 [PerformQualityCheck]
-├── Input: DemandId, QualityMetrics, CheckResults
-├── Validations: Meets quality standards, Compliance requirements
-├── Decision: Approve, Reject, or Request rework
-├── Output: QualityCheckId
-└── Events: QualityApproved, QualityRejected, ReworkRequired
+â”œâ”€â”€ Input: DemandId, QualityMetrics, CheckResults
+â”œâ”€â”€ Validations: Meets quality standards, Compliance requirements
+â”œâ”€â”€ Decision: Approve, Reject, or Request rework
+â”œâ”€â”€ Output: QualityCheckId
+â””â”€â”€ Events: QualityApproved, QualityRejected, ReworkRequired
 
 [RescheduleProduction]
-├── Input: ProductionOrderId, NewSchedule, RescheduleReason
-├── Validations: New schedule feasible, Impact on other orders
-├── Complex logic: Cascade rescheduling of dependent orders
-├── Output: NewScheduleId
-└── Events: ProductionRescheduled
+â”œâ”€â”€ Input: ProductionOrderId, NewSchedule, RescheduleReason
+â”œâ”€â”€ Validations: New schedule feasible, Impact on other orders
+â”œâ”€â”€ Complex logic: Cascade rescheduling of dependent orders
+â”œâ”€â”€ Output: NewScheduleId
+â””â”€â”€ Events: ProductionRescheduled
 
 [CancelProduction]
-├── Input: ProductionOrderId, CancellationReason
-├── Validations: Order not yet started, Valid cancellation reason
-├── Cleanup: Release reserved ingredients, Cancel calendar events
-├── Output: CancellationId
-└── Events: ProductionCancelled
+â”œâ”€â”€ Input: ProductionOrderId, CancellationReason
+â”œâ”€â”€ Validations: Order not yet started, Valid cancellation reason
+â”œâ”€â”€ Cleanup: Release reserved ingredients, Cancel calendar events
+â”œâ”€â”€ Output: CancellationId
+â””â”€â”€ Events: ProductionCancelled
 ```
 
-#### **⚙️ Operadores (Production Workers)**
+#### **âš™ï¸ Operadores (Production Workers)**
 ```
 [StartDemandProduction]
-├── Input: DemandId, OperatorId, WorkstationId
-├── Validations: Demand assigned to operator, Workstation available
-├── Time tracking: Start production timer
-├── Output: ProductionSessionId
-└── Events: DemandProductionStarted
+â”œâ”€â”€ Input: DemandId, OperatorId, WorkstationId
+â”œâ”€â”€ Validations: Demand assigned to operator, Workstation available
+â”œâ”€â”€ Time tracking: Start production timer
+â”œâ”€â”€ Output: ProductionSessionId
+â””â”€â”€ Events: DemandProductionStarted
 
 [ProcessProductComposition]
-├── Input: ProductCompositionId, OperatorId, ProcessingData
-├── Validations: Task assigned, Prerequisites completed
-├── Step tracking: Track individual component processing
-├── Output: ProcessingResultId
-└── Events: ComponentProcessingStarted, IngredientConsumed
+â”œâ”€â”€ Input: ProductCompositionId, OperatorId, ProcessingData
+â”œâ”€â”€ Validations: Task assigned, Prerequisites completed
+â”œâ”€â”€ Step tracking: Track individual component processing
+â”œâ”€â”€ Output: ProcessingResultId
+â””â”€â”€ Events: ComponentProcessingStarted, IngredientConsumed
 
 [CompleteProductComposition]
-├── Input: ProductCompositionId, CompletionData, QualityNotes
-├── Validations: All steps completed, Quality requirements met
-├── Time tracking: Record actual processing time
-├── Output: CompletionId
-└── Events: ProductCompositionCompleted
+â”œâ”€â”€ Input: ProductCompositionId, CompletionData, QualityNotes
+â”œâ”€â”€ Validations: All steps completed, Quality requirements met
+â”œâ”€â”€ Time tracking: Record actual processing time
+â”œâ”€â”€ Output: CompletionId
+â””â”€â”€ Events: ProductCompositionCompleted
 
 [ReportProductionIssue]
-├── Input: DemandId, IssueType, IssueDescription, Severity
-├── Validations: Valid issue type, Appropriate severity
-├── Escalation: Auto-escalate critical issues
-├── Output: IssueId
-└── Events: ProductionIssueReported
+â”œâ”€â”€ Input: DemandId, IssueType, IssueDescription, Severity
+â”œâ”€â”€ Validations: Valid issue type, Appropriate severity
+â”œâ”€â”€ Escalation: Auto-escalate critical issues
+â”œâ”€â”€ Output: IssueId
+â””â”€â”€ Events: ProductionIssueReported
 
 [ConsumeIngredient]
-├── Input: IngredientId, Quantity, DemandId, ConsumptionReason
-├── Validations: Sufficient stock, Valid consumption reason
-├── Cross-domain: Update inventory in Purchasing domain
-├── Output: ConsumptionId
-└── Events: IngredientConsumed
+â”œâ”€â”€ Input: IngredientId, Quantity, DemandId, ConsumptionReason
+â”œâ”€â”€ Validations: Sufficient stock, Valid consumption reason
+â”œâ”€â”€ Cross-domain: Update inventory in Purchasing domain
+â”œâ”€â”€ Output: ConsumptionId
+â””â”€â”€ Events: IngredientConsumed
 
 [CompleteDemandProduction]
-├── Input: DemandId, CompletionData, ActualTime, ActualCost
-├── Validations: All compositions completed, Quality approved
-├── Finalization: Calculate final metrics, Package product
-├── Output: CompletionId
-└── Events: DemandProductionCompleted
+â”œâ”€â”€ Input: DemandId, CompletionData, ActualTime, ActualCost
+â”œâ”€â”€ Validations: All compositions completed, Quality approved
+â”œâ”€â”€ Finalization: Calculate final metrics, Package product
+â”œâ”€â”€ Output: CompletionId
+â””â”€â”€ Events: DemandProductionCompleted
 ```
 
-#### **🌐 Sistema (Google Calendar Integration)**
+#### **ðŸŒ Sistema (Google Calendar Integration)**
 ```
 [CreateGoogleCalendarEvent]
-├── Trigger: ProductionScheduled
-├── Input: ProductionOrderId, ScheduledDate, Duration, Team
-├── External API: Google Calendar API integration
-├── Event details: Title, description, attendees, location
-├── Output: GoogleEventId
-└── Events: ProductionEventCreated
+â”œâ”€â”€ Trigger: ProductionScheduled
+â”œâ”€â”€ Input: ProductionOrderId, ScheduledDate, Duration, Team
+â”œâ”€â”€ External API: Google Calendar API integration
+â”œâ”€â”€ Event details: Title, description, attendees, location
+â”œâ”€â”€ Output: GoogleEventId
+â””â”€â”€ Events: ProductionEventCreated
 
 [UpdateGoogleCalendarEvent]
-├── Trigger: ProductionRescheduled, ProductionCancelled
-├── Input: GoogleEventId, UpdateData
-├── External API: Google Calendar API
-├── Update logic: Change time, cancel, or modify details
-├── Output: UpdateResult
-└── Events: ProductionEventUpdated, ProductionEventCancelled
+â”œâ”€â”€ Trigger: ProductionRescheduled, ProductionCancelled
+â”œâ”€â”€ Input: GoogleEventId, UpdateData
+â”œâ”€â”€ External API: Google Calendar API
+â”œâ”€â”€ Update logic: Change time, cancel, or modify details
+â”œâ”€â”€ Output: UpdateResult
+â””â”€â”€ Events: ProductionEventUpdated, ProductionEventCancelled
 ```
 
-### **⚡ Eventos de Alto Nível**
+### **âš¡ Eventos de Alto NÃ­vel**
 
-#### **🏭 Demand Lifecycle Events**
+#### **ðŸ­ Demand Lifecycle Events**
 ```
 DemandCreated
-├── Data: DemandId, OrderItemId, ProductId, Quantity, RequiredDate, ProductType
-├── Triggers: [AnalyzeProductType], Production planning
-├── Integrations: Sales (demand tracking), Reporting
-└── Importance: 🚨 Critical - Core production trigger
+â”œâ”€â”€ Data: DemandId, OrderItemId, ProductId, Quantity, RequiredDate, ProductType
+â”œâ”€â”€ Triggers: [AnalyzeProductType], Production planning
+â”œâ”€â”€ Integrations: Sales (demand tracking), Reporting
+â””â”€â”€ Importance: ðŸš¨ Critical - Core production trigger
 
 ProductCompositionRequired
-├── Data: DemandId, ProductId, ConfigurationData, ComponentRequirements
-├── Triggers: [CreateProductComposition], Component scheduling
-├── Integrations: Product (component validation), Scheduling
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: DemandId, ProductId, ConfigurationData, ComponentRequirements
+â”œâ”€â”€ Triggers: [CreateProductComposition], Component scheduling
+â”œâ”€â”€ Integrations: Product (component validation), Scheduling
+â””â”€â”€ Importance: âš ï¸ High
 
 ProductCompositionCreated
-├── Data: ProductCompositionId, DemandId, ComponentId, HierarchyName, Quantity
-├── Triggers: Task scheduling, Resource allocation
-├── Integrations: Scheduling, Resource management
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ProductCompositionId, DemandId, ComponentId, HierarchyName, Quantity
+â”œâ”€â”€ Triggers: Task scheduling, Resource allocation
+â”œâ”€â”€ Integrations: Scheduling, Resource management
+â””â”€â”€ Importance: âš ï¸ High
 
 DemandProductionStarted
-├── Data: DemandId, OperatorId, WorkstationId, StartTime, EstimatedDuration
-├── Triggers: Time tracking, Progress monitoring
-├── Integrations: Analytics, Performance monitoring
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: DemandId, OperatorId, WorkstationId, StartTime, EstimatedDuration
+â”œâ”€â”€ Triggers: Time tracking, Progress monitoring
+â”œâ”€â”€ Integrations: Analytics, Performance monitoring
+â””â”€â”€ Importance: âš ï¸ High
 
 DemandProductionCompleted
-├── Data: DemandId, CompletionTime, ActualDuration, ActualCost, QualityScore
-├── Triggers: [MarkAsReady], Status updates, Performance calculation
-├── Integrations: Sales (status update), Analytics, Costing
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: DemandId, CompletionTime, ActualDuration, ActualCost, QualityScore
+â”œâ”€â”€ Triggers: [MarkAsReady], Status updates, Performance calculation
+â”œâ”€â”€ Integrations: Sales (status update), Analytics, Costing
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 DemandReady
-├── Data: DemandId, ReadyTime, FinalQualityCheck, PackagingComplete
-├── Triggers: [UpdateOrderStatus], Delivery preparation
-├── Integrations: Sales (order status), Logistics
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: DemandId, ReadyTime, FinalQualityCheck, PackagingComplete
+â”œâ”€â”€ Triggers: [UpdateOrderStatus], Delivery preparation
+â”œâ”€â”€ Integrations: Sales (order status), Logistics
+â””â”€â”€ Importance: ðŸš¨ Critical
 ```
 
-#### **📋 Production Order Events**
+#### **ðŸ“‹ Production Order Events**
 ```
 ProductionOrderCreated
-├── Data: ProductionOrderId, DemandIds[], EstimatedTime, EstimatedCost, Priority
-├── Triggers: [ScheduleProduction], Resource planning
-├── Integrations: Scheduling, Resource management, Costing
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: ProductionOrderId, DemandIds[], EstimatedTime, EstimatedCost, Priority
+â”œâ”€â”€ Triggers: [ScheduleProduction], Resource planning
+â”œâ”€â”€ Integrations: Scheduling, Resource management, Costing
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 ProductionScheduled
-├── Data: ProductionOrderId, ScheduledDate, AssignedTeam, ResourceAllocation
-├── Triggers: [CreateGoogleCalendarEvent], [ReserveIngredients]
-├── Integrations: Google Calendar, Purchasing (ingredient reservation)
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: ProductionOrderId, ScheduledDate, AssignedTeam, ResourceAllocation
+â”œâ”€â”€ Triggers: [CreateGoogleCalendarEvent], [ReserveIngredients]
+â”œâ”€â”€ Integrations: Google Calendar, Purchasing (ingredient reservation)
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 ProductionStarted
-├── Data: ProductionOrderId, StartTime, Team, InitialSetup
-├── Triggers: Time tracking, Progress monitoring, Status updates
-├── Integrations: Analytics, Real-time dashboards
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ProductionOrderId, StartTime, Team, InitialSetup
+â”œâ”€â”€ Triggers: Time tracking, Progress monitoring, Status updates
+â”œâ”€â”€ Integrations: Analytics, Real-time dashboards
+â””â”€â”€ Importance: âš ï¸ High
 
 ProductionCompleted
-├── Data: ProductionOrderId, CompletionTime, TotalCost, QualityMetrics
-├── Triggers: [UpdateGoogleCalendarEvent], Performance analysis
-├── Integrations: Google Calendar, Analytics, Costing
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: ProductionOrderId, CompletionTime, TotalCost, QualityMetrics
+â”œâ”€â”€ Triggers: [UpdateGoogleCalendarEvent], Performance analysis
+â”œâ”€â”€ Integrations: Google Calendar, Analytics, Costing
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 ProductionRescheduled
-├── Data: ProductionOrderId, OldSchedule, NewSchedule, RescheduleReason
-├── Triggers: [UpdateGoogleCalendarEvent], Cascade rescheduling
-├── Integrations: Google Calendar, Sales (delivery date updates)
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ProductionOrderId, OldSchedule, NewSchedule, RescheduleReason
+â”œâ”€â”€ Triggers: [UpdateGoogleCalendarEvent], Cascade rescheduling
+â”œâ”€â”€ Integrations: Google Calendar, Sales (delivery date updates)
+â””â”€â”€ Importance: âš ï¸ High
 
 ProductionCancelled
-├── Data: ProductionOrderId, CancellationReason, CancelledBy, Impact
-├── Triggers: [ReleaseReservedIngredients], [CancelGoogleEvent]
-├── Integrations: Purchasing (release ingredients), Google Calendar
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ProductionOrderId, CancellationReason, CancelledBy, Impact
+â”œâ”€â”€ Triggers: [ReleaseReservedIngredients], [CancelGoogleEvent]
+â”œâ”€â”€ Integrations: Purchasing (release ingredients), Google Calendar
+â””â”€â”€ Importance: âš ï¸ High
 ```
 
-#### **🧩 Task Execution Events**
+#### **ðŸ§© Task Execution Events**
 ```
 ComponentProcessingStarted
-├── Data: ProductCompositionId, ComponentId, OperatorId, StartTime
-├── Triggers: Ingredient consumption tracking, Progress updates
-├── Integrations: Real-time monitoring, Analytics
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: ProductCompositionId, ComponentId, OperatorId, StartTime
+â”œâ”€â”€ Triggers: Ingredient consumption tracking, Progress updates
+â”œâ”€â”€ Integrations: Real-time monitoring, Analytics
+â””â”€â”€ Importance: ðŸ“Š Medium
 
 IngredientConsumed
-├── Data: IngredientId, Quantity, DemandId, ConsumptionTime, OperatorId
-├── Triggers: [UpdateIngredientStock], Cost tracking
-├── Integrations: Purchasing (stock update), Costing
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: IngredientId, Quantity, DemandId, ConsumptionTime, OperatorId
+â”œâ”€â”€ Triggers: [UpdateIngredientStock], Cost tracking
+â”œâ”€â”€ Integrations: Purchasing (stock update), Costing
+â””â”€â”€ Importance: âš ï¸ High
 
 ProductCompositionCompleted
-├── Data: ProductCompositionId, CompletionTime, QualityNotes, ActualTime
-├── Triggers: Progress calculation, Quality tracking
-├── Integrations: Progress monitoring, Quality analytics
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: ProductCompositionId, CompletionTime, QualityNotes, ActualTime
+â”œâ”€â”€ Triggers: Progress calculation, Quality tracking
+â”œâ”€â”€ Integrations: Progress monitoring, Quality analytics
+â””â”€â”€ Importance: ðŸ“Š Medium
 
 QualityApproved
-├── Data: DemandId, QualityMetrics, ApprovedBy, ApprovalTime
-├── Triggers: [MarkAsReady], Final packaging
-├── Integrations: Quality management, Final production steps
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: DemandId, QualityMetrics, ApprovedBy, ApprovalTime
+â”œâ”€â”€ Triggers: [MarkAsReady], Final packaging
+â”œâ”€â”€ Integrations: Quality management, Final production steps
+â””â”€â”€ Importance: âš ï¸ High
 
 QualityRejected
-├── Data: DemandId, RejectionReason, QualityIssues, RequiredActions
-├── Triggers: [InitiateRework], Issue escalation
-├── Integrations: Quality management, Rework processes
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: DemandId, RejectionReason, QualityIssues, RequiredActions
+â”œâ”€â”€ Triggers: [InitiateRework], Issue escalation
+â”œâ”€â”€ Integrations: Quality management, Rework processes
+â””â”€â”€ Importance: âš ï¸ High
 ```
 
-### **🔍 Micro-Eventos (Tracking Detalhado)**
+### **ðŸ” Micro-Eventos (Tracking Detalhado)**
 
-#### **📊 Performance Tracking**
+#### **ðŸ“Š Performance Tracking**
 ```
 ProductionEfficiencyCalculated
-├── Data: ProductionOrderId, PlannedTime, ActualTime, EfficiencyRatio
-├── Purpose: Track production efficiency metrics
-├── Used by: Performance optimization, Resource planning
-└── Frequency: After each production completion
+â”œâ”€â”€ Data: ProductionOrderId, PlannedTime, ActualTime, EfficiencyRatio
+â”œâ”€â”€ Purpose: Track production efficiency metrics
+â”œâ”€â”€ Used by: Performance optimization, Resource planning
+â””â”€â”€ Frequency: After each production completion
 
 WorkstationUtilizationTracked
-├── Data: WorkstationId, UsageTime, IdleTime, UtilizationRate
-├── Purpose: Monitor equipment and workspace efficiency
-├── Used by: Capacity planning, Equipment optimization
-└── Frequency: Continuous during production hours
+â”œâ”€â”€ Data: WorkstationId, UsageTime, IdleTime, UtilizationRate
+â”œâ”€â”€ Purpose: Monitor equipment and workspace efficiency
+â”œâ”€â”€ Used by: Capacity planning, Equipment optimization
+â””â”€â”€ Frequency: Continuous during production hours
 
 OperatorProductivityMeasured
-├── Data: OperatorId, TasksCompleted, AverageTime, QualityScore
-├── Purpose: Track individual operator performance
-├── Used by: Training needs, Performance reviews
-└── Frequency: After each task completion
+â”œâ”€â”€ Data: OperatorId, TasksCompleted, AverageTime, QualityScore
+â”œâ”€â”€ Purpose: Track individual operator performance
+â”œâ”€â”€ Used by: Training needs, Performance reviews
+â””â”€â”€ Frequency: After each task completion
 
 CostVarianceCalculated
-├── Data: DemandId, EstimatedCost, ActualCost, VarianceAmount, VarianceReason
-├── Purpose: Track cost accuracy and identify improvement areas
-├── Used by: Cost management, Process optimization
-└── Frequency: After demand completion
+â”œâ”€â”€ Data: DemandId, EstimatedCost, ActualCost, VarianceAmount, VarianceReason
+â”œâ”€â”€ Purpose: Track cost accuracy and identify improvement areas
+â”œâ”€â”€ Used by: Cost management, Process optimization
+â””â”€â”€ Frequency: After demand completion
 ```
 
-#### **🔧 Process Monitoring**
+#### **ðŸ”§ Process Monitoring**
 ```
 ProductionStepExecuted
-├── Data: DemandId, StepName, ExecutionTime, OperatorId, Result
-├── Purpose: Detailed process step tracking
-├── Used by: Process optimization, Training
-└── Frequency: High (each production step)
+â”œâ”€â”€ Data: DemandId, StepName, ExecutionTime, OperatorId, Result
+â”œâ”€â”€ Purpose: Detailed process step tracking
+â”œâ”€â”€ Used by: Process optimization, Training
+â””â”€â”€ Frequency: High (each production step)
 
 IngredientLevelAlertTriggered
-├── Data: IngredientId, CurrentLevel, MinimumLevel, AlertSeverity
-├── Purpose: Proactive ingredient management
-├── Used by: Purchasing planning, Production scheduling
-└── Frequency: Continuous monitoring
+â”œâ”€â”€ Data: IngredientId, CurrentLevel, MinimumLevel, AlertSeverity
+â”œâ”€â”€ Purpose: Proactive ingredient management
+â”œâ”€â”€ Used by: Purchasing planning, Production scheduling
+â””â”€â”€ Frequency: Continuous monitoring
 
 ProductionLineStatusChanged
-├── Data: LineId, OldStatus, NewStatus, ChangeReason, Timestamp
-├── Purpose: Track production line availability and issues
-├── Used by: Scheduling optimization, Maintenance planning
-└── Frequency: Status changes
+â”œâ”€â”€ Data: LineId, OldStatus, NewStatus, ChangeReason, Timestamp
+â”œâ”€â”€ Purpose: Track production line availability and issues
+â”œâ”€â”€ Used by: Scheduling optimization, Maintenance planning
+â””â”€â”€ Frequency: Status changes
 
 QualityControlPointChecked
-├── Data: DemandId, CheckPointName, CheckResult, OperatorId, Notes
-├── Purpose: Detailed quality tracking throughout production
-├── Used by: Quality improvement, Compliance
-└── Frequency: Each quality checkpoint
+â”œâ”€â”€ Data: DemandId, CheckPointName, CheckResult, OperatorId, Notes
+â”œâ”€â”€ Purpose: Detailed quality tracking throughout production
+â”œâ”€â”€ Used by: Quality improvement, Compliance
+â””â”€â”€ Frequency: Each quality checkpoint
 ```
 
-#### **🌐 Integration Monitoring**
+#### **ðŸŒ Integration Monitoring**
 ```
 GoogleCalendarEventSynced
-├── Data: ProductionOrderId, GoogleEventId, SyncStatus, SyncTime
-├── Purpose: Monitor Google Calendar integration health
-├── Used by: Integration monitoring, Event management
-└── Frequency: Calendar operations
+â”œâ”€â”€ Data: ProductionOrderId, GoogleEventId, SyncStatus, SyncTime
+â”œâ”€â”€ Purpose: Monitor Google Calendar integration health
+â”œâ”€â”€ Used by: Integration monitoring, Event management
+â””â”€â”€ Frequency: Calendar operations
 
 InventoryLevelSynced
-├── Data: IngredientId, SyncedQuantity, SyncStatus, SyncTime
-├── Purpose: Track inventory synchronization with Purchasing
-├── Used by: Data consistency monitoring, Inventory accuracy
-└── Frequency: Ingredient consumption events
+â”œâ”€â”€ Data: IngredientId, SyncedQuantity, SyncStatus, SyncTime
+â”œâ”€â”€ Purpose: Track inventory synchronization with Purchasing
+â”œâ”€â”€ Used by: Data consistency monitoring, Inventory accuracy
+â””â”€â”€ Frequency: Ingredient consumption events
 
 OrderStatusSyncRequested
-├── Data: OrderId, DemandId, NewStatus, SyncStatus, RequestTime
-├── Purpose: Monitor cross-domain status synchronization
-├── Used by: Integration health, Data consistency
-└── Frequency: Status update events
+â”œâ”€â”€ Data: OrderId, DemandId, NewStatus, SyncStatus, RequestTime
+â”œâ”€â”€ Purpose: Monitor cross-domain status synchronization
+â”œâ”€â”€ Used by: Integration health, Data consistency
+â””â”€â”€ Frequency: Status update events
 
 ExternalAPICallMade
-├── Data: APIName, Endpoint, RequestData, ResponseTime, Status
-├── Purpose: Monitor external API usage and performance
-├── Used by: API monitoring, Performance optimization
-└── Frequency: All external API calls
+â”œâ”€â”€ Data: APIName, Endpoint, RequestData, ResponseTime, Status
+â”œâ”€â”€ Purpose: Monitor external API usage and performance
+â”œâ”€â”€ Used by: API monitoring, Performance optimization
+â””â”€â”€ Frequency: All external API calls
 ```
 
-### **📊 Agregados e Responsabilidades**
+### **ðŸ“Š Agregados e Responsabilidades**
 
-#### **🎯 Demand Aggregate**
+#### **ðŸŽ¯ Demand Aggregate**
 ```
 {Demand}
-├── Entities: Demand, ProductComposition
-├── Value Objects: DemandStatus, Priority, EstimatedCost
-├── Invariants:
-│   ├── Quantity must be > 0
-│   ├── RequiredDate must be >= CreatedDate
-│   ├── ProductComposition only for Composite products
-│   ├── Cannot start production without ingredient availability
-│   └── Cannot complete without all compositions finished
-├── Events Published:
-│   ├── DemandCreated, DemandProductionStarted
-│   ├── DemandProductionCompleted, DemandReady
-│   ├── ProductCompositionRequired, ProductCompositionCreated
-│   └── ProductCompositionCompleted
-└── Commands Handled:
-    ├── CreateDemand, StartDemandProduction, CompleteDemandProduction
-    ├── CreateProductComposition, ProcessProductComposition
-    └── CompleteProductComposition
+â”œâ”€â”€ Entities: Demand, ProductComposition
+â”œâ”€â”€ Value Objects: DemandStatus, Priority, EstimatedCost
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Quantity must be > 0
+â”‚   â”œâ”€â”€ RequiredDate must be >= CreatedDate
+â”‚   â”œâ”€â”€ ProductComposition only for Composite products
+â”‚   â”œâ”€â”€ Cannot start production without ingredient availability
+â”‚   â””â”€â”€ Cannot complete without all compositions finished
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ DemandCreated, DemandProductionStarted
+â”‚   â”œâ”€â”€ DemandProductionCompleted, DemandReady
+â”‚   â”œâ”€â”€ ProductCompositionRequired, ProductCompositionCreated
+â”‚   â””â”€â”€ ProductCompositionCompleted
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreateDemand, StartDemandProduction, CompleteDemandProduction
+    â”œâ”€â”€ CreateProductComposition, ProcessProductComposition
+    â””â”€â”€ CompleteProductComposition
 ```
 
-#### **🏭 ProductionOrder Aggregate**
+#### **ðŸ­ ProductionOrder Aggregate**
 ```
 {ProductionOrder}
-├── Entities: ProductionOrder
-├── Value Objects: ProductionStatus, Schedule, ResourceAllocation
-├── Invariants:
-│   ├── Must contain at least one Demand
-│   ├── All demands must have same priority level (or compatible)
-│   ├── Schedule must be feasible given resource constraints
-│   ├── Cannot start without all ingredients reserved
-│   └── Cannot be cancelled once production starts
-├── Events Published:
-│   ├── ProductionOrderCreated, ProductionScheduled
-│   ├── ProductionStarted, ProductionCompleted
-│   ├── ProductionRescheduled, ProductionCancelled
-│   └── ResourcesAllocated
-└── Commands Handled:
-    ├── CreateProductionOrder, ScheduleProduction
-    ├── StartProductionOrder, CompleteProductionOrder
-    ├── RescheduleProduction, CancelProduction
-    └── AllocateResources
+â”œâ”€â”€ Entities: ProductionOrder
+â”œâ”€â”€ Value Objects: ProductionStatus, Schedule, ResourceAllocation
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Must contain at least one Demand
+â”‚   â”œâ”€â”€ All demands must have same priority level (or compatible)
+â”‚   â”œâ”€â”€ Schedule must be feasible given resource constraints
+â”‚   â”œâ”€â”€ Cannot start without all ingredients reserved
+â”‚   â””â”€â”€ Cannot be cancelled once production starts
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ ProductionOrderCreated, ProductionScheduled
+â”‚   â”œâ”€â”€ ProductionStarted, ProductionCompleted
+â”‚   â”œâ”€â”€ ProductionRescheduled, ProductionCancelled
+â”‚   â””â”€â”€ ResourcesAllocated
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreateProductionOrder, ScheduleProduction
+    â”œâ”€â”€ StartProductionOrder, CompleteProductionOrder
+    â”œâ”€â”€ RescheduleProduction, CancelProduction
+    â””â”€â”€ AllocateResources
 ```
 
-#### **🧩 ProductComposition Aggregate**
+#### **ðŸ§© ProductComposition Aggregate**
 ```
 {ProductComposition}
-├── Entities: ProductComposition
-├── Value Objects: ComponentStatus, ProcessingTime, QualityMetrics
-├── Invariants:
-│   ├── Must reference valid Product Component
-│   ├── Quantity must align with product configuration
-│   ├── Cannot start without operator assignment
-│   ├── Must complete in sequence defined by hierarchy
-│   └── Quality check required before completion
-├── Events Published:
-│   ├── ProductCompositionCreated
-│   ├── ComponentProcessingStarted, ComponentProcessingCompleted
-│   ├── IngredientConsumed, QualityChecked
-│   └── ProductCompositionCompleted
-└── Commands Handled:
-    ├── CreateProductComposition, StartComponentProcessing
-    ├── CompleteComponentProcessing, ConsumeIngredient
-    └── PerformQualityCheck
+â”œâ”€â”€ Entities: ProductComposition
+â”œâ”€â”€ Value Objects: ComponentStatus, ProcessingTime, QualityMetrics
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Must reference valid Product Component
+â”‚   â”œâ”€â”€ Quantity must align with product configuration
+â”‚   â”œâ”€â”€ Cannot start without operator assignment
+â”‚   â”œâ”€â”€ Must complete in sequence defined by hierarchy
+â”‚   â””â”€â”€ Quality check required before completion
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ ProductCompositionCreated
+â”‚   â”œâ”€â”€ ComponentProcessingStarted, ComponentProcessingCompleted
+â”‚   â”œâ”€â”€ IngredientConsumed, QualityChecked
+â”‚   â””â”€â”€ ProductCompositionCompleted
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreateProductComposition, StartComponentProcessing
+    â”œâ”€â”€ CompleteComponentProcessing, ConsumeIngredient
+    â””â”€â”€ PerformQualityCheck
 ```
 
-### **🔄 Políticas de Negócio (Business Rules)**
+### **ðŸ”„ PolÃ­ticas de NegÃ³cio (Business Rules)**
 
-#### **⚙️ Demand Processing Policies**
+#### **âš™ï¸ Demand Processing Policies**
 ```
-"Quando DemandCreated, então AnalyzeProductType"
-├── Product type detection: Simple, Composite, or Group
-├── Strategy selection: Different production approaches per type
-├── Resource estimation: Calculate time and ingredient needs
-├── Auto-execution: Immediate after demand creation
-└── Integration: Product domain for type and configuration
+"Quando DemandCreated, entÃ£o AnalyzeProductType"
+â”œâ”€â”€ Product type detection: Simple, Composite, or Group
+â”œâ”€â”€ Strategy selection: Different production approaches per type
+â”œâ”€â”€ Resource estimation: Calculate time and ingredient needs
+â”œâ”€â”€ Auto-execution: Immediate after demand creation
+â””â”€â”€ Integration: Product domain for type and configuration
 
-"Quando ProductCompositionRequired, então CreateProductComposition"
-├── Configuration parsing: Extract component selections from JSON
-├── Task decomposition: Create individual tasks per component
-├── Dependency analysis: Determine task execution order
-├── Auto-execution: Immediate after composition requirement
-└── Integration: Product domain for component validation
+"Quando ProductCompositionRequired, entÃ£o CreateProductComposition"
+â”œâ”€â”€ Configuration parsing: Extract component selections from JSON
+â”œâ”€â”€ Task decomposition: Create individual tasks per component
+â”œâ”€â”€ Dependency analysis: Determine task execution order
+â”œâ”€â”€ Auto-execution: Immediate after composition requirement
+â””â”€â”€ Integration: Product domain for component validation
 
-"Quando IngredientConsumed, então UpdateInventoryLevel"
-├── Cross-domain update: Reduce ingredient stock in Purchasing
-├── Low stock detection: Trigger alerts if below minimum
-├── Cost tracking: Track ingredient costs for demand costing
-├── Auto-execution: Real-time during production
-└── Integration: Purchasing domain inventory management
-```
-
-#### **📅 Scheduling and Resource Policies**
-```
-"Quando ProductionScheduled, então CreateGoogleCalendarEvent"
-├── Calendar integration: Create event in Google Calendar
-├── Team notification: Invite assigned team members
-├── Resource blocking: Reserve production line and equipment
-├── Auto-execution: Immediate after scheduling
-└── Integration: Google Calendar API
-
-"Quando ProductionRescheduled, então UpdateAllRelatedEvents"
-├── Cascade updating: Update Google Calendar event
-├── Impact analysis: Check effect on other scheduled productions
-├── Notification: Inform affected teams and stakeholders
-├── Auto-execution: Immediate after rescheduling
-└── Integration: Google Calendar API, Notification system
-
-"Quando IngredientsReserved, então ValidateProductionFeasibility"
-├── Availability check: Ensure all required ingredients available
-├── Capacity validation: Confirm production line availability
-├── Team assignment: Verify required skills available
-├── Auto-execution: Before production start
-└── Integration: Purchasing (ingredients), HR (team skills)
+"Quando IngredientConsumed, entÃ£o UpdateInventoryLevel"
+â”œâ”€â”€ Cross-domain update: Reduce ingredient stock in Purchasing
+â”œâ”€â”€ Low stock detection: Trigger alerts if below minimum
+â”œâ”€â”€ Cost tracking: Track ingredient costs for demand costing
+â”œâ”€â”€ Auto-execution: Real-time during production
+â””â”€â”€ Integration: Purchasing domain inventory management
 ```
 
-#### **📊 Quality and Completion Policies**
+#### **ðŸ“… Scheduling and Resource Policies**
 ```
-"Quando QualityApproved, então MarkDemandAsReady"
-├── Status transition: Move demand to ready state
-├── Packaging preparation: Prepare for delivery
-├── Cross-domain update: Update order status in Sales
-├── Auto-execution: After quality approval
-└── Integration: Sales domain status synchronization
+"Quando ProductionScheduled, entÃ£o CreateGoogleCalendarEvent"
+â”œâ”€â”€ Calendar integration: Create event in Google Calendar
+â”œâ”€â”€ Team notification: Invite assigned team members
+â”œâ”€â”€ Resource blocking: Reserve production line and equipment
+â”œâ”€â”€ Auto-execution: Immediate after scheduling
+â””â”€â”€ Integration: Google Calendar API
 
-"Quando AllDemandsReady, então UpdateOrderStatus"
-├── Order completion check: Verify all demands completed
-├── Status synchronization: Update order status in Sales domain
-├── Customer notification: Prepare delivery notification
-├── Auto-execution: When last demand becomes ready
-└── Integration: Sales domain, Customer notification
+"Quando ProductionRescheduled, entÃ£o UpdateAllRelatedEvents"
+â”œâ”€â”€ Cascade updating: Update Google Calendar event
+â”œâ”€â”€ Impact analysis: Check effect on other scheduled productions
+â”œâ”€â”€ Notification: Inform affected teams and stakeholders
+â”œâ”€â”€ Auto-execution: Immediate after rescheduling
+â””â”€â”€ Integration: Google Calendar API, Notification system
 
-"Quando ProductionCompleted, então CalculateActualCosts"
-├── Cost aggregation: Sum all ingredient and labor costs
-├── Variance analysis: Compare actual vs estimated costs
-├── Performance metrics: Calculate efficiency ratios
-├── Auto-execution: After production completion
-└── Integration: Financial domain cost tracking
+"Quando IngredientsReserved, entÃ£o ValidateProductionFeasibility"
+â”œâ”€â”€ Availability check: Ensure all required ingredients available
+â”œâ”€â”€ Capacity validation: Confirm production line availability
+â”œâ”€â”€ Team assignment: Verify required skills available
+â”œâ”€â”€ Auto-execution: Before production start
+â””â”€â”€ Integration: Purchasing (ingredients), HR (team skills)
 ```
 
-### **⚠️ Hotspots e Complexidades**
+#### **ðŸ“Š Quality and Completion Policies**
+```
+"Quando QualityApproved, entÃ£o MarkDemandAsReady"
+â”œâ”€â”€ Status transition: Move demand to ready state
+â”œâ”€â”€ Packaging preparation: Prepare for delivery
+â”œâ”€â”€ Cross-domain update: Update order status in Sales
+â”œâ”€â”€ Auto-execution: After quality approval
+â””â”€â”€ Integration: Sales domain status synchronization
 
-#### **🚨 Complexidades Críticas**
+"Quando AllDemandsReady, entÃ£o UpdateOrderStatus"
+â”œâ”€â”€ Order completion check: Verify all demands completed
+â”œâ”€â”€ Status synchronization: Update order status in Sales domain
+â”œâ”€â”€ Customer notification: Prepare delivery notification
+â”œâ”€â”€ Auto-execution: When last demand becomes ready
+â””â”€â”€ Integration: Sales domain, Customer notification
+
+"Quando ProductionCompleted, entÃ£o CalculateActualCosts"
+â”œâ”€â”€ Cost aggregation: Sum all ingredient and labor costs
+â”œâ”€â”€ Variance analysis: Compare actual vs estimated costs
+â”œâ”€â”€ Performance metrics: Calculate efficiency ratios
+â”œâ”€â”€ Auto-execution: After production completion
+â””â”€â”€ Integration: Financial domain cost tracking
+```
+
+### **âš ï¸ Hotspots e Complexidades**
+
+#### **ðŸš¨ Complexidades CrÃ­ticas**
 
 ##### **(!DemandTypeStrategies!)**
 ```
 Problema: Complex logic for different product types in production
-Cenário: Simple vs Composite vs Group require different production approaches
+CenÃ¡rio: Simple vs Composite vs Group require different production approaches
 Impacto: Core production logic, extensibility, maintainability
-Solução: Strategy pattern with type-specific production handlers
+SoluÃ§Ã£o: Strategy pattern with type-specific production handlers
 Prioridade: Critical - Core business logic
 ```
 
 ##### **(!IngredientReservationConcurrency!)**
 ```
 Problema: Concurrent access to limited ingredient inventory
-Cenário: Multiple productions trying to reserve same ingredients
+CenÃ¡rio: Multiple productions trying to reserve same ingredients
 Impacto: Production blocking, ingredient conflicts, scheduling issues
-Solução: Distributed locking + reservation system
+SoluÃ§Ã£o: Distributed locking + reservation system
 Prioridade: Critical - Production blocking risk
 ```
 
 ##### **(!ProductCompositionOrchestration!)**
 ```
 Problema: Complex orchestration of parallel composition tasks
-Cenário: Multiple operators working on different components simultaneously
+CenÃ¡rio: Multiple operators working on different components simultaneously
 Impacto: Task coordination, quality control, timing synchronization
-Solução: Workflow engine with task dependencies
+SoluÃ§Ã£o: Workflow engine with task dependencies
 Prioridade: High - Production efficiency
 ```
 
 ##### **(!CrossDomainStatusSynchronization!)**
 ```
 Problema: Keeping status synchronized across Sales, Production, Financial
-Cenário: Status updates in Production need to propagate correctly
+CenÃ¡rio: Status updates in Production need to propagate correctly
 Impacto: Data consistency, customer experience, business integrity
-Solução: Event-driven synchronization with compensating actions
+SoluÃ§Ã£o: Event-driven synchronization with compensating actions
 Prioridade: Critical - Data integrity
 ```
 
 ##### **(!GoogleCalendarAPIResilience!)**
 ```
 Problema: Dependency on Google Calendar for production scheduling
-Cenário: API downtime affecting production planning and team coordination
+CenÃ¡rio: API downtime affecting production planning and team coordination
 Impacto: Production scheduling, team coordination, planning disruption
-Solução: Circuit breaker + local scheduling fallback
+SoluÃ§Ã£o: Circuit breaker + local scheduling fallback
 Prioridade: High - Operational continuity
 ```
 
-#### **📊 Métricas e Alertas**
+#### **ðŸ“Š MÃ©tricas e Alertas**
 
-##### **🎯 Production Performance Metrics**
+##### **ðŸŽ¯ Production Performance Metrics**
 ```
 Production Efficiency Rate:
-├── Metric: (Planned Time / Actual Time) * 100
-├── Alert: < 80% efficiency rate
-├── Dashboard: Production performance KPIs
-└── Usage: Process optimization
+â”œâ”€â”€ Metric: (Planned Time / Actual Time) * 100
+â”œâ”€â”€ Alert: < 80% efficiency rate
+â”œâ”€â”€ Dashboard: Production performance KPIs
+â””â”€â”€ Usage: Process optimization
 
 Demand Completion Rate:
-├── Metric: % demands completed on time
-├── Alert: < 90% on-time completion
-├── Dashboard: Production reliability
-└── Usage: Scheduling optimization
+â”œâ”€â”€ Metric: % demands completed on time
+â”œâ”€â”€ Alert: < 90% on-time completion
+â”œâ”€â”€ Dashboard: Production reliability
+â””â”€â”€ Usage: Scheduling optimization
 
 Quality Pass Rate:
-├── Metric: % demands passing quality control on first check
-├── Alert: < 95% pass rate
-├── Dashboard: Quality metrics
-└── Usage: Quality improvement
+â”œâ”€â”€ Metric: % demands passing quality control on first check
+â”œâ”€â”€ Alert: < 95% pass rate
+â”œâ”€â”€ Dashboard: Quality metrics
+â””â”€â”€ Usage: Quality improvement
 
 Ingredient Waste Rate:
-├── Metric: % ingredient waste vs planned consumption
-├── Alert: > 5% waste rate
-├── Dashboard: Cost optimization
-└── Usage: Process improvement
+â”œâ”€â”€ Metric: % ingredient waste vs planned consumption
+â”œâ”€â”€ Alert: > 5% waste rate
+â”œâ”€â”€ Dashboard: Cost optimization
+â””â”€â”€ Usage: Process improvement
 ```
 
-##### **⚡ Technical Performance Metrics**
+##### **âš¡ Technical Performance Metrics**
 ```
 Demand Generation Latency:
-├── Metric: Time from OrderConfirmed to DemandCreated
-├── Alert: > 10 seconds latency
-├── Dashboard: Integration performance
-└── Usage: System optimization
+â”œâ”€â”€ Metric: Time from OrderConfirmed to DemandCreated
+â”œâ”€â”€ Alert: > 10 seconds latency
+â”œâ”€â”€ Dashboard: Integration performance
+â””â”€â”€ Usage: System optimization
 
 Google Calendar API Response Time:
-├── Metric: Average response time for calendar operations
-├── Alert: > 5 seconds response time
-├── Dashboard: External dependency health
-└── Usage: API performance monitoring
+â”œâ”€â”€ Metric: Average response time for calendar operations
+â”œâ”€â”€ Alert: > 5 seconds response time
+â”œâ”€â”€ Dashboard: External dependency health
+â””â”€â”€ Usage: API performance monitoring
 
 Cross-Domain Event Processing Time:
-├── Metric: Time to propagate status updates to Sales
-├── Alert: > 30 seconds processing time
-├── Dashboard: Integration health
-└── Usage: Synchronization optimization
+â”œâ”€â”€ Metric: Time to propagate status updates to Sales
+â”œâ”€â”€ Alert: > 30 seconds processing time
+â”œâ”€â”€ Dashboard: Integration health
+â””â”€â”€ Usage: Synchronization optimization
 
 Production Task Queue Length:
-├── Metric: Number of pending production tasks
-├── Alert: Queue length > 100 tasks
-├── Dashboard: System load monitoring
-└── Usage: Capacity planning
+â”œâ”€â”€ Metric: Number of pending production tasks
+â”œâ”€â”€ Alert: Queue length > 100 tasks
+â”œâ”€â”€ Dashboard: System load monitoring
+â””â”€â”€ Usage: Capacity planning
 ```
 
-##### **🔍 Business Intelligence Metrics**
+##### **ðŸ” Business Intelligence Metrics**
 ```
 Resource Utilization Rate:
-├── Metric: % time production resources are actively used
-├── Alert: < 70% utilization rate
-├── Dashboard: Capacity management
-└── Usage: Resource planning
+â”œâ”€â”€ Metric: % time production resources are actively used
+â”œâ”€â”€ Alert: < 70% utilization rate
+â”œâ”€â”€ Dashboard: Capacity management
+â””â”€â”€ Usage: Resource planning
 
 Peak Production Load:
-├── Metric: Maximum concurrent demands in production
-├── Alert: Approaching capacity limits
-├── Dashboard: Capacity planning
-└── Usage: Infrastructure scaling
+â”œâ”€â”€ Metric: Maximum concurrent demands in production
+â”œâ”€â”€ Alert: Approaching capacity limits
+â”œâ”€â”€ Dashboard: Capacity planning
+â””â”€â”€ Usage: Infrastructure scaling
 
 Production Cost Variance:
-├── Metric: % difference between estimated and actual costs
-├── Alert: > 15% cost variance
-├── Dashboard: Cost management
-└── Usage: Estimation improvement
+â”œâ”€â”€ Metric: % difference between estimated and actual costs
+â”œâ”€â”€ Alert: > 15% cost variance
+â”œâ”€â”€ Dashboard: Cost management
+â””â”€â”€ Usage: Estimation improvement
 
 Customer Delivery Promise Accuracy:
-├── Metric: % orders delivered on promised date
-├── Alert: < 85% delivery accuracy
-├── Dashboard: Customer satisfaction
-└── Usage: Promise accuracy improvement
+â”œâ”€â”€ Metric: % orders delivered on promised date
+â”œâ”€â”€ Alert: < 85% delivery accuracy
+â”œâ”€â”€ Dashboard: Customer satisfaction
+â””â”€â”€ Usage: Promise accuracy improvement
 ```
 
 ---
 
 **Arquivo**: `production-domain-events.md`  
-**Domínio**: Produção (#fba81d)  
+**DomÃ­nio**: ProduÃ§Ã£o (#fba81d)  
 **Tipo**: Event Storming  
-**Granularidade**: Alto nível + Micro-eventos + Integrações Google Calendar  
-**Atualização**: 16/06/2025
+**Granularidade**: Alto nÃ­vel + Micro-eventos + IntegraÃ§Ãµes Google Calendar  
+**AtualizaÃ§Ã£o**: 16/06/2025

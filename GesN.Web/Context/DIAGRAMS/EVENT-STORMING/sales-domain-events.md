@@ -1,32 +1,32 @@
-# 💰 EVENT STORMING - DOMÍNIO DE VENDAS
+﻿# ðŸ’° EVENT STORMING - DOMÃNIO DE VENDAS
 
-## 🎯 Visão Geral
-Event Storming do Domínio de Vendas mapeando o fluxo completo desde a criação de pedidos até a entrega, incluindo gestão de clientes, configuração de produtos complexos, e integrações críticas com Produção e Financeiro. Inclui eventos de alto nível e micro-eventos para máximo controle.
+## ðŸŽ¯ VisÃ£o Geral
+Event Storming do DomÃ­nio de Vendas mapeando o fluxo completo desde a criaÃ§Ã£o de pedidos atÃ© a entrega, incluindo gestÃ£o de clientes, configuraÃ§Ã£o de produtos complexos, e integraÃ§Ãµes crÃ­ticas com ProduÃ§Ã£o e Financeiro. Inclui eventos de alto nÃ­vel e micro-eventos para mÃ¡ximo controle.
 
-## 🎨 Convenções Visuais
-- **📋 [Comando]** - Azul - Ação executada por usuário/sistema
-- **⚡ Evento** - Laranja - Fato que aconteceu no domínio
-- **👤 (Ator)** - Verde - Quem executa o comando
-- **📊 {Agregado}** - Roxo - Entidade que processa comando
-- **🔄 Política** - Cinza - Regra "quando X então Y"
-- **⚠️ (!Hotspot!)** - Rosa - Complexidade/problema identificado
-- **🌐 <Sistema Externo>** - Vermelho - Integração externa
+## ðŸŽ¨ ConvenÃ§Ãµes Visuais
+- **ðŸ“‹ [Comando]** - Azul - AÃ§Ã£o executada por usuÃ¡rio/sistema
+- **âš¡ Evento** - Laranja - Fato que aconteceu no domÃ­nio
+- **ðŸ‘¤ (Ator)** - Verde - Quem executa o comando
+- **ðŸ“Š {Agregado}** - Roxo - Entidade que processa comando
+- **ðŸ”„ PolÃ­tica** - Cinza - Regra "quando X entÃ£o Y"
+- **âš ï¸ (!Hotspot!)** - Rosa - Complexidade/problema identificado
+- **ðŸŒ <Sistema Externo>** - Vermelho - IntegraÃ§Ã£o externa
 
-## ⚡ Event Storming Timeline
+## âš¡ Event Storming Timeline
 
-### **🔄 Fluxo Principal - Jornada do Pedido**
+### **ðŸ”„ Fluxo Principal - Jornada do Pedido**
 
 ```mermaid
 journey
     title Sales Domain Event Timeline
-    section Criação do Pedido
+    section CriaÃ§Ã£o do Pedido
       Cliente/Operador inicia pedido       : 5: Usuario
       [CreateOrder]                        : 3: Sistema
       OrderCreated                         : 5: Sistema
       [AddCustomer]                        : 3: Usuario
       CustomerLinkedToOrder                : 5: Sistema
       
-    section Adição de Itens
+    section AdiÃ§Ã£o de Itens
       [AddOrderItem] Simple                : 4: Usuario
       OrderItemAdded                       : 5: Sistema
       [AddOrderItem] Composite             : 3: Usuario
@@ -35,7 +35,7 @@ journey
       ProductConfigured                    : 5: Sistema
       OrderItemAdded                       : 5: Sistema
       
-    section Finalização
+    section FinalizaÃ§Ã£o
       [CalculateOrderTotal]                : 4: Sistema
       OrderTotalCalculated                 : 5: Sistema
       [ConfirmOrder]                       : 4: Usuario
@@ -43,7 +43,7 @@ journey
       DemandsCreatedAutomatically          : 5: Sistema
       AccountReceivableCreated             : 5: Sistema
       
-    section Produção e Entrega
+    section ProduÃ§Ã£o e Entrega
       [SendToProduction]                   : 4: Sistema
       OrderSentToProduction                : 5: Sistema
       ProductionCompleted                  : 5: Sistema
@@ -53,578 +53,578 @@ journey
       OrderInvoiced                        : 5: Sistema
 ```
 
-### **📋 Comandos por Ator**
+### **ðŸ“‹ Comandos por Ator**
 
-#### **👤 Clientes**
+#### **ðŸ‘¤ Clientes**
 ```
 [RequestOrder]
-├── Input: DeliveryDate, DeliveryAddress, SpecialRequests
-├── Validations: Valid delivery date (future), Valid address
-├── Output: OrderRequestId
-└── Events: OrderRequested
+â”œâ”€â”€ Input: DeliveryDate, DeliveryAddress, SpecialRequests
+â”œâ”€â”€ Validations: Valid delivery date (future), Valid address
+â”œâ”€â”€ Output: OrderRequestId
+â””â”€â”€ Events: OrderRequested
 
 [SelectProducts]
-├── Input: ProductIds[], Quantities[], Configurations[]
-├── Validations: Products active, Valid quantities
-├── Cross-domain: Validate with Product domain
-└── Events: ProductsSelected
+â”œâ”€â”€ Input: ProductIds[], Quantities[], Configurations[]
+â”œâ”€â”€ Validations: Products active, Valid quantities
+â”œâ”€â”€ Cross-domain: Validate with Product domain
+â””â”€â”€ Events: ProductsSelected
 
 [ConfirmDeliveryDetails]
-├── Input: DeliveryAddress, ContactInfo, PreferredTime
-├── Validations: Address reachable, Contact valid
-├── Integration: Google Maps API for address validation
-└── Events: DeliveryDetailsConfirmed
+â”œâ”€â”€ Input: DeliveryAddress, ContactInfo, PreferredTime
+â”œâ”€â”€ Validations: Address reachable, Contact valid
+â”œâ”€â”€ Integration: Google Maps API for address validation
+â””â”€â”€ Events: DeliveryDetailsConfirmed
 
 [RequestOrderChange]
-├── Input: OrderId, ChangeType, NewData
-├── Validations: Order not in production, Valid changes
-├── Business rules: Change fees may apply
-└── Events: OrderChangeRequested
+â”œâ”€â”€ Input: OrderId, ChangeType, NewData
+â”œâ”€â”€ Validations: Order not in production, Valid changes
+â”œâ”€â”€ Business rules: Change fees may apply
+â””â”€â”€ Events: OrderChangeRequested
 ```
 
-#### **⚙️ Operadores (Sales Team)**
+#### **âš™ï¸ Operadores (Sales Team)**
 ```
 [CreateOrder]
-├── Input: CustomerId (optional), OrderType, InitialData
-├── Validations: Customer exists (if provided)
-├── Output: OrderId
-└── Events: OrderCreated
+â”œâ”€â”€ Input: CustomerId (optional), OrderType, InitialData
+â”œâ”€â”€ Validations: Customer exists (if provided)
+â”œâ”€â”€ Output: OrderId
+â””â”€â”€ Events: OrderCreated
 
 [AddCustomer]
-├── Input: CustomerData or CustomerId
-├── Validations: Customer data valid, Not duplicate
-├── Integration: Google Contacts sync
-└── Events: CustomerAdded, CustomerLinkedToOrder
+â”œâ”€â”€ Input: CustomerData or CustomerId
+â”œâ”€â”€ Validations: Customer data valid, Not duplicate
+â”œâ”€â”€ Integration: Google Contacts sync
+â””â”€â”€ Events: CustomerAdded, CustomerLinkedToOrder
 
 [AddOrderItem]
-├── Input: OrderId, ProductId, Quantity, SpecialInstructions
-├── Validations: Product active, Quantity > 0, Order editable
-├── Cross-domain: Product availability check
-└── Events: OrderItemAdded, ProductConfigurationRequired (if Composite/Group)
+â”œâ”€â”€ Input: OrderId, ProductId, Quantity, SpecialInstructions
+â”œâ”€â”€ Validations: Product active, Quantity > 0, Order editable
+â”œâ”€â”€ Cross-domain: Product availability check
+â””â”€â”€ Events: OrderItemAdded, ProductConfigurationRequired (if Composite/Group)
 
 [ConfigureCompositeProduct]
-├── Input: OrderItemId, ComponentSelections[], Quantities[]
-├── Validations: Valid selections, Within min/max limits
-├── Complex validation: Component compatibility rules
-└── Events: ProductConfigured, OrderItemConfigurationUpdated
+â”œâ”€â”€ Input: OrderItemId, ComponentSelections[], Quantities[]
+â”œâ”€â”€ Validations: Valid selections, Within min/max limits
+â”œâ”€â”€ Complex validation: Component compatibility rules
+â””â”€â”€ Events: ProductConfigured, OrderItemConfigurationUpdated
 
 [ConfigureGroupProduct]
-├── Input: OrderItemId, GroupItemSelections[], ExchangeRules[]
-├── Validations: Valid group items, Exchange rules respected
-├── Complex calculation: Group pricing with exchanges
-└── Events: GroupConfigured, ExchangeRulesApplied
+â”œâ”€â”€ Input: OrderItemId, GroupItemSelections[], ExchangeRules[]
+â”œâ”€â”€ Validations: Valid group items, Exchange rules respected
+â”œâ”€â”€ Complex calculation: Group pricing with exchanges
+â””â”€â”€ Events: GroupConfigured, ExchangeRulesApplied
 
 [UpdateOrderItem]
-├── Input: OrderItemId, UpdateData
-├── Validations: Order editable, Valid update data
-├── Recalculations: Item price, Order total
-└── Events: OrderItemUpdated, OrderTotalRecalculated
+â”œâ”€â”€ Input: OrderItemId, UpdateData
+â”œâ”€â”€ Validations: Order editable, Valid update data
+â”œâ”€â”€ Recalculations: Item price, Order total
+â””â”€â”€ Events: OrderItemUpdated, OrderTotalRecalculated
 
 [RemoveOrderItem]
-├── Input: OrderItemId, RemovalReason
-├── Validations: Order editable, Item exists
-├── Cleanup: Remove related configurations
-└── Events: OrderItemRemoved, OrderTotalRecalculated
+â”œâ”€â”€ Input: OrderItemId, RemovalReason
+â”œâ”€â”€ Validations: Order editable, Item exists
+â”œâ”€â”€ Cleanup: Remove related configurations
+â””â”€â”€ Events: OrderItemRemoved, OrderTotalRecalculated
 
 [ConfirmOrder]
-├── Input: OrderId, PaymentTerms, FinalReview
-├── Validations: Order complete, Customer valid, Payment terms valid
-├── Critical validation: All items configured properly
-└── Events: OrderConfirmed
+â”œâ”€â”€ Input: OrderId, PaymentTerms, FinalReview
+â”œâ”€â”€ Validations: Order complete, Customer valid, Payment terms valid
+â”œâ”€â”€ Critical validation: All items configured properly
+â””â”€â”€ Events: OrderConfirmed
 
 [SendToProduction]
-├── Input: OrderId
-├── Validations: Order confirmed, Not already sent
-├── Auto-execution: Triggered by OrderConfirmed
-└── Events: OrderSentToProduction
+â”œâ”€â”€ Input: OrderId
+â”œâ”€â”€ Validations: Order confirmed, Not already sent
+â”œâ”€â”€ Auto-execution: Triggered by OrderConfirmed
+â””â”€â”€ Events: OrderSentToProduction
 
 [DeliverOrder]
-├── Input: OrderId, DeliveryConfirmation, ActualDeliveryTime
-├── Validations: Order ready for delivery, Valid confirmation
-├── Optional: Customer signature, Photo proof
-└── Events: OrderDelivered
+â”œâ”€â”€ Input: OrderId, DeliveryConfirmation, ActualDeliveryTime
+â”œâ”€â”€ Validations: Order ready for delivery, Valid confirmation
+â”œâ”€â”€ Optional: Customer signature, Photo proof
+â””â”€â”€ Events: OrderDelivered
 
 [CancelOrder]
-├── Input: OrderId, CancellationReason, RefundPolicy
-├── Validations: Order cancellable, Valid reason
-├── Complex logic: Partial cancellation handling
-└── Events: OrderCancelled, RefundInitiated (if applicable)
+â”œâ”€â”€ Input: OrderId, CancellationReason, RefundPolicy
+â”œâ”€â”€ Validations: Order cancellable, Valid reason
+â”œâ”€â”€ Complex logic: Partial cancellation handling
+â””â”€â”€ Events: OrderCancelled, RefundInitiated (if applicable)
 ```
 
-#### **🤖 Sistema (Automático)**
+#### **ðŸ¤– Sistema (AutomÃ¡tico)**
 ```
 [CalculateOrderTotal]
-├── Trigger: OrderItemAdded, OrderItemUpdated, OrderItemRemoved
-├── Calculation: Sum of all item totals + taxes + delivery
-├── Auto-execution: Immediate after item changes
-└── Events: OrderTotalCalculated
+â”œâ”€â”€ Trigger: OrderItemAdded, OrderItemUpdated, OrderItemRemoved
+â”œâ”€â”€ Calculation: Sum of all item totals + taxes + delivery
+â”œâ”€â”€ Auto-execution: Immediate after item changes
+â””â”€â”€ Events: OrderTotalCalculated
 
 [ValidateOrderConfiguration]
-├── Trigger: ProductConfigured, GroupConfigured
-├── Validation: Business rules, Component compatibility
-├── Auto-execution: Background validation
-└── Events: OrderConfigurationValidated, ValidationFailed
+â”œâ”€â”€ Trigger: ProductConfigured, GroupConfigured
+â”œâ”€â”€ Validation: Business rules, Component compatibility
+â”œâ”€â”€ Auto-execution: Background validation
+â””â”€â”€ Events: OrderConfigurationValidated, ValidationFailed
 
 [CreateDemandsForOrder]
-├── Trigger: OrderConfirmed
-├── Complex logic: 1 OrderItem → 1:N Demands (depends on ProductType)
-├── Auto-execution: Immediate after confirmation
-└── Events: DemandsCreatedAutomatically
+â”œâ”€â”€ Trigger: OrderConfirmed
+â”œâ”€â”€ Complex logic: 1 OrderItem â†’ 1:N Demands (depends on ProductType)
+â”œâ”€â”€ Auto-execution: Immediate after confirmation
+â””â”€â”€ Events: DemandsCreatedAutomatically
 
 [CreateAccountReceivable]
-├── Trigger: OrderConfirmed
-├── Financial calculation: Payment terms, Installments
-├── Auto-execution: Immediate after confirmation
-└── Events: AccountReceivableCreated
+â”œâ”€â”€ Trigger: OrderConfirmed
+â”œâ”€â”€ Financial calculation: Payment terms, Installments
+â”œâ”€â”€ Auto-execution: Immediate after confirmation
+â””â”€â”€ Events: AccountReceivableCreated
 
 [UpdateOrderStatus]
-├── Trigger: Production events, Delivery events, Payment events
-├── Status synchronization: Keep order status up-to-date
-├── Auto-execution: Event-driven
-└── Events: OrderStatusUpdated
+â”œâ”€â”€ Trigger: Production events, Delivery events, Payment events
+â”œâ”€â”€ Status synchronization: Keep order status up-to-date
+â”œâ”€â”€ Auto-execution: Event-driven
+â””â”€â”€ Events: OrderStatusUpdated
 
 [CalculateDeliveryRoute]
-├── Trigger: DeliveryDetailsConfirmed
-├── Integration: Google Maps Directions API
-├── Calculation: Distance, time, delivery cost
-└── Events: DeliveryRouteCalculated, DeliveryCostUpdated
+â”œâ”€â”€ Trigger: DeliveryDetailsConfirmed
+â”œâ”€â”€ Integration: Google Maps Directions API
+â”œâ”€â”€ Calculation: Distance, time, delivery cost
+â””â”€â”€ Events: DeliveryRouteCalculated, DeliveryCostUpdated
 ```
 
-### **⚡ Eventos de Alto Nível**
+### **âš¡ Eventos de Alto NÃ­vel**
 
-#### **📋 Order Lifecycle Events**
+#### **ðŸ“‹ Order Lifecycle Events**
 ```
 OrderCreated
-├── Data: OrderId, CustomerId (optional), CreatedBy, OrderDate
-├── Triggers: [AddCustomer], [AddOrderItem] availability
-├── Integrations: Reporting, Analytics
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: OrderId, CustomerId (optional), CreatedBy, OrderDate
+â”œâ”€â”€ Triggers: [AddCustomer], [AddOrderItem] availability
+â”œâ”€â”€ Integrations: Reporting, Analytics
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 OrderConfirmed
-├── Data: OrderId, CustomerId, TotalValue, DeliveryDate, PaymentTerms
-├── Triggers: [CreateDemandsForOrder], [CreateAccountReceivable], [SendToProduction]
-├── Integrations: Production (demand creation), Financial (AR creation)
-└── Importance: 🚨 Critical - Primary cross-domain trigger
+â”œâ”€â”€ Data: OrderId, CustomerId, TotalValue, DeliveryDate, PaymentTerms
+â”œâ”€â”€ Triggers: [CreateDemandsForOrder], [CreateAccountReceivable], [SendToProduction]
+â”œâ”€â”€ Integrations: Production (demand creation), Financial (AR creation)
+â””â”€â”€ Importance: ðŸš¨ Critical - Primary cross-domain trigger
 
 OrderSentToProduction
-├── Data: OrderId, ProductionOrderId, DemandIds[], ScheduledDate
-├── Triggers: Production domain orchestration
-├── Integrations: Production (order processing), Google Calendar (scheduling)
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: OrderId, ProductionOrderId, DemandIds[], ScheduledDate
+â”œâ”€â”€ Triggers: Production domain orchestration
+â”œâ”€â”€ Integrations: Production (order processing), Google Calendar (scheduling)
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 OrderDelivered
-├── Data: OrderId, DeliveryDate, DeliveryAddress, DeliveredBy, CustomerConfirmation
-├── Triggers: [ProcessPayment], Status updates across domains
-├── Integrations: Financial (payment processing), Customer notification
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: OrderId, DeliveryDate, DeliveryAddress, DeliveredBy, CustomerConfirmation
+â”œâ”€â”€ Triggers: [ProcessPayment], Status updates across domains
+â”œâ”€â”€ Integrations: Financial (payment processing), Customer notification
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 OrderCancelled
-├── Data: OrderId, CancellationReason, CancelledBy, RefundAmount
-├── Triggers: Reverse operations in Production and Financial domains
-├── Integrations: Production (cancel demands), Financial (cancel AR)
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: OrderId, CancellationReason, CancelledBy, RefundAmount
+â”œâ”€â”€ Triggers: Reverse operations in Production and Financial domains
+â”œâ”€â”€ Integrations: Production (cancel demands), Financial (cancel AR)
+â””â”€â”€ Importance: ðŸš¨ Critical
 ```
 
-#### **📦 Order Item Management Events**
+#### **ðŸ“¦ Order Item Management Events**
 ```
 OrderItemAdded
-├── Data: OrderItemId, OrderId, ProductId, Quantity, UnitPrice, TotalPrice
-├── Triggers: [CalculateOrderTotal], Configuration requirements (if needed)
-├── Integrations: Product (availability check), Inventory
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: OrderItemId, OrderId, ProductId, Quantity, UnitPrice, TotalPrice
+â”œâ”€â”€ Triggers: [CalculateOrderTotal], Configuration requirements (if needed)
+â”œâ”€â”€ Integrations: Product (availability check), Inventory
+â””â”€â”€ Importance: âš ï¸ High
 
 ProductConfigurationRequired
-├── Data: OrderItemId, ProductId, ProductType, ConfigurationOptions
-├── Triggers: [ConfigureCompositeProduct] or [ConfigureGroupProduct]
-├── Integrations: Product (configuration rules)
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: OrderItemId, ProductId, ProductType, ConfigurationOptions
+â”œâ”€â”€ Triggers: [ConfigureCompositeProduct] or [ConfigureGroupProduct]
+â”œâ”€â”€ Integrations: Product (configuration rules)
+â””â”€â”€ Importance: âš ï¸ High
 
 ProductConfigured
-├── Data: OrderItemId, ProductId, ConfigurationData, CalculatedPrice
-├── Triggers: [OrderItemConfigurationUpdated], [CalculateOrderTotal]
-├── Integrations: Product (validation), Pricing engine
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: OrderItemId, ProductId, ConfigurationData, CalculatedPrice
+â”œâ”€â”€ Triggers: [OrderItemConfigurationUpdated], [CalculateOrderTotal]
+â”œâ”€â”€ Integrations: Product (validation), Pricing engine
+â””â”€â”€ Importance: âš ï¸ High
 
 OrderItemConfigurationUpdated
-├── Data: OrderItemId, OldConfiguration, NewConfiguration, PriceDifference
-├── Triggers: [CalculateOrderTotal], Configuration validation
-├── Integrations: Product (validation), Pricing
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: OrderItemId, OldConfiguration, NewConfiguration, PriceDifference
+â”œâ”€â”€ Triggers: [CalculateOrderTotal], Configuration validation
+â”œâ”€â”€ Integrations: Product (validation), Pricing
+â””â”€â”€ Importance: ðŸ“Š Medium
 
 OrderTotalCalculated
-├── Data: OrderId, SubTotal, Taxes, DeliveryFee, TotalAmount, CalculationDetails
-├── Triggers: UI updates, Order validation
-├── Integrations: Financial (pricing validation), Customer notification
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: OrderId, SubTotal, Taxes, DeliveryFee, TotalAmount, CalculationDetails
+â”œâ”€â”€ Triggers: UI updates, Order validation
+â”œâ”€â”€ Integrations: Financial (pricing validation), Customer notification
+â””â”€â”€ Importance: âš ï¸ High
 ```
 
-#### **👤 Customer Management Events**
+#### **ðŸ‘¤ Customer Management Events**
 ```
 CustomerAdded
-├── Data: CustomerId, CustomerData, AddedBy, SyncToGoogle
-├── Triggers: [SyncWithGoogleContacts], Credit check
-├── Integrations: Google Contacts, Financial (credit validation)
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: CustomerId, CustomerData, AddedBy, SyncToGoogle
+â”œâ”€â”€ Triggers: [SyncWithGoogleContacts], Credit check
+â”œâ”€â”€ Integrations: Google Contacts, Financial (credit validation)
+â””â”€â”€ Importance: âš ï¸ High
 
 CustomerLinkedToOrder
-├── Data: OrderId, CustomerId, LinkTimestamp
-├── Triggers: Customer history update, Credit limit check
-├── Integrations: Financial (credit verification), Reporting
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: OrderId, CustomerId, LinkTimestamp
+â”œâ”€â”€ Triggers: Customer history update, Credit limit check
+â”œâ”€â”€ Integrations: Financial (credit verification), Reporting
+â””â”€â”€ Importance: ðŸ“Š Medium
 
 CustomerCreditValidated
-├── Data: CustomerId, OrderId, CreditLimit, CurrentDebt, ValidationResult
-├── Triggers: Order continuation or credit hold
-├── Integrations: Financial (credit check)
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: CustomerId, OrderId, CreditLimit, CurrentDebt, ValidationResult
+â”œâ”€â”€ Triggers: Order continuation or credit hold
+â”œâ”€â”€ Integrations: Financial (credit check)
+â””â”€â”€ Importance: âš ï¸ High
 
 DeliveryDetailsConfirmed
-├── Data: OrderId, DeliveryAddress, ContactInfo, RouteData
-├── Triggers: [CalculateDeliveryRoute], Delivery scheduling
-├── Integrations: Google Maps (route calculation), Logistics
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: OrderId, DeliveryAddress, ContactInfo, RouteData
+â”œâ”€â”€ Triggers: [CalculateDeliveryRoute], Delivery scheduling
+â”œâ”€â”€ Integrations: Google Maps (route calculation), Logistics
+â””â”€â”€ Importance: ðŸ“Š Medium
 ```
 
-### **🔍 Micro-Eventos (Tracking Detalhado)**
+### **ðŸ” Micro-Eventos (Tracking Detalhado)**
 
-#### **📊 Configuration Tracking**
+#### **ðŸ“Š Configuration Tracking**
 ```
 CompositeProductValidationStarted
-├── Data: OrderItemId, ProductId, ComponentSelections[], ValidationRules
-├── Purpose: Track complex validation processes
-├── Used by: Performance monitoring, UX optimization
-└── Frequency: High (every composite configuration)
+â”œâ”€â”€ Data: OrderItemId, ProductId, ComponentSelections[], ValidationRules
+â”œâ”€â”€ Purpose: Track complex validation processes
+â”œâ”€â”€ Used by: Performance monitoring, UX optimization
+â””â”€â”€ Frequency: High (every composite configuration)
 
 ComponentSelectionValidated
-├── Data: OrderItemId, ComponentId, HierarchyName, ValidationResult, ResponseTime
-├── Purpose: Individual component validation tracking
-├── Used by: Component usage analytics, Validation performance
-└── Frequency: High (each component selection)
+â”œâ”€â”€ Data: OrderItemId, ComponentId, HierarchyName, ValidationResult, ResponseTime
+â”œâ”€â”€ Purpose: Individual component validation tracking
+â”œâ”€â”€ Used by: Component usage analytics, Validation performance
+â””â”€â”€ Frequency: High (each component selection)
 
 GroupExchangeCalculationPerformed
-├── Data: OrderItemId, ExchangeRules[], CalculationResult, ProcessingTime
-├── Purpose: Track complex group exchange calculations
-├── Used by: Pricing accuracy monitoring, Performance optimization
-└── Frequency: Medium (group configurations with exchanges)
+â”œâ”€â”€ Data: OrderItemId, ExchangeRules[], CalculationResult, ProcessingTime
+â”œâ”€â”€ Purpose: Track complex group exchange calculations
+â”œâ”€â”€ Used by: Pricing accuracy monitoring, Performance optimization
+â””â”€â”€ Frequency: Medium (group configurations with exchanges)
 
 PricingRecalculationTriggered
-├── Data: OrderId, TriggerReason, OldTotal, NewTotal, CalculationTime
-├── Purpose: Track pricing calculation frequency and performance
-├── Used by: Pricing system monitoring, User experience analysis
-└── Frequency: High (any item changes)
+â”œâ”€â”€ Data: OrderId, TriggerReason, OldTotal, NewTotal, CalculationTime
+â”œâ”€â”€ Purpose: Track pricing calculation frequency and performance
+â”œâ”€â”€ Used by: Pricing system monitoring, User experience analysis
+â””â”€â”€ Frequency: High (any item changes)
 ```
 
-#### **🔄 Process Tracking**
+#### **ðŸ”„ Process Tracking**
 ```
 OrderEditSessionStarted
-├── Data: OrderId, UserId, SessionId, EditType
-├── Purpose: Track editing sessions for UX analysis
-├── Used by: User experience optimization, Training needs
-└── Frequency: Medium (order editing)
+â”œâ”€â”€ Data: OrderId, UserId, SessionId, EditType
+â”œâ”€â”€ Purpose: Track editing sessions for UX analysis
+â”œâ”€â”€ Used by: User experience optimization, Training needs
+â””â”€â”€ Frequency: Medium (order editing)
 
 CrossDomainValidationRequested
-├── Data: OrderId, TargetDomain, ValidationData, RequestId
-├── Purpose: Track cross-domain validation calls
-├── Used by: Integration monitoring, Performance optimization
-└── Frequency: High (product validation, customer validation)
+â”œâ”€â”€ Data: OrderId, TargetDomain, ValidationData, RequestId
+â”œâ”€â”€ Purpose: Track cross-domain validation calls
+â”œâ”€â”€ Used by: Integration monitoring, Performance optimization
+â””â”€â”€ Frequency: High (product validation, customer validation)
 
 CustomerSearchPerformed
-├── Data: SearchTerm, ResultsCount, SearchTime, SelectedCustomer
-├── Purpose: Customer search optimization
-├── Used by: Search improvement, Customer data quality
-└── Frequency: High (customer selection)
+â”œâ”€â”€ Data: SearchTerm, ResultsCount, SearchTime, SelectedCustomer
+â”œâ”€â”€ Purpose: Customer search optimization
+â”œâ”€â”€ Used by: Search improvement, Customer data quality
+â””â”€â”€ Frequency: High (customer selection)
 
 ProductCatalogFiltered
-├── Data: FilterCriteria, ResultsCount, FilterTime, UserSelection
-├── Purpose: Product catalog usage analysis
-├── Used by: Catalog optimization, Product positioning
-└── Frequency: High (product selection)
+â”œâ”€â”€ Data: FilterCriteria, ResultsCount, FilterTime, UserSelection
+â”œâ”€â”€ Purpose: Product catalog usage analysis
+â”œâ”€â”€ Used by: Catalog optimization, Product positioning
+â””â”€â”€ Frequency: High (product selection)
 ```
 
-#### **🌐 Integration Tracking**
+#### **ðŸŒ Integration Tracking**
 ```
 GoogleMapsApiCalled
-├── Data: OrderId, ApiEndpoint, RequestData, ResponseTime, Result
-├── Purpose: Track external API usage and performance
-├── Used by: API monitoring, Cost optimization
-└── Frequency: Medium (address validation, route calculation)
+â”œâ”€â”€ Data: OrderId, ApiEndpoint, RequestData, ResponseTime, Result
+â”œâ”€â”€ Purpose: Track external API usage and performance
+â”œâ”€â”€ Used by: API monitoring, Cost optimization
+â””â”€â”€ Frequency: Medium (address validation, route calculation)
 
 GoogleContactsSyncTriggered
-├── Data: CustomerId, SyncType, SyncResult, SyncTime
-├── Purpose: Track customer data synchronization
-├── Used by: Integration health monitoring, Data consistency
-└── Frequency: Low (new customers, updates)
+â”œâ”€â”€ Data: CustomerId, SyncType, SyncResult, SyncTime
+â”œâ”€â”€ Purpose: Track customer data synchronization
+â”œâ”€â”€ Used by: Integration health monitoring, Data consistency
+â””â”€â”€ Frequency: Low (new customers, updates)
 
 ProductCatalogSyncRequested
-├── Data: OrderId, ProductIds[], SyncReason, SyncResult
-├── Purpose: Track product data synchronization
-├── Used by: Data consistency monitoring, Cache optimization
-└── Frequency: Medium (product availability checks)
+â”œâ”€â”€ Data: OrderId, ProductIds[], SyncReason, SyncResult
+â”œâ”€â”€ Purpose: Track product data synchronization
+â”œâ”€â”€ Used by: Data consistency monitoring, Cache optimization
+â””â”€â”€ Frequency: Medium (product availability checks)
 ```
 
-### **📊 Agregados e Responsabilidades**
+### **ðŸ“Š Agregados e Responsabilidades**
 
-#### **🎯 OrderEntry Aggregate**
+#### **ðŸŽ¯ OrderEntry Aggregate**
 ```
 {OrderEntry}
-├── Entities: OrderEntry, OrderItem
-├── Value Objects: OrderStatus, OrderType, DeliveryInfo
-├── Invariants:
-│   ├── Order must have at least one item to be confirmed
-│   ├── DeliveryDate must be >= OrderDate
-│   ├── TotalValue = Sum of OrderItem totals
-│   ├── Cannot edit confirmed orders
-│   └── Customer required for confirmation
-├── Events Published:
-│   ├── OrderCreated, OrderConfirmed, OrderDelivered
-│   ├── OrderCancelled, OrderStatusUpdated
-│   ├── OrderItemAdded, OrderItemUpdated, OrderItemRemoved
-│   └── OrderTotalCalculated
-└── Commands Handled:
-    ├── CreateOrder, ConfirmOrder, CancelOrder
-    ├── AddOrderItem, UpdateOrderItem, RemoveOrderItem
-    ├── DeliverOrder, UpdateOrderStatus
-    └── CalculateOrderTotal
+â”œâ”€â”€ Entities: OrderEntry, OrderItem
+â”œâ”€â”€ Value Objects: OrderStatus, OrderType, DeliveryInfo
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Order must have at least one item to be confirmed
+â”‚   â”œâ”€â”€ DeliveryDate must be >= OrderDate
+â”‚   â”œâ”€â”€ TotalValue = Sum of OrderItem totals
+â”‚   â”œâ”€â”€ Cannot edit confirmed orders
+â”‚   â””â”€â”€ Customer required for confirmation
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ OrderCreated, OrderConfirmed, OrderDelivered
+â”‚   â”œâ”€â”€ OrderCancelled, OrderStatusUpdated
+â”‚   â”œâ”€â”€ OrderItemAdded, OrderItemUpdated, OrderItemRemoved
+â”‚   â””â”€â”€ OrderTotalCalculated
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreateOrder, ConfirmOrder, CancelOrder
+    â”œâ”€â”€ AddOrderItem, UpdateOrderItem, RemoveOrderItem
+    â”œâ”€â”€ DeliverOrder, UpdateOrderStatus
+    â””â”€â”€ CalculateOrderTotal
 ```
 
-#### **📦 OrderItem Aggregate**
+#### **ðŸ“¦ OrderItem Aggregate**
 ```
 {OrderItem}
-├── Entities: OrderItem
-├── Value Objects: ProductConfiguration, ItemStatus
-├── Invariants:
-│   ├── Quantity must be > 0
-│   ├── UnitPrice must be >= 0
-│   ├── Product must be active
-│   ├── Configuration required for Composite/Group products
-│   └── Configuration must be valid per product rules
-├── Events Published:
-│   ├── OrderItemAdded, OrderItemUpdated, OrderItemRemoved
-│   ├── ProductConfigurationRequired, ProductConfigured
-│   ├── OrderItemConfigurationUpdated
-│   └── ItemPriceCalculated
-└── Commands Handled:
-    ├── AddOrderItem, UpdateOrderItem, RemoveOrderItem
-    ├── ConfigureCompositeProduct, ConfigureGroupProduct
-    └── ValidateItemConfiguration
+â”œâ”€â”€ Entities: OrderItem
+â”œâ”€â”€ Value Objects: ProductConfiguration, ItemStatus
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Quantity must be > 0
+â”‚   â”œâ”€â”€ UnitPrice must be >= 0
+â”‚   â”œâ”€â”€ Product must be active
+â”‚   â”œâ”€â”€ Configuration required for Composite/Group products
+â”‚   â””â”€â”€ Configuration must be valid per product rules
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ OrderItemAdded, OrderItemUpdated, OrderItemRemoved
+â”‚   â”œâ”€â”€ ProductConfigurationRequired, ProductConfigured
+â”‚   â”œâ”€â”€ OrderItemConfigurationUpdated
+â”‚   â””â”€â”€ ItemPriceCalculated
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ AddOrderItem, UpdateOrderItem, RemoveOrderItem
+    â”œâ”€â”€ ConfigureCompositeProduct, ConfigureGroupProduct
+    â””â”€â”€ ValidateItemConfiguration
 ```
 
-#### **👤 Customer Aggregate**
+#### **ðŸ‘¤ Customer Aggregate**
 ```
 {Customer}
-├── Entities: Customer
-├── Value Objects: CustomerType, ContactInfo, Address
-├── Invariants:
-│   ├── Email must be unique (if provided)
-│   ├── Document (CPF/CNPJ) must be valid
-│   ├── Name cannot be empty
-│   ├── Customer type must match document type
-│   └── Active customers only can place orders
-├── Events Published:
-│   ├── CustomerCreated, CustomerUpdated
-│   ├── CustomerActivated, CustomerDeactivated
-│   ├── CustomerLinkedToOrder
-│   └── CustomerCreditValidated
-└── Commands Handled:
-    ├── CreateCustomer, UpdateCustomer
-    ├── ActivateCustomer, DeactivateCustomer
-    ├── LinkCustomerToOrder
-    └── ValidateCustomerCredit
+â”œâ”€â”€ Entities: Customer
+â”œâ”€â”€ Value Objects: CustomerType, ContactInfo, Address
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Email must be unique (if provided)
+â”‚   â”œâ”€â”€ Document (CPF/CNPJ) must be valid
+â”‚   â”œâ”€â”€ Name cannot be empty
+â”‚   â”œâ”€â”€ Customer type must match document type
+â”‚   â””â”€â”€ Active customers only can place orders
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ CustomerCreated, CustomerUpdated
+â”‚   â”œâ”€â”€ CustomerActivated, CustomerDeactivated
+â”‚   â”œâ”€â”€ CustomerLinkedToOrder
+â”‚   â””â”€â”€ CustomerCreditValidated
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreateCustomer, UpdateCustomer
+    â”œâ”€â”€ ActivateCustomer, DeactivateCustomer
+    â”œâ”€â”€ LinkCustomerToOrder
+    â””â”€â”€ ValidateCustomerCredit
 ```
 
-### **🔄 Políticas de Negócio (Business Rules)**
+### **ðŸ”„ PolÃ­ticas de NegÃ³cio (Business Rules)**
 
-#### **⚙️ Order Processing Policies**
+#### **âš™ï¸ Order Processing Policies**
 ```
-"Quando OrderConfirmed, então CreateDemandsAutomatically"
-├── Rule Engine: Analyze OrderItems and create demands per ProductType
-├── Simple Product: 1 OrderItem → 1 Demand
-├── Composite Product: 1 OrderItem → 1 Demand + N ProductComposition
-├── Group Product: 1 OrderItem → N Demands (one per concrete product)
-├── Auto-execution: Immediate and atomic
-└── Integration: Production domain demand creation
+"Quando OrderConfirmed, entÃ£o CreateDemandsAutomatically"
+â”œâ”€â”€ Rule Engine: Analyze OrderItems and create demands per ProductType
+â”œâ”€â”€ Simple Product: 1 OrderItem â†’ 1 Demand
+â”œâ”€â”€ Composite Product: 1 OrderItem â†’ 1 Demand + N ProductComposition
+â”œâ”€â”€ Group Product: 1 OrderItem â†’ N Demands (one per concrete product)
+â”œâ”€â”€ Auto-execution: Immediate and atomic
+â””â”€â”€ Integration: Production domain demand creation
 
-"Quando OrderConfirmed, então CreateAccountReceivable"
-├── Payment terms analysis: À vista vs Parcelado
-├── Financial calculation: Total amount, installments, due dates
-├── Auto-execution: Immediate after demand creation
-└── Integration: Financial domain AR creation
+"Quando OrderConfirmed, entÃ£o CreateAccountReceivable"
+â”œâ”€â”€ Payment terms analysis: Ã€ vista vs Parcelado
+â”œâ”€â”€ Financial calculation: Total amount, installments, due dates
+â”œâ”€â”€ Auto-execution: Immediate after demand creation
+â””â”€â”€ Integration: Financial domain AR creation
 
-"Quando OrderItemAdded, então ValidateProductAvailability"
-├── Cross-domain check: Product active status
-├── Inventory check: Component availability (for Composite)
-├── Business rules: Customer-specific restrictions
-└── Failure handling: Block item addition, notify user
-```
-
-#### **🧩 Product Configuration Policies**
-```
-"Quando ProductConfigurationRequired, então LoadConfigurationOptions"
-├── Cross-domain query: Get product configuration rules
-├── Composite logic: Load hierarchies and components
-├── Group logic: Load group items and exchange rules
-├── Cache optimization: Cache configuration options
-└── Integration: Product domain configuration rules
-
-"Quando ComponentSelected, então ValidateComponentCompatibility"
-├── Business rules: Component compatibility matrix
-├── Quantity validation: Min/max per hierarchy
-├── Pricing calculation: Base price + component costs
-├── Real-time validation: Immediate feedback to user
-└── Integration: Product domain validation rules
-
-"Quando GroupExchangeApplied, então RecalculateGroupPricing"
-├── Exchange ratio calculation: Source to target conversions
-├── Price adjustment: Apply exchange cost differences
-├── Quantity validation: Ensure minimum quantities met
-├── Complex calculation: Multi-step exchange chains
-└── Integration: Product domain exchange rules
+"Quando OrderItemAdded, entÃ£o ValidateProductAvailability"
+â”œâ”€â”€ Cross-domain check: Product active status
+â”œâ”€â”€ Inventory check: Component availability (for Composite)
+â”œâ”€â”€ Business rules: Customer-specific restrictions
+â””â”€â”€ Failure handling: Block item addition, notify user
 ```
 
-#### **🚚 Delivery and Integration Policies**
+#### **ðŸ§© Product Configuration Policies**
 ```
-"Quando DeliveryDetailsConfirmed, então CalculateDeliveryRoute"
-├── External API call: Google Maps Directions API
-├── Route optimization: Distance, time, cost calculation
-├── Delivery fee calculation: Based on distance and time
-├── Cache strategy: Cache routes for common addresses
-└── Integration: Google Maps Platform
+"Quando ProductConfigurationRequired, entÃ£o LoadConfigurationOptions"
+â”œâ”€â”€ Cross-domain query: Get product configuration rules
+â”œâ”€â”€ Composite logic: Load hierarchies and components
+â”œâ”€â”€ Group logic: Load group items and exchange rules
+â”œâ”€â”€ Cache optimization: Cache configuration options
+â””â”€â”€ Integration: Product domain configuration rules
 
-"Quando OrderDelivered, então TriggerPaymentProcessing"
-├── Financial integration: Update AccountReceivable status
-├── Payment notification: Notify customer for payment
-├── Status synchronization: Update order status across domains
-└── Integration: Financial domain payment processing
+"Quando ComponentSelected, entÃ£o ValidateComponentCompatibility"
+â”œâ”€â”€ Business rules: Component compatibility matrix
+â”œâ”€â”€ Quantity validation: Min/max per hierarchy
+â”œâ”€â”€ Pricing calculation: Base price + component costs
+â”œâ”€â”€ Real-time validation: Immediate feedback to user
+â””â”€â”€ Integration: Product domain validation rules
 
-"Quando CustomerAdded, então SyncWithGoogleContacts"
-├── External sync: Add/update customer in Google Contacts
-├── Bidirectional sync: Handle Google-originated changes
-├── Conflict resolution: Prefer system data over Google data
-├── Async processing: Don't block order creation
-└── Integration: Google People API
+"Quando GroupExchangeApplied, entÃ£o RecalculateGroupPricing"
+â”œâ”€â”€ Exchange ratio calculation: Source to target conversions
+â”œâ”€â”€ Price adjustment: Apply exchange cost differences
+â”œâ”€â”€ Quantity validation: Ensure minimum quantities met
+â”œâ”€â”€ Complex calculation: Multi-step exchange chains
+â””â”€â”€ Integration: Product domain exchange rules
 ```
 
-### **⚠️ Hotspots e Complexidades**
+#### **ðŸšš Delivery and Integration Policies**
+```
+"Quando DeliveryDetailsConfirmed, entÃ£o CalculateDeliveryRoute"
+â”œâ”€â”€ External API call: Google Maps Directions API
+â”œâ”€â”€ Route optimization: Distance, time, cost calculation
+â”œâ”€â”€ Delivery fee calculation: Based on distance and time
+â”œâ”€â”€ Cache strategy: Cache routes for common addresses
+â””â”€â”€ Integration: Google Maps Platform
 
-#### **🚨 Complexidades Críticas**
+"Quando OrderDelivered, entÃ£o TriggerPaymentProcessing"
+â”œâ”€â”€ Financial integration: Update AccountReceivable status
+â”œâ”€â”€ Payment notification: Notify customer for payment
+â”œâ”€â”€ Status synchronization: Update order status across domains
+â””â”€â”€ Integration: Financial domain payment processing
+
+"Quando CustomerAdded, entÃ£o SyncWithGoogleContacts"
+â”œâ”€â”€ External sync: Add/update customer in Google Contacts
+â”œâ”€â”€ Bidirectional sync: Handle Google-originated changes
+â”œâ”€â”€ Conflict resolution: Prefer system data over Google data
+â”œâ”€â”€ Async processing: Don't block order creation
+â””â”€â”€ Integration: Google People API
+```
+
+### **âš ï¸ Hotspots e Complexidades**
+
+#### **ðŸš¨ Complexidades CrÃ­ticas**
 
 ##### **(!OrderItemDemandGeneration!)**
 ```
 Problema: Complex 1:N mapping from OrderItems to Demands
-Cenário: Group products can generate multiple demands of different types
+CenÃ¡rio: Group products can generate multiple demands of different types
 Impacto: Core business logic, affects Production domain
-Solução: Demand Generation Service with Strategy pattern
+SoluÃ§Ã£o: Demand Generation Service with Strategy pattern
 Prioridade: Critical - Core business functionality
 ```
 
 ##### **(!CompositeProductConfiguration!)**
 ```
 Problema: Complex validation and pricing for composite products
-Cenário: Multiple hierarchies, component dependencies, dynamic pricing
+CenÃ¡rio: Multiple hierarchies, component dependencies, dynamic pricing
 Impacto: User experience, order accuracy, pricing integrity
-Solução: Configuration Engine with rule caching
+SoluÃ§Ã£o: Configuration Engine with rule caching
 Prioridade: High - Direct customer impact
 ```
 
 ##### **(!CrossDomainEventOrdering!)**
 ```
-Problema: Event ordering between Sales → Production → Financial
-Cenário: Race conditions in demand creation vs AR creation
+Problema: Event ordering between Sales â†’ Production â†’ Financial
+CenÃ¡rio: Race conditions in demand creation vs AR creation
 Impacto: Data consistency, financial accuracy
-Solução: Saga pattern with compensating actions
+SoluÃ§Ã£o: Saga pattern with compensating actions
 Prioridade: Critical - Data integrity
 ```
 
 ##### **(!GoogleAPIResilience!)**
 ```
 Problema: Dependency on Google APIs for core functionality
-Cenário: API downtime affecting order creation and delivery
+CenÃ¡rio: API downtime affecting order creation and delivery
 Impacto: Order processing blocked, customer experience
-Solução: Circuit breaker + fallback mechanisms
+SoluÃ§Ã£o: Circuit breaker + fallback mechanisms
 Prioridade: High - System availability
 ```
 
-#### **📊 Métricas e Alertas**
+#### **ðŸ“Š MÃ©tricas e Alertas**
 
-##### **🎯 Business Metrics**
+##### **ðŸŽ¯ Business Metrics**
 ```
 Order Conversion Rate:
-├── Metric: (Confirmed Orders / Created Orders) * 100
-├── Alert: < 70% conversion rate
-├── Dashboard: Sales performance KPIs
-└── Usage: Sales process optimization
+â”œâ”€â”€ Metric: (Confirmed Orders / Created Orders) * 100
+â”œâ”€â”€ Alert: < 70% conversion rate
+â”œâ”€â”€ Dashboard: Sales performance KPIs
+â””â”€â”€ Usage: Sales process optimization
 
 Average Order Value (AOV):
-├── Metric: Total order value / Number of orders
-├── Alert: AOV declining > 10% week-over-week
-├── Dashboard: Revenue analytics
-└── Usage: Pricing strategy evaluation
+â”œâ”€â”€ Metric: Total order value / Number of orders
+â”œâ”€â”€ Alert: AOV declining > 10% week-over-week
+â”œâ”€â”€ Dashboard: Revenue analytics
+â””â”€â”€ Usage: Pricing strategy evaluation
 
 Configuration Completion Rate:
-├── Metric: % orders with successful product configuration
-├── Alert: < 90% completion rate
-├── Dashboard: UX metrics
-└── Usage: Configuration flow optimization
+â”œâ”€â”€ Metric: % orders with successful product configuration
+â”œâ”€â”€ Alert: < 90% completion rate
+â”œâ”€â”€ Dashboard: UX metrics
+â””â”€â”€ Usage: Configuration flow optimization
 
 Time to Confirm Order:
-├── Metric: Average time from creation to confirmation
-├── Alert: > 30 minutes average time
-├── Dashboard: Process efficiency
-└── Usage: Process improvement
+â”œâ”€â”€ Metric: Average time from creation to confirmation
+â”œâ”€â”€ Alert: > 30 minutes average time
+â”œâ”€â”€ Dashboard: Process efficiency
+â””â”€â”€ Usage: Process improvement
 ```
 
-##### **⚡ Technical Metrics**
+##### **âš¡ Technical Metrics**
 ```
 Cross-Domain Event Latency:
-├── Metric: Time from OrderConfirmed to DemandsCreated
-├── Alert: > 5 seconds latency
-├── Dashboard: Integration performance
-└── Usage: System optimization
+â”œâ”€â”€ Metric: Time from OrderConfirmed to DemandsCreated
+â”œâ”€â”€ Alert: > 5 seconds latency
+â”œâ”€â”€ Dashboard: Integration performance
+â””â”€â”€ Usage: System optimization
 
 Google API Response Time:
-├── Metric: Average response time for Maps/Contacts APIs
-├── Alert: > 3 seconds response time
-├── Dashboard: External dependency health
-└── Usage: API performance monitoring
+â”œâ”€â”€ Metric: Average response time for Maps/Contacts APIs
+â”œâ”€â”€ Alert: > 3 seconds response time
+â”œâ”€â”€ Dashboard: External dependency health
+â””â”€â”€ Usage: API performance monitoring
 
 Order Processing Error Rate:
-├── Metric: % orders with processing errors
-├── Alert: > 1% error rate
-├── Dashboard: System reliability
-└── Usage: Error reduction initiatives
+â”œâ”€â”€ Metric: % orders with processing errors
+â”œâ”€â”€ Alert: > 1% error rate
+â”œâ”€â”€ Dashboard: System reliability
+â””â”€â”€ Usage: Error reduction initiatives
 
 Cache Hit Ratio (Product Catalog):
-├── Metric: % product requests served from cache
-├── Alert: < 85% hit ratio
-├── Dashboard: Performance optimization
-└── Usage: Caching strategy tuning
+â”œâ”€â”€ Metric: % product requests served from cache
+â”œâ”€â”€ Alert: < 85% hit ratio
+â”œâ”€â”€ Dashboard: Performance optimization
+â””â”€â”€ Usage: Caching strategy tuning
 ```
 
-##### **🔍 Operational Metrics**
+##### **ðŸ” Operational Metrics**
 ```
 Peak Order Processing Load:
-├── Metric: Maximum concurrent orders being processed
-├── Alert: Approaching system capacity limits
-├── Dashboard: Capacity planning
-└── Usage: Infrastructure scaling decisions
+â”œâ”€â”€ Metric: Maximum concurrent orders being processed
+â”œâ”€â”€ Alert: Approaching system capacity limits
+â”œâ”€â”€ Dashboard: Capacity planning
+â””â”€â”€ Usage: Infrastructure scaling decisions
 
 Customer Data Sync Success Rate:
-├── Metric: % successful Google Contacts synchronizations
-├── Alert: < 95% success rate
-├── Dashboard: Integration health
-└── Usage: Data consistency monitoring
+â”œâ”€â”€ Metric: % successful Google Contacts synchronizations
+â”œâ”€â”€ Alert: < 95% success rate
+â”œâ”€â”€ Dashboard: Integration health
+â””â”€â”€ Usage: Data consistency monitoring
 
 Order Cancellation Rate:
-├── Metric: % orders cancelled after confirmation
-├── Alert: > 5% cancellation rate
-├── Dashboard: Business health indicators
-└── Usage: Process and quality improvement
+â”œâ”€â”€ Metric: % orders cancelled after confirmation
+â”œâ”€â”€ Alert: > 5% cancellation rate
+â”œâ”€â”€ Dashboard: Business health indicators
+â””â”€â”€ Usage: Process and quality improvement
 ```
 
 ---
 
 **Arquivo**: `sales-domain-events.md`  
-**Domínio**: Vendas (#f36b21)  
+**DomÃ­nio**: Vendas (#f36b21)  
 **Tipo**: Event Storming  
-**Granularidade**: Alto nível + Micro-eventos + Integrações críticas  
-**Atualização**: 16/06/2025
+**Granularidade**: Alto nÃ­vel + Micro-eventos + IntegraÃ§Ãµes crÃ­ticas  
+**AtualizaÃ§Ã£o**: 16/06/2025

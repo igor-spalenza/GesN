@@ -1,218 +1,32 @@
 // ===================================
-// PRODUCT CATALOG MANAGER - GesN (TypeScript)
-// Gerenciamento completo do catálogo de produtos na edição de pedidos
+// PRODUCT CATALOG MANAGER - VERSÃO SIMPLIFICADA (Padrão _Grid.cshtml)
+// Seguindo exatamente o padrão usado em _Grid.cshtml do projeto
 // ===================================
 
-// Imports removidos - interfaces carregadas globalmente via script tags
-// As interfaces estão definidas em product-catalog.ts
-
-// ===================================
-// DECLARAÇÕES DE TIPOS GLOBAIS
-// ===================================
-
-declare interface ProductCatalogConfig {
-    baseUrl: string;
-    catalogContainerSelector: string;
-    productListSelector: string;
-    orderItemsContainerSelector: string;
-    pageSize: number;
-    maxSearchLength: number;
-    debounceMs: number;
-}
-
-declare interface ProductCatalogState {
-    orderId: string | null;
-    currentPage: number;
-    currentCategory: string;
-    currentSearchTerm: string;
-    totalProducts: number;
-    isLoading: boolean;
-    lastLoadedData: ProductCatalogData | null;
-    totalPages?: number;
-}
-
-declare interface ProductCatalogEvents {
-    onProductLoaded?: (product: ProductCatalogItem) => void;
-    onProductsLoaded?: (data: ProductCatalogData) => void;
-    onCategoryChanged?: (category: string) => void;
-    onSearchPerformed?: (searchTerm: string) => void;
-    onPageChanged?: (page: number) => void;
-    onAddToCart?: (productId: string, quantity: number) => void;
-    onError?: (error: ProductCatalogError) => void;
-}
-
-declare interface ProductCatalogFilters {
-    category?: string;
-    search?: string;
-    page: number;
-    pageSize: number;
-}
-
-declare interface ProductCatalogData {
-    products: ProductCatalogItem[];
-    currentPage: number;
-    totalProducts: number;
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-    filters: ProductCatalogFilters;
-}
-
-declare interface ProductCatalogItem {
-    id: string;
-    name: string;
-    description?: string;
-    sku?: string;
-    price: number;
-    unitPrice: number;
-    cost?: number;
-    categoryId?: string;
-    categoryName?: string;
-    productType: ProductType;
-    imageUrl?: string;
-    assemblyTime?: number;
-    isActive: boolean;
-    createdAt: string;
-}
-
-declare interface AddToCartRequest {
-    orderId: string;
-    productId: string;
-    quantity: number;
-    notes?: string;
-}
-
-declare interface AddToCartResponse {
-    success: boolean;
-    message?: string;
-    totalItems: number;
-    orderItem?: OrderItemData;
-}
-
-declare interface OrderItemData {
-    id: string;
-    productId: string;
-    productName: string;
-    quantity: number;
-    unitPrice: number;
-    discountAmount: number;
-    taxAmount: number;
-    totalAmount: number;
-    notes?: string;
-}
-
-declare interface CatalogLoadResponse {
-    success: boolean;
-    data?: ProductCatalogData;
-    error?: ProductCatalogError;
-    message?: string;
-}
-
-declare interface ProductCatalogError {
-    code: string;
-    message: string;
-    details?: any;
-    timestamp: number;
-}
-
-declare interface ProductCatalogUI {
-    showProduct: (product: ProductCatalogItem) => void;
-    showProductList: (products: ProductCatalogItem[]) => void;
-    showPagination: (pagination: ProductCatalogPagination) => void;
-    showLoading: (show: boolean) => void;
-    showError: (error: ProductCatalogError) => void;
-    showEmpty: (message: string) => void;
-    clearContent: () => void;
-}
-
-declare interface ProductCatalogPagination {
-    currentPage: number;
-    totalPages: number;
-    totalProducts: number;
-    pageSize: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-}
-
-declare interface ProductCatalogCache {
-    key: string;
-    data: ProductCatalogData;
-    timestamp: number;
-    expiry: number;
-}
-
-declare interface SavedCatalogState {
-    orderId: string;
-    category: string;
-    searchTerm: string;
-    currentPage: number;
-    pageSize: number;
-    timestamp: number;
-    productCache?: ProductCatalogItem[];
-    totalProducts?: number;
-    totalPages?: number;
-    scrollPosition?: number;
-}
-
-declare interface CatalogStateManager {
-    savedStates: Map<string, SavedCatalogState>;
-    currentOrderId: string | null;
-    persistToStorage: boolean;
-    maxStates: number;
-}
-
-declare interface ContextConfig {
-    enablePersistence: boolean;
-    maxStatesInMemory: number;
-    storageKey: string;
-    autoSaveInterval: number;
-    debugMode: boolean;
-}
-
-declare interface ContextChangeEvent {
-    previousOrderId: string | null;
-    newOrderId: string | null;
-    stateRestored: boolean;
-    timestamp: number;
-}
-
-declare interface CatalogSlideControl {
-    isVisible: boolean;
-    isAnimating: boolean;
-    currentOrderId: string | null;
-    slideDirection: 'in' | 'out';
-}
-
-
+/// <reference path="../interfaces/common.ts" />
+/// <reference path="../interfaces/product-catalog.ts" />
+/// <reference path="../types/globals.d.ts" />
 
 class ProductCatalogManager {
     // ===================================
     // PROPRIEDADES E CONFIGURAÇÕES
     // ===================================
-    private config: ProductCatalogConfig;
+    private config: ProductCatalogDataTablesConfig;
     private state: ProductCatalogState;
     private events: ProductCatalogEvents;
-    
-    // ===================================
-    // GERENCIAMENTO DE ESTADO POR ABA
-    // ===================================
+    private dataTable: any = null;
     private stateManager: CatalogStateManager;
-    private contextConfig: ContextConfig;
-    private slideControl: CatalogSlideControl;
-    private ui: ProductCatalogUI;
-    private cache: Map<string, ProductCatalogCache> = new Map();
     private debounceTimer: number | null = null;
+    private isInitializing: boolean = false;
 
     constructor() {
-        // Configuração seguindo padrão dos outros managers
+        // Configuração para DataTables
         this.config = {
             baseUrl: '/Product',
             catalogContainerSelector: '#productCatalogContainer',
-            productListSelector: '#products-list', 
-            orderItemsContainerSelector: '#orderItemsContainer',
-            pageSize: 8,
-            maxSearchLength: 100,
-            debounceMs: 300
+            tableSelector: '#productCatalogTable',
+            categoryFiltersSelector: '.category-filter',
+            summarySelector: '#catalog-summary'
         };
 
         // Estado inicial
@@ -226,1242 +40,504 @@ class ProductCatalogManager {
             lastLoadedData: null
         };
 
-        // Eventos (opcionais)
-        this.events = {};
-
-        // Configuração do sistema de contextos
-        this.contextConfig = {
-            enablePersistence: true,
-            maxStatesInMemory: 10,
-            storageKey: 'gesn_catalog_states',
-            autoSaveInterval: 2000,
-            debugMode: false
+        // Eventos customizados (compatível com interfaces existentes)
+        this.events = {
+            onSimpleProductSelected: (productId: string, quantity: number) => {
+                const event = new CustomEvent('simple-product-added', {
+                    detail: { productId, quantity }
+                });
+                document.dispatchEvent(event);
+            },
+            
+            onCompositeProductConfigured: (productId: string, config: CompositeItemConfiguration[]) => {
+                const event = new CustomEvent('composite-product-configured', {
+                    detail: { productId, config }
+                });
+                document.dispatchEvent(event);
+            },
+            
+            onGroupProductConfigured: (productId: string, config: GroupItemConfiguration[]) => {
+                const event = new CustomEvent('group-product-configured', {
+                    detail: { productId, config }
+                });
+                document.dispatchEvent(event);
+            },
+            
+            onError: (error: ProductCatalogError) => {
+                const event = new CustomEvent('catalog-error', {
+                    detail: error
+                });
+                document.dispatchEvent(event);
+            }
         };
 
-        // Gerenciador de estados por aba
-        this.stateManager = {
-            savedStates: new Map<string, SavedCatalogState>(),
-            currentOrderId: null,
-            persistToStorage: this.contextConfig.enablePersistence,
-            maxStates: this.contextConfig.maxStatesInMemory
-        };
+        // State manager
+        this.stateManager = new CatalogStateManager();
 
-        // Controle de slide
-        this.slideControl = {
-            isVisible: false,
-            isAnimating: false,
-            currentOrderId: null,
-            slideDirection: 'out'
-        };
-
-        // Carregar estados persistidos
-        this.loadPersistedStates();
-
-        // Interface de UI
-        this.ui = {
-            showProduct: this.renderProduct.bind(this),
-            showProductList: this.renderProductList.bind(this),
-            showPagination: this.renderPagination.bind(this),
-            showLoading: this.renderLoading.bind(this),
-            showEmpty: this.renderEmpty.bind(this),
-            showError: this.renderError.bind(this)
-        };
+        console.log('🏗️ ProductCatalogManager inicializado (padrão _Grid.cshtml)');
     }
 
     // ===================================
-    // INICIALIZAÇÃO PRINCIPAL
+    // INICIALIZAÇÃO (Seguindo padrão _Grid.cshtml)
     // ===================================
-    
-    /**
-     * Inicializa o catálogo de produtos
-     * @param orderId ID do pedido em edição
-     */
-    public init(orderId: string): void {
+
+    public async init(orderId: string): Promise<void> {
+        // Prevenir múltiplas inicializações simultâneas
+        if (this.isInitializing) {
+            console.log(`⏳ Inicialização já em andamento para pedido: ${orderId}`);
+            return;
+        }
+        
+        // Se já está inicializado para este pedido, não precisa reinicializar
+        if (this.dataTable && this.state.orderId === orderId) {
+            console.log(`✅ Catálogo já inicializado para pedido: ${orderId}`);
+            return;
+        }
+        
         try {
+            this.isInitializing = true;
+            console.log(`🏗️ Inicializando catálogo para pedido: ${orderId} (padrão _Grid.cshtml)`);
+            
             this.state.orderId = orderId;
-            this.bindEvents();
-            this.loadInitialData();
+            this.stateManager.currentOrderId = orderId;
+
+            // Carregar dados e renderizar HTML (como _Grid.cshtml)
+            await this.loadCatalogData(orderId);
+            this.loadStateForOrder(orderId);
             
-            console.log(`ProductCatalogManager iniciado para pedido: ${orderId}`);
+            console.log('✅ Catálogo inicializado seguindo padrão do projeto');
         } catch (error) {
-            console.error('Erro ao inicializar ProductCatalogManager:', error);
-            this.handleError({
-                code: 'INIT_ERROR',
-                message: 'Erro ao inicializar catálogo de produtos',
-                details: error,
-                timestamp: Date.now()
-            });
-        }
-    }
-
-    /**
-     * Associa eventos aos elementos da interface
-     */
-    private bindEvents(): void {
-        // Unbind eventos anteriores para evitar duplicação
-        this.unbindEvents();
-
-        // Click nas tabs de categoria (novos seletores)
-        $(document).on('click.productCatalog', '.category-chip[data-category]', (e) => {
-            e.preventDefault();
-            const category = $(e.currentTarget).data('category') as string || '';
-            this.filterByCategory(category);
-        });
-
-        // Busca de produtos
-        $(document).on('click.productCatalog', '#search-btn', () => {
-            this.performSearch();
-        });
-
-        // Enter no campo de busca
-        $(document).on('keypress.productCatalog', '#product-search', (e) => {
-            if (e.which === 13) { // Enter key
-                this.performSearch();
-            }
-        });
-
-        // Input de busca com debounce
-        $(document).on('input.productCatalog', '#product-search', () => {
-            this.debouncedSearch();
-        });
-
-        // Botões de adicionar ao carrinho
-        $(document).on('click.productCatalog', '.btn-add-to-cart', (e) => {
-            e.preventDefault();
-            const productId = $(e.currentTarget).data('product-id') as string;
-            const quantity = parseInt($(e.currentTarget).data('quantity') as string) || 1;
-            
-            if (productId) {
-                this.addToCart(productId, quantity);
-            }
-        });
-
-        // Paginação
-        $(document).on('click.productCatalog', '.pagination-btn[data-page]', (e) => {
-            e.preventDefault();
-            const page = parseInt($(e.currentTarget).data('page') as string);
-            if (!isNaN(page)) {
-                this.goToPage(page);
-            }
-        });
-
-        // Seletor de itens por página
-        $(document).on('change.productCatalog', '#page-size', (e) => {
-            const newPageSize = parseInt($(e.currentTarget).val() as string);
-            if (!isNaN(newPageSize)) {
-                this.changePageSize(newPageSize);
-            }
-        });
-
-        console.log('ProductCatalogManager: Eventos associados');
-    }
-
-    /**
-     * Remove associações de eventos
-     */
-    private unbindEvents(): void {
-        $(document).off('.productCatalog');
-    }
-
-    // ===================================
-    // CARREGAMENTO DE DADOS
-    // ===================================
-
-    /**
-     * Carrega dados iniciais do catálogo
-     */
-    private async loadInitialData(): Promise<void> {
-        try {
-            await this.loadProducts({
-                page: 1,
-                pageSize: this.config.pageSize
-            });
-        } catch (error) {
-            console.error('Erro ao carregar dados iniciais:', error);
-            this.handleError({
-                code: 'INITIAL_LOAD_ERROR',
-                message: 'Erro ao carregar catálogo inicial',
-                details: error,
-                timestamp: Date.now()
-            });
-        }
-    }
-
-    /**
-     * Carrega produtos com filtros especificados
-     */
-    public async loadProducts(filters: ProductCatalogFilters): Promise<void> {
-        try {
-            // Verificar se já está carregando
-            if (this.state.isLoading) {
-                console.log('ProductCatalogManager: Carregamento já em andamento');
-                return;
-            }
-
-            // Atualizar estado
-            this.setLoadingState(true);
-            
-            // Verificar cache
-            const cacheKey = this.generateCacheKey(filters);
-            const cached = this.getCachedData(cacheKey);
-            if (cached) {
-                console.log('ProductCatalogManager: Usando dados do cache');
-                this.handleLoadSuccess(cached.data);
-                return;
-            }
-
-            // Mostrar loading UI
-            this.showLoadingUI();
-
-            // Fazer requisição
-            const response = await this.makeProductRequest(filters);
-            
-            if (response.success && response.data) {
-                // Cachear resultado
-                this.setCachedData(cacheKey, response.data);
-                
-                // Processar dados
-                this.handleLoadSuccess(response.data);
-                
-                // Notificar eventos
-                this.events.onProductsLoaded?.(response.data);
-            } else {
-                throw new Error(response.message || 'Erro desconhecido ao carregar produtos');
-            }
-
-        } catch (error) {
-            console.error('Erro ao carregar produtos:', error);
-            this.handleLoadError(error);
+            console.error('❌ Erro ao inicializar catálogo:', error);
+            this.showToast('error', 'Erro ao inicializar catálogo de produtos');
         } finally {
-            this.setLoadingState(false);
+            this.isInitializing = false;
         }
     }
 
-    /**
-     * Faz requisição AJAX para carregar produtos
-     */
-    private async makeProductRequest(filters: ProductCatalogFilters): Promise<CatalogLoadResponse> {
-        return new Promise((resolve, reject) => {
-            $.ajax({
-                url: `${this.config.baseUrl}/CatalogProducts`,
-                type: 'GET',
-                data: {
-                    category: filters.category || '',
-                    search: filters.search || '',
-                    page: filters.page || 1,
-                    pageSize: filters.pageSize || this.config.pageSize,
-                    returnJson: true // Solicitar resposta JSON
-                },
-                dataType: 'json',
-                timeout: 30000,
-                success: (response: any) => {
-                    try {
-                        // Converter resposta do backend para formato esperado
-                        const catalogResponse: CatalogLoadResponse = {
-                            success: response.success || false,
-                            message: response.message || 'Produtos carregados',
-                            data: {
-                                products: (response.data?.products || []).map((p: any) => ({
-                                    id: p.id,
-                                    name: p.name,
-                                    description: p.description,
-                                    sku: p.sku,
-                                    price: p.price,
-                                    unitPrice: p.unitPrice,
-                                    cost: p.cost,
-                                    categoryId: p.categoryId,
-                                    categoryName: p.categoryName,
-                                    productType: this.parseProductType(p.productType),
-                                    imageUrl: p.imageUrl,
-                                    assemblyTime: p.assemblyTime,
-                                    isActive: p.isActive,
-                                    createdAt: p.createdAt
-                                })),
-                                currentPage: response.data?.currentPage || 1,
-                                totalProducts: response.data?.totalProducts || 0,
-                                totalPages: response.data?.totalPages || 0,
-                                hasNextPage: response.data?.hasNextPage || false,
-                                hasPreviousPage: response.data?.hasPreviousPage || false,
-                                filters: response.data?.filters || filters
-                            }
-                        };
-                        
-                        resolve(catalogResponse);
-                    } catch (parseError) {
-                        console.error('Erro ao processar resposta:', parseError);
-                        reject(parseError);
-                    }
-                },
-                error: (xhr: JQueryXHR, status: string, error: string) => {
-                    console.error('Erro na requisição:', { status, error, response: xhr });
-                    
-                    const errorResponse: CatalogLoadResponse = {
-                        success: false,
-                        message: xhr.responseJSON?.message || `Erro ao carregar produtos: ${error}`,
-                        data: {
-                            products: [],
-                            currentPage: 1,
-                            totalProducts: 0,
-                            totalPages: 0,
-                            hasNextPage: false,
-                            hasPreviousPage: false,
-                            filters: filters
-                        }
-                    };
-                    resolve(errorResponse);
-                }
-            });
-        });
-    }
-
-    // ===================================
-    // FUNCIONALIDADES PRINCIPAIS
-    // ===================================
-
-    /**
-     * Filtra produtos por categoria
-     */
-    public async filterByCategory(category: string): Promise<void> {
+    private async loadCatalogData(orderId: string): Promise<void> {
         try {
-            this.state.currentCategory = category;
-            this.state.currentPage = 1; // Reset página
+            console.log(`🔄 Carregando catálogo para pedido: ${orderId} (padrão _Grid.cshtml)`);
             
-            // Atualizar UI das tabs
-            this.updateCategoryTabs(category);
+            // Buscar HTML do catálogo via AJAX (como _Grid.cshtml)
+            const response = await $.get(`/Order/ProductCatalog?category=${encodeURIComponent(this.state.currentCategory)}&search=${encodeURIComponent(this.state.currentSearchTerm)}`);
             
-            // Carregar produtos filtrados
-            await this.loadProducts({
-                category: category,
-                search: this.state.currentSearchTerm,
-                page: 1,
-                pageSize: this.config.pageSize
-            });
+            // Injetar HTML no container
+            $(this.config.catalogContainerSelector).html(response);
+            console.log(`✅ HTML do catálogo carregado`);
             
-            // Notificar evento
-            this.events.onCategoryChanged?.(category);
-            
-            // Auto-save estado após filtrar
-            if (this.stateManager.currentOrderId) {
-                this.saveStateForOrder(this.stateManager.currentOrderId);
-            }
+            // Aguardar DOM ser atualizado e inicializar DataTables
+            setTimeout(() => {
+                this.initializeStaticDataTable();
+            }, 100);
             
         } catch (error) {
-            console.error('Erro ao filtrar por categoria:', error);
-            this.handleError({
-                code: 'CATEGORY_FILTER_ERROR',
-                message: 'Erro ao filtrar produtos por categoria',
-                details: error,
-                timestamp: Date.now()
-            });
+            console.error('❌ Erro ao carregar catálogo:', error);
+            this.showToast('error', 'Erro ao carregar catálogo de produtos');
+            throw error;
         }
     }
 
-    /**
-     * Realiza busca de produtos
-     */
-    public async performSearch(): Promise<void> {
+    private initializeStaticDataTable(): void {
         try {
-            const searchTerm = ($('#product-search').val() as string || '').trim();
-            
-            // Validar busca
-            if (searchTerm.length > this.config.maxSearchLength) {
-                this.showToast('warning', `Busca limitada a ${this.config.maxSearchLength} caracteres`);
+            console.log('🔄 Inicializando DataTable estático (padrão _Grid.cshtml)');
+
+            const tableElement = $(this.config.tableSelector);
+            if (!tableElement.length) {
+                console.warn('⚠️ Tabela do catálogo não encontrada:', this.config.tableSelector);
                 return;
             }
-            
-            this.state.currentSearchTerm = searchTerm;
-            this.state.currentPage = 1; // Reset página
-            
-            // Carregar produtos com busca
-            await this.loadProducts({
-                category: this.state.currentCategory,
-                search: searchTerm,
-                page: 1,
-                pageSize: this.config.pageSize
-            });
-            
-            // Notificar evento
-            this.events.onSearchPerformed?.(searchTerm);
-            
-            // Auto-save estado após buscar
-            if (this.stateManager.currentOrderId) {
-                this.saveStateForOrder(this.stateManager.currentOrderId);
+
+            // Verificar se há dados na tabela
+            const rowCount = tableElement.find('tbody tr').length;
+            console.log(`📊 Linhas encontradas no HTML: ${rowCount}`);
+
+            // Destruir instância existente se houver
+            if ($.fn.DataTable.isDataTable(this.config.tableSelector)) {
+                $(this.config.tableSelector).DataTable().destroy();
+                console.log('🗑️ DataTable anterior destruído');
             }
+
+            // Configuração simplificada seguindo padrão do projeto (como _Grid.cshtml)
+            const dataTableConfig = {
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
+                },
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[5, 10, 25, 50], [5, 10, 25, 50]],
+                order: [[0, 'asc']], // Ordenar por nome do produto (primeira coluna agora)
+                columnDefs: [
+                    {
+                        targets: [3], // Coluna de ações (ajustado para 4 colunas)
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center'
+                    },
+                    {
+                        targets: [2], // Coluna de preço (ajustado para 4 colunas)
+                        orderable: true,
+                        searchable: false,
+                        className: 'text-end'
+                    }
+                ],
+                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+                drawCallback: () => {
+                    // Reaplica eventos após redraw da tabela (padrão do projeto)
+                    this.bindAddToCartEvents();
+                }
+            };
+
+            // Inicializar DataTable (como ordersTable em _Grid.cshtml)
+            this.dataTable = tableElement.DataTable(dataTableConfig);
             
+            console.log('✅ DataTable estático inicializado seguindo padrão _Grid.cshtml');
+            console.log('🔍 Produtos na tabela:', this.dataTable.rows().count());
+            
+            // Configurar eventos
+            this.setupEventListeners();
+            this.bindAddToCartEvents();
+            this.updateCatalogSummary();
+
         } catch (error) {
-            console.error('Erro ao realizar busca:', error);
-            this.handleError({
-                code: 'SEARCH_ERROR',
-                message: 'Erro ao buscar produtos',
-                details: error,
-                timestamp: Date.now()
-            });
+            console.error('❌ Erro ao inicializar DataTable estático:', error);
+            this.showToast('error', 'Erro ao configurar tabela do catálogo');
+            throw error;
         }
     }
 
-    /**
-     * Busca com debounce
-     */
-    private debouncedSearch(): void {
-        if (this.debounceTimer !== null) {
+    // ===================================
+    // FILTROS E BUSCA (Server-side como _Grid.cshtml)
+    // ===================================
+
+    public filterByCategory(category: string): void {
+        console.log(`🏷️ Filtro aplicado: categoria '${category}' (server-side)`);
+        
+        this.state.currentCategory = category;
+        
+        // Atualizar visual dos botões de filtro
+        $(this.config.categoryFiltersSelector).removeClass('active');
+        $(`[data-category="${category}"]`).addClass('active');
+        
+        // Recarregar catálogo com filtro server-side (padrão do projeto)
+        if (this.state.orderId) {
+            this.loadCatalogData(this.state.orderId);
+        }
+    }
+
+    public searchProducts(searchTerm: string): void {
+        // Limpar timer anterior
+        if (this.debounceTimer) {
             clearTimeout(this.debounceTimer);
         }
         
+        // Aplicar debounce de 500ms
         this.debounceTimer = window.setTimeout(() => {
-            this.performSearch();
-        }, this.config.debounceMs);
+            console.log(`🔍 Busca aplicada: '${searchTerm}' (server-side)`);
+            this.state.currentSearchTerm = searchTerm;
+            
+            // Recarregar catálogo com busca server-side (padrão do projeto)
+            if (this.state.orderId) {
+                this.loadCatalogData(this.state.orderId);
+            }
+        }, 500);
     }
 
-    /**
-     * Adiciona produto ao carrinho
-     */
-    public async addToCart(productId: string, quantity: number = 1): Promise<void> {
-        try {
-            if (!this.state.orderId) {
-                this.showToast('error', 'ID do pedido não encontrado');
-                return;
-            }
+    // ===================================
+    // EVENT HANDLERS E BINDINGS
+    // ===================================
 
-            if (!productId) {
-                this.showToast('error', 'ID do produto não encontrado');
-                return;
-            }
-
-            // Preparar dados da requisição
-            const request: AddToCartRequest = {
-                orderId: this.state.orderId,
-                productId: productId,
-                quantity: Math.max(1, quantity)
-            };
-
-            // Mostrar loading no botão
-            const button = $(`.btn-add-to-cart[data-product-id="${productId}"]`);
-            const originalHtml = button.html();
-            button.html('<i class="fas fa-spinner fa-spin"></i> Adicionando...').prop('disabled', true);
-
-            // Fazer requisição
-            const response = await this.makeAddToCartRequest(request);
-
-            if (response.success) {
-                this.showToast('success', response.message || 'Produto adicionado ao carrinho!');
-                
-                // Recarregar lista de OrderItems
-                await this.reloadOrderItems();
-                
-                // Notificar evento
-                const product = this.findProductById(productId);
-                if (product) {
-                    this.events.onAddToCart?.(productId, quantity);
-                }
-                
-            } else {
-                this.showToast('error', response.message || 'Erro ao adicionar produto');
-            }
-
-        } catch (error) {
-            console.error('Erro ao adicionar ao carrinho:', error);
-            this.showToast('error', 'Erro interno ao adicionar produto');
-            this.handleError({
-                code: 'ADD_TO_CART_ERROR',
-                message: 'Erro ao adicionar produto ao carrinho',
-                details: error,
-                timestamp: Date.now()
-            });
-        } finally {
-            // Restaurar botão
-            const button = $(`.btn-add-to-cart[data-product-id="${productId}"]`);
-            const originalHtml = 'Adicionar';
-            button.html(originalHtml).prop('disabled', false);
-        }
-    }
-
-    /**
-     * Faz requisição para adicionar ao carrinho
-     */
-    private async makeAddToCartRequest(request: AddToCartRequest): Promise<AddToCartResponse> {
-        return new Promise((resolve) => {
-            $.ajax({
-                url: '/Order/AdicionarProdutoAoCarrinho',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(request),
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() as string
-                },
-                success: (response: AddToCartResponse) => {
-                    resolve(response);
-                },
-                error: (xhr: JQueryXHR) => {
-                    const errorResponse: AddToCartResponse = {
-                        success: false,
-                        message: xhr.responseJSON?.message || 'Erro ao adicionar produto ao carrinho',
-                        totalItems: 0
-                    };
-                    resolve(errorResponse);
-                }
-            });
+    private setupEventListeners(): void {
+        // Remover listeners existentes para evitar duplicação
+        $(document).off('click.productCatalog');
+        
+        // Filtros de categoria (com namespace para evitar conflitos)
+        $(document).on('click.productCatalog', this.config.categoryFiltersSelector, (e: any) => {
+            e.preventDefault();
+            const category = $(e.currentTarget).data('category') || '';
+            this.filterByCategory(category);
         });
     }
 
-    /**
-     * Recarrega lista de OrderItems
-     */
-    private async reloadOrderItems(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            try {
-                if (!this.state.orderId) {
-                    resolve();
-                    return;
-                }
+    private bindAddToCartEvents(): void {
+        // Remover eventos anteriores para evitar duplicação
+        $('.btn-add-simple, .btn-configure-composite, .btn-configure-group').off('click.catalog');
 
-                $.ajax({
-                    url: '/Order/RecarregarItens',
-                    type: 'GET',
-                    data: { orderId: this.state.orderId },
-                    dataType: 'html'
-                })
-                    .done((response: string) => {
-                        $(this.config.orderItemsContainerSelector).html(response);
-                        resolve();
-                    })
-                    .fail((xhr: JQueryXHR) => {
-                        console.error('Erro ao recarregar OrderItems:', xhr);
-                        this.showToast('error', 'Erro ao atualizar carrinho');
-                        reject(new Error('Erro ao recarregar OrderItems'));
-                    });
-                    
-            } catch (error) {
-                console.error('Erro ao recarregar OrderItems:', error);
-                this.showToast('error', 'Erro ao atualizar carrinho');
-                reject(error);
-            }
+        // Produtos simples
+        $('.btn-add-simple').on('click.catalog', async (e: any) => {
+            e.preventDefault();
+            const $btn = $(e.currentTarget);
+            const productId = $btn.data('product-id');
+            await this.addSimpleToCart(productId, 1);
+        });
+
+        // Produtos compostos
+        $('.btn-configure-composite').on('click.catalog', async (e: any) => {
+            e.preventDefault();
+            const $btn = $(e.currentTarget);
+            const productId = $btn.data('product-id');
+            await this.showCompositeProductModal(productId);
+        });
+
+        // Grupos de produtos
+        $('.btn-configure-group').on('click.catalog', async (e: any) => {
+            e.preventDefault();
+            const $btn = $(e.currentTarget);
+            const productId = $btn.data('product-id');
+            await this.showGroupProductModal(productId);
         });
     }
 
     // ===================================
-    // NAVEGAÇÃO E PAGINAÇÃO
+    // ADICIONAR PRODUTOS AO CARRINHO
     // ===================================
 
-    /**
-     * Vai para página específica
-     */
-    public async goToPage(page: number): Promise<void> {
+    public async addSimpleToCart(productId: string, quantity: number = 1): Promise<void> {
         try {
-            if (page < 1 || page === this.state.currentPage) {
-                return;
-            }
-
-            this.state.currentPage = page;
-
-            await this.loadProducts({
-                category: this.state.currentCategory,
-                search: this.state.currentSearchTerm,
-                page: page,
-                pageSize: this.config.pageSize
-            });
-
-            this.events.onPageChanged?.(page);
-
-            // Auto-save estado após navegar
-            if (this.stateManager.currentOrderId) {
-                this.saveStateForOrder(this.stateManager.currentOrderId);
-            }
-
+            console.log(`➕ Adicionando produto simples ao carrinho: ${productId}`);
+            this.events.onSimpleProductSelected?.(productId, quantity);
         } catch (error) {
-            console.error('Erro ao navegar para página:', error);
-            this.handleError({
-                code: 'PAGINATION_ERROR',
-                message: 'Erro ao navegar entre páginas',
-                details: error,
+            console.error('❌ Erro ao adicionar produto simples:', error);
+            this.events.onError?.({
+                action: 'add-simple-product',
+                message: error instanceof Error ? error.message : String(error),
+                details: { productId, quantity },
                 timestamp: Date.now()
             });
         }
     }
 
-    /**
-     * Muda quantidade de itens por página
-     */
-    public async changePageSize(newPageSize: number): Promise<void> {
+    // ===================================
+    // MODAIS DE CONFIGURAÇÃO
+    // ===================================
+
+    public async showCompositeProductModal(productId: string, initialQuantity: number = 1): Promise<void> {
         try {
-            this.config.pageSize = Math.max(1, Math.min(50, newPageSize));
-            this.state.currentPage = 1; // Reset para primeira página
-
-            await this.loadProducts({
-                category: this.state.currentCategory,
-                search: this.state.currentSearchTerm,
-                page: 1,
-                pageSize: this.config.pageSize
-            });
-
+            console.log(`🔧 Abrindo modal de produto composto: ${productId}`);
+            
+            const response = await $.get(`/Order/CompositeProductModal/${productId}?initialQuantity=${initialQuantity}`);
+            
+            const $modal = $('#compositeProductModal');
+            $modal.find('.modal-body').html(response);
+            $modal.modal('show');
+            
         } catch (error) {
-            console.error('Erro ao mudar tamanho da página:', error);
+            console.error('❌ Erro ao abrir modal de produto composto:', error);
+            this.showToast('error', 'Erro ao carregar configuração do produto');
         }
     }
 
-    // ===================================
-    // RENDERIZAÇÃO E UI
-    // ===================================
-
-    private renderProduct(product: ProductCatalogItem): string {
-        const typeDisplay = this.getProductTypeDisplay(product.productType);
-        const priceDisplay = this.formatPrice(product.unitPrice);
-        const imageUrl = product.imageUrl || '/images/product-placeholder.png';
-
-        return `
-            <div class="product-item" data-product-id="${product.id}" data-product-type="${product.productType}">
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="${imageUrl}" alt="${product.name}" />
-                        ${product.productType !== 'Simple' ? `<span class="product-type-badge">${typeDisplay}</span>` : ''}
-                    </div>
-                    <div class="product-content">
-                        <div class="product-header">
-                            <h6 class="product-name">${product.name}</h6>
-                            ${product.sku ? `<small class="product-sku">SKU: ${product.sku}</small>` : ''}
-                        </div>
-                        ${product.description ? `<p class="product-description">${product.description}</p>` : ''}
-                        <div class="product-footer">
-                            <div class="product-price">
-                                <span class="price-value">${priceDisplay}</span>
-                                ${product.categoryName ? `<small class="product-category">${product.categoryName}</small>` : ''}
-                            </div>
-                            <button type="button" class="btn btn-primary btn-sm btn-add-to-cart" 
-                                    data-product-id="${product.id}" data-quantity="1">
-                                <i class="fas fa-plus"></i> Adicionar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    private renderProductList(products: ProductCatalogItem[]): string {
-        if (products.length === 0) {
-            return this.renderEmpty();
+    public async showGroupProductModal(productId: string, initialQuantity: number = 1): Promise<void> {
+        try {
+            console.log(`👥 Abrindo modal de grupo de produtos: ${productId}`);
+            
+            const response = await $.get(`/Order/GroupProductModal/${productId}?initialQuantity=${initialQuantity}`);
+            
+            const $modal = $('#groupProductModal');
+            $modal.find('.modal-body').html(response);
+            $modal.modal('show');
+            
+        } catch (error) {
+            console.error('❌ Erro ao abrir modal de grupo de produtos:', error);
+            this.showToast('error', 'Erro ao carregar configuração do grupo');
         }
-
-        return `
-            <div class="products-grid">
-                ${products.map(product => this.renderProduct(product)).join('')}
-            </div>
-        `;
     }
 
-    private renderPagination(data: ProductCatalogData): string {
-        if (data.totalPages <= 1) {
-            return '';
-        }
-
-        const pagination = this.calculatePagination(data);
-        
-        return `
-            <div class="catalog-pagination">
-                <div class="pagination-info">
-                    <small>${((pagination.currentPage - 1) * pagination.pageSize) + 1}-${Math.min(pagination.currentPage * pagination.pageSize, pagination.totalProducts)} de ${pagination.totalProducts}</small>
-                </div>
-                <div class="pagination-controls">
-                    <button class="btn btn-sm btn-outline-primary pagination-btn" 
-                            data-page="${pagination.currentPage - 1}" 
-                            ${!pagination.hasPreviousPage ? 'disabled' : ''}>
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <span class="pagination-current">
-                        ${pagination.currentPage} de ${pagination.totalPages}
-                    </span>
-                    <button class="btn btn-sm btn-outline-primary pagination-btn" 
-                            data-page="${pagination.currentPage + 1}" 
-                            ${!pagination.hasNextPage ? 'disabled' : ''}>
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-                <div class="pagination-size">
-                    <select id="page-size" class="form-select form-select-sm">
-                        <option value="5" ${this.config.pageSize === 5 ? 'selected' : ''}>5</option>
-                        <option value="8" ${this.config.pageSize === 8 ? 'selected' : ''}>8</option>
-                        <option value="12" ${this.config.pageSize === 12 ? 'selected' : ''}>12</option>
-                        <option value="16" ${this.config.pageSize === 16 ? 'selected' : ''}>16</option>
-                    </select>
-                </div>
-            </div>
-        `;
+    public confirmCompositeAddToCart(productId: string, config: CompositeItemConfiguration[]): void {
+        console.log(`✅ Confirmando adição de produto composto:`, { productId, config });
+        this.events.onCompositeProductConfigured?.(productId, config);
     }
 
-    private renderLoading(): string {
-        return `
-            <div class="catalog-loading">
-                <div class="loading-spinner">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando produtos...</span>
-                    </div>
-                </div>
-                <p class="loading-text">Carregando catálogo de produtos...</p>
-            </div>
-        `;
-    }
-
-    private renderEmpty(): string {
-        const searchTerm = this.state.currentSearchTerm;
-        const category = this.state.currentCategory;
-        
-        let message = 'Nenhum produto encontrado';
-        if (searchTerm) {
-            message = `Nenhum produto encontrado para "${searchTerm}"`;
-        } else if (category) {
-            message = `Nenhum produto encontrado na categoria "${category}"`;
-        }
-
-        return `
-            <div class="catalog-empty">
-                <div class="empty-icon">
-                    <i class="fas fa-search"></i>
-                </div>
-                <h5 class="empty-title">${message}</h5>
-                <p class="empty-description">Tente ajustar os filtros ou buscar por outros termos.</p>
-                ${searchTerm || category ? `
-                    <button type="button" class="btn btn-outline-primary btn-clear-filters" onclick="productCatalogManager.clearFilters()">
-                        <i class="fas fa-times"></i> Limpar Filtros
-                    </button>
-                ` : ''}
-            </div>
-        `;
-    }
-
-    private renderPagination(pagination: ProductCatalogPagination): void {
-        // Atualizar informações de paginação no footer
-        const paginationInfo = pagination.totalProducts > 0 
-            ? `${((pagination.currentPage - 1) * pagination.pageSize) + 1}-${Math.min(pagination.currentPage * pagination.pageSize, pagination.totalProducts)} de ${pagination.totalProducts}`
-            : '0-0 de 0';
-        
-        $('#pagination-range').text(paginationInfo);
-        $('#current-page').text(pagination.currentPage.toString());
-        
-        // Controles de navegação
-        $('#prev-page').prop('disabled', !pagination.hasPreviousPage);
-        $('#next-page').prop('disabled', !pagination.hasNextPage);
-        
-        // Atualizar seletor de página
-        $('#page-size').val(pagination.pageSize.toString());
-    }
-
-    private renderError(error: ProductCatalogError): string {
-        return `
-            <div class="catalog-error">
-                <div class="error-icon">
-                    <i class="fas fa-exclamation-triangle text-warning"></i>
-                </div>
-                <h5 class="error-title">Erro ao carregar produtos</h5>
-                <p class="error-message">${error.message}</p>
-                <button type="button" class="btn btn-primary btn-retry" onclick="productCatalogManager.retry()">
-                    <i class="fas fa-redo"></i> Tentar Novamente
-                </button>
-            </div>
-        `;
+    public confirmGroupAddToCart(productId: string, config: GroupItemConfiguration[]): void {
+        console.log(`✅ Confirmando adição de grupo de produtos:`, { productId, config });
+        this.events.onGroupProductConfigured?.(productId, config);
     }
 
     // ===================================
     // UTILITÁRIOS E HELPERS
     // ===================================
 
-    /**
-     * Limpa todos os filtros
-     */
-    public async clearFilters(): Promise<void> {
-        this.state.currentCategory = '';
-        this.state.currentSearchTerm = '';
-        this.state.currentPage = 1;
-
-        $('#product-search').val('');
-        this.updateCategoryTabs('');
-
-        await this.loadProducts({
-            page: 1,
-            pageSize: this.config.pageSize
-        });
-        
-        this.showToast('success', 'Filtros limpos');
-    }
-
-    /**
-     * Retry em caso de erro
-     */
-    public async retry(): Promise<void> {
-        await this.loadProducts({
-            category: this.state.currentCategory,
-            search: this.state.currentSearchTerm,
-            page: this.state.currentPage,
-            pageSize: this.config.pageSize
-        });
-    }
-
-    private updateCategoryTabs(activeCategory: string): void {
-        $('.category-chip').removeClass('active');
-        if (activeCategory) {
-            $(`.category-chip[data-category="${activeCategory}"]`).addClass('active');
-        } else {
-            $('.category-chip[data-category=""]').addClass('active');
+    private updateCatalogSummary(): void {
+        if (this.dataTable) {
+            const info = this.dataTable.page.info();
+            const summaryText = `${info.recordsDisplay} produtos encontrados`;
+            $(this.config.summarySelector).text(summaryText);
         }
     }
 
-    private showLoadingUI(): void {
-        $(this.config.productListSelector).html(this.renderLoading());
-    }
-
-    private setLoadingState(isLoading: boolean): void {
-        this.state.isLoading = isLoading;
-        this.events.onLoadingStateChanged?.(isLoading);
-    }
-
-    private handleLoadSuccess(data: ProductCatalogData): void {
-        this.state.lastLoadedData = data;
-        this.state.currentPage = data.currentPage;
-        this.state.totalProducts = data.totalProducts;
-
-        // Renderizar produtos
-        const productsHtml = this.renderProductList(data.products);
-        const paginationHtml = this.renderPagination(data);
-        
-        $(this.config.productListSelector).html(`
-            ${productsHtml}
-            ${paginationHtml}
-        `);
-    }
-
-    private handleLoadError(error: any): void {
-        const catalogError: ProductCatalogError = {
-            code: 'LOAD_ERROR',
-            message: typeof error === 'string' ? error : 'Erro ao carregar produtos',
-            details: error,
-            timestamp: new Date()
-        };
-
-        $(this.config.productListSelector).html(this.renderError(catalogError));
-        this.handleError(catalogError);
-    }
-
-    private handleError(error: ProductCatalogError): void {
-        console.error('ProductCatalogManager Error:', error);
-        this.events.onError?.(error);
-    }
-
-    // ===================================
-    // CACHE E PERFORMANCE
-    // ===================================
-
-    private generateCacheKey(filters: ProductCatalogFilters): string {
-        return `catalog_${filters.category || 'all'}_${filters.search || 'none'}_${filters.page}_${filters.pageSize}`;
-    }
-
-    private getCachedData(key: string): ProductCatalogCache | null {
-        const cached = this.cache.get(key);
-        if (cached && cached.expiry > Date.now()) {
-            return cached;
-        }
-        return null;
-    }
-
-    private setCachedData(key: string, data: ProductCatalogData): void {
-        const expiry = Date.now() + (5 * 60 * 1000); // Cache por 5 minutos
-
-        this.cache.set(key, {
-            key,
-            data,
-            timestamp: Date.now(),
-            expiry
-        });
-    }
-
-    // ===================================
-    // FORMATADORES E UTILITÁRIOS
-    // ===================================
-
-    private getProductTypeDisplay(type: ProductType): string {
-        switch (type) {
-            case 'simples':
-                return 'Simples';
-            case 'montagem':
-                return 'Montagem';
-            default:
-                return 'Produto';
-        }
-    }
-
-    private formatPrice(price: number): string {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(price);
-    }
-
-    private calculatePagination(data: ProductCatalogData): ProductCatalogPagination {
-        const startItem = ((data.currentPage - 1) * this.config.pageSize) + 1;
-        const endItem = Math.min(data.currentPage * this.config.pageSize, data.totalProducts);
-        
-        return {
-            currentPage: data.currentPage,
-            totalPages: data.totalPages,
-            pageSize: this.config.pageSize,
-            totalProducts: data.totalProducts,
-            hasNextPage: data.hasNextPage,
-            hasPreviousPage: data.hasPreviousPage,
-            startItem,
-            endItem
-        };
-    }
-
-    private findProductById(productId: string): ProductCatalogItem | undefined {
-        return this.state.lastLoadedData?.products.find(p => p.id === productId);
-    }
-
-    /**
-     * Converte string do tipo de produto para enum
-     */
-    private parseProductType(productTypeString: string): ProductType {
-        switch (productTypeString?.toLowerCase()) {
-            case 'simple':
-                return 'simples';
-            case 'composite':
-            case 'group':
-                return 'montagem';
-            default:
-                return 'simples';
-        }
-    }
-
-    private showToast(type: 'success' | 'error' | 'warning' | 'info', message: string): void {
+    private showToast(type: string, message: string): void {
         if (typeof toastr !== 'undefined') {
-            toastr[type](message);
+            (toastr as any)[type](message);
         } else {
-            console.log(`[${type.toUpperCase()}] ${message}`);
+            console.log(`Toast ${type}: ${message}`);
         }
     }
 
     // ===================================
-    // CLEANUP E DESTRUIÇÃO
+    // GERENCIAMENTO DE ESTADO
     // ===================================
 
-    /**
-     * Limpa recursos e remove event listeners
-     */
-    public destroy(): void {
-        this.unbindEvents();
-        this.cache.clear();
-        
-        if (this.debounceTimer !== null) {
-            clearTimeout(this.debounceTimer);
-            this.debounceTimer = null;
-        }
-
-        console.log('ProductCatalogManager: Recursos limpos');
-    }
-
-    // ===================================
-    // GERENCIAMENTO DE ESTADO POR ABA
-    // ===================================
-
-    /**
-     * Salva o estado atual para uma aba específica
-     */
-    public saveStateForOrder(orderId: string): void {
-        if (!orderId) return;
-
-        const currentState: SavedCatalogState = {
+    private saveStateForOrder(orderId: string): void {
+        this.stateManager.saveState(orderId, {
             orderId: orderId,
             category: this.state.currentCategory,
             searchTerm: this.state.currentSearchTerm,
             currentPage: this.state.currentPage,
-            pageSize: this.config.pageSize,
-            timestamp: Date.now(),
-            totalProducts: this.state.totalProducts,
-            totalPages: this.state.totalPages || 1,
-            scrollPosition: ($(this.config.productListSelector) as any).scrollTop() || 0
-        };
-
-        // Salvar no Map
-        this.stateManager.savedStates.set(orderId, currentState);
-
-        // Limitar número de estados em memória
-        if (this.stateManager.savedStates.size > this.stateManager.maxStates) {
-            const oldestKey = Array.from(this.stateManager.savedStates.keys())[0];
-            this.stateManager.savedStates.delete(oldestKey);
-        }
-
-        // Persistir se habilitado
-        if (this.stateManager.persistToStorage) {
-            this.persistStatesToStorage();
-        }
-
-        if (this.contextConfig.debugMode) {
-            console.log(`💾 Estado salvo para pedido ${orderId}:`, currentState);
-        }
-    }
-
-    /**
-     * Carrega estado salvo para uma aba específica
-     */
-    public async loadStateForOrder(orderId: string): Promise<boolean> {
-        if (!orderId) return false;
-
-        const savedState = this.stateManager.savedStates.get(orderId);
-        if (!savedState) {
-            if (this.contextConfig.debugMode) {
-                console.log(`📭 Nenhum estado salvo encontrado para pedido ${orderId}`);
-            }
-            return false;
-        }
-
-        // Restaurar estado
-        this.state.currentCategory = savedState.category;
-        this.state.currentSearchTerm = savedState.searchTerm;
-        this.state.currentPage = savedState.currentPage;
-        this.config.pageSize = savedState.pageSize;
-        this.state.totalProducts = savedState.totalProducts || 0;
-        this.state.totalPages = savedState.totalPages || 1;
-
-        // Atualizar UI
-        $('#product-search').val(savedState.searchTerm);
-        this.updateCategoryTabs(savedState.category);
-
-        // Recarregar produtos com filtros restaurados
-        await this.loadProducts({
-            category: savedState.category,
-            search: savedState.searchTerm,
-            page: savedState.currentPage,
-            pageSize: savedState.pageSize
-        });
-
-        // Restaurar posição de scroll
-        setTimeout(() => {
-            if (savedState.scrollPosition) {
-                ($(this.config.productListSelector) as any).scrollTop(savedState.scrollPosition);
-            }
-        }, 100);
-
-        if (this.contextConfig.debugMode) {
-            console.log(`📂 Estado restaurado para pedido ${orderId}:`, savedState);
-        }
-
-        return true;
-    }
-
-    /**
-     * Troca contexto entre abas (salva atual + carrega novo)
-     */
-    public async switchContext(newOrderId: string): Promise<ContextChangeEvent> {
-        const previousOrderId = this.stateManager.currentOrderId;
-
-        // Salvar estado atual se existir
-        if (previousOrderId) {
-            this.saveStateForOrder(previousOrderId);
-        }
-
-        // Atualizar OrderId atual
-        this.stateManager.currentOrderId = newOrderId;
-        this.state.orderId = newOrderId;
-
-        // Tentar carregar estado salvo
-        const stateRestored = await this.loadStateForOrder(newOrderId);
-
-        // Se não há estado salvo, resetar para padrões
-        if (!stateRestored) {
-            await this.resetToDefaults();
-        }
-
-        const contextEvent: ContextChangeEvent = {
-            previousOrderId,
-            newOrderId,
-            stateRestored,
+            pageSize: 10,
             timestamp: Date.now()
-        };
-
-        if (this.contextConfig.debugMode) {
-            console.log(`🔄 Contexto alterado:`, contextEvent);
-        }
-
-        return contextEvent;
-    }
-
-    /**
-     * Reseta catálogo para valores padrão
-     */
-    public async resetToDefaults(): Promise<void> {
-        this.state.currentCategory = '';
-        this.state.currentSearchTerm = '';
-        this.state.currentPage = 1;
-        this.config.pageSize = 8;
-
-        $('#product-search').val('');
-        this.updateCategoryTabs('');
-
-        await this.loadProducts({
-            page: 1,
-            pageSize: this.config.pageSize
         });
     }
 
-    /**
-     * Limpa estado salvo de uma aba específica
-     */
-    public clearStateForOrder(orderId: string): void {
-        if (!orderId) return;
-
-        this.stateManager.savedStates.delete(orderId);
-
-        if (this.stateManager.persistToStorage) {
-            this.persistStatesToStorage();
-        }
-
-        if (this.contextConfig.debugMode) {
-            console.log(`🗑️ Estado removido para pedido ${orderId}`);
+    private loadStateForOrder(orderId: string): void {
+        const savedState = this.stateManager.loadState(orderId);
+        if (savedState) {
+            this.state.currentCategory = savedState.category || '';
+            this.state.currentSearchTerm = savedState.searchTerm || '';
+            
+            // Atualizar UI com estado salvo
+            $(this.config.categoryFiltersSelector).removeClass('active');
+            $(`[data-category="${this.state.currentCategory}"]`).addClass('active');
         }
     }
 
-    /**
-     * Persiste estados no localStorage
-     */
-    private persistStatesToStorage(): void {
-        if (!this.contextConfig.enablePersistence) return;
+    // ===================================
+    // INTERFACE PÚBLICA (Compatibilidade OrderManager)
+    // ===================================
 
-        try {
-            const statesArray = Array.from(this.stateManager.savedStates.entries());
-            const serialized = JSON.stringify(statesArray);
-            localStorage.setItem(this.contextConfig.storageKey, serialized);
-
-            if (this.contextConfig.debugMode) {
-                console.log(`💾 ${statesArray.length} estados persistidos no localStorage`);
-            }
-        } catch (error) {
-            console.error('Erro ao persistir estados:', error);
-        }
-    }
-
-    /**
-     * Carrega estados persistidos do localStorage
-     */
-    private loadPersistedStates(): void {
-        if (!this.contextConfig.enablePersistence) return;
-
-        try {
-            const serialized = localStorage.getItem(this.contextConfig.storageKey);
-            if (serialized) {
-                const statesArray: [string, SavedCatalogState][] = JSON.parse(serialized);
-                this.stateManager.savedStates = new Map(statesArray);
-
-                if (this.contextConfig.debugMode) {
-                    console.log(`📂 ${statesArray.length} estados carregados do localStorage`);
-                }
-            }
-        } catch (error) {
-            console.error('Erro ao carregar estados persistidos:', error);
-            this.stateManager.savedStates.clear();
-        }
-    }
-
-    /**
-     * Mostra catálogo lateral (slide in)
-     */
     public showCatalog(orderId: string): void {
-        if (this.slideControl.isAnimating) return;
-
-        this.slideControl.isAnimating = true;
-        this.slideControl.currentOrderId = orderId;
-        this.slideControl.slideDirection = 'in';
-
-        // Trocar contexto
-        this.switchContext(orderId);
-
-        // Animar slide
-        $('#orderWorkspace').addClass('catalog-active');
-        
-        setTimeout(() => {
-            this.slideControl.isVisible = true;
-            this.slideControl.isAnimating = false;
-        }, 400);
-
-        if (this.contextConfig.debugMode) {
-            console.log(`👁️ Catálogo exibido para pedido ${orderId}`);
-        }
-    }
-
-    /**
-     * Esconde catálogo lateral (slide out)
-     */
-    public hideCatalog(): void {
-        if (this.slideControl.isAnimating) return;
-
-        this.slideControl.isAnimating = true;
-        this.slideControl.slideDirection = 'out';
-
-        // Salvar estado atual antes de esconder
-        if (this.stateManager.currentOrderId) {
-            this.saveStateForOrder(this.stateManager.currentOrderId);
-        }
-
-        // Animar slide
-        $('#orderWorkspace').removeClass('catalog-active');
-        
-        setTimeout(() => {
-            this.slideControl.isVisible = false;
-            this.slideControl.isAnimating = false;
-            this.slideControl.currentOrderId = null;
-            this.stateManager.currentOrderId = null;
-        }, 400);
-
-        if (this.contextConfig.debugMode) {
-            console.log(`🙈 Catálogo escondido`);
-        }
-    }
-
-    /**
-     * Alterna visibilidade do catálogo
-     */
-    public toggleCatalog(orderId?: string): void {
-        if (this.slideControl.isVisible) {
-            this.hideCatalog();
-        } else {
-            // Usar orderId fornecido ou orderId atual
-            const targetOrderId = orderId || this.stateManager.currentOrderId;
-            if (targetOrderId) {
-                this.showCatalog(targetOrderId);
-            } else {
-                console.warn('⚠️ Nenhum pedido ativo para mostrar catálogo');
-                this.showToast('warning', 'Abra um pedido para visualizar o catálogo');
+        try {
+            // Inicializar se necessário
+            if (!this.dataTable || this.state.orderId !== orderId) {
+                console.log(`👁️ Inicializando catálogo para pedido: ${orderId}`);
+                this.init(orderId);
             }
+            
+            // Mostrar sidebar
+            this.showCatalogSidebar();
+        } catch (error) {
+            console.error('❌ Erro em showCatalog:', error);
+            this.showToast('error', 'Erro ao mostrar catálogo de produtos');
         }
     }
 
-    /**
-     * Obtém estados salvos (para debug)
-     */
-    public getSavedStates(): Map<string, SavedCatalogState> {
-        return this.stateManager.savedStates;
+    public hideCatalog(): void {
+        $('#orderWorkspace').removeClass('catalog-active');
     }
 
-    /**
-     * Limpa todos os estados salvos
-     */
-    public clearAllStates(): void {
-        this.stateManager.savedStates.clear();
+    public toggleCatalog(orderId?: string): void {
+        const workspace = $('#orderWorkspace');
+        if (workspace.hasClass('catalog-active')) {
+            this.hideCatalog();
+        } else if (orderId || this.state.orderId) {
+            this.showCatalog(orderId || this.state.orderId!);
+        }
+    }
+
+    public showCatalogSidebar(): void {
+        $('#orderWorkspace').addClass('catalog-active');
+    }
+
+    public async switchContext(orderId: string): Promise<void> {
+        // Se já estamos no contexto correto, não fazer nada
+        if (this.state.orderId === orderId && this.dataTable) {
+            console.log(`✅ Já no contexto correto para pedido: ${orderId}`);
+            this.showCatalogSidebar();
+            return;
+        }
+
+        try {
+            // Salvar estado atual se existe um orderId ativo e diferente
+            if (this.state.orderId && this.state.orderId !== orderId) {
+                this.saveStateForOrder(this.state.orderId);
+            }
+            
+            // Se DataTable não está inicializada, inicializar primeiro
+            if (!this.dataTable) {
+                console.log(`🏗️ DataTable não inicializada, chamando init() para pedido: ${orderId}`);
+                await this.init(orderId);
+                return; // init() já configura tudo necessário
+            }
+            
+            // Mudar para o novo contexto
+            this.state.orderId = orderId;
+            
+            // Carregar estado salvo para este pedido (se existir)
+            this.loadStateForOrder(orderId);
+            
+            // Recarregar catálogo para o novo contexto (server-side)
+            await this.loadCatalogData(orderId);
+            
+            // Mostrar a sidebar do catálogo
+            this.showCatalogSidebar();
+            
+        } catch (error) {
+            console.error('❌ Erro em switchContext:', error);
+            this.showToast('error', 'Erro ao trocar contexto do catálogo');
+        }
+    }
+
+    public clearStateForOrder(orderId: string): void {
+        console.log(`🧹 Limpando estado para pedido ${orderId}`);
+        this.stateManager.clearState(orderId);
         
-        if (this.contextConfig.enablePersistence) {
-            localStorage.removeItem(this.contextConfig.storageKey);
-        }
-
-        if (this.contextConfig.debugMode) {
-            console.log(`🧹 Todos os estados foram limpos`);
+        if (this.state.orderId === orderId) {
+            this.state.currentCategory = '';
+            this.state.currentSearchTerm = '';
         }
     }
 }
 
 // ===================================
-// INSTÂNCIA GLOBAL E INICIALIZAÇÃO
+// STATE MANAGER (Reutilizado)
 // ===================================
+class CatalogStateManager {
+    public currentOrderId: string | null = null;
+    private readonly STORAGE_KEY = 'product_catalog_state';
 
-// Instância global mantendo compatibilidade
-const productCatalogManager = new ProductCatalogManager();
+    public saveState(orderId: string, state: SavedCatalogState): void {
+        try {
+            const allStates = this.getAllStates();
+            allStates[orderId] = state;
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(allStates));
+        } catch (error) {
+            console.warn('⚠️ Erro ao salvar estado do catálogo:', error);
+        }
+    }
 
-// Disponibilizar globalmente
-(window as any).productCatalogManager = productCatalogManager;
+    public loadState(orderId: string): SavedCatalogState | null {
+        try {
+            const allStates = this.getAllStates();
+            return allStates[orderId] || null;
+        } catch (error) {
+            console.warn('⚠️ Erro ao carregar estado do catálogo:', error);
+            return null;
+        }
+    }
 
-// Auto-inicialização removida - será feita pelo OrderManager
-// quando a view de edição for carregada via AJAX
+    public clearState(orderId: string): void {
+        try {
+            const allStates = this.getAllStates();
+            delete allStates[orderId];
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(allStates));
+        } catch (error) {
+            console.warn('⚠️ Erro ao limpar estado do catálogo:', error);
+        }
+    }
+
+    private getAllStates(): { [orderId: string]: SavedCatalogState } {
+        try {
+            const stored = localStorage.getItem(this.STORAGE_KEY);
+            return stored ? JSON.parse(stored) : {};
+        } catch (error) {
+            console.warn('⚠️ Erro ao ler estados do localStorage:', error);
+            return {};
+        }
+    }
+}
+
+// ===================================
+// EXPOSIÇÃO GLOBAL
+// ===================================
+if (typeof window !== 'undefined') {
+    (window as any).productCatalogManager = new ProductCatalogManager();
+    console.log('🏗️ ProductCatalogManager inicializado (padrão _Grid.cshtml)');
+}

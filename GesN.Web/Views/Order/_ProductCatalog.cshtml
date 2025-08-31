@@ -1,90 +1,167 @@
 @model GesN.Web.Models.ViewModels.Production.ProductCatalogViewModel
 
-<div class="product-catalog-modern">
-    <!-- Header Moderno -->
-    <div class="catalog-header-modern">
+<div class="product-catalog-datatables">
+    <!-- Header com Filtros -->
+    <div class="catalog-header">
         <div class="header-content">
             <h5 class="catalog-title">
                 <i class="fas fa-store"></i> Catálogo De Produtos
             </h5>
-            <div class="catalog-quick-search">
-                <div class="search-input-group">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="form-control search-input" id="product-search" 
-                           placeholder="Buscar produtos..." autocomplete="off">
-                    <button class="btn btn-search" type="button" id="search-btn">
-                        <i class="fas fa-arrow-right"></i>
+        </div>
+    </div>
+    
+    <!-- Filtros de Categoria -->
+    <div class="catalog-filters mb-3">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="btn-group category-filters" role="group">
+                    <button type="button" class="btn btn-outline-primary active category-filter" data-category="">
+                        <i class="fas fa-th-large"></i> Todos
+                    </button>
+                    <button type="button" class="btn btn-outline-primary category-filter" data-category="bolos">
+                        <i class="fas fa-birthday-cake"></i> Bolos
+                    </button>
+                    <button type="button" class="btn btn-outline-primary category-filter" data-category="salgados">
+                        <i class="fas fa-drumstick-bite"></i> Salgados
+                    </button>
+                    <button type="button" class="btn btn-outline-primary category-filter" data-category="doces">
+                        <i class="fas fa-candy-cane"></i> Doces
+                    </button>
+                    <button type="button" class="btn btn-outline-primary category-filter" data-category="kits">
+                        <i class="fas fa-gift"></i> Kits
+                    </button>
+                    <button type="button" class="btn btn-outline-primary category-filter" data-category="servicos">
+                        <i class="fas fa-tools"></i> Serviços
                     </button>
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <!-- Categorias Compactas -->
-    <div class="catalog-categories">
-        <div class="categories-scroll" id="categoryTabs">
-            <button class="category-chip active" data-category="" data-category-name="Todos">
-                <i class="fas fa-th-large"></i> Todos
-            </button>
-            <button class="category-chip" data-category="bolos" data-category-name="Bolos">
-                <i class="fas fa-birthday-cake"></i> Bolos
-            </button>
-            <button class="category-chip" data-category="salgados" data-category-name="Salgados">
-                <i class="fas fa-drumstick-bite"></i> Salgados
-            </button>
-            <button class="category-chip" data-category="doces" data-category-name="Doces">
-                <i class="fas fa-candy-cane"></i> Doces
-            </button>
-            <button class="category-chip" data-category="kits" data-category-name="Kits">
-                <i class="fas fa-gift"></i> Kits
-            </button>
-            <button class="category-chip" data-category="cardapios" data-category-name="Cardápios">
-                <i class="fas fa-book-open"></i> Cardápios
-            </button>
-            <button class="category-chip" data-category="servicos" data-category-name="Serviços">
-                <i class="fas fa-tools"></i> Serviços
-            </button>
-            <button class="category-chip" data-category="terceirizados" data-category-name="Terceirizados">
-                <i class="fas fa-handshake"></i> Terceirizados
-            </button>
-        </div>
-    </div>
-    
-    <!-- Lista de Produtos Moderna -->
-    <div class="catalog-products-area">
-        <div id="products-list" class="products-list-modern">
-            <div class="products-loading">
-                <div class="loading-spinner-modern">
-                    <div class="spinner"></div>
+            <div class="col-md-4">
+                <div class="catalog-summary">
+                    <small class="text-muted" id="catalog-summary">
+                        @if (Model.Products?.Any() == true)
+                        {
+                            @($"{Model.Products.Count()} produtos encontrados")
+                        }
+                        else
+                        {
+                            @("Nenhum produto encontrado")
+                        }
+                    </small>
                 </div>
-                <p class="loading-text">Carregando produtos...</p>
             </div>
         </div>
     </div>
     
-    <!-- Footer com Paginação -->
-    <div class="catalog-footer-modern">
-        <div class="pagination-modern">
-            <div class="pagination-info">
-                <small class="text-muted" id="pagination-range">Carregando...</small>
-            </div>
-            <div class="pagination-controls">
-                <button type="button" class="btn btn-pagination" id="prev-page" disabled>
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <span class="pagination-current" id="current-page">1</span>
-                <button type="button" class="btn btn-pagination" id="next-page">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-            <div class="pagination-size">
-                <select class="form-select form-select-sm" id="page-size">
-                    <option value="5">5</option>
-                    <option value="8" selected>8</option>
-                    <option value="12">12</option>
-                    <option value="16">16</option>
-                </select>
-            </div>
+    <!-- Tabela de Produtos com Datatables -->
+    <div class="catalog-table-container">
+        <div class="table-responsive">
+            <table class="table table-hover" id="productCatalogTable">
+                <thead class="table-light">
+                    <tr>
+                        @* <th width="80">SKU</th> *@
+                        <th width="170">Produto</th>
+                        <th width="100">Tipo</th>
+                        @* <th width="120">Categoria</th> *@
+                        <th width="100">Preço</th>
+                        <th width="80">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="productCatalogTableBody">
+                    @if (Model.Products?.Any() == true)
+                    {
+                        @foreach (var product in Model.Products)
+                        {
+                            <tr data-product-id="@product.Id">
+                                @* <td>
+                                    @if (!string.IsNullOrWhiteSpace(product.SKU))
+                                    {
+                                        <code class="text-primary">@product.SKU</code>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td> *@
+                                <td>
+                                    <div>
+                                        <strong>@product.Name</strong>
+                                        @if (!string.IsNullOrWhiteSpace(product.Category))
+                                        {
+                                            @* <br><small class="text-muted">@product.Description</small> *@
+                                            <br><small class="text-muted">@(product.Category)</small>
+
+                                            
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    @{
+                                        var typeClass = product.ProductType switch
+                                        {
+                                            GesN.Web.Models.Enumerators.ProductType.Simple => "bg-primary",
+                                            GesN.Web.Models.Enumerators.ProductType.Composite => "bg-info", 
+                                            GesN.Web.Models.Enumerators.ProductType.Group => "bg-success",
+                                            _ => "bg-secondary"
+                                        };
+                                        var typeDisplay = product.ProductType switch
+                                        {
+                                            GesN.Web.Models.Enumerators.ProductType.Simple => "Simples",
+                                            GesN.Web.Models.Enumerators.ProductType.Composite => "Composto", 
+                                            GesN.Web.Models.Enumerators.ProductType.Group => "Grupo",
+                                            _ => "Desconhecido"
+                                        };
+                                    }
+                                    <span class="badge @typeClass">@typeDisplay</span>
+                                </td>
+                                @* <td>@(product.Category ?? "Sem categoria")</td> *@
+                                <td class="text-end">@product.Price.ToString("C")</td>
+                                <td>
+                                    @if (product.ProductType == GesN.Web.Models.Enumerators.ProductType.Simple)
+                                    {
+                                        <button class="btn btn-sm btn-success btn-add-simple" 
+                                                data-product-id="@product.Id" 
+                                                data-product-name="@product.Name"
+                                                title="Adicionar produto simples">
+                                            <i class="bi bi-add"></i>
+                                        </button>
+                                    }
+                                    else if (product.ProductType == GesN.Web.Models.Enumerators.ProductType.Composite)
+                                    {
+                                        <button class="btn btn-sm btn-info btn-configure-composite" 
+                                                data-product-id="@product.Id" 
+                                                data-product-name="@product.Name"
+                                                title="Configurar produto composto">
+                                            <i class="bi bi-add"></i>
+                                        </button>
+                                    }
+                                    else if (product.ProductType == GesN.Web.Models.Enumerators.ProductType.Group)
+                                    {
+                                        <button class="btn btn-sm btn-warning btn-configure-group" 
+                                                data-product-id="@product.Id" 
+                                                data-product-name="@product.Name"
+                                                title="Configurar grupo de produtos">
+                                            <i class="bi bi-add"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                                        <tr>
+                    <td colspan="4" class="text-center text-muted py-4">
+                        <i class="fas fa-box-open display-4 mb-3"></i>
+                        <br>Nenhum produto encontrado
+                    </td>
+                </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

@@ -1,26 +1,26 @@
-# 🛒 EVENT STORMING - DOMÍNIO DE COMPRAS
+﻿# ðŸ›’ EVENT STORMING - DOMÃNIO DE COMPRAS
 
-## 🎯 Visão Geral
-Event Storming do Domínio de Compras mapeando desde a gestão de fornecedores até o processamento inteligente de notas fiscais com IA, incluindo controle de estoque de ingredientes, alertas automáticos de reposição, e integrações críticas com Produção e Financeiro.
+## ðŸŽ¯ VisÃ£o Geral
+Event Storming do DomÃ­nio de Compras mapeando desde a gestÃ£o de fornecedores atÃ© o processamento inteligente de notas fiscais com IA, incluindo controle de estoque de ingredientes, alertas automÃ¡ticos de reposiÃ§Ã£o, e integraÃ§Ãµes crÃ­ticas com ProduÃ§Ã£o e Financeiro.
 
-## 🎨 Convenções Visuais
-- **📋 [Comando]** - Azul - Ação executada por usuário/sistema
-- **⚡ Evento** - Laranja - Fato que aconteceu no domínio
-- **👤 (Ator)** - Verde - Quem executa o comando
-- **📊 {Agregado}** - Roxo - Entidade que processa comando
-- **🔄 Política** - Cinza - Regra "quando X então Y"
-- **⚠️ (!Hotspot!)** - Rosa - Complexidade/problema identificado
-- **🤖 <IA Service>** - Rosa - Processamento com inteligência artificial
-- **🌐 <Sistema Externo>** - Vermelho - Integração externa
+## ðŸŽ¨ ConvenÃ§Ãµes Visuais
+- **ðŸ“‹ [Comando]** - Azul - AÃ§Ã£o executada por usuÃ¡rio/sistema
+- **âš¡ Evento** - Laranja - Fato que aconteceu no domÃ­nio
+- **ðŸ‘¤ (Ator)** - Verde - Quem executa o comando
+- **ðŸ“Š {Agregado}** - Roxo - Entidade que processa comando
+- **ðŸ”„ PolÃ­tica** - Cinza - Regra "quando X entÃ£o Y"
+- **âš ï¸ (!Hotspot!)** - Rosa - Complexidade/problema identificado
+- **ðŸ¤– <IA Service>** - Rosa - Processamento com inteligÃªncia artificial
+- **ðŸŒ <Sistema Externo>** - Vermelho - IntegraÃ§Ã£o externa
 
-## ⚡ Event Storming Timeline
+## âš¡ Event Storming Timeline
 
-### **🔄 Fluxo Principal - Gestão de Compras**
+### **ðŸ”„ Fluxo Principal - GestÃ£o de Compras**
 
 ```mermaid
 journey
     title Purchasing Domain Event Timeline
-    section Criação Manual
+    section CriaÃ§Ã£o Manual
       Operador inicia compra               : 4: Operador
       [CreatePurchaseOrder]                : 3: Sistema
       PurchaseOrderCreated                 : 5: Sistema
@@ -40,7 +40,7 @@ journey
       [MapExtractedData]                   : 3: Sistema
       PurchaseDataMapped                   : 5: Sistema
       
-    section Finalização
+    section FinalizaÃ§Ã£o
       [ConfirmPurchaseOrder]               : 4: Operador
       PurchaseOrderConfirmed               : 5: Sistema
       [SendToSupplier]                     : 4: Sistema
@@ -55,710 +55,710 @@ journey
       SupplierPerformanceUpdated           : 5: Sistema
 ```
 
-### **📋 Comandos por Ator**
+### **ðŸ“‹ Comandos por Ator**
 
-#### **⚙️ Operadores (Purchasing Team)**
+#### **âš™ï¸ Operadores (Purchasing Team)**
 ```
 [CreatePurchaseOrder]
-├── Input: PurchaseType (Manual/AI), InitialData, Priority
-├── Validations: Valid purchase type, Required fields
-├── Output: PurchaseOrderId
-└── Events: PurchaseOrderCreated
+â”œâ”€â”€ Input: PurchaseType (Manual/AI), InitialData, Priority
+â”œâ”€â”€ Validations: Valid purchase type, Required fields
+â”œâ”€â”€ Output: PurchaseOrderId
+â””â”€â”€ Events: PurchaseOrderCreated
 
 [AddSupplier]
-├── Input: SupplierData or SupplierId
-├── Validations: Supplier active, Not blocked, Valid data
-├── Integration: Supplier performance check
-└── Events: SupplierAdded, SupplierLinkedToPurchase
+â”œâ”€â”€ Input: SupplierData or SupplierId
+â”œâ”€â”€ Validations: Supplier active, Not blocked, Valid data
+â”œâ”€â”€ Integration: Supplier performance check
+â””â”€â”€ Events: SupplierAdded, SupplierLinkedToPurchase
 
 [AddIngredientItem]
-├── Input: IngredientId, Quantity, UnitPrice, Notes
-├── Validations: Ingredient exists, Quantity > 0, Price >= 0
-├── Calculation: Line total = Quantity * UnitPrice
-└── Events: IngredientItemAdded, PurchaseTotalRecalculated
+â”œâ”€â”€ Input: IngredientId, Quantity, UnitPrice, Notes
+â”œâ”€â”€ Validations: Ingredient exists, Quantity > 0, Price >= 0
+â”œâ”€â”€ Calculation: Line total = Quantity * UnitPrice
+â””â”€â”€ Events: IngredientItemAdded, PurchaseTotalRecalculated
 
 [RemoveIngredientItem]
-├── Input: ItemId, RemovalReason
-├── Validations: Item exists, Purchase not confirmed
-├── Cleanup: Recalculate purchase total
-└── Events: IngredientItemRemoved, PurchaseTotalRecalculated
+â”œâ”€â”€ Input: ItemId, RemovalReason
+â”œâ”€â”€ Validations: Item exists, Purchase not confirmed
+â”œâ”€â”€ Cleanup: Recalculate purchase total
+â””â”€â”€ Events: IngredientItemRemoved, PurchaseTotalRecalculated
 
 [UpdateIngredientItem]
-├── Input: ItemId, NewQuantity, NewPrice, UpdateReason
-├── Validations: Purchase editable, Valid values
-├── Recalculation: Update line total and purchase total
-└── Events: IngredientItemUpdated, PurchaseTotalRecalculated
+â”œâ”€â”€ Input: ItemId, NewQuantity, NewPrice, UpdateReason
+â”œâ”€â”€ Validations: Purchase editable, Valid values
+â”œâ”€â”€ Recalculation: Update line total and purchase total
+â””â”€â”€ Events: IngredientItemUpdated, PurchaseTotalRecalculated
 
 [UploadFiscalDocument]
-├── Input: PurchaseOrderId, DocumentFile (PDF/Image), DocumentType
-├── Validations: Valid file format, File size limits, Not duplicate
-├── Storage: Store document in file system
-└── Events: FiscalDocumentUploaded
+â”œâ”€â”€ Input: PurchaseOrderId, DocumentFile (PDF/Image), DocumentType
+â”œâ”€â”€ Validations: Valid file format, File size limits, Not duplicate
+â”œâ”€â”€ Storage: Store document in file system
+â””â”€â”€ Events: FiscalDocumentUploaded
 
 [ValidateExtractedData]
-├── Input: ExtractionId, ValidationResults, Corrections
-├── Complex validation: Human review of AI extraction
-├── Data correction: Manual fixes to AI extracted data
-└── Events: AIDataValidated, AIDataCorrected (if needed)
+â”œâ”€â”€ Input: ExtractionId, ValidationResults, Corrections
+â”œâ”€â”€ Complex validation: Human review of AI extraction
+â”œâ”€â”€ Data correction: Manual fixes to AI extracted data
+â””â”€â”€ Events: AIDataValidated, AIDataCorrected (if needed)
 
 [ConfirmPurchaseOrder]
-├── Input: PurchaseOrderId, FinalReview, PaymentTerms
-├── Validations: All items valid, Supplier confirmed, Budget approved
-├── Complex validation: Business rules, Budget limits
-└── Events: PurchaseOrderConfirmed
+â”œâ”€â”€ Input: PurchaseOrderId, FinalReview, PaymentTerms
+â”œâ”€â”€ Validations: All items valid, Supplier confirmed, Budget approved
+â”œâ”€â”€ Complex validation: Business rules, Budget limits
+â””â”€â”€ Events: PurchaseOrderConfirmed
 
 [SendToSupplier]
-├── Input: PurchaseOrderId, DeliveryDetails, SpecialInstructions
-├── Validations: Purchase confirmed, Supplier contact valid
-├── Communication: Email/system integration to supplier
-└── Events: PurchaseOrderSent, SupplierNotified
+â”œâ”€â”€ Input: PurchaseOrderId, DeliveryDetails, SpecialInstructions
+â”œâ”€â”€ Validations: Purchase confirmed, Supplier contact valid
+â”œâ”€â”€ Communication: Email/system integration to supplier
+â””â”€â”€ Events: PurchaseOrderSent, SupplierNotified
 
 [ReceivePurchaseOrder]
-├── Input: PurchaseOrderId, ReceivedItems[], ActualQuantities[], QualityNotes
-├── Validations: Received quantities <= ordered quantities
-├── Complex processing: Partial receipts, Quality control
-└── Events: PurchaseOrderReceived, IngredientStockUpdated
+â”œâ”€â”€ Input: PurchaseOrderId, ReceivedItems[], ActualQuantities[], QualityNotes
+â”œâ”€â”€ Validations: Received quantities <= ordered quantities
+â”œâ”€â”€ Complex processing: Partial receipts, Quality control
+â””â”€â”€ Events: PurchaseOrderReceived, IngredientStockUpdated
 
 [RejectDelivery]
-├── Input: PurchaseOrderId, RejectionReason, RejectedItems[]
-├── Validations: Valid rejection reason, Items match order
-├── Complex logic: Partial rejections, Quality issues
-└── Events: DeliveryRejected, SupplierPerformanceImpacted
+â”œâ”€â”€ Input: PurchaseOrderId, RejectionReason, RejectedItems[]
+â”œâ”€â”€ Validations: Valid rejection reason, Items match order
+â”œâ”€â”€ Complex logic: Partial rejections, Quality issues
+â””â”€â”€ Events: DeliveryRejected, SupplierPerformanceImpacted
 
 [ApprovePurchasePayment]
-├── Input: PurchaseOrderId, ApprovalNotes, PaymentSchedule
-├── Validations: Purchase received, Budget available
-├── Financial trigger: Create AccountPayable
-└── Events: PaymentApproved, AccountPayableCreated
+â”œâ”€â”€ Input: PurchaseOrderId, ApprovalNotes, PaymentSchedule
+â”œâ”€â”€ Validations: Purchase received, Budget available
+â”œâ”€â”€ Financial trigger: Create AccountPayable
+â””â”€â”€ Events: PaymentApproved, AccountPayableCreated
 
 [ManageSupplier]
-├── Input: SupplierData, Action (Create/Update/Block/Activate)
-├── Validations: Valid supplier data, Action permissions
-├── Complex logic: Supplier evaluation, Performance tracking
-└── Events: SupplierCreated/Updated/Blocked/Activated
+â”œâ”€â”€ Input: SupplierData, Action (Create/Update/Block/Activate)
+â”œâ”€â”€ Validations: Valid supplier data, Action permissions
+â”œâ”€â”€ Complex logic: Supplier evaluation, Performance tracking
+â””â”€â”€ Events: SupplierCreated/Updated/Blocked/Activated
 ```
 
-#### **🤖 Sistema (IA Processing)**
+#### **ðŸ¤– Sistema (IA Processing)**
 ```
 [ProcessDocumentWithAI]
-├── Trigger: FiscalDocumentUploaded
-├── Input: DocumentFile, DocumentType
-├── AI Pipeline: OCR → ML Classification → Data Extraction
-├── Complex processing: Document type detection, Entity recognition
-├── Output: ExtractedData, ConfidenceScores
-└── Events: DocumentOCRCompleted, DataExtractionCompleted
+â”œâ”€â”€ Trigger: FiscalDocumentUploaded
+â”œâ”€â”€ Input: DocumentFile, DocumentType
+â”œâ”€â”€ AI Pipeline: OCR â†’ ML Classification â†’ Data Extraction
+â”œâ”€â”€ Complex processing: Document type detection, Entity recognition
+â”œâ”€â”€ Output: ExtractedData, ConfidenceScores
+â””â”€â”€ Events: DocumentOCRCompleted, DataExtractionCompleted
 
 [PerformOCR]
-├── Input: DocumentFile
-├── OCR Processing: Extract raw text from PDF/image
-├── Text preprocessing: Clean and structure extracted text
-├── Output: RawTextData, OCRConfidence
-└── Events: DocumentOCRCompleted
+â”œâ”€â”€ Input: DocumentFile
+â”œâ”€â”€ OCR Processing: Extract raw text from PDF/image
+â”œâ”€â”€ Text preprocessing: Clean and structure extracted text
+â”œâ”€â”€ Output: RawTextData, OCRConfidence
+â””â”€â”€ Events: DocumentOCRCompleted
 
 [ExtractPurchaseData]
-├── Input: RawTextData, DocumentType
-├── ML Processing: Named Entity Recognition, Data mapping
-├── Complex extraction: Supplier info, items, prices, dates
-├── Output: StructuredData, ExtractionConfidence
-└── Events: DataExtractionCompleted
+â”œâ”€â”€ Input: RawTextData, DocumentType
+â”œâ”€â”€ ML Processing: Named Entity Recognition, Data mapping
+â”œâ”€â”€ Complex extraction: Supplier info, items, prices, dates
+â”œâ”€â”€ Output: StructuredData, ExtractionConfidence
+â””â”€â”€ Events: DataExtractionCompleted
 
 [MapExtractedData]
-├── Trigger: AIDataValidated
-├── Input: ValidatedData, SystemMappings
-├── Data mapping: Map to system entities (Suppliers, Ingredients)
-├── Complex logic: Fuzzy matching, New entity detection
-├── Output: MappedData, UnmappedEntities
-└── Events: PurchaseDataMapped, NewEntitiesDetected
+â”œâ”€â”€ Trigger: AIDataValidated
+â”œâ”€â”€ Input: ValidatedData, SystemMappings
+â”œâ”€â”€ Data mapping: Map to system entities (Suppliers, Ingredients)
+â”œâ”€â”€ Complex logic: Fuzzy matching, New entity detection
+â”œâ”€â”€ Output: MappedData, UnmappedEntities
+â””â”€â”€ Events: PurchaseDataMapped, NewEntitiesDetected
 
 [ValidateAIAccuracy]
-├── Input: ExtractedData, ActualData (human validated)
-├── ML feedback: Compare AI results with human corrections
-├── Model improvement: Update ML models based on feedback
-├── Output: AccuracyMetrics, ModelUpdateData
-└── Events: AIAccuracyMeasured, ModelTrainingDataCollected
+â”œâ”€â”€ Input: ExtractedData, ActualData (human validated)
+â”œâ”€â”€ ML feedback: Compare AI results with human corrections
+â”œâ”€â”€ Model improvement: Update ML models based on feedback
+â”œâ”€â”€ Output: AccuracyMetrics, ModelUpdateData
+â””â”€â”€ Events: AIAccuracyMeasured, ModelTrainingDataCollected
 ```
 
-#### **🔄 Sistema (Automático)**
+#### **ðŸ”„ Sistema (AutomÃ¡tico)**
 ```
 [CalculatePurchaseTotal]
-├── Trigger: IngredientItemAdded, IngredientItemUpdated, IngredientItemRemoved
-├── Calculation: Sum of all line totals + taxes + shipping
-├── Auto-execution: Immediate after item changes
-└── Events: PurchaseTotalCalculated
+â”œâ”€â”€ Trigger: IngredientItemAdded, IngredientItemUpdated, IngredientItemRemoved
+â”œâ”€â”€ Calculation: Sum of all line totals + taxes + shipping
+â”œâ”€â”€ Auto-execution: Immediate after item changes
+â””â”€â”€ Events: PurchaseTotalCalculated
 
 [UpdateIngredientStock]
-├── Trigger: PurchaseOrderReceived
-├── Input: ReceivedItems[], Quantities[]
-├── Stock calculation: Current stock + received quantities
-├── Auto-execution: Immediate after receipt
-└── Events: IngredientStockUpdated
+â”œâ”€â”€ Trigger: PurchaseOrderReceived
+â”œâ”€â”€ Input: ReceivedItems[], Quantities[]
+â”œâ”€â”€ Stock calculation: Current stock + received quantities
+â”œâ”€â”€ Auto-execution: Immediate after receipt
+â””â”€â”€ Events: IngredientStockUpdated
 
 [CheckLowStockIngredients]
-├── Trigger: IngredientConsumed (from Production), IngredientStockUpdated
-├── Threshold check: Compare current stock with minimum levels
-├── Alert generation: Create low stock alerts
-├── Auto-execution: Real-time monitoring
-└── Events: LowStockAlertTriggered, PurchaseSuggestionGenerated
+â”œâ”€â”€ Trigger: IngredientConsumed (from Production), IngredientStockUpdated
+â”œâ”€â”€ Threshold check: Compare current stock with minimum levels
+â”œâ”€â”€ Alert generation: Create low stock alerts
+â”œâ”€â”€ Auto-execution: Real-time monitoring
+â””â”€â”€ Events: LowStockAlertTriggered, PurchaseSuggestionGenerated
 
 [CreateAccountPayable]
-├── Trigger: PaymentApproved
-├── Input: PurchaseOrderId, PaymentTerms, Amount
-├── Financial calculation: Payment schedule, Due dates
-├── Auto-execution: Immediate after payment approval
-└── Events: AccountPayableCreated
+â”œâ”€â”€ Trigger: PaymentApproved
+â”œâ”€â”€ Input: PurchaseOrderId, PaymentTerms, Amount
+â”œâ”€â”€ Financial calculation: Payment schedule, Due dates
+â”œâ”€â”€ Auto-execution: Immediate after payment approval
+â””â”€â”€ Events: AccountPayableCreated
 
 [SyncWithProduction]
-├── Trigger: IngredientConsumed (from Production domain)
-├── Input: IngredientId, ConsumedQuantity, DemandId
-├── Stock update: Reduce available stock
-├── Auto-execution: Real-time during production
-└── Events: IngredientStockReduced, ProductionStockSynced
+â”œâ”€â”€ Trigger: IngredientConsumed (from Production domain)
+â”œâ”€â”€ Input: IngredientId, ConsumedQuantity, DemandId
+â”œâ”€â”€ Stock update: Reduce available stock
+â”œâ”€â”€ Auto-execution: Real-time during production
+â””â”€â”€ Events: IngredientStockReduced, ProductionStockSynced
 
 [EvaluateSupplierPerformance]
-├── Trigger: PurchaseOrderReceived, DeliveryRejected
-├── Input: DeliveryData, QualityMetrics, TimeMetrics
-├── Performance calculation: On-time delivery, Quality scores
-├── Auto-execution: After each delivery event
-└── Events: SupplierPerformanceUpdated
+â”œâ”€â”€ Trigger: PurchaseOrderReceived, DeliveryRejected
+â”œâ”€â”€ Input: DeliveryData, QualityMetrics, TimeMetrics
+â”œâ”€â”€ Performance calculation: On-time delivery, Quality scores
+â”œâ”€â”€ Auto-execution: After each delivery event
+â””â”€â”€ Events: SupplierPerformanceUpdated
 ```
 
-### **⚡ Eventos de Alto Nível**
+### **âš¡ Eventos de Alto NÃ­vel**
 
-#### **📋 Purchase Order Lifecycle Events**
+#### **ðŸ“‹ Purchase Order Lifecycle Events**
 ```
 PurchaseOrderCreated
-├── Data: PurchaseOrderId, CreatedBy, PurchaseType, Priority, EstimatedTotal
-├── Triggers: Supplier addition, Item addition workflows
-├── Integrations: Budget validation, Approval workflows
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: PurchaseOrderId, CreatedBy, PurchaseType, Priority, EstimatedTotal
+â”œâ”€â”€ Triggers: Supplier addition, Item addition workflows
+â”œâ”€â”€ Integrations: Budget validation, Approval workflows
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 PurchaseOrderConfirmed
-├── Data: PurchaseOrderId, SupplierId, TotalAmount, PaymentTerms, ExpectedDelivery
-├── Triggers: [SendToSupplier], Budget allocation
-├── Integrations: Financial (budget), Supplier communication
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: PurchaseOrderId, SupplierId, TotalAmount, PaymentTerms, ExpectedDelivery
+â”œâ”€â”€ Triggers: [SendToSupplier], Budget allocation
+â”œâ”€â”€ Integrations: Financial (budget), Supplier communication
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 PurchaseOrderSent
-├── Data: PurchaseOrderId, SentToSupplier, SentDate, DeliveryExpected
-├── Triggers: Delivery tracking, Supplier follow-up
-├── Integrations: Supplier systems, Delivery tracking
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: PurchaseOrderId, SentToSupplier, SentDate, DeliveryExpected
+â”œâ”€â”€ Triggers: Delivery tracking, Supplier follow-up
+â”œâ”€â”€ Integrations: Supplier systems, Delivery tracking
+â””â”€â”€ Importance: âš ï¸ High
 
 PurchaseOrderReceived
-├── Data: PurchaseOrderId, ReceivedDate, ReceivedItems[], QualityReport
-├── Triggers: [UpdateIngredientStock], [CreateAccountPayable]
-├── Integrations: Production (stock availability), Financial (payment)
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: PurchaseOrderId, ReceivedDate, ReceivedItems[], QualityReport
+â”œâ”€â”€ Triggers: [UpdateIngredientStock], [CreateAccountPayable]
+â”œâ”€â”€ Integrations: Production (stock availability), Financial (payment)
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 PurchaseOrderCancelled
-├── Data: PurchaseOrderId, CancellationReason, CancelledBy, Impact
-├── Triggers: Supplier notification, Budget release
-├── Integrations: Supplier systems, Financial systems
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: PurchaseOrderId, CancellationReason, CancelledBy, Impact
+â”œâ”€â”€ Triggers: Supplier notification, Budget release
+â”œâ”€â”€ Integrations: Supplier systems, Financial systems
+â””â”€â”€ Importance: âš ï¸ High
 ```
 
-#### **🤖 AI Processing Events**
+#### **ðŸ¤– AI Processing Events**
 ```
 FiscalDocumentUploaded
-├── Data: DocumentId, PurchaseOrderId, DocumentType, FileSize, UploadedBy
-├── Triggers: [ProcessDocumentWithAI], AI processing queue
-├── Integrations: File storage, AI processing pipeline
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: DocumentId, PurchaseOrderId, DocumentType, FileSize, UploadedBy
+â”œâ”€â”€ Triggers: [ProcessDocumentWithAI], AI processing queue
+â”œâ”€â”€ Integrations: File storage, AI processing pipeline
+â””â”€â”€ Importance: âš ï¸ High
 
 DocumentOCRCompleted
-├── Data: DocumentId, OCRResult, RawText, OCRConfidence, ProcessingTime
-├── Triggers: [ExtractPurchaseData], Text analysis pipeline
-├── Integrations: AI pipeline, Text processing
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: DocumentId, OCRResult, RawText, OCRConfidence, ProcessingTime
+â”œâ”€â”€ Triggers: [ExtractPurchaseData], Text analysis pipeline
+â”œâ”€â”€ Integrations: AI pipeline, Text processing
+â””â”€â”€ Importance: ðŸ“Š Medium
 
 DataExtractionCompleted
-├── Data: ExtractionId, ExtractedData, ConfidenceScores, ExtractionTime
-├── Triggers: [ValidateExtractedData] (human review queue)
-├── Integrations: Human validation workflow, Data mapping
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ExtractionId, ExtractedData, ConfidenceScores, ExtractionTime
+â”œâ”€â”€ Triggers: [ValidateExtractedData] (human review queue)
+â”œâ”€â”€ Integrations: Human validation workflow, Data mapping
+â””â”€â”€ Importance: âš ï¸ High
 
 AIDataValidated
-├── Data: ExtractionId, ValidationResult, CorrectedData, ValidatedBy
-├── Triggers: [MapExtractedData], Data processing continuation
-├── Integrations: Data mapping, Purchase order update
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ExtractionId, ValidationResult, CorrectedData, ValidatedBy
+â”œâ”€â”€ Triggers: [MapExtractedData], Data processing continuation
+â”œâ”€â”€ Integrations: Data mapping, Purchase order update
+â””â”€â”€ Importance: âš ï¸ High
 
 PurchaseDataMapped
-├── Data: PurchaseOrderId, MappedSupplier, MappedItems[], UnmappedEntities[]
-├── Triggers: Purchase order auto-population, New entity creation
-├── Integrations: Purchase order workflow, Master data management
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: PurchaseOrderId, MappedSupplier, MappedItems[], UnmappedEntities[]
+â”œâ”€â”€ Triggers: Purchase order auto-population, New entity creation
+â”œâ”€â”€ Integrations: Purchase order workflow, Master data management
+â””â”€â”€ Importance: âš ï¸ High
 
 AIAccuracyMeasured
-├── Data: ModelVersion, AccuracyScore, FeedbackData, MeasurementDate
-├── Triggers: Model improvement, Training data collection
-├── Integrations: ML model management, Performance monitoring
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: ModelVersion, AccuracyScore, FeedbackData, MeasurementDate
+â”œâ”€â”€ Triggers: Model improvement, Training data collection
+â”œâ”€â”€ Integrations: ML model management, Performance monitoring
+â””â”€â”€ Importance: ðŸ“Š Medium
 ```
 
-#### **📦 Inventory Management Events**
+#### **ðŸ“¦ Inventory Management Events**
 ```
 IngredientStockUpdated
-├── Data: IngredientId, OldQuantity, NewQuantity, UpdateReason, UpdatedBy
-├── Triggers: [CheckLowStockIngredients], Production notifications
-├── Integrations: Production (availability), Analytics
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: IngredientId, OldQuantity, NewQuantity, UpdateReason, UpdatedBy
+â”œâ”€â”€ Triggers: [CheckLowStockIngredients], Production notifications
+â”œâ”€â”€ Integrations: Production (availability), Analytics
+â””â”€â”€ Importance: âš ï¸ High
 
 LowStockAlertTriggered
-├── Data: IngredientId, CurrentStock, MinimumLevel, AlertSeverity, SuggestedAction
-├── Triggers: [PurchaseSuggestionGenerated], Procurement notifications
-├── Integrations: Procurement planning, Notification system
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: IngredientId, CurrentStock, MinimumLevel, AlertSeverity, SuggestedAction
+â”œâ”€â”€ Triggers: [PurchaseSuggestionGenerated], Procurement notifications
+â”œâ”€â”€ Integrations: Procurement planning, Notification system
+â””â”€â”€ Importance: âš ï¸ High
 
 PurchaseSuggestionGenerated
-├── Data: IngredientId, SuggestedQuantity, SuggestedSupplier, Urgency, CalculationBasis
-├── Triggers: Procurement approval workflow, Auto-purchasing (if configured)
-├── Integrations: Approval workflows, Auto-purchase systems
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: IngredientId, SuggestedQuantity, SuggestedSupplier, Urgency, CalculationBasis
+â”œâ”€â”€ Triggers: Procurement approval workflow, Auto-purchasing (if configured)
+â”œâ”€â”€ Integrations: Approval workflows, Auto-purchase systems
+â””â”€â”€ Importance: ðŸ“Š Medium
 
 IngredientStockReduced
-├── Data: IngredientId, ConsumedQuantity, DemandId, ProductionOrderId, ConsumedBy
-├── Triggers: Stock level recalculation, Low stock checking
-├── Integrations: Production tracking, Analytics
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: IngredientId, ConsumedQuantity, DemandId, ProductionOrderId, ConsumedBy
+â”œâ”€â”€ Triggers: Stock level recalculation, Low stock checking
+â”œâ”€â”€ Integrations: Production tracking, Analytics
+â””â”€â”€ Importance: ðŸ“Š Medium
 
 StockCountDiscrepancyDetected
-├── Data: IngredientId, SystemStock, PhysicalStock, Discrepancy, DetectedBy
-├── Triggers: Stock adjustment workflow, Investigation process
-├── Integrations: Inventory management, Audit processes
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: IngredientId, SystemStock, PhysicalStock, Discrepancy, DetectedBy
+â”œâ”€â”€ Triggers: Stock adjustment workflow, Investigation process
+â”œâ”€â”€ Integrations: Inventory management, Audit processes
+â””â”€â”€ Importance: âš ï¸ High
 ```
 
-#### **🏢 Supplier Management Events**
+#### **ðŸ¢ Supplier Management Events**
 ```
 SupplierAdded
-├── Data: SupplierId, SupplierData, AddedBy, PerformanceRating, Status
-├── Triggers: Supplier setup, Performance tracking initialization
-├── Integrations: Supplier onboarding, Performance systems
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: SupplierId, SupplierData, AddedBy, PerformanceRating, Status
+â”œâ”€â”€ Triggers: Supplier setup, Performance tracking initialization
+â”œâ”€â”€ Integrations: Supplier onboarding, Performance systems
+â””â”€â”€ Importance: ðŸ“Š Medium
 
 SupplierPerformanceUpdated
-├── Data: SupplierId, NewRating, PerformanceMetrics, UpdateReason, Period
-├── Triggers: Supplier ranking update, Preferred supplier evaluation
-├── Integrations: Supplier selection, Procurement strategy
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: SupplierId, NewRating, PerformanceMetrics, UpdateReason, Period
+â”œâ”€â”€ Triggers: Supplier ranking update, Preferred supplier evaluation
+â”œâ”€â”€ Integrations: Supplier selection, Procurement strategy
+â””â”€â”€ Importance: ðŸ“Š Medium
 
 SupplierBlocked
-├── Data: SupplierId, BlockReason, BlockedBy, BlockDuration, Impact
-├── Triggers: Active purchase order review, Alternative supplier search
-├── Integrations: Purchase order management, Supplier alternatives
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: SupplierId, BlockReason, BlockedBy, BlockDuration, Impact
+â”œâ”€â”€ Triggers: Active purchase order review, Alternative supplier search
+â”œâ”€â”€ Integrations: Purchase order management, Supplier alternatives
+â””â”€â”€ Importance: âš ï¸ High
 
 DeliveryRejected
-├── Data: PurchaseOrderId, RejectionReason, RejectedItems[], QualityIssues[]
-├── Triggers: [EvaluateSupplierPerformance], Supplier notification
-├── Integrations: Supplier communication, Quality management
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: PurchaseOrderId, RejectionReason, RejectedItems[], QualityIssues[]
+â”œâ”€â”€ Triggers: [EvaluateSupplierPerformance], Supplier notification
+â”œâ”€â”€ Integrations: Supplier communication, Quality management
+â””â”€â”€ Importance: âš ï¸ High
 ```
 
-### **🔍 Micro-Eventos (Tracking Detalhado)**
+### **ðŸ” Micro-Eventos (Tracking Detalhado)**
 
-#### **🤖 AI Performance Tracking**
+#### **ðŸ¤– AI Performance Tracking**
 ```
 OCRProcessingTimeRecorded
-├── Data: DocumentId, DocumentType, FileSize, ProcessingTime, OCREngine
-├── Purpose: Track OCR performance and optimization opportunities
-├── Used by: AI performance monitoring, Infrastructure optimization
-└── Frequency: Every OCR operation
+â”œâ”€â”€ Data: DocumentId, DocumentType, FileSize, ProcessingTime, OCREngine
+â”œâ”€â”€ Purpose: Track OCR performance and optimization opportunities
+â”œâ”€â”€ Used by: AI performance monitoring, Infrastructure optimization
+â””â”€â”€ Frequency: Every OCR operation
 
 DataExtractionAccuracyMeasured
-├── Data: ExtractionId, FieldName, ExtractedValue, ActualValue, AccuracyScore
-├── Purpose: Track field-level extraction accuracy for model improvement
-├── Used by: ML model training, Accuracy improvement
-└── Frequency: Every human validation
+â”œâ”€â”€ Data: ExtractionId, FieldName, ExtractedValue, ActualValue, AccuracyScore
+â”œâ”€â”€ Purpose: Track field-level extraction accuracy for model improvement
+â”œâ”€â”€ Used by: ML model training, Accuracy improvement
+â””â”€â”€ Frequency: Every human validation
 
 AIModelConfidenceDistributed
-├── Data: ModelVersion, ConfidenceRange, PredictionCount, AccuracyInRange
-├── Purpose: Analyze confidence score distribution and calibration
-├── Used by: Model calibration, Confidence threshold optimization
-└── Frequency: Aggregated daily
+â”œâ”€â”€ Data: ModelVersion, ConfidenceRange, PredictionCount, AccuracyInRange
+â”œâ”€â”€ Purpose: Analyze confidence score distribution and calibration
+â”œâ”€â”€ Used by: Model calibration, Confidence threshold optimization
+â””â”€â”€ Frequency: Aggregated daily
 
 DocumentTypeClassificationPerformed
-├── Data: DocumentId, PredictedType, ActualType, ConfidenceScore, ClassificationTime
-├── Purpose: Track document classification accuracy
-├── Used by: Classification model improvement, Type-specific processing
-└── Frequency: Every document classification
+â”œâ”€â”€ Data: DocumentId, PredictedType, ActualType, ConfidenceScore, ClassificationTime
+â”œâ”€â”€ Purpose: Track document classification accuracy
+â”œâ”€â”€ Used by: Classification model improvement, Type-specific processing
+â””â”€â”€ Frequency: Every document classification
 ```
 
-#### **📊 Process Efficiency Tracking**
+#### **ðŸ“Š Process Efficiency Tracking**
 ```
 PurchaseOrderProcessingTimeTracked
-├── Data: PurchaseOrderId, Stage, StartTime, EndTime, ProcessingDuration
-├── Purpose: Track time spent in each stage of purchase process
-├── Used by: Process optimization, Bottleneck identification
-└── Frequency: Stage transitions
+â”œâ”€â”€ Data: PurchaseOrderId, Stage, StartTime, EndTime, ProcessingDuration
+â”œâ”€â”€ Purpose: Track time spent in each stage of purchase process
+â”œâ”€â”€ Used by: Process optimization, Bottleneck identification
+â””â”€â”€ Frequency: Stage transitions
 
 SupplierResponseTimeRecorded
-├── Data: PurchaseOrderId, SupplierId, RequestSent, ResponseReceived, ResponseTime
-├── Purpose: Track supplier responsiveness and communication efficiency
-├── Used by: Supplier performance evaluation, SLA monitoring
-└── Frequency: Supplier communications
+â”œâ”€â”€ Data: PurchaseOrderId, SupplierId, RequestSent, ResponseReceived, ResponseTime
+â”œâ”€â”€ Purpose: Track supplier responsiveness and communication efficiency
+â”œâ”€â”€ Used by: Supplier performance evaluation, SLA monitoring
+â””â”€â”€ Frequency: Supplier communications
 
 HumanValidationEfficiencyMeasured
-├── Data: ValidatorId, ExtractionId, ValidationTime, CorrectionsMade, Complexity
-├── Purpose: Track human validation efficiency and training needs
-├── Used by: Training optimization, Workload balancing
-└── Frequency: Every validation session
+â”œâ”€â”€ Data: ValidatorId, ExtractionId, ValidationTime, CorrectionsMade, Complexity
+â”œâ”€â”€ Purpose: Track human validation efficiency and training needs
+â”œâ”€â”€ Used by: Training optimization, Workload balancing
+â””â”€â”€ Frequency: Every validation session
 
 BudgetApprovalTimeTracked
-├── Data: PurchaseOrderId, ApprovalLevel, SubmittedTime, ApprovedTime, ApprovalDuration
-├── Purpose: Track approval process efficiency
-├── Used by: Approval process optimization, Delegation decisions
-└── Frequency: Approval workflows
+â”œâ”€â”€ Data: PurchaseOrderId, ApprovalLevel, SubmittedTime, ApprovedTime, ApprovalDuration
+â”œâ”€â”€ Purpose: Track approval process efficiency
+â”œâ”€â”€ Used by: Approval process optimization, Delegation decisions
+â””â”€â”€ Frequency: Approval workflows
 ```
 
-#### **🔧 System Integration Monitoring**
+#### **ðŸ”§ System Integration Monitoring**
 ```
 ProductionIngredientSyncPerformed
-├── Data: IngredientId, SyncType, OldQuantity, NewQuantity, SyncStatus, SyncTime
-├── Purpose: Monitor synchronization with Production domain
-├── Used by: Data consistency monitoring, Integration health
-└── Frequency: Production ingredient consumption
+â”œâ”€â”€ Data: IngredientId, SyncType, OldQuantity, NewQuantity, SyncStatus, SyncTime
+â”œâ”€â”€ Purpose: Monitor synchronization with Production domain
+â”œâ”€â”€ Used by: Data consistency monitoring, Integration health
+â””â”€â”€ Frequency: Production ingredient consumption
 
 FinancialAccountCreationSynced
-├── Data: PurchaseOrderId, AccountPayableId, SyncStatus, SyncTime, Amount
-├── Purpose: Track financial integration for account payable creation
-├── Used by: Financial integration monitoring, Payment tracking
-└── Frequency: Payment approval events
+â”œâ”€â”€ Data: PurchaseOrderId, AccountPayableId, SyncStatus, SyncTime, Amount
+â”œâ”€â”€ Purpose: Track financial integration for account payable creation
+â”œâ”€â”€ Used by: Financial integration monitoring, Payment tracking
+â””â”€â”€ Frequency: Payment approval events
 
 SupplierSystemIntegrationAttempted
-├── Data: SupplierId, IntegrationType, RequestData, ResponseStatus, ResponseTime
-├── Purpose: Monitor external supplier system integrations
-├── Used by: Integration health monitoring, Supplier system reliability
-└── Frequency: External supplier communications
+â”œâ”€â”€ Data: SupplierId, IntegrationType, RequestData, ResponseStatus, ResponseTime
+â”œâ”€â”€ Purpose: Monitor external supplier system integrations
+â”œâ”€â”€ Used by: Integration health monitoring, Supplier system reliability
+â””â”€â”€ Frequency: External supplier communications
 
 FileStorageOperationPerformed
-├── Data: DocumentId, Operation, FileSize, ProcessingTime, StorageLocation
-├── Purpose: Monitor file storage performance and capacity
-├── Used by: Storage optimization, Performance monitoring
-└── Frequency: File operations
+â”œâ”€â”€ Data: DocumentId, Operation, FileSize, ProcessingTime, StorageLocation
+â”œâ”€â”€ Purpose: Monitor file storage performance and capacity
+â”œâ”€â”€ Used by: Storage optimization, Performance monitoring
+â””â”€â”€ Frequency: File operations
 ```
 
-### **📊 Agregados e Responsabilidades**
+### **ðŸ“Š Agregados e Responsabilidades**
 
-#### **🎯 PurchaseOrder Aggregate**
+#### **ðŸŽ¯ PurchaseOrder Aggregate**
 ```
 {PurchaseOrder}
-├── Entities: PurchaseOrder, PurchaseOrderItem
-├── Value Objects: PurchaseStatus, PaymentTerms, DeliveryTerms
-├── Invariants:
-│   ├── Must have at least one item to be confirmed
-│   ├── Total amount must equal sum of item totals
-│   ├── Cannot modify after sending to supplier
-│   ├── Received quantities cannot exceed ordered quantities
-│   └── Must have valid supplier before confirmation
-├── Events Published:
-│   ├── PurchaseOrderCreated, PurchaseOrderConfirmed
-│   ├── PurchaseOrderSent, PurchaseOrderReceived
-│   ├── PurchaseOrderCancelled, PurchaseTotalCalculated
-│   └── PaymentApproved, AccountPayableCreated
-└── Commands Handled:
-    ├── CreatePurchaseOrder, ConfirmPurchaseOrder, CancelPurchaseOrder
-    ├── AddIngredientItem, UpdateIngredientItem, RemoveIngredientItem
-    ├── SendToSupplier, ReceivePurchaseOrder
-    └── ApprovePurchasePayment
+â”œâ”€â”€ Entities: PurchaseOrder, PurchaseOrderItem
+â”œâ”€â”€ Value Objects: PurchaseStatus, PaymentTerms, DeliveryTerms
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Must have at least one item to be confirmed
+â”‚   â”œâ”€â”€ Total amount must equal sum of item totals
+â”‚   â”œâ”€â”€ Cannot modify after sending to supplier
+â”‚   â”œâ”€â”€ Received quantities cannot exceed ordered quantities
+â”‚   â””â”€â”€ Must have valid supplier before confirmation
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ PurchaseOrderCreated, PurchaseOrderConfirmed
+â”‚   â”œâ”€â”€ PurchaseOrderSent, PurchaseOrderReceived
+â”‚   â”œâ”€â”€ PurchaseOrderCancelled, PurchaseTotalCalculated
+â”‚   â””â”€â”€ PaymentApproved, AccountPayableCreated
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreatePurchaseOrder, ConfirmPurchaseOrder, CancelPurchaseOrder
+    â”œâ”€â”€ AddIngredientItem, UpdateIngredientItem, RemoveIngredientItem
+    â”œâ”€â”€ SendToSupplier, ReceivePurchaseOrder
+    â””â”€â”€ ApprovePurchasePayment
 ```
 
-#### **📄 FiscalDocument Aggregate**
+#### **ðŸ“„ FiscalDocument Aggregate**
 ```
 {FiscalDocument}
-├── Entities: FiscalDocument, AIExtraction
-├── Value Objects: DocumentType, ExtractionStatus, ConfidenceScore
-├── Invariants:
-│   ├── Document file must be valid format (PDF/Image)
-│   ├── Extraction results must have confidence scores
-│   ├── Human validation required for low confidence extractions
-│   ├── Cannot reprocess document without reason
-│   └── Extraction data must be mappable to purchase order
-├── Events Published:
-│   ├── FiscalDocumentUploaded, DocumentOCRCompleted
-│   ├── DataExtractionCompleted, AIDataValidated
-│   ├── PurchaseDataMapped, AIAccuracyMeasured
-│   └── NewEntitiesDetected
-└── Commands Handled:
-    ├── UploadFiscalDocument, ProcessDocumentWithAI
-    ├── ValidateExtractedData, MapExtractedData
-    └── ValidateAIAccuracy
+â”œâ”€â”€ Entities: FiscalDocument, AIExtraction
+â”œâ”€â”€ Value Objects: DocumentType, ExtractionStatus, ConfidenceScore
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Document file must be valid format (PDF/Image)
+â”‚   â”œâ”€â”€ Extraction results must have confidence scores
+â”‚   â”œâ”€â”€ Human validation required for low confidence extractions
+â”‚   â”œâ”€â”€ Cannot reprocess document without reason
+â”‚   â””â”€â”€ Extraction data must be mappable to purchase order
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ FiscalDocumentUploaded, DocumentOCRCompleted
+â”‚   â”œâ”€â”€ DataExtractionCompleted, AIDataValidated
+â”‚   â”œâ”€â”€ PurchaseDataMapped, AIAccuracyMeasured
+â”‚   â””â”€â”€ NewEntitiesDetected
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ UploadFiscalDocument, ProcessDocumentWithAI
+    â”œâ”€â”€ ValidateExtractedData, MapExtractedData
+    â””â”€â”€ ValidateAIAccuracy
 ```
 
-#### **🏢 Supplier Aggregate**
+#### **ðŸ¢ Supplier Aggregate**
 ```
 {Supplier}
-├── Entities: Supplier
-├── Value Objects: SupplierStatus, PerformanceRating, ContactInfo
-├── Invariants:
-│   ├── Supplier name must be unique
-│   ├── Contact information must be valid
-│   ├── Performance rating must be between 0-5
-│   ├── Cannot delete supplier with active purchase orders
-│   └── Blocked suppliers cannot receive new purchase orders
-├── Events Published:
-│   ├── SupplierCreated, SupplierUpdated
-│   ├── SupplierActivated, SupplierBlocked
-│   ├── SupplierPerformanceUpdated
-│   └── SupplierNotified
-└── Commands Handled:
-    ├── CreateSupplier, UpdateSupplier
-    ├── ActivateSupplier, BlockSupplier
-    ├── EvaluateSupplierPerformance
-    └── NotifySupplier
+â”œâ”€â”€ Entities: Supplier
+â”œâ”€â”€ Value Objects: SupplierStatus, PerformanceRating, ContactInfo
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Supplier name must be unique
+â”‚   â”œâ”€â”€ Contact information must be valid
+â”‚   â”œâ”€â”€ Performance rating must be between 0-5
+â”‚   â”œâ”€â”€ Cannot delete supplier with active purchase orders
+â”‚   â””â”€â”€ Blocked suppliers cannot receive new purchase orders
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ SupplierCreated, SupplierUpdated
+â”‚   â”œâ”€â”€ SupplierActivated, SupplierBlocked
+â”‚   â”œâ”€â”€ SupplierPerformanceUpdated
+â”‚   â””â”€â”€ SupplierNotified
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreateSupplier, UpdateSupplier
+    â”œâ”€â”€ ActivateSupplier, BlockSupplier
+    â”œâ”€â”€ EvaluateSupplierPerformance
+    â””â”€â”€ NotifySupplier
 ```
 
-#### **📦 Ingredient Aggregate**
+#### **ðŸ“¦ Ingredient Aggregate**
 ```
 {Ingredient}
-├── Entities: Ingredient, IngredientStock
-├── Value Objects: Unit, StockLevel, MinimumLevel
-├── Invariants:
-│   ├── Stock quantity cannot be negative
-│   ├── Minimum level must be >= 0
-│   ├── Unit must be valid measurement unit
-│   ├── Cannot consume more than available stock
-│   └── Stock adjustments must have valid reason
-├── Events Published:
-│   ├── IngredientCreated, IngredientUpdated
-│   ├── IngredientStockUpdated, IngredientStockReduced
-│   ├── LowStockAlertTriggered, PurchaseSuggestionGenerated
-│   └── StockCountDiscrepancyDetected
-└── Commands Handled:
-    ├── CreateIngredient, UpdateIngredient
-    ├── UpdateIngredientStock, AdjustStock
-    ├── CheckLowStockIngredients
-    └── ResolveStockDiscrepancy
+â”œâ”€â”€ Entities: Ingredient, IngredientStock
+â”œâ”€â”€ Value Objects: Unit, StockLevel, MinimumLevel
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Stock quantity cannot be negative
+â”‚   â”œâ”€â”€ Minimum level must be >= 0
+â”‚   â”œâ”€â”€ Unit must be valid measurement unit
+â”‚   â”œâ”€â”€ Cannot consume more than available stock
+â”‚   â””â”€â”€ Stock adjustments must have valid reason
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ IngredientCreated, IngredientUpdated
+â”‚   â”œâ”€â”€ IngredientStockUpdated, IngredientStockReduced
+â”‚   â”œâ”€â”€ LowStockAlertTriggered, PurchaseSuggestionGenerated
+â”‚   â””â”€â”€ StockCountDiscrepancyDetected
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreateIngredient, UpdateIngredient
+    â”œâ”€â”€ UpdateIngredientStock, AdjustStock
+    â”œâ”€â”€ CheckLowStockIngredients
+    â””â”€â”€ ResolveStockDiscrepancy
 ```
 
-### **🔄 Políticas de Negócio (Business Rules)**
+### **ðŸ”„ PolÃ­ticas de NegÃ³cio (Business Rules)**
 
-#### **🤖 AI Processing Policies**
+#### **ðŸ¤– AI Processing Policies**
 ```
-"Quando FiscalDocumentUploaded, então ProcessDocumentWithAI"
-├── AI pipeline activation: OCR → Classification → Extraction
-├── Processing priority: Based on document type and urgency
-├── Quality assurance: Confidence score calculation for each field
-├── Auto-execution: Immediate background processing
-└── Integration: AI/ML services, File storage
+"Quando FiscalDocumentUploaded, entÃ£o ProcessDocumentWithAI"
+â”œâ”€â”€ AI pipeline activation: OCR â†’ Classification â†’ Extraction
+â”œâ”€â”€ Processing priority: Based on document type and urgency
+â”œâ”€â”€ Quality assurance: Confidence score calculation for each field
+â”œâ”€â”€ Auto-execution: Immediate background processing
+â””â”€â”€ Integration: AI/ML services, File storage
 
-"Quando DataExtractionCompleted, então ValidateIfLowConfidence"
-├── Confidence threshold: < 80% requires human validation
-├── Field-level validation: Different thresholds per field type
-├── Queue management: Priority based on purchase urgency
-├── Auto-execution: Route to validation queue if needed
-└── Integration: Human validation workflow
+"Quando DataExtractionCompleted, entÃ£o ValidateIfLowConfidence"
+â”œâ”€â”€ Confidence threshold: < 80% requires human validation
+â”œâ”€â”€ Field-level validation: Different thresholds per field type
+â”œâ”€â”€ Queue management: Priority based on purchase urgency
+â”œâ”€â”€ Auto-execution: Route to validation queue if needed
+â””â”€â”€ Integration: Human validation workflow
 
-"Quando AIDataValidated, então MapExtractedData"
-├── Entity mapping: Match suppliers and ingredients to system entities
-├── Fuzzy matching: Use similarity algorithms for matching
-├── New entity detection: Identify unknown suppliers/ingredients
-├── Auto-execution: Immediate after validation
-└── Integration: Master data management, Entity creation
-```
-
-#### **📦 Inventory Management Policies**
-```
-"Quando IngredientConsumed (from Production), então UpdateStock"
-├── Real-time synchronization: Immediate stock reduction
-├── Stock validation: Ensure sufficient stock before consumption
-├── Cross-domain consistency: Sync between Production and Purchasing
-├── Auto-execution: Real-time during production
-└── Integration: Production domain synchronization
-
-"Quando IngredientStockUpdated, então CheckLowStockLevels"
-├── Threshold monitoring: Compare with configured minimum levels
-├── Alert generation: Create low stock alerts with urgency levels
-├── Purchase suggestions: Generate automatic purchase recommendations
-├── Auto-execution: Immediate after stock updates
-└── Integration: Procurement planning, Alert systems
-
-"Quando LowStockAlertTriggered, então GeneratePurchaseSuggestion"
-├── Suggestion algorithm: Calculate optimal purchase quantities
-├── Supplier selection: Recommend best performing suppliers
-├── Lead time consideration: Factor in supplier delivery times
-├── Auto-execution: Immediate after low stock detection
-└── Integration: Procurement planning, Supplier management
+"Quando AIDataValidated, entÃ£o MapExtractedData"
+â”œâ”€â”€ Entity mapping: Match suppliers and ingredients to system entities
+â”œâ”€â”€ Fuzzy matching: Use similarity algorithms for matching
+â”œâ”€â”€ New entity detection: Identify unknown suppliers/ingredients
+â”œâ”€â”€ Auto-execution: Immediate after validation
+â””â”€â”€ Integration: Master data management, Entity creation
 ```
 
-#### **🏢 Supplier Management Policies**
+#### **ðŸ“¦ Inventory Management Policies**
 ```
-"Quando PurchaseOrderReceived, então EvaluateSupplierPerformance"
-├── Performance metrics: On-time delivery, Quality, Completeness
-├── Rating calculation: Update overall supplier rating
-├── Trend analysis: Track performance over time
-├── Auto-execution: After each delivery event
-└── Integration: Supplier ranking, Procurement strategy
+"Quando IngredientConsumed (from Production), entÃ£o UpdateStock"
+â”œâ”€â”€ Real-time synchronization: Immediate stock reduction
+â”œâ”€â”€ Stock validation: Ensure sufficient stock before consumption
+â”œâ”€â”€ Cross-domain consistency: Sync between Production and Purchasing
+â”œâ”€â”€ Auto-execution: Real-time during production
+â””â”€â”€ Integration: Production domain synchronization
 
-"Quando DeliveryRejected, então ImpactSupplierRating"
-├── Negative impact: Reduce supplier performance rating
-├── Severity assessment: Impact based on rejection reason
-├── Pattern detection: Identify recurring quality issues
-├── Auto-execution: Immediate after rejection
-└── Integration: Supplier evaluation, Quality management
+"Quando IngredientStockUpdated, entÃ£o CheckLowStockLevels"
+â”œâ”€â”€ Threshold monitoring: Compare with configured minimum levels
+â”œâ”€â”€ Alert generation: Create low stock alerts with urgency levels
+â”œâ”€â”€ Purchase suggestions: Generate automatic purchase recommendations
+â”œâ”€â”€ Auto-execution: Immediate after stock updates
+â””â”€â”€ Integration: Procurement planning, Alert systems
 
-"Quando SupplierPerformanceUpdated, então UpdatePreferredSuppliers"
-├── Ranking update: Reorder preferred supplier lists
-├── Procurement guidance: Update buyer recommendations
-├── Contract review: Flag suppliers for contract renegotiation
-├── Auto-execution: After performance updates
-└── Integration: Procurement strategy, Contract management
-```
-
-#### **💰 Financial Integration Policies**
-```
-"Quando PaymentApproved, então CreateAccountPayable"
-├── Financial calculation: Payment amount, terms, due dates
-├── Installment handling: Break down payments if needed
-├── Cross-domain integration: Create financial obligation
-├── Auto-execution: Immediate after approval
-└── Integration: Financial domain AccountPayable creation
-
-"Quando PurchaseOrderCancelled, então CancelAccountPayable"
-├── Financial cleanup: Cancel related financial obligations
-├── Budget release: Return allocated budget amounts
-├── Supplier notification: Inform supplier of cancellation
-├── Auto-execution: Immediate after cancellation
-└── Integration: Financial domain, Supplier communication
+"Quando LowStockAlertTriggered, entÃ£o GeneratePurchaseSuggestion"
+â”œâ”€â”€ Suggestion algorithm: Calculate optimal purchase quantities
+â”œâ”€â”€ Supplier selection: Recommend best performing suppliers
+â”œâ”€â”€ Lead time consideration: Factor in supplier delivery times
+â”œâ”€â”€ Auto-execution: Immediate after low stock detection
+â””â”€â”€ Integration: Procurement planning, Supplier management
 ```
 
-### **⚠️ Hotspots e Complexidades**
+#### **ðŸ¢ Supplier Management Policies**
+```
+"Quando PurchaseOrderReceived, entÃ£o EvaluateSupplierPerformance"
+â”œâ”€â”€ Performance metrics: On-time delivery, Quality, Completeness
+â”œâ”€â”€ Rating calculation: Update overall supplier rating
+â”œâ”€â”€ Trend analysis: Track performance over time
+â”œâ”€â”€ Auto-execution: After each delivery event
+â””â”€â”€ Integration: Supplier ranking, Procurement strategy
 
-#### **🚨 Complexidades Críticas**
+"Quando DeliveryRejected, entÃ£o ImpactSupplierRating"
+â”œâ”€â”€ Negative impact: Reduce supplier performance rating
+â”œâ”€â”€ Severity assessment: Impact based on rejection reason
+â”œâ”€â”€ Pattern detection: Identify recurring quality issues
+â”œâ”€â”€ Auto-execution: Immediate after rejection
+â””â”€â”€ Integration: Supplier evaluation, Quality management
+
+"Quando SupplierPerformanceUpdated, entÃ£o UpdatePreferredSuppliers"
+â”œâ”€â”€ Ranking update: Reorder preferred supplier lists
+â”œâ”€â”€ Procurement guidance: Update buyer recommendations
+â”œâ”€â”€ Contract review: Flag suppliers for contract renegotiation
+â”œâ”€â”€ Auto-execution: After performance updates
+â””â”€â”€ Integration: Procurement strategy, Contract management
+```
+
+#### **ðŸ’° Financial Integration Policies**
+```
+"Quando PaymentApproved, entÃ£o CreateAccountPayable"
+â”œâ”€â”€ Financial calculation: Payment amount, terms, due dates
+â”œâ”€â”€ Installment handling: Break down payments if needed
+â”œâ”€â”€ Cross-domain integration: Create financial obligation
+â”œâ”€â”€ Auto-execution: Immediate after approval
+â””â”€â”€ Integration: Financial domain AccountPayable creation
+
+"Quando PurchaseOrderCancelled, entÃ£o CancelAccountPayable"
+â”œâ”€â”€ Financial cleanup: Cancel related financial obligations
+â”œâ”€â”€ Budget release: Return allocated budget amounts
+â”œâ”€â”€ Supplier notification: Inform supplier of cancellation
+â”œâ”€â”€ Auto-execution: Immediate after cancellation
+â””â”€â”€ Integration: Financial domain, Supplier communication
+```
+
+### **âš ï¸ Hotspots e Complexidades**
+
+#### **ðŸš¨ Complexidades CrÃ­ticas**
 
 ##### **(!AIExtractionAccuracy!)**
 ```
 Problema: AI extraction accuracy varies significantly by document type and quality
-Cenário: Poor quality scans, unusual document formats, handwritten notes
+CenÃ¡rio: Poor quality scans, unusual document formats, handwritten notes
 Impacto: Requires extensive human validation, reduces automation benefits
-Solução: Model training with domain-specific data, confidence thresholds
+SoluÃ§Ã£o: Model training with domain-specific data, confidence thresholds
 Prioridade: Critical - Core value proposition of AI feature
 ```
 
 ##### **(!RealTimeInventorySync!)**
 ```
 Problema: Real-time synchronization between Production and Purchasing domains
-Cenário: Concurrent ingredient consumption and stock updates
+CenÃ¡rio: Concurrent ingredient consumption and stock updates
 Impacto: Stock inconsistencies, production blocking, data integrity issues
-Solução: Event-driven synchronization with eventual consistency
+SoluÃ§Ã£o: Event-driven synchronization with eventual consistency
 Prioridade: Critical - Data integrity and production continuity
 ```
 
 ##### **(!SupplierSystemIntegration!)**
 ```
 Problema: Integration with external supplier systems for order status
-Cenário: Different APIs, formats, and reliability levels across suppliers
+CenÃ¡rio: Different APIs, formats, and reliability levels across suppliers
 Impacto: Manual follow-up required, delayed delivery information
-Solução: Adapter pattern with fallback to manual processes
+SoluÃ§Ã£o: Adapter pattern with fallback to manual processes
 Prioridade: High - Operational efficiency
 ```
 
 ##### **(!HumanAIValidationWorkflow!)**
 ```
 Problema: Complex workflow for human validation of AI extractions
-Cenário: High volume of documents requiring validation, varying complexity
+CenÃ¡rio: High volume of documents requiring validation, varying complexity
 Impacto: Bottleneck in processing, user experience issues
-Solução: Intelligent routing and validation UX optimization
+SoluÃ§Ã£o: Intelligent routing and validation UX optimization
 Prioridade: High - User experience and throughput
 ```
 
 ##### **(!DocumentStorageAndRetrieval!)**
 ```
 Problema: Efficient storage and retrieval of fiscal documents for compliance
-Cenário: Large document volumes, compliance requirements, search needs
+CenÃ¡rio: Large document volumes, compliance requirements, search needs
 Impacto: Storage costs, retrieval performance, compliance risks
-Solução: Tiered storage with intelligent archiving
+SoluÃ§Ã£o: Tiered storage with intelligent archiving
 Prioridade: Medium - Cost and compliance
 ```
 
-#### **📊 Métricas e Alertas**
+#### **ðŸ“Š MÃ©tricas e Alertas**
 
-##### **🎯 Business Metrics**
+##### **ðŸŽ¯ Business Metrics**
 ```
 AI Processing Accuracy:
-├── Metric: % accuracy of AI data extraction vs human validation
-├── Alert: < 85% accuracy rate
-├── Dashboard: AI performance monitoring
-└── Usage: Model improvement, Process optimization
+â”œâ”€â”€ Metric: % accuracy of AI data extraction vs human validation
+â”œâ”€â”€ Alert: < 85% accuracy rate
+â”œâ”€â”€ Dashboard: AI performance monitoring
+â””â”€â”€ Usage: Model improvement, Process optimization
 
 Purchase Order Cycle Time:
-├── Metric: Average time from creation to receipt
-├── Alert: > 10 days average cycle time
-├── Dashboard: Procurement efficiency
-└── Usage: Process improvement, Supplier performance
+â”œâ”€â”€ Metric: Average time from creation to receipt
+â”œâ”€â”€ Alert: > 10 days average cycle time
+â”œâ”€â”€ Dashboard: Procurement efficiency
+â””â”€â”€ Usage: Process improvement, Supplier performance
 
 Supplier Performance Score:
-├── Metric: Average supplier rating across all suppliers
-├── Alert: Average score < 3.5/5.0
-├── Dashboard: Supplier management
-└── Usage: Supplier relationship management
+â”œâ”€â”€ Metric: Average supplier rating across all suppliers
+â”œâ”€â”€ Alert: Average score < 3.5/5.0
+â”œâ”€â”€ Dashboard: Supplier management
+â””â”€â”€ Usage: Supplier relationship management
 
 Inventory Turnover Rate:
-├── Metric: How quickly ingredients are consumed and replenished
-├── Alert: Turnover rate declining > 20%
-├── Dashboard: Inventory management
-└── Usage: Procurement planning, Cost optimization
+â”œâ”€â”€ Metric: How quickly ingredients are consumed and replenished
+â”œâ”€â”€ Alert: Turnover rate declining > 20%
+â”œâ”€â”€ Dashboard: Inventory management
+â””â”€â”€ Usage: Procurement planning, Cost optimization
 ```
 
-##### **⚡ Technical Metrics**
+##### **âš¡ Technical Metrics**
 ```
 Document Processing Throughput:
-├── Metric: Documents processed per hour by AI pipeline
-├── Alert: Throughput < 50 documents/hour
-├── Dashboard: AI system performance
-└── Usage: Capacity planning, Performance optimization
+â”œâ”€â”€ Metric: Documents processed per hour by AI pipeline
+â”œâ”€â”€ Alert: Throughput < 50 documents/hour
+â”œâ”€â”€ Dashboard: AI system performance
+â””â”€â”€ Usage: Capacity planning, Performance optimization
 
 Human Validation Queue Length:
-├── Metric: Number of documents waiting for human validation
-├── Alert: Queue length > 100 documents
-├── Dashboard: Workflow monitoring
-└── Usage: Resource allocation, Process optimization
+â”œâ”€â”€ Metric: Number of documents waiting for human validation
+â”œâ”€â”€ Alert: Queue length > 100 documents
+â”œâ”€â”€ Dashboard: Workflow monitoring
+â””â”€â”€ Usage: Resource allocation, Process optimization
 
 Cross-Domain Sync Latency:
-├── Metric: Time for inventory updates to sync with Production
-├── Alert: Sync latency > 30 seconds
-├── Dashboard: Integration health
-└── Usage: System optimization, Data consistency
+â”œâ”€â”€ Metric: Time for inventory updates to sync with Production
+â”œâ”€â”€ Alert: Sync latency > 30 seconds
+â”œâ”€â”€ Dashboard: Integration health
+â””â”€â”€ Usage: System optimization, Data consistency
 
 File Storage Performance:
-├── Metric: Average time for document upload and retrieval
-├── Alert: Operations taking > 5 seconds
-├── Dashboard: Infrastructure performance
-└── Usage: Storage optimization, User experience
+â”œâ”€â”€ Metric: Average time for document upload and retrieval
+â”œâ”€â”€ Alert: Operations taking > 5 seconds
+â”œâ”€â”€ Dashboard: Infrastructure performance
+â””â”€â”€ Usage: Storage optimization, User experience
 ```
 
-##### **🔍 Operational Metrics**
+##### **ðŸ” Operational Metrics**
 ```
 Low Stock Alert Response Time:
-├── Metric: Time from alert to purchase order creation
-├── Alert: Response time > 24 hours
-├── Dashboard: Inventory management
-└── Usage: Procurement process optimization
+â”œâ”€â”€ Metric: Time from alert to purchase order creation
+â”œâ”€â”€ Alert: Response time > 24 hours
+â”œâ”€â”€ Dashboard: Inventory management
+â””â”€â”€ Usage: Procurement process optimization
 
 Supplier Communication Success Rate:
-├── Metric: % successful communications with suppliers
-├── Alert: Success rate < 95%
-├── Dashboard: Supplier integration health
-└── Usage: Communication system optimization
+â”œâ”€â”€ Metric: % successful communications with suppliers
+â”œâ”€â”€ Alert: Success rate < 95%
+â”œâ”€â”€ Dashboard: Supplier integration health
+â””â”€â”€ Usage: Communication system optimization
 
 Budget Approval Processing Time:
-├── Metric: Average time for purchase approvals
-├── Alert: Approval time > 48 hours
-├── Dashboard: Approval workflow efficiency
-└── Usage: Process streamlining, Authority delegation
+â”œâ”€â”€ Metric: Average time for purchase approvals
+â”œâ”€â”€ Alert: Approval time > 48 hours
+â”œâ”€â”€ Dashboard: Approval workflow efficiency
+â””â”€â”€ Usage: Process streamlining, Authority delegation
 
 Document Compliance Rate:
-├── Metric: % documents meeting compliance requirements
-├── Alert: Compliance rate < 98%
-├── Dashboard: Compliance monitoring
-└── Usage: Compliance process improvement
+â”œâ”€â”€ Metric: % documents meeting compliance requirements
+â”œâ”€â”€ Alert: Compliance rate < 98%
+â”œâ”€â”€ Dashboard: Compliance monitoring
+â””â”€â”€ Usage: Compliance process improvement
 ```
 
 ---
 
 **Arquivo**: `purchasing-domain-events.md`  
-**Domínio**: Compras (#0562aa)  
+**DomÃ­nio**: Compras (#0562aa)  
 **Tipo**: Event Storming  
-**Granularidade**: Alto nível + Micro-eventos + IA Processing pipeline  
-**Atualização**: 16/06/2025
+**Granularidade**: Alto nÃ­vel + Micro-eventos + IA Processing pipeline  
+**AtualizaÃ§Ã£o**: 16/06/2025

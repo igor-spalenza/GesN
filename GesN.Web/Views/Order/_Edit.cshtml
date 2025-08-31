@@ -9,59 +9,68 @@
     
     <div class="row">
         <!-- COLUNA 1 - Dados do Pedido -->
-        <div class="col-md-6 order-data">
-            <div class="column-header order-header">
+        <div class="col-md-12 order-section">
+            <div class="order-section-header">
                 <h5><i class="fas fa-file-invoice"></i> Dados do Pedido</h5>
             </div>
-            <div class="column-content">
-                <form id="editOrderForm">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" asp-for="Id" />
-                    <div class="form-group">
-                        <label asp-for="NumberSequence"></label>
-                        <input asp-for="NumberSequence" class="form-control" readonly />
+            
+            <div class="order-section-content">
+                <div class="row">
+                    <!-- Sub-coluna 1: Formulário de Dados -->
+                    <div class="col-md-6 order-form-column">
+                        <div class="order-form-content">
+                            <form id="editOrderForm">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" asp-for="Id" />
+                                <div class="form-group">
+                                    <label asp-for="NumberSequence"></label>
+                                    <input asp-for="NumberSequence" class="form-control" readonly />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="CustomerId"></label>
+                                    <input asp-for="CustomerId" class="form-control" readonly />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="OrderDate"></label>
+                                    <input asp-for="OrderDate" class="form-control" type="date" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="DeliveryDate"></label>
+                                    <input asp-for="DeliveryDate" class="form-control" type="date" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Type"></label>
+                                    <select asp-for="Type" class="form-control">
+                                        @foreach (var type in Enum.GetValues(typeof(GesN.Web.Models.Enumerators.OrderType)))
+                                        {
+                                            <option value="@((int)type)">@type</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Status"></label>
+                                    <input asp-for="Status" class="form-control" readonly />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="TotalAmount"></label>
+                                    <input asp-for="TotalAmount" class="form-control" readonly />
+                                </div>
+                                <div class="form-group mt-3">
+                                    <button type="submit" class="btn btn-primary" id="btnSalvarOrder">Salvar Alterações</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                <div class="form-group">
-                    <label asp-for="CustomerId"></label>
-                    <input asp-for="CustomerId" class="form-control" readonly />
-                </div>
-                <div class="form-group">
-                    <label asp-for="OrderDate"></label>
-                    <input asp-for="OrderDate" class="form-control" type="date" />
-                </div>
-                <div class="form-group">
-                    <label asp-for="DeliveryDate"></label>
-                    <input asp-for="DeliveryDate" class="form-control" type="date" />
-                </div>
-                <div class="form-group">
-                    <label asp-for="Type"></label>
-                    <select asp-for="Type" class="form-control">
-                        @foreach (var type in Enum.GetValues(typeof(GesN.Web.Models.Enumerators.OrderType)))
-                        {
-                            <option value="@((int)type)">@type</option>
-                        }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Status"></label>
-                    <input asp-for="Status" class="form-control" readonly />
-                </div>
-                <div class="form-group">
-                    <label asp-for="TotalAmount"></label>
-                    <input asp-for="TotalAmount" class="form-control" readonly />
-                </div>
-                    <div class="form-group mt-3">
-                        <button type="submit" class="btn btn-primary" id="btnSalvarOrder">Salvar Alterações</button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
-        <!-- COLUNA 2 - Itens do Pedido (Carrinho) -->
-        <div class="col-md-6 order-items">
-            <div id="orderItemsContainer">
-                @await Html.PartialAsync("_OrderItems", Model.Items)
-            </div>
+                    <!-- Sub-coluna 2: Itens do Pedido -->
+                    <div class="col-md-6 order-items-column">
+                        <div class="order-items-content">
+                            <div id="orderItemsContainer">
+                                @await Html.PartialAsync("_OrderItems", Model.Items)
+                            </div>
+                        </div>
+                    </div>
+                </div>
         </div>
     </div>
 </div>
@@ -69,4 +78,3 @@
 @* Estilos do OrderEdit *@
 <link href="~/css/OrderEdit.css" rel="stylesheet" />
 
- 

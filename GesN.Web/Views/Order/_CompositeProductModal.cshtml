@@ -1,0 +1,115 @@
+@model dynamic
+
+<div class="modal fade" id="compositeProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-cogs text-warning"></i>
+                    Configurar: @Model.name
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="product-summary mb-4">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6>Detalhes do Produto</h6>
+                            <p class="mb-1"><strong>SKU:</strong> @(Model.sku ?? "N/A")</p>
+                            <p class="mb-1"><strong>Preço Base:</strong> R$ @Model.unitPrice.ToString("F2")</p>
+                            <p class="mb-3"><strong>Tempo de Montagem:</strong> @Model.assemblyTime dia(s)</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="productQuantity" class="form-label">Quantidade do Produto</label>
+                            <input type="number" id="productQuantity" class="form-control" 
+                                   min="1" max="999" value="@Model.initialQuantity">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hierarchies-container">
+                    <h6 class="mb-3">Configurar Componentes</h6>
+                    
+                    @foreach (var hierarchy in ((IEnumerable<dynamic>)Model.hierarchies).OrderBy(h => (int)h.assemblyOrder))
+                    {
+                        var isRequired = !hierarchy.isOptional;
+                        var maxQtyText = hierarchy.maxQuantity > 0 ? hierarchy.maxQuantity.ToString() : "∞";
+                        
+                        <div class="hierarchy-section" data-hierarchy-id="@hierarchy.id">
+                            <div class="hierarchy-header">
+                                <h6 class="hierarchy-title">
+                                    @hierarchy.name
+                                    @if (isRequired)
+                                    {
+                                        <span class="text-danger">*</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">(Opcional)</span>
+                                    }
+                                </h6>
+                                <small class="text-muted">
+                                    Quantidade: @hierarchy.minQuantity - @maxQtyText
+                                </small>
+                            </div>
+                            
+                            <div class="components-grid">
+                                @foreach (var component in hierarchy.components)
+                                {
+                                    <div class="component-option" data-component-id="@component.id" data-additional-cost="@component.additionalCost">
+                                        <label class="component-label">
+                                            <input type="radio" name="hierarchy_@hierarchy.id" 
+                                                   value="@component.id">
+                                            <div class="component-info">
+                                                <div class="component-name">@component.name</div>
+                                                @if (!string.IsNullOrEmpty(component.description))
+                                                {
+                                                    <div class="component-desc">@component.description</div>
+                                                }
+                                                @if (component.additionalCost > 0)
+                                                {
+                                                    <div class="component-cost">+R$ @component.additionalCost.ToString("F2")</div>
+                                                }
+                                            </div>
+                                        </label>
+                                        <div class="component-quantity">
+                                            <input type="number" class="form-control form-control-sm" 
+                                                   min="@hierarchy.minQuantity" 
+                                                   max="@(hierarchy.maxQuantity > 0 ? hierarchy.maxQuantity : 999)"
+                                                   value="@hierarchy.minQuantity" 
+                                                   data-hierarchy-id="@hierarchy.id"
+                                                   data-component-id="@component.id">
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="pricing-summary mt-4 p-3 bg-light rounded">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Preço Base:</strong> <span id="basePriceDisplay">R$ @Model.unitPrice.ToString("F2")</span></p>
+                            <p class="mb-1"><strong>Custos Adicionais:</strong> <span id="additionalCostDisplay">R$ 0,00</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Preço Unitário:</strong> <span id="unitPriceDisplay">R$ @Model.unitPrice.ToString("F2")</span></p>
+                            <p class="mb-0"><strong>Total:</strong> <span id="totalPriceDisplay">R$ @Model.unitPrice.ToString("F2")</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="btnConfirmCompositeAdd">
+                    <i class="fas fa-shopping-cart"></i> Adicionar ao Carrinho
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

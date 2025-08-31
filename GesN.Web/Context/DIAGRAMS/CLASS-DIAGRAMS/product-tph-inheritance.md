@@ -1,9 +1,9 @@
-# 🏗️ DIAGRAMA DE CLASSES - HERANÇA TPH DO DOMÍNIO DE PRODUTO
+﻿# ðŸ—ï¸ DIAGRAMA DE CLASSES - HERANÃ‡A TPH DO DOMÃNIO DE PRODUTO
 
-## 🎯 Visão Geral
-Diagrama de classes mostrando a implementação de herança Table Per Hierarchy (TPH) do Domínio de Produto, incluindo a classe abstrata base, classes derivadas, interfaces de serviços e padrões arquiteturais implementados.
+## ðŸŽ¯ VisÃ£o Geral
+Diagrama de classes mostrando a implementaÃ§Ã£o de heranÃ§a Table Per Hierarchy (TPH) do DomÃ­nio de Produto, incluindo a classe abstrata base, classes derivadas, interfaces de serviÃ§os e padrÃµes arquiteturais implementados.
 
-## 🧬 Diagrama de Herança e Interfaces
+## ðŸ§¬ Diagrama de HeranÃ§a e Interfaces
 
 ```mermaid
 classDiagram
@@ -145,7 +145,7 @@ classDiagram
     }
 
     %% ==========================================
-    %% INTERFACES DE SERVIÇOS
+    %% INTERFACES DE SERVIÃ‡OS
     %% ==========================================
     class IProductService {
         <<interface>>
@@ -172,7 +172,7 @@ classDiagram
     }
 
     %% ==========================================
-    %% IMPLEMENTAÇÕES DE SERVIÇOS
+    %% IMPLEMENTAÃ‡Ã•ES DE SERVIÃ‡OS
     %% ==========================================
     class ProductService {
         -IProductRepository _productRepository
@@ -202,7 +202,7 @@ classDiagram
     }
 
     %% ==========================================
-    %% RELACIONAMENTOS DE HERANÇA
+    %% RELACIONAMENTOS DE HERANÃ‡A
     %% ==========================================
     Product <|-- SimpleProduct : inherits
     Product <|-- CompositeProduct : inherits
@@ -212,7 +212,7 @@ classDiagram
     Product --> ProductCategory : belongs to
 
     %% ==========================================
-    %% RELACIONAMENTOS DE COMPOSIÇÃO
+    %% RELACIONAMENTOS DE COMPOSIÃ‡ÃƒO
     %% ==========================================
     CompositeProduct "1" --> "*" CompositeProductXHierarchy : configures
     CompositeProductXHierarchy "*" --> "1" ProductComponentHierarchy : references
@@ -225,7 +225,7 @@ classDiagram
     ProductGroupItem "*" --> "1" ProductCategory : can reference
 
     %% ==========================================
-    %% RELACIONAMENTOS DE DEPENDÊNCIA
+    %% RELACIONAMENTOS DE DEPENDÃŠNCIA
     %% ==========================================
     IProductService <|.. ProductService : implements
     IProductRepository <|.. ProductRepository : implements
@@ -233,7 +233,7 @@ classDiagram
     ProductService --> Product : manages
 
     %% ==========================================
-    %% STYLING POR DOMÍNIO
+    %% STYLING POR DOMÃNIO
     %% ==========================================
     
     %% CLASSES PRINCIPAIS = Verde escuro
@@ -254,7 +254,7 @@ classDiagram
         color: white
     }
     
-    %% ENTIDADES RELACIONADAS = Verde médio
+    %% ENTIDADES RELACIONADAS = Verde mÃ©dio
     class ProductCategory {
         background-color: #2dd4aa
         color: black
@@ -290,7 +290,7 @@ classDiagram
         color: black
     }
     
-    %% IMPLEMENTAÇÕES = Verde médio
+    %% IMPLEMENTAÃ‡Ã•ES = Verde mÃ©dio
     class ProductService {
         background-color: #6ee7b7
         color: black
@@ -300,65 +300,65 @@ classDiagram
         color: black
     }
     
-    %% ENUMERAÇÃO = Cinza
+    %% ENUMERAÃ‡ÃƒO = Cinza
     class ProductType {
         background-color: #e5e7eb
         color: black
     }
 ```
 
-## 📋 Detalhes da Implementação
+## ðŸ“‹ Detalhes da ImplementaÃ§Ã£o
 
-### **🏗️ Padrão Table Per Hierarchy (TPH)**
-- **Estratégia**: Uma única tabela `Product` para todos os tipos
+### **ðŸ—ï¸ PadrÃ£o Table Per Hierarchy (TPH)**
+- **EstratÃ©gia**: Uma Ãºnica tabela `Product` para todos os tipos
 - **Discriminador**: Coluna `ProductType` (Simple|Composite|Group)
 - **Vantagens**: Performance, simplicidade de queries, integridade referencial
 - **Constraint**: `CHECK (ProductType IN ('Simple', 'Composite', 'Group'))`
 
-### **🧬 Hierarquia de Classes**
+### **ðŸ§¬ Hierarquia de Classes**
 
 #### **Product (Classe Abstrata Base)**
-- Contém todas as propriedades comuns
-- Método abstrato `ValidateBusinessRules()`
-- Métodos virtuais para override nas classes derivadas
+- ContÃ©m todas as propriedades comuns
+- MÃ©todo abstrato `ValidateBusinessRules()`
+- MÃ©todos virtuais para override nas classes derivadas
 
 #### **SimpleProduct**
-- Implementação mais simples
-- Validação básica de nome e preço
-- Cálculo de custo baseado em ingredientes
+- ImplementaÃ§Ã£o mais simples
+- ValidaÃ§Ã£o bÃ¡sica de nome e preÃ§o
+- CÃ¡lculo de custo baseado em ingredientes
 
 #### **CompositeProduct**
 - Relacionamento com hierarquias de componentes
-- Validação complexa de configurações
-- Cálculo dinâmico de preço baseado em seleções
+- ValidaÃ§Ã£o complexa de configuraÃ§Ãµes
+- CÃ¡lculo dinÃ¢mico de preÃ§o baseado em seleÃ§Ãµes
 
 #### **ProductGroup**
 - Relacionamento com itens do grupo
 - Regras de troca entre itens
-- Cálculo de preço baseado em configuração
+- CÃ¡lculo de preÃ§o baseado em configuraÃ§Ã£o
 
-### **🔧 Padrões Arquiteturais Implementados**
+### **ðŸ”§ PadrÃµes Arquiteturais Implementados**
 
 #### **Repository Pattern**
 - `IProductRepository`: Interface de acesso a dados
-- `ProductRepository`: Implementação usando Dapper
-- Abstração do acesso a dados
+- `ProductRepository`: ImplementaÃ§Ã£o usando Dapper
+- AbstraÃ§Ã£o do acesso a dados
 
 #### **Service Layer Pattern**
-- `IProductService`: Interface de regras de negócio
-- `ProductService`: Implementação das regras
-- Orquestração entre repository e validações
+- `IProductService`: Interface de regras de negÃ³cio
+- `ProductService`: ImplementaÃ§Ã£o das regras
+- OrquestraÃ§Ã£o entre repository e validaÃ§Ãµes
 
 #### **Strategy Pattern**
-- Validação específica por tipo de produto
-- Cálculo de custo específico por tipo
-- Configuração específica por tipo
+- ValidaÃ§Ã£o especÃ­fica por tipo de produto
+- CÃ¡lculo de custo especÃ­fico por tipo
+- ConfiguraÃ§Ã£o especÃ­fica por tipo
 
-#### **Factory Pattern** (Implícito)
-- Criação de instâncias corretas baseada em ProductType
-- Mapping automático no Repository
+#### **Factory Pattern** (ImplÃ­cito)
+- CriaÃ§Ã£o de instÃ¢ncias corretas baseada em ProductType
+- Mapping automÃ¡tico no Repository
 
-### **⚖️ Regras de Negócio por Tipo**
+### **âš–ï¸ Regras de NegÃ³cio por Tipo**
 
 #### **Simple Product**
 ```csharp
@@ -390,17 +390,17 @@ public override bool ValidateBusinessRules()
 }
 ```
 
-## 🔄 Fluxo de Criação de Produtos
+## ðŸ”„ Fluxo de CriaÃ§Ã£o de Produtos
 
 1. **Cliente chama** `ProductService.CreateAsync(product)`
-2. **Service valida** tipo e regras de negócio
-3. **Service configura** propriedades específicas do tipo
+2. **Service valida** tipo e regras de negÃ³cio
+3. **Service configura** propriedades especÃ­ficas do tipo
 4. **Repository persiste** na tabela Product com discriminador
 5. **Sistema retorna** ID do produto criado
 
 ---
 
 **Arquivo**: `product-tph-inheritance.md`  
-**Domínio**: Produto (#00a86b)  
+**DomÃ­nio**: Produto (#00a86b)  
 **Tipo**: Class Diagram  
-**Padrão**: Table Per Hierarchy (TPH)
+**PadrÃ£o**: Table Per Hierarchy (TPH)

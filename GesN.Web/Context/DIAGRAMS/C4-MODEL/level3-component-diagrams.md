@@ -1,9 +1,9 @@
-# 🧩 C4 LEVEL 3 - COMPONENT DIAGRAMS
+﻿# ðŸ§© C4 LEVEL 3 - COMPONENT DIAGRAMS
 
-## 🎯 Visão Geral
-Diagramas de componentes do sistema GesN mostrando como cada container é decomposto em componentes. Este nível mostra a organização interna dos bounded contexts e suas responsabilidades específicas.
+## ðŸŽ¯ VisÃ£o Geral
+Diagramas de componentes do sistema GesN mostrando como cada container Ã© decomposto em componentes. Este nÃ­vel mostra a organizaÃ§Ã£o interna dos bounded contexts e suas responsabilidades especÃ­ficas.
 
-## 📊 Web Application - Component Overview
+## ðŸ“Š Web Application - Component Overview
 
 ```mermaid
 C4Component
@@ -50,21 +50,21 @@ C4Component
     Container_Ext(google_apis, "Google Workspace APIs", "External APIs", "People, Calendar, Maps integration")
     Container_Ext(file_system, "File Storage", "File System", "Documents, images, reports")
     
-    %% Controller → Service relationships
+    %% Controller â†’ Service relationships
     Rel(product_controller, product_service, "Uses", "Business logic")
     Rel(sales_controller, sales_service, "Uses", "Business logic")
     Rel(production_controller, production_service, "Uses", "Business logic")  
     Rel(purchasing_controller, purchasing_service, "Uses", "Business logic")
     Rel(financial_controller, financial_service, "Uses", "Business logic")
     
-    %% Service → Repository relationships
+    %% Service â†’ Repository relationships
     Rel(product_service, product_repository, "Uses", "Data access")
     Rel(sales_service, sales_repository, "Uses", "Data access")
     Rel(production_service, production_repository, "Uses", "Data access")
     Rel(purchasing_service, purchasing_repository, "Uses", "Data access")
     Rel(financial_service, financial_repository, "Uses", "Data access")
     
-    %% Repository → Database relationships
+    %% Repository â†’ Database relationships
     Rel(product_repository, database, "Reads/Writes", "SQL queries")
     Rel(sales_repository, database, "Reads/Writes", "SQL queries")
     Rel(production_repository, database, "Reads/Writes", "SQL queries")
@@ -126,365 +126,365 @@ C4Component
     UpdateElementStyle(event_bus, $bgColor="#6b7280", $fontColor="white")
 ```
 
-## 📦 Detalhamento por Bounded Context
+## ðŸ“¦ Detalhamento por Bounded Context
 
-### **📦 PRODUCT DOMAIN COMPONENTS**
+### **ðŸ“¦ PRODUCT DOMAIN COMPONENTS**
 
-#### **🎮 Product Controller**
+#### **ðŸŽ® Product Controller**
 ```
 Responsabilidades:
-├── 📋 ProductController
-│   ├── GET /Product - Listar produtos
-│   ├── GET /Product/{id} - Detalhes produto
-│   ├── POST /Product - Criar produto
-│   ├── PUT /Product/{id} - Atualizar produto
-│   └── DELETE /Product/{id} - Remover produto
-├── 📂 ProductCategoryController
-│   ├── GET /ProductCategory - Listar categorias
-│   └── POST /ProductCategory - Criar categoria
-└── 🧩 ProductComponentController
-    ├── GET /ProductComponent - Listar componentes
-    └── POST /ProductComponent - Criar componente
+â”œâ”€â”€ ðŸ“‹ ProductController
+â”‚   â”œâ”€â”€ GET /Product - Listar produtos
+â”‚   â”œâ”€â”€ GET /Product/{id} - Detalhes produto
+â”‚   â”œâ”€â”€ POST /Product - Criar produto
+â”‚   â”œâ”€â”€ PUT /Product/{id} - Atualizar produto
+â”‚   â””â”€â”€ DELETE /Product/{id} - Remover produto
+â”œâ”€â”€ ðŸ“‚ ProductCategoryController
+â”‚   â”œâ”€â”€ GET /ProductCategory - Listar categorias
+â”‚   â””â”€â”€ POST /ProductCategory - Criar categoria
+â””â”€â”€ ðŸ§© ProductComponentController
+    â”œâ”€â”€ GET /ProductComponent - Listar componentes
+    â””â”€â”€ POST /ProductComponent - Criar componente
 
-Validações:
-├── ✅ Authorize attributes por role
-├── 📊 Model validation (FluentValidation)
-├── 🔒 Tenant isolation verification
-└── 📝 Input sanitization
+ValidaÃ§Ãµes:
+â”œâ”€â”€ âœ… Authorize attributes por role
+â”œâ”€â”€ ðŸ“Š Model validation (FluentValidation)
+â”œâ”€â”€ ðŸ”’ Tenant isolation verification
+â””â”€â”€ ðŸ“ Input sanitization
 ```
 
-#### **⚙️ Product Service**
+#### **âš™ï¸ Product Service**
 ```
-Métodos Principais:
-├── 📦 CreateProductAsync(ProductCreateDto)
-├── 🔍 GetProductByIdAsync(string id)
-├── 📋 GetProductsByTypeAsync(ProductType type)
-├── ✅ ValidateProductConfigurationAsync(ProductConfigDto)
-├── 💰 CalculateProductPriceAsync(string id, ConfigDto config)
-└── 🔄 UpdateProductAsync(string id, ProductUpdateDto)
+MÃ©todos Principais:
+â”œâ”€â”€ ðŸ“¦ CreateProductAsync(ProductCreateDto)
+â”œâ”€â”€ ðŸ” GetProductByIdAsync(string id)
+â”œâ”€â”€ ðŸ“‹ GetProductsByTypeAsync(ProductType type)
+â”œâ”€â”€ âœ… ValidateProductConfigurationAsync(ProductConfigDto)
+â”œâ”€â”€ ðŸ’° CalculateProductPriceAsync(string id, ConfigDto config)
+â””â”€â”€ ðŸ”„ UpdateProductAsync(string id, ProductUpdateDto)
 
-Regras de Negócio:
-├── 🎯 Product type-specific validation (TPH)
-├── 🧩 Component hierarchy validation (Composite)
-├── 📊 Group item validation (Group)
-├── 💰 Price calculation with components
-└── 🔍 SKU uniqueness verification
+Regras de NegÃ³cio:
+â”œâ”€â”€ ðŸŽ¯ Product type-specific validation (TPH)
+â”œâ”€â”€ ðŸ§© Component hierarchy validation (Composite)
+â”œâ”€â”€ ðŸ“Š Group item validation (Group)
+â”œâ”€â”€ ðŸ’° Price calculation with components
+â””â”€â”€ ðŸ” SKU uniqueness verification
 
-Integrações:
-├── 🎯 Product Repository (data access)
-├── 🔔 Event Bus (ProductCreated, ProductUpdated)
-├── 💾 Cache Service (product catalog caching)
-└── 📊 Validation Engine (business rules)
+IntegraÃ§Ãµes:
+â”œâ”€â”€ ðŸŽ¯ Product Repository (data access)
+â”œâ”€â”€ ðŸ”” Event Bus (ProductCreated, ProductUpdated)
+â”œâ”€â”€ ðŸ’¾ Cache Service (product catalog caching)
+â””â”€â”€ ðŸ“Š Validation Engine (business rules)
 ```
 
-#### **🗄️ Product Repository**
+#### **ðŸ—„ï¸ Product Repository**
 ```
-Operações CRUD:
-├── 📦 Products (base table with TPH discriminator)
-├── 📂 ProductCategories
-├── 🧩 ProductComponents
-├── 🏗️ ProductComponentHierarchy
-├── 🔗 CompositeProductXHierarchy
-├── 📦 ProductGroupItems
-└── ⚖️ ProductGroupExchangeRules
+OperaÃ§Ãµes CRUD:
+â”œâ”€â”€ ðŸ“¦ Products (base table with TPH discriminator)
+â”œâ”€â”€ ðŸ“‚ ProductCategories
+â”œâ”€â”€ ðŸ§© ProductComponents
+â”œâ”€â”€ ðŸ—ï¸ ProductComponentHierarchy
+â”œâ”€â”€ ðŸ”— CompositeProductXHierarchy
+â”œâ”€â”€ ðŸ“¦ ProductGroupItems
+â””â”€â”€ âš–ï¸ ProductGroupExchangeRules
 
 Queries Especializadas:
-├── 🔍 GetProductsWithConfigurationAsync()
-├── 📊 GetProductsByTypeAsync(ProductType)
-├── 🧩 GetComponentsByHierarchyAsync(string hierarchyId)
-├── 💰 GetProductPricingDataAsync(string productId)
-└── 📈 GetProductMetricsAsync()
+â”œâ”€â”€ ðŸ” GetProductsWithConfigurationAsync()
+â”œâ”€â”€ ðŸ“Š GetProductsByTypeAsync(ProductType)
+â”œâ”€â”€ ðŸ§© GetComponentsByHierarchyAsync(string hierarchyId)
+â”œâ”€â”€ ðŸ’° GetProductPricingDataAsync(string productId)
+â””â”€â”€ ðŸ“ˆ GetProductMetricsAsync()
 
 Performance:
-├── 🎯 Eager loading para relacionamentos
-├── 💾 Query result caching
-├── 📊 Optimized JOIN queries
-└── 🔍 Indexed searches por SKU/Name
+â”œâ”€â”€ ðŸŽ¯ Eager loading para relacionamentos
+â”œâ”€â”€ ðŸ’¾ Query result caching
+â”œâ”€â”€ ðŸ“Š Optimized JOIN queries
+â””â”€â”€ ðŸ” Indexed searches por SKU/Name
 ```
 
-### **💰 SALES DOMAIN COMPONENTS**
+### **ðŸ’° SALES DOMAIN COMPONENTS**
 
-#### **🎮 Sales Controllers**
+#### **ðŸŽ® Sales Controllers**
 ```
 CustomerController:
-├── GET /Customer - Lista paginada clientes
-├── POST /Customer - Criar cliente
-├── PUT /Customer/{id} - Atualizar cliente
-└── GET /Customer/{id}/Orders - Histórico pedidos
+â”œâ”€â”€ GET /Customer - Lista paginada clientes
+â”œâ”€â”€ POST /Customer - Criar cliente
+â”œâ”€â”€ PUT /Customer/{id} - Atualizar cliente
+â””â”€â”€ GET /Customer/{id}/Orders - HistÃ³rico pedidos
 
 OrderController:
-├── GET /Order - Lista pedidos (filtros)
-├── GET /Order/{id} - Detalhes pedido
-├── POST /Order - Criar pedido (modal rápido)
-├── PUT /Order/{id} - Atualizar pedido
-├── POST /Order/{id}/Confirm - Confirmar pedido
-├── POST /Order/{id}/Cancel - Cancelar pedido
-└── GET /Order/{id}/Status - Tracking em tempo real
+â”œâ”€â”€ GET /Order - Lista pedidos (filtros)
+â”œâ”€â”€ GET /Order/{id} - Detalhes pedido
+â”œâ”€â”€ POST /Order - Criar pedido (modal rÃ¡pido)
+â”œâ”€â”€ PUT /Order/{id} - Atualizar pedido
+â”œâ”€â”€ POST /Order/{id}/Confirm - Confirmar pedido
+â”œâ”€â”€ POST /Order/{id}/Cancel - Cancelar pedido
+â””â”€â”€ GET /Order/{id}/Status - Tracking em tempo real
 
 OrderItemController:
-├── POST /Order/{orderId}/Items - Adicionar item
-├── PUT /OrderItem/{id} - Configurar item
-├── DELETE /OrderItem/{id} - Remover item
-└── POST /OrderItem/{id}/Configure - Config produtos compostos
+â”œâ”€â”€ POST /Order/{orderId}/Items - Adicionar item
+â”œâ”€â”€ PUT /OrderItem/{id} - Configurar item
+â”œâ”€â”€ DELETE /OrderItem/{id} - Remover item
+â””â”€â”€ POST /OrderItem/{id}/Configure - Config produtos compostos
 ```
 
-#### **⚙️ Sales Service**
+#### **âš™ï¸ Sales Service**
 ```
-Principais Operações:
-├── 🆕 CreateOrderAsync(OrderCreateDto)
-├── ✅ ConfirmOrderAsync(string orderId)
-├── 📦 AddOrderItemAsync(string orderId, OrderItemDto)
-├── 🧩 ConfigureCompositeProductAsync(string itemId, ConfigDto)
-├── 📊 CalculateOrderTotalAsync(string orderId)
-└── 🔄 UpdateOrderStatusAsync(string orderId, OrderStatus status)
+Principais OperaÃ§Ãµes:
+â”œâ”€â”€ ðŸ†• CreateOrderAsync(OrderCreateDto)
+â”œâ”€â”€ âœ… ConfirmOrderAsync(string orderId)
+â”œâ”€â”€ ðŸ“¦ AddOrderItemAsync(string orderId, OrderItemDto)
+â”œâ”€â”€ ðŸ§© ConfigureCompositeProductAsync(string itemId, ConfigDto)
+â”œâ”€â”€ ðŸ“Š CalculateOrderTotalAsync(string orderId)
+â””â”€â”€ ðŸ”„ UpdateOrderStatusAsync(string orderId, OrderStatus status)
 
 Business Logic Complexa:
-├── 🎯 Product type detection (Simple/Composite/Group)
-├── 🧩 Composite product configuration validation
-├── 📦 Group product explosion logic
-├── 💰 Dynamic pricing calculation
-├── 📅 Delivery date validation
-└── 👤 Customer credit limit verification
+â”œâ”€â”€ ðŸŽ¯ Product type detection (Simple/Composite/Group)
+â”œâ”€â”€ ðŸ§© Composite product configuration validation
+â”œâ”€â”€ ðŸ“¦ Group product explosion logic
+â”œâ”€â”€ ðŸ’° Dynamic pricing calculation
+â”œâ”€â”€ ðŸ“… Delivery date validation
+â””â”€â”€ ðŸ‘¤ Customer credit limit verification
 
 Event Publishing:
-├── 📋 OrderCreated
-├── ✅ OrderConfirmed (triggers production + financial)
-├── 📦 OrderItemAdded
-├── 🧩 ProductConfigured
-└── ❌ OrderCancelled
+â”œâ”€â”€ ðŸ“‹ OrderCreated
+â”œâ”€â”€ âœ… OrderConfirmed (triggers production + financial)
+â”œâ”€â”€ ðŸ“¦ OrderItemAdded
+â”œâ”€â”€ ðŸ§© ProductConfigured
+â””â”€â”€ âŒ OrderCancelled
 ```
 
-### **🏭 PRODUCTION DOMAIN COMPONENTS**
+### **ðŸ­ PRODUCTION DOMAIN COMPONENTS**
 
-#### **🎮 Production Controller**
+#### **ðŸŽ® Production Controller**
 ```
 DemandController:
-├── GET /Demand - Lista demands (filtros por status)
-├── GET /Demand/{id} - Detalhes demand + composition
-├── PUT /Demand/{id}/Status - Atualizar status
-└── POST /Demand/{id}/Start - Iniciar produção
+â”œâ”€â”€ GET /Demand - Lista demands (filtros por status)
+â”œâ”€â”€ GET /Demand/{id} - Detalhes demand + composition
+â”œâ”€â”€ PUT /Demand/{id}/Status - Atualizar status
+â””â”€â”€ POST /Demand/{id}/Start - Iniciar produÃ§Ã£o
 
 ProductionOrderController:
-├── GET /ProductionOrder - Lista ordens produção
-├── POST /ProductionOrder - Criar ordem (agrupa demands)
-├── PUT /ProductionOrder/{id}/Schedule - Agendar produção
-├── POST /ProductionOrder/{id}/Start - Iniciar lote
-└── GET /ProductionOrder/{id}/Progress - Progresso tempo real
+â”œâ”€â”€ GET /ProductionOrder - Lista ordens produÃ§Ã£o
+â”œâ”€â”€ POST /ProductionOrder - Criar ordem (agrupa demands)
+â”œâ”€â”€ PUT /ProductionOrder/{id}/Schedule - Agendar produÃ§Ã£o
+â”œâ”€â”€ POST /ProductionOrder/{id}/Start - Iniciar lote
+â””â”€â”€ GET /ProductionOrder/{id}/Progress - Progresso tempo real
 
 ProductCompositionController:
-├── GET /Demand/{id}/Composition - Lista tarefas
-├── PUT /ProductComposition/{id}/Start - Iniciar tarefa
-├── PUT /ProductComposition/{id}/Complete - Finalizar tarefa
-└── POST /ProductComposition/{id}/ConsumeIngredient - Registrar consumo
+â”œâ”€â”€ GET /Demand/{id}/Composition - Lista tarefas
+â”œâ”€â”€ PUT /ProductComposition/{id}/Start - Iniciar tarefa
+â”œâ”€â”€ PUT /ProductComposition/{id}/Complete - Finalizar tarefa
+â””â”€â”€ POST /ProductComposition/{id}/ConsumeIngredient - Registrar consumo
 ```
 
-#### **⚙️ Production Service**
+#### **âš™ï¸ Production Service**
 ```
 Demand Management:
-├── 🆕 CreateDemandFromOrderItemAsync(OrderItem)
-├── 🧩 CreateProductCompositionAsync(Demand, ProductConfig)
-├── 📊 CalculateDemandEstimatesAsync(string demandId)
-├── ⚡ ProcessDemandStatusChangeAsync(string demandId, DemandStatus)
-└── 🔄 SyncDemandWithOrderAsync(string demandId)
+â”œâ”€â”€ ðŸ†• CreateDemandFromOrderItemAsync(OrderItem)
+â”œâ”€â”€ ðŸ§© CreateProductCompositionAsync(Demand, ProductConfig)
+â”œâ”€â”€ ðŸ“Š CalculateDemandEstimatesAsync(string demandId)
+â”œâ”€â”€ âš¡ ProcessDemandStatusChangeAsync(string demandId, DemandStatus)
+â””â”€â”€ ðŸ”„ SyncDemandWithOrderAsync(string demandId)
 
 Production Execution:
-├── 🏭 CreateProductionOrderAsync(List<string> demandIds)
-├── ⏰ ScheduleProductionAsync(string productionOrderId, DateTime date)
-├── ▶️ StartProductionAsync(string productionOrderId)
-├── 📊 TrackProductionProgressAsync(string productionOrderId)
-└── ✅ CompleteProductionAsync(string productionOrderId)
+â”œâ”€â”€ ðŸ­ CreateProductionOrderAsync(List<string> demandIds)
+â”œâ”€â”€ â° ScheduleProductionAsync(string productionOrderId, DateTime date)
+â”œâ”€â”€ â–¶ï¸ StartProductionAsync(string productionOrderId)
+â”œâ”€â”€ ðŸ“Š TrackProductionProgressAsync(string productionOrderId)
+â””â”€â”€ âœ… CompleteProductionAsync(string productionOrderId)
 
 Integrations:
-├── 🛒 Purchasing Service (ingredient consumption)
-├── 💰 Sales Service (demand status updates)
-├── 📅 Google Calendar (production scheduling)
-└── 🔔 Notification Service (alerts)
+â”œâ”€â”€ ðŸ›’ Purchasing Service (ingredient consumption)
+â”œâ”€â”€ ðŸ’° Sales Service (demand status updates)
+â”œâ”€â”€ ðŸ“… Google Calendar (production scheduling)
+â””â”€â”€ ðŸ”” Notification Service (alerts)
 ```
 
-### **🛒 PURCHASING DOMAIN COMPONENTS**
+### **ðŸ›’ PURCHASING DOMAIN COMPONENTS**
 
-#### **🎮 Purchasing Controllers**
+#### **ðŸŽ® Purchasing Controllers**
 ```
 SupplierController:
-├── GET /Supplier - Lista fornecedores
-├── POST /Supplier - Criar fornecedor
-├── PUT /Supplier/{id} - Atualizar fornecedor
-└── GET /Supplier/{id}/Performance - Métricas fornecedor
+â”œâ”€â”€ GET /Supplier - Lista fornecedores
+â”œâ”€â”€ POST /Supplier - Criar fornecedor
+â”œâ”€â”€ PUT /Supplier/{id} - Atualizar fornecedor
+â””â”€â”€ GET /Supplier/{id}/Performance - MÃ©tricas fornecedor
 
 PurchaseOrderController:
-├── GET /PurchaseOrder - Lista ordens compra
-├── POST /PurchaseOrder - Criar ordem (manual/IA)
-├── POST /PurchaseOrder/UploadFiscalDocument - Upload nota fiscal
-├── PUT /PurchaseOrder/{id}/Send - Enviar ao fornecedor
-├── POST /PurchaseOrder/{id}/Receive - Registrar recebimento
-└── GET /PurchaseOrder/{id}/Status - Status tracking
+â”œâ”€â”€ GET /PurchaseOrder - Lista ordens compra
+â”œâ”€â”€ POST /PurchaseOrder - Criar ordem (manual/IA)
+â”œâ”€â”€ POST /PurchaseOrder/UploadFiscalDocument - Upload nota fiscal
+â”œâ”€â”€ PUT /PurchaseOrder/{id}/Send - Enviar ao fornecedor
+â”œâ”€â”€ POST /PurchaseOrder/{id}/Receive - Registrar recebimento
+â””â”€â”€ GET /PurchaseOrder/{id}/Status - Status tracking
 
 IngredientController:
-├── GET /Ingredient - Lista ingredientes
-├── POST /Ingredient - Criar ingrediente
-├── GET /Ingredient/{id}/Stock - Níveis estoque
-└── GET /Ingredient/LowStock - Alertas estoque mínimo
+â”œâ”€â”€ GET /Ingredient - Lista ingredientes
+â”œâ”€â”€ POST /Ingredient - Criar ingrediente
+â”œâ”€â”€ GET /Ingredient/{id}/Stock - NÃ­veis estoque
+â””â”€â”€ GET /Ingredient/LowStock - Alertas estoque mÃ­nimo
 ```
 
-#### **⚙️ Purchasing Service**
+#### **âš™ï¸ Purchasing Service**
 ```
 Purchase Order Management:
-├── 🆕 CreatePurchaseOrderAsync(PurchaseOrderDto)
-├── 🤖 ProcessFiscalDocumentWithAIAsync(Stream document)
-├── ✅ ValidateAIExtractedDataAsync(AIExtractedData)
-├── 📤 SendPurchaseOrderAsync(string orderId)
-├── 📦 ReceivePurchaseOrderAsync(string orderId, ReceiveDto)
-└── 📊 EvaluateSupplierPerformanceAsync(string supplierId)
+â”œâ”€â”€ ðŸ†• CreatePurchaseOrderAsync(PurchaseOrderDto)
+â”œâ”€â”€ ðŸ¤– ProcessFiscalDocumentWithAIAsync(Stream document)
+â”œâ”€â”€ âœ… ValidateAIExtractedDataAsync(AIExtractedData)
+â”œâ”€â”€ ðŸ“¤ SendPurchaseOrderAsync(string orderId)
+â”œâ”€â”€ ðŸ“¦ ReceivePurchaseOrderAsync(string orderId, ReceiveDto)
+â””â”€â”€ ðŸ“Š EvaluateSupplierPerformanceAsync(string supplierId)
 
 AI Processing:
-├── 📄 ExtractDataFromDocumentAsync(Stream document)
-├── 🔍 MapSuppliersFromExtractedDataAsync(SupplierData)
-├── 🧩 MapIngredientsFromExtractedDataAsync(List<ItemData>)
-├── ✅ ValidateExtractedDataAsync(ExtractedData)
-└── 📋 GeneratePrefilledFormAsync(ExtractedData)
+â”œâ”€â”€ ðŸ“„ ExtractDataFromDocumentAsync(Stream document)
+â”œâ”€â”€ ðŸ” MapSuppliersFromExtractedDataAsync(SupplierData)
+â”œâ”€â”€ ðŸ§© MapIngredientsFromExtractedDataAsync(List<ItemData>)
+â”œâ”€â”€ âœ… ValidateExtractedDataAsync(ExtractedData)
+â””â”€â”€ ðŸ“‹ GeneratePrefilledFormAsync(ExtractedData)
 
 Stock Management:
-├── 📊 CheckLowStockIngredientsAsync()
-├── 💡 GeneratePurchaseSuggestionsAsync()
-├── 📦 UpdateStockOnReceiptAsync(string orderId)
-├── 🥘 ReserveIngredientsAsync(List<IngredientReservation>)
-└── 📈 CalculateStockMetricsAsync()
+â”œâ”€â”€ ðŸ“Š CheckLowStockIngredientsAsync()
+â”œâ”€â”€ ðŸ’¡ GeneratePurchaseSuggestionsAsync()
+â”œâ”€â”€ ðŸ“¦ UpdateStockOnReceiptAsync(string orderId)
+â”œâ”€â”€ ðŸ¥˜ ReserveIngredientsAsync(List<IngredientReservation>)
+â””â”€â”€ ðŸ“ˆ CalculateStockMetricsAsync()
 ```
 
-### **💳 FINANCIAL DOMAIN COMPONENTS**
+### **ðŸ’³ FINANCIAL DOMAIN COMPONENTS**
 
-#### **🎮 Financial Controllers**
+#### **ðŸŽ® Financial Controllers**
 ```
 AccountReceivableController:
-├── GET /AccountReceivable - Lista contas a receber
-├── POST /AccountReceivable/{id}/Payment - Registrar recebimento
-├── GET /AccountReceivable/Overdue - Contas vencidas
-└── GET /AccountReceivable/{id}/Installments - Parcelas
+â”œâ”€â”€ GET /AccountReceivable - Lista contas a receber
+â”œâ”€â”€ POST /AccountReceivable/{id}/Payment - Registrar recebimento
+â”œâ”€â”€ GET /AccountReceivable/Overdue - Contas vencidas
+â””â”€â”€ GET /AccountReceivable/{id}/Installments - Parcelas
 
 AccountPayableController:
-├── GET /AccountPayable - Lista contas a pagar
-├── POST /AccountPayable/{id}/Payment - Registrar pagamento
-├── GET /AccountPayable/Overdue - Contas vencidas
-└── GET /AccountPayable/DueToday - Vencimentos hoje
+â”œâ”€â”€ GET /AccountPayable - Lista contas a pagar
+â”œâ”€â”€ POST /AccountPayable/{id}/Payment - Registrar pagamento
+â”œâ”€â”€ GET /AccountPayable/Overdue - Contas vencidas
+â””â”€â”€ GET /AccountPayable/DueToday - Vencimentos hoje
 
 TransactionController:
-├── GET /Transaction - Extrato transações
-├── POST /Transaction - Registrar transação manual
-├── POST /Transaction/Reconcile - Conciliação bancária
-└── GET /Transaction/CashFlow - Fluxo de caixa
+â”œâ”€â”€ GET /Transaction - Extrato transaÃ§Ãµes
+â”œâ”€â”€ POST /Transaction - Registrar transaÃ§Ã£o manual
+â”œâ”€â”€ POST /Transaction/Reconcile - ConciliaÃ§Ã£o bancÃ¡ria
+â””â”€â”€ GET /Transaction/CashFlow - Fluxo de caixa
 
 ReportController:
-├── GET /Report/Profitability - Relatório lucratividade
-├── GET /Report/CashFlow - Projeção fluxo caixa
-├── GET /Report/AgingReport - Relatório aging
-└── GET /Report/Dashboard - Dashboard executivo
+â”œâ”€â”€ GET /Report/Profitability - RelatÃ³rio lucratividade
+â”œâ”€â”€ GET /Report/CashFlow - ProjeÃ§Ã£o fluxo caixa
+â”œâ”€â”€ GET /Report/AgingReport - RelatÃ³rio aging
+â””â”€â”€ GET /Report/Dashboard - Dashboard executivo
 ```
 
-#### **⚙️ Financial Service**
+#### **âš™ï¸ Financial Service**
 ```
 Account Management:
-├── 🆕 CreateAccountReceivableAsync(OrderEntry)
-├── 🆕 CreateAccountPayableAsync(PurchaseOrder)
-├── 💰 ProcessPaymentAsync(string accountId, PaymentDto)
-├── 📊 CalculateInstallmentsAsync(decimal amount, PaymentTerms)
-└── ⚠️ ProcessOverdueAccountsAsync()
+â”œâ”€â”€ ðŸ†• CreateAccountReceivableAsync(OrderEntry)
+â”œâ”€â”€ ðŸ†• CreateAccountPayableAsync(PurchaseOrder)
+â”œâ”€â”€ ðŸ’° ProcessPaymentAsync(string accountId, PaymentDto)
+â”œâ”€â”€ ðŸ“Š CalculateInstallmentsAsync(decimal amount, PaymentTerms)
+â””â”€â”€ âš ï¸ ProcessOverdueAccountsAsync()
 
 Transaction Processing:
-├── 💳 CreateTransactionAsync(TransactionDto)
-├── 🏦 ReconcileTransactionAsync(string transactionId, BankData)
-├── 📊 CalculateCashFlowAsync(DateTime start, DateTime end)
-├── 📈 GenerateProfitabilityReportAsync(string orderId)
-└── 💹 UpdateFinancialMetricsAsync()
+â”œâ”€â”€ ðŸ’³ CreateTransactionAsync(TransactionDto)
+â”œâ”€â”€ ðŸ¦ ReconcileTransactionAsync(string transactionId, BankData)
+â”œâ”€â”€ ðŸ“Š CalculateCashFlowAsync(DateTime start, DateTime end)
+â”œâ”€â”€ ðŸ“ˆ GenerateProfitabilityReportAsync(string orderId)
+â””â”€â”€ ðŸ’¹ UpdateFinancialMetricsAsync()
 
 Integration Events:
-├── 📥 Handle OrderConfirmed (create AR)
-├── 📥 Handle PurchaseCompleted (create AP)
-├── 📥 Handle PaymentReceived (update AR)
-├── 📥 Handle PaymentMade (update AP)
-└── 📤 Publish CashFlowUpdated
+â”œâ”€â”€ ðŸ“¥ Handle OrderConfirmed (create AR)
+â”œâ”€â”€ ðŸ“¥ Handle PurchaseCompleted (create AP)
+â”œâ”€â”€ ðŸ“¥ Handle PaymentReceived (update AR)
+â”œâ”€â”€ ðŸ“¥ Handle PaymentMade (update AP)
+â””â”€â”€ ðŸ“¤ Publish CashFlowUpdated
 ```
 
-## 🔧 Infrastructure Components
+## ðŸ”§ Infrastructure Components
 
-### **🔐 Identity Service**
+### **ðŸ” Identity Service**
 ```
 ASP.NET Core Identity Features:
-├── 👤 User management per tenant
-├── 🎭 Role-based authorization
-├── 🎯 Claims-based permissions
-├── 🔒 Password policies
-├── 🔑 Two-factor authentication
-└── 📊 Audit trail
+â”œâ”€â”€ ðŸ‘¤ User management per tenant
+â”œâ”€â”€ ðŸŽ­ Role-based authorization
+â”œâ”€â”€ ðŸŽ¯ Claims-based permissions
+â”œâ”€â”€ ðŸ”’ Password policies
+â”œâ”€â”€ ðŸ”‘ Two-factor authentication
+â””â”€â”€ ðŸ“Š Audit trail
 
 Tenant Isolation:
-├── 🏠 Separate Identity tables per tenant
-├── 🔒 Cross-tenant access prevention
-├── 🎯 Role scoping within tenant
-└── 📋 Permission inheritance
+â”œâ”€â”€ ðŸ  Separate Identity tables per tenant
+â”œâ”€â”€ ðŸ”’ Cross-tenant access prevention
+â”œâ”€â”€ ðŸŽ¯ Role scoping within tenant
+â””â”€â”€ ðŸ“‹ Permission inheritance
 ```
 
-### **🌐 Integration Service**
+### **ðŸŒ Integration Service**
 ```
 Google Workspace APIs:
-├── 👥 People API Client
-│   ├── SyncContactsAsync()
-│   ├── CreateContactAsync(Customer)
-│   └── UpdateContactAsync(string id, ContactData)
-├── 📅 Calendar API Client
-│   ├── CreateEventAsync(ProductionOrder)
-│   ├── UpdateEventAsync(string eventId, EventData)
-│   └── DeleteEventAsync(string eventId)
-└── 🗺️ Maps API Client
-    ├── CalculateRouteAsync(string origin, string destination)
-    ├── GetDistanceMatrixAsync(List<Address>)
-    └── GeocodingAsync(string address)
+â”œâ”€â”€ ðŸ‘¥ People API Client
+â”‚   â”œâ”€â”€ SyncContactsAsync()
+â”‚   â”œâ”€â”€ CreateContactAsync(Customer)
+â”‚   â””â”€â”€ UpdateContactAsync(string id, ContactData)
+â”œâ”€â”€ ðŸ“… Calendar API Client
+â”‚   â”œâ”€â”€ CreateEventAsync(ProductionOrder)
+â”‚   â”œâ”€â”€ UpdateEventAsync(string eventId, EventData)
+â”‚   â””â”€â”€ DeleteEventAsync(string eventId)
+â””â”€â”€ ðŸ—ºï¸ Maps API Client
+    â”œâ”€â”€ CalculateRouteAsync(string origin, string destination)
+    â”œâ”€â”€ GetDistanceMatrixAsync(List<Address>)
+    â””â”€â”€ GeocodingAsync(string address)
 
 Circuit Breaker Pattern:
-├── ⚡ Auto-retry on transient failures
-├── 🔴 Circuit open on consecutive failures
-├── 💾 Fallback to cached data
-└── 📊 Health check monitoring
+â”œâ”€â”€ âš¡ Auto-retry on transient failures
+â”œâ”€â”€ ðŸ”´ Circuit open on consecutive failures
+â”œâ”€â”€ ðŸ’¾ Fallback to cached data
+â””â”€â”€ ðŸ“Š Health check monitoring
 ```
 
-### **🤖 AI Service**
+### **ðŸ¤– AI Service**
 ```
 Document Processing Pipeline:
-├── 📄 OCR Engine (Extract text from images/PDF)
-├── 🧠 ML Models (Classification + Named Entity Recognition)
-├── 🔍 Data Mapping (Match suppliers/ingredients)
-├── ✅ Confidence Scoring (Accuracy assessment)
-└── 📋 Result Formatting (Structured JSON output)
+â”œâ”€â”€ ðŸ“„ OCR Engine (Extract text from images/PDF)
+â”œâ”€â”€ ðŸ§  ML Models (Classification + Named Entity Recognition)
+â”œâ”€â”€ ðŸ” Data Mapping (Match suppliers/ingredients)
+â”œâ”€â”€ âœ… Confidence Scoring (Accuracy assessment)
+â””â”€â”€ ðŸ“‹ Result Formatting (Structured JSON output)
 
 Processing Steps:
-├── 1️⃣ File upload validation
-├── 2️⃣ OCR text extraction
-├── 3️⃣ Document type classification
-├── 4️⃣ Entity extraction (supplier, items, values)
-├── 5️⃣ Data mapping to system entities
-├── 6️⃣ Confidence calculation
-└── 7️⃣ Human validation queue
+â”œâ”€â”€ 1ï¸âƒ£ File upload validation
+â”œâ”€â”€ 2ï¸âƒ£ OCR text extraction
+â”œâ”€â”€ 3ï¸âƒ£ Document type classification
+â”œâ”€â”€ 4ï¸âƒ£ Entity extraction (supplier, items, values)
+â”œâ”€â”€ 5ï¸âƒ£ Data mapping to system entities
+â”œâ”€â”€ 6ï¸âƒ£ Confidence calculation
+â””â”€â”€ 7ï¸âƒ£ Human validation queue
 ```
 
-### **⚡ Event Bus**
+### **âš¡ Event Bus**
 ```
 In-Memory Event Coordination:
-├── 📤 Event Publishing (IEventPublisher)
-├── 📥 Event Subscription (IEventHandler<T>)
-├── 🔄 Event Routing (by event type)
-├── ⚡ Async Processing (BackgroundService)
-└── 📊 Event Tracking (audit + metrics)
+â”œâ”€â”€ ðŸ“¤ Event Publishing (IEventPublisher)
+â”œâ”€â”€ ðŸ“¥ Event Subscription (IEventHandler<T>)
+â”œâ”€â”€ ðŸ”„ Event Routing (by event type)
+â”œâ”€â”€ âš¡ Async Processing (BackgroundService)
+â””â”€â”€ ðŸ“Š Event Tracking (audit + metrics)
 
 Key Events:
-├── 💰 OrderConfirmed → Create Demands + AccountReceivable
-├── 🏭 DemandCreated → Check ingredient availability
-├── 📦 ProductionCompleted → Update order status
-├── 🛒 PurchaseReceived → Update stock + AccountPayable
-└── 💳 PaymentReceived → Update account status
+â”œâ”€â”€ ðŸ’° OrderConfirmed â†’ Create Demands + AccountReceivable
+â”œâ”€â”€ ðŸ­ DemandCreated â†’ Check ingredient availability
+â”œâ”€â”€ ðŸ“¦ ProductionCompleted â†’ Update order status
+â”œâ”€â”€ ðŸ›’ PurchaseReceived â†’ Update stock + AccountPayable
+â””â”€â”€ ðŸ’³ PaymentReceived â†’ Update account status
 ```
 
-## 🔄 Component Interaction Patterns
+## ðŸ”„ Component Interaction Patterns
 
-### **📊 Cross-Domain Integration Pattern**
+### **ðŸ“Š Cross-Domain Integration Pattern**
 ```mermaid
 sequenceDiagram
     participant SC as Sales Controller
@@ -508,7 +508,7 @@ sequenceDiagram
     SS-->>SC: Order confirmed successfully
 ```
 
-### **🤖 AI Processing Pattern**
+### **ðŸ¤– AI Processing Pattern**
 ```mermaid
 sequenceDiagram
     participant PC as Purchasing Controller
@@ -530,9 +530,9 @@ sequenceDiagram
     PS->>PC: Notify completion (SignalR)
 ```
 
-## 📊 Performance and Monitoring
+## ðŸ“Š Performance and Monitoring
 
-### **🎯 Component SLA Targets**
+### **ðŸŽ¯ Component SLA Targets**
 | Component | Response Time | Throughput | Error Rate |
 |-----------|---------------|------------|------------|
 | **Controllers** | < 200ms | 1000 req/min | < 0.1% |
@@ -541,21 +541,21 @@ sequenceDiagram
 | **AI Service** | < 30s | 100 docs/hour | < 5% |
 | **Integration Service** | < 2s | 1000 API calls/hour | < 1% |
 
-### **📈 Monitoring Strategy**
+### **ðŸ“ˆ Monitoring Strategy**
 ```
 Metrics Collection:
-├── 🎮 Controller: Request count, response time, error rate
-├── ⚙️ Service: Method execution time, business rule violations
-├── 🗄️ Repository: Query performance, connection pooling
-├── 🤖 AI Service: Processing time, accuracy rate, queue length
-├── 🌐 Integration: API latency, quota usage, circuit breaker status
-└── 📊 Event Bus: Event throughput, processing lag, dead letters
+â”œâ”€â”€ ðŸŽ® Controller: Request count, response time, error rate
+â”œâ”€â”€ âš™ï¸ Service: Method execution time, business rule violations
+â”œâ”€â”€ ðŸ—„ï¸ Repository: Query performance, connection pooling
+â”œâ”€â”€ ðŸ¤– AI Service: Processing time, accuracy rate, queue length
+â”œâ”€â”€ ðŸŒ Integration: API latency, quota usage, circuit breaker status
+â””â”€â”€ ðŸ“Š Event Bus: Event throughput, processing lag, dead letters
 ```
 
 ---
 
 **Arquivo**: `level3-component-diagrams.md`  
-**Nível C4**: 3 - Component  
-**Audiência**: Arquitetos de software e desenvolvedores  
-**Foco**: Organização interna dos containers em componentes  
-**Atualização**: 16/06/2025
+**NÃ­vel C4**: 3 - Component  
+**AudiÃªncia**: Arquitetos de software e desenvolvedores  
+**Foco**: OrganizaÃ§Ã£o interna dos containers em componentes  
+**AtualizaÃ§Ã£o**: 16/06/2025

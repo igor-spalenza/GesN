@@ -162,6 +162,7 @@ interface Window {
     productManager: any;
     ordersManager: any;
     productCatalogManager: any;
+    orderItemManager: any;
     toastr: typeof toastr;
     bootstrap: typeof bootstrap;
 }

@@ -1,79 +1,79 @@
-# ⚡ EVENT STORMING - SISTEMA GesN
+﻿# âš¡ EVENT STORMING - SISTEMA GesN
 
-## 🎯 Visão Geral
-Event Storming é uma técnica colaborativa para mapear o domínio de negócio através de eventos, comandos, agregados e outros elementos do Domain-Driven Design (DDD). Este diretório contém o mapeamento completo dos eventos do sistema GesN.
+## ðŸŽ¯ VisÃ£o Geral
+Event Storming Ã© uma tÃ©cnica colaborativa para mapear o domÃ­nio de negÃ³cio atravÃ©s de eventos, comandos, agregados e outros elementos do Domain-Driven Design (DDD). Este diretÃ³rio contÃ©m o mapeamento completo dos eventos do sistema GesN.
 
-## 📋 Estrutura por Domínio
+## ðŸ“‹ Estrutura por DomÃ­nio
 
-### **🗂️ Organização dos Arquivos**
+### **ðŸ—‚ï¸ OrganizaÃ§Ã£o dos Arquivos**
 
-| Domínio | Arquivo | Foco Principal |
+| DomÃ­nio | Arquivo | Foco Principal |
 |---------|---------|----------------|
-| **📦 Produto** | [`product-domain-events.md`](./product-domain-events.md) | Criação produtos, configurações, validações |
-| **💰 Vendas** | [`sales-domain-events.md`](./sales-domain-events.md) | Pedidos, confirmações, integrações |
-| **🏭 Produção** | [`production-domain-events.md`](./production-domain-events.md) | Demandas, execução, finalização |
-| **🛒 Compras** | [`purchasing-domain-events.md`](./purchasing-domain-events.md) | Ordens compra, recebimentos, IA |
-| **💳 Financeiro** | [`financial-domain-events.md`](./financial-domain-events.md) | Contas, transações, conciliação |
+| **ðŸ“¦ Produto** | [`product-domain-events.md`](./product-domain-events.md) | CriaÃ§Ã£o produtos, configuraÃ§Ãµes, validaÃ§Ãµes |
+| **ðŸ’° Vendas** | [`sales-domain-events.md`](./sales-domain-events.md) | Pedidos, confirmaÃ§Ãµes, integraÃ§Ãµes |
+| **ðŸ­ ProduÃ§Ã£o** | [`production-domain-events.md`](./production-domain-events.md) | Demandas, execuÃ§Ã£o, finalizaÃ§Ã£o |
+| **ðŸ›’ Compras** | [`purchasing-domain-events.md`](./purchasing-domain-events.md) | Ordens compra, recebimentos, IA |
+| **ðŸ’³ Financeiro** | [`financial-domain-events.md`](./financial-domain-events.md) | Contas, transaÃ§Ãµes, conciliaÃ§Ã£o |
 
-## 🎨 Convenções do Event Storming
+## ðŸŽ¨ ConvenÃ§Ãµes do Event Storming
 
-### **🎭 Elementos e Cores**
+### **ðŸŽ­ Elementos e Cores**
 
-| Elemento | Cor | Formato | Descrição |
+| Elemento | Cor | Formato | DescriÃ§Ã£o |
 |----------|-----|---------|-----------|
-| **📋 Comando** | `#3b82f6` (Azul) | `[CreateOrder]` | Ação que inicia processo |
-| **⚡ Evento** | `#f59e0b` (Laranja) | `OrderCreated` | Fato que aconteceu |
-| **👤 Ator** | `#10b981` (Verde) | `(Customer)` | Quem executa comando |
-| **📊 Agregado** | `#8b5cf6` (Roxo) | `{OrderEntry}` | Entidade que processa |
-| **📋 Read Model** | `#6b7280` (Cinza) | `[OrderSummary]` | Projeção para leitura |
-| **🔗 Sistema Externo** | `#ef4444` (Vermelho) | `<GoogleCalendar>` | Dependência externa |
-| **⚠️ Hotspot** | `#ec4899` (Rosa) | `(!ComplexRule!)` | Regra complexa/problema |
+| **ðŸ“‹ Comando** | `#3b82f6` (Azul) | `[CreateOrder]` | AÃ§Ã£o que inicia processo |
+| **âš¡ Evento** | `#f59e0b` (Laranja) | `OrderCreated` | Fato que aconteceu |
+| **ðŸ‘¤ Ator** | `#10b981` (Verde) | `(Customer)` | Quem executa comando |
+| **ðŸ“Š Agregado** | `#8b5cf6` (Roxo) | `{OrderEntry}` | Entidade que processa |
+| **ðŸ“‹ Read Model** | `#6b7280` (Cinza) | `[OrderSummary]` | ProjeÃ§Ã£o para leitura |
+| **ðŸ”— Sistema Externo** | `#ef4444` (Vermelho) | `<GoogleCalendar>` | DependÃªncia externa |
+| **âš ï¸ Hotspot** | `#ec4899` (Rosa) | `(!ComplexRule!)` | Regra complexa/problema |
 
-### **🔄 Fluxo Temporal**
+### **ðŸ”„ Fluxo Temporal**
 ```
-Comando → Evento → Reação → Novo Comando → Novo Evento...
+Comando â†’ Evento â†’ ReaÃ§Ã£o â†’ Novo Comando â†’ Novo Evento...
 ```
 
-### **🏗️ Estrutura de Cada Domínio**
+### **ðŸ—ï¸ Estrutura de Cada DomÃ­nio**
 
-#### **1. 📋 Comandos (Commands)**
-- Ações que usuários/sistemas executam
+#### **1. ðŸ“‹ Comandos (Commands)**
+- AÃ§Ãµes que usuÃ¡rios/sistemas executam
 - Verbos no imperativo
-- Podem falhar (validações)
+- Podem falhar (validaÃ§Ãµes)
 
-#### **2. ⚡ Eventos (Domain Events)**
+#### **2. âš¡ Eventos (Domain Events)**
 - Fatos que aconteceram
 - Verbos no passado
 - Sempre bem-sucedidos
 
-#### **3. 📊 Agregados (Aggregates)**
+#### **3. ðŸ“Š Agregados (Aggregates)**
 - Entidades que processam comandos
-- Garantem consistência
+- Garantem consistÃªncia
 - Geram eventos
 
-#### **4. 👥 Atores (Actors)**
-- Usuários do sistema
+#### **4. ðŸ‘¥ Atores (Actors)**
+- UsuÃ¡rios do sistema
 - Sistemas externos
-- Processos automáticos
+- Processos automÃ¡ticos
 
-#### **5. 🔄 Políticas (Policies)**
-- Regras de negócio
-- "Quando X acontece, então Y"
+#### **5. ðŸ”„ PolÃ­ticas (Policies)**
+- Regras de negÃ³cio
+- "Quando X acontece, entÃ£o Y"
 - Conectam eventos a comandos
 
-## ⚡ Eventos de Alto Nível
+## âš¡ Eventos de Alto NÃ­vel
 
-### **🎯 Eventos Críticos Cross-Domain**
+### **ðŸŽ¯ Eventos CrÃ­ticos Cross-Domain**
 
-| Evento | Domínio Origem | Domínios Impactados | Criticidade |
+| Evento | DomÃ­nio Origem | DomÃ­nios Impactados | Criticidade |
 |--------|----------------|-------------------|------------|
-| `OrderConfirmed` | Vendas | Produção + Financeiro | 🚨 Crítico |
-| `DemandCreated` | Produção | Compras (se ingredients low) | ⚠️ Alto |
-| `ProductionCompleted` | Produção | Vendas + Financeiro | 🚨 Crítico |
-| `PurchaseReceived` | Compras | Produção + Financeiro | ⚠️ Alto |
-| `PaymentReceived` | Financeiro | Vendas | 🚨 Crítico |
+| `OrderConfirmed` | Vendas | ProduÃ§Ã£o + Financeiro | ðŸš¨ CrÃ­tico |
+| `DemandCreated` | ProduÃ§Ã£o | Compras (se ingredients low) | âš ï¸ Alto |
+| `ProductionCompleted` | ProduÃ§Ã£o | Vendas + Financeiro | ðŸš¨ CrÃ­tico |
+| `PurchaseReceived` | Compras | ProduÃ§Ã£o + Financeiro | âš ï¸ Alto |
+| `PaymentReceived` | Financeiro | Vendas | ðŸš¨ CrÃ­tico |
 
-### **🔗 Cadeia de Eventos Típica**
+### **ðŸ”— Cadeia de Eventos TÃ­pica**
 ```mermaid
 graph LR
     A[OrderConfirmed] --> B[DemandCreated]
@@ -85,28 +85,28 @@ graph LR
     G --> H[OrderInvoiced]
 ```
 
-## 🎯 Micro-Eventos
+## ðŸŽ¯ Micro-Eventos
 
-### **📊 Granularidade Detalhada**
+### **ðŸ“Š Granularidade Detalhada**
 
-| Nível | Exemplo | Quando Usar |
+| NÃ­vel | Exemplo | Quando Usar |
 |-------|---------|-------------|
-| **Alto Nível** | `OrderConfirmed` | Integrações entre domínios |
-| **Médio Nível** | `OrderItemAdded` | Dentro do domínio |
-| **Micro Nível** | `ProductComponentCompleted` | Tracking detalhado |
+| **Alto NÃ­vel** | `OrderConfirmed` | IntegraÃ§Ãµes entre domÃ­nios |
+| **MÃ©dio NÃ­vel** | `OrderItemAdded` | Dentro do domÃ­nio |
+| **Micro NÃ­vel** | `ProductComponentCompleted` | Tracking detalhado |
 
-### **⚙️ Estratégia de Implementação**
-- **Alto Nível**: Event Bus para integrações
-- **Médio Nível**: Domain Events locais
-- **Micro Nível**: Audit log + métricas
+### **âš™ï¸ EstratÃ©gia de ImplementaÃ§Ã£o**
+- **Alto NÃ­vel**: Event Bus para integraÃ§Ãµes
+- **MÃ©dio NÃ­vel**: Domain Events locais
+- **Micro NÃ­vel**: Audit log + mÃ©tricas
 
-## 📊 Padrões de Eventos
+## ðŸ“Š PadrÃµes de Eventos
 
-### **🔄 Padrões Identificados**
+### **ðŸ”„ PadrÃµes Identificados**
 
 #### **1. Saga Pattern**
 ```
-OrderConfirmed → DemandCreated → ProductionScheduled → IngredientReserved
+OrderConfirmed â†’ DemandCreated â†’ ProductionScheduled â†’ IngredientReserved
 ```
 
 #### **2. Event Sourcing Candidates**
@@ -119,20 +119,20 @@ OrderConfirmed → DemandCreated → ProductionScheduled → IngredientReserved
 - Financial reports (complex queries)
 - Production dashboard (real-time)
 
-## 🚨 Hotspots Identificados
+## ðŸš¨ Hotspots Identificados
 
-### **⚠️ Complexidades do Negócio**
+### **âš ï¸ Complexidades do NegÃ³cio**
 
-| Hotspot | Domínio | Descrição | Impacto |
+| Hotspot | DomÃ­nio | DescriÃ§Ã£o | Impacto |
 |---------|---------|-----------|---------|
-| **Product Configuration** | Produto/Vendas | Validação de componentes compostos | Alto |
-| **Demand Explosion** | Vendas/Produção | 1 OrderItem → N Demands | Crítico |
-| **Stock Reservation** | Produção/Compras | Concorrência de ingredientes | Alto |
-| **Payment Reconciliation** | Financeiro | Match transação ↔ conta | Médio |
+| **Product Configuration** | Produto/Vendas | ValidaÃ§Ã£o de componentes compostos | Alto |
+| **Demand Explosion** | Vendas/ProduÃ§Ã£o | 1 OrderItem â†’ N Demands | CrÃ­tico |
+| **Stock Reservation** | ProduÃ§Ã£o/Compras | ConcorrÃªncia de ingredientes | Alto |
+| **Payment Reconciliation** | Financeiro | Match transaÃ§Ã£o â†” conta | MÃ©dio |
 
 ---
 
 **Criado em**: 16/06/2025  
-**Versão**: 1.0  
-**Técnica**: Event Storming by Alberto Brandolini  
-**Escopo**: 5 Domínios + Integrações Google Workspace
+**VersÃ£o**: 1.0  
+**TÃ©cnica**: Event Storming by Alberto Brandolini  
+**Escopo**: 5 DomÃ­nios + IntegraÃ§Ãµes Google Workspace

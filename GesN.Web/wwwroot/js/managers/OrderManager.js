@@ -5,6 +5,7 @@
 // ===================================
 // Imports removidos - interfaces carregadas globalmente via script tags
 // As interfaces estão definidas em arquivos separados que serão carregados antes
+/// <reference path="../types/globals.d.ts" />
 // ⚠️ Tipos removidos - já definidos em common.ts
 class OrderManager {
     constructor() {
@@ -55,15 +56,126 @@ class OrderManager {
             activeClass: 'has-value',
             errorClass: 'is-invalid'
         };
+        // Inicializar managers
+        this.initializeManagers();
         // Configurar event listeners para controle do catálogo
         this.setupCatalogIntegration();
+    }
+    /**
+     * Inicializa managers necessários para o funcionamento do sistema
+     */
+    initializeManagers() {
+        try {
+            // Inicializar OrderItemManager globalmente
+            if (!window.orderItemManager) {
+                window.orderItemManager = new OrderItemManager({
+                    onItemAdded: (item) => {
+                        console.log('✅ Item adicionado ao carrinho:', item);
+                        // Atualizar display de totais se necessário
+                    },
+                    onItemsReloaded: () => {
+                        console.log('🔄 Lista de itens recarregada');
+                    },
+                    onError: (error) => {
+                        console.error('❌ Erro no OrderItemManager:', error);
+                        // Mostrar toast de erro global
+                        if (window.toastr) {
+                            window.toastr.error(error.message || 'Erro no gerenciamento de itens');
+                        }
+                    }
+                });
+                console.log('✅ OrderItemManager inicializado');
+            }
+            // Configurar comunicação entre managers
+            this.setupManagersCommunication();
+            console.log('🏗️ Managers preparados e comunicação configurada');
+        }
+        catch (error) {
+            console.error('❌ Erro ao inicializar managers:', error);
+        }
+    }
+    /**
+     * Configura comunicação entre ProductCatalogManager e OrderItemManager
+     */
+    setupManagersCommunication() {
+        try {
+            // Aguardar ProductCatalogManager estar disponível
+            if (typeof window.productCatalogManager !== 'undefined') {
+                this.configureEventsBetweenManagers();
+            }
+            else {
+                // Tentar novamente após um pequeno delay
+                setTimeout(() => {
+                    if (typeof window.productCatalogManager !== 'undefined') {
+                        this.configureEventsBetweenManagers();
+                    }
+                    else {
+                        console.warn('⚠️ ProductCatalogManager não disponível para configurar eventos');
+                    }
+                }, 100);
+            }
+        }
+        catch (error) {
+            console.error('❌ Erro ao configurar comunicação entre managers:', error);
+        }
+    }
+    /**
+     * Configura eventos específicos entre os managers
+     */
+    configureEventsBetweenManagers() {
+        try {
+            const catalogManager = window.productCatalogManager;
+            const itemManager = window.orderItemManager;
+            if (!catalogManager || !itemManager) {
+                console.warn('⚠️ Managers não disponíveis para configurar eventos');
+                return;
+            }
+            // ProductCatalogManager → OrderItemManager
+            catalogManager.events.onSimpleProductSelected = async (productId, quantity) => {
+                try {
+                    const response = await itemManager.addSimpleItem(productId, quantity);
+                    if (!response.success) {
+                        console.error('Erro ao adicionar produto simples:', response.message);
+                    }
+                }
+                catch (error) {
+                    console.error('Erro no evento onSimpleProductSelected:', error);
+                }
+            };
+            catalogManager.events.onCompositeProductConfigured = async (productId, config) => {
+                try {
+                    const response = await itemManager.addCompositeItem(productId, 1, config);
+                    if (!response.success) {
+                        console.error('Erro ao adicionar produto composto:', response.message);
+                    }
+                }
+                catch (error) {
+                    console.error('Erro no evento onCompositeProductConfigured:', error);
+                }
+            };
+            catalogManager.events.onGroupProductConfigured = async (productId, config) => {
+                try {
+                    const response = await itemManager.addGroupItem(productId, 1, config);
+                    if (!response.success) {
+                        console.error('Erro ao adicionar grupo de produtos:', response.message);
+                    }
+                }
+                catch (error) {
+                    console.error('Erro no evento onGroupProductConfigured:', error);
+                }
+            };
+            console.log('🔗 Comunicação entre managers configurada com sucesso');
+        }
+        catch (error) {
+            console.error('❌ Erro ao configurar eventos entre managers:', error);
+        }
     }
     /**
      * Configura integração com o catálogo lateral
      */
     setupCatalogIntegration() {
         // Event listener para mudança de abas
-        $(document).on('shown.bs.tab', 'button[data-bs-toggle="tab"]', (e) => {
+        $(document).on('shown.bs.tab', 'button[data-bs-toggle="tab"]', async (e) => {
             const target = $(e.target);
             const targetId = target.data('bs-target') || target.attr('href');
             const orderId = target.data('order-id');
@@ -75,10 +187,18 @@ class OrderManager {
                     console.log('🏠 Página inicial ativa - catálogo escondido');
                 }
                 else if (orderId) {
-                    // Aba de edição - trocar contexto do catálogo e mostrar botão toggle
-                    window.productCatalogManager.switchContext(orderId);
+                    // Aba de edição - trocar contexto do catálogo e inicializar OrderItemManager
+                    window.productCatalogManager.switchContext(orderId).then(() => {
+                        console.log('📝 Contexto do catálogo alterado para pedido:', orderId);
+                    }).catch((error) => {
+                        console.error('❌ Erro ao trocar contexto:', error);
+                    });
+                    // Inicializar OrderItemManager para este pedido
+                    if (typeof window.orderItemManager !== 'undefined') {
+                        window.orderItemManager.init(orderId);
+                        console.log('🛒 OrderItemManager inicializado para pedido:', orderId);
+                    }
                     $('#catalogToggleBtn').removeClass('hidden');
-                    console.log('📝 Contexto do catálogo alterado para pedido:', orderId);
                 }
             }
         });
@@ -315,7 +435,7 @@ class OrderManager {
             data: formData,
             processData: false,
             contentType: false,
-            success: (response) => {
+            success: async (response) => {
                 // 🔍 DEBUG: Vamos analisar a resposta real
                 console.log('=== DEBUG RESPONSE ===');
                 console.log('Resposta completa:', response);
@@ -352,7 +472,15 @@ class OrderManager {
             }
         });
     }
+    // Wrapper público para uso em onclick HTML (não async)
     abrirEdicao(orderId, numberSequence) {
+        this.abrirEdicaoAsync(orderId, numberSequence).catch(error => {
+            console.error('❌ Erro ao abrir edição:', error);
+            this.showToast('error', 'Erro ao abrir edição do pedido');
+        });
+    }
+    // Implementação async interna
+    async abrirEdicaoAsync(orderId, numberSequence) {
         // Verifica se a aba já existe usando o orderId como identificador
         const existingTabId = `order-${orderId}`;
         const existingTab = $(`#${existingTabId}-tab`);
@@ -390,15 +518,15 @@ class OrderManager {
         $(this.config.tabsContentSelector).append(novoConteudo);
         // Carrega o conteúdo da aba
         $.get(`${this.config.baseUrl}/EditPartial/${orderId}`)
-            .done((data) => {
+            .done(async (data) => {
             $(`#conteudo-${tabId}`).html(data);
-            // Preparar contexto do catálogo para esta aba
-            if (typeof window.productCatalogManager !== 'undefined') {
-                // Apenas trocar contexto, não mostrar automaticamente
-                window.productCatalogManager.switchContext(orderId);
-                // Mostrar botão toggle
-                $('#catalogToggleBtn').removeClass('hidden');
-                console.log('Contexto do catálogo preparado para pedido:', orderId);
+            // Mostrar botão toggle do catálogo (contexto já foi configurado no event listener)
+            $('#catalogToggleBtn').removeClass('hidden');
+            console.log('Aba carregada para pedido:', orderId);
+            // Inicializar OrderItemManager para este pedido
+            if (typeof window.orderItemManager !== 'undefined') {
+                window.orderItemManager.init(orderId);
+                console.log('🛒 OrderItemManager inicializado para pedido:', orderId);
             }
             // Se numberSequence não foi fornecido, extrai do conteúdo carregado
             if (!numberSequence) {

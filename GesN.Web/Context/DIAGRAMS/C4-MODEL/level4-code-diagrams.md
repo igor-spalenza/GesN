@@ -1,9 +1,9 @@
-# 💻 C4 LEVEL 4 - CODE DIAGRAMS
+﻿# ðŸ’» C4 LEVEL 4 - CODE DIAGRAMS
 
-## 🎯 Visão Geral
-Diagramas de código do sistema GesN mostrando classes, interfaces e implementações específicas. Este nível mostra os detalhes de implementação mais importantes para desenvolvedores, incluindo herança, padrões de design e contratos de interface.
+## ðŸŽ¯ VisÃ£o Geral
+Diagramas de cÃ³digo do sistema GesN mostrando classes, interfaces e implementaÃ§Ãµes especÃ­ficas. Este nÃ­vel mostra os detalhes de implementaÃ§Ã£o mais importantes para desenvolvedores, incluindo heranÃ§a, padrÃµes de design e contratos de interface.
 
-## 🧬 Product Domain - TPH Inheritance Implementation
+## ðŸ§¬ Product Domain - TPH Inheritance Implementation
 
 ```mermaid
 classDiagram
@@ -167,9 +167,9 @@ classDiagram
     class ProductType enum
 ```
 
-## 🏗️ Service Layer Interfaces by Domain
+## ðŸ—ï¸ Service Layer Interfaces by Domain
 
-### **💰 Sales Domain Contracts**
+### **ðŸ’° Sales Domain Contracts**
 
 ```mermaid
 classDiagram
@@ -270,7 +270,7 @@ classDiagram
     class SalesService,OrderItemService,CustomerService salesImpl
 ```
 
-### **🏭 Production Domain Contracts**
+### **ðŸ­ Production Domain Contracts**
 
 ```mermaid
 classDiagram
@@ -367,9 +367,9 @@ classDiagram
     class ProductionService,DemandService,ProductCompositionService productionImpl
 ```
 
-## 🔧 Repository Pattern Implementation
+## ðŸ”§ Repository Pattern Implementation
 
-### **🗄️ Generic Repository Base**
+### **ðŸ—„ï¸ Generic Repository Base**
 
 ```mermaid
 classDiagram
@@ -488,9 +488,9 @@ classDiagram
     class ProductRepository,SalesRepository specificClass
 ```
 
-## ⚡ Event-Driven Architecture
+## âš¡ Event-Driven Architecture
 
-### **📡 Event Bus Implementation**
+### **ðŸ“¡ Event Bus Implementation**
 
 ```mermaid
 classDiagram
@@ -646,9 +646,9 @@ classDiagram
     class InMemoryEventBus eventBusClass
 ```
 
-## 🔐 Cross-Cutting Concerns
+## ðŸ” Cross-Cutting Concerns
 
-### **🛡️ Security and Validation**
+### **ðŸ›¡ï¸ Security and Validation**
 
 ```mermaid
 classDiagram
@@ -798,9 +798,9 @@ classDiagram
     class AuditService auditClass
 ```
 
-## 📊 Performance and Monitoring
+## ðŸ“Š Performance and Monitoring
 
-### **📈 Metrics and Health Checks**
+### **ðŸ“ˆ Metrics and Health Checks**
 
 ```mermaid
 classDiagram
@@ -958,7 +958,7 @@ classDiagram
 ---
 
 **Arquivo**: `level4-code-diagrams.md`  
-**Nível C4**: 4 - Code  
-**Audiência**: Desenvolvedores  
-**Foco**: Classes, interfaces e implementações específicas  
-**Atualização**: 16/06/2025
+**NÃ­vel C4**: 4 - Code  
+**AudiÃªncia**: Desenvolvedores  
+**Foco**: Classes, interfaces e implementaÃ§Ãµes especÃ­ficas  
+**AtualizaÃ§Ã£o**: 16/06/2025

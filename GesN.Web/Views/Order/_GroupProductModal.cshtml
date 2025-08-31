@@ -1,0 +1,206 @@
+@model dynamic
+
+<div class="modal fade" id="groupProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-layer-group text-info"></i>
+                    Configurar Grupo: @Model.name
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="group-summary mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Informações do Grupo</h6>
+                            <p class="mb-1"><strong>SKU:</strong> @(Model.sku ?? "N/A")</p>
+                            <p class="mb-1"><strong>Total de Itens:</strong> @Model.totalItems</p>
+                            <p class="mb-3">
+                                <strong>Configuração:</strong> 
+                                @Model.requiredItems obrigatório(s), @Model.optionalItems opcional(is)
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="groupQuantity" class="form-label">Quantidade do Grupo</label>
+                            <input type="number" id="groupQuantity" class="form-control" 
+                                   min="1" max="999" value="@Model.initialQuantity">
+                            <small class="text-muted">Quantidade de grupos a adicionar</small>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="group-totals">
+                                <div class="pricing-display">
+                                    <strong>Total:</strong>
+                                    <div id="groupTotalDisplay" class="h5 text-primary mb-0">R$ 0,00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group-items-container">
+                    <h6 class="mb-3">Configurar Itens do Grupo</h6>
+                    <div class="group-items-list">
+                        
+                        @foreach (var groupItem in Model.groupItems ?? new List<object>())
+                        {
+                            var isRequired = !groupItem.isOptional;
+                            var maxQtyText = groupItem.maxQuantity != null ? groupItem.maxQuantity.ToString() : "∞";
+                            var hasMultipleOptions = groupItem.productOptions != null && groupItem.productOptions.Count > 1;
+                            
+                            <div class="group-item-section @(isRequired ? "required-item" : "optional-item")" 
+                                 data-group-item-id="@groupItem.id">
+                                <div class="group-item-header">
+                                    <h6 class="group-item-title">
+                                        @groupItem.displayName
+                                        @if (isRequired)
+                                        {
+                                            <span class="text-danger">*</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">(Opcional)</span>
+                                        }
+                                    </h6>
+                                    <small class="text-muted">
+                                        Tipo: @groupItem.itemType | Quantidade: @groupItem.minQuantity - @maxQtyText
+                                    </small>
+                                </div>
+                                
+                                <div class="group-item-content">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <label class="form-label">Selecionar Produto</label>
+                                            
+                                            @if (groupItem.itemType == "Produto" && groupItem.productOptions?.Count == 1)
+                                            {
+                                                var option = groupItem.productOptions.First();
+                                                <div class="single-product-option">
+                                                    <div class="product-info">
+                                                        <input type="hidden" class="selected-product" value="@option.id" 
+                                                               data-group-item-id="@groupItem.id">
+                                                        <div class="product-display">
+                                                            <strong>@option.name</strong>
+                                                            @if (!string.IsNullOrEmpty(option.description))
+                                                            {
+                                                                <div class="text-muted small">@option.description</div>
+                                                            }
+                                                            <div class="price-info">
+                                                                Preço: R$ @option.price.ToString("F2")
+                                                                @if (groupItem.extraPrice > 0)
+                                                                {
+                                                                    <text> + R$ @groupItem.extraPrice.ToString("F2") = R$ @option.effectivePrice.ToString("F2")</text>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else if (hasMultipleOptions)
+                                            {
+                                                <div class="multiple-options">
+                                                    <select class="form-control product-selector" data-group-item-id="@groupItem.id">
+                                                        <option value="">Selecione um produto...</option>
+                                                        @foreach (var option in groupItem.productOptions ?? new List<object>())
+                                                        {
+                                                            @if (option.isAvailable)
+                                                            {
+                                                                <option value="@option.id" 
+                                                                        data-price="@option.price" 
+                                                                        data-effective-price="@option.effectivePrice">
+                                                                    @option.name - R$ @option.effectivePrice.ToString("F2")
+                                                                </option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@option.id" 
+                                                                        data-price="@option.price" 
+                                                                        data-effective-price="@option.effectivePrice"
+                                                                        disabled>
+                                                                    @option.name - R$ @option.effectivePrice.ToString("F2") (Indisponível)
+                                                                </option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="no-options">
+                                                    <div class="alert alert-warning">
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                        Nenhuma opção disponível para este item
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Quantidade</label>
+                                            <input type="number" class="form-control item-quantity" 
+                                                   min="@groupItem.minQuantity" 
+                                                   max="@(groupItem.maxQuantity ?? 999)"
+                                                   value="@groupItem.defaultQuantity" 
+                                                   data-group-item-id="@groupItem.id"
+                                                   @(isRequired ? "" : "disabled")>
+                                            <div class="quantity-info">
+                                                <small class="text-muted">
+                                                    @if (groupItem.extraPrice > 0)
+                                                    {
+                                                        <text>Extra: +R$ @groupItem.extraPrice.ToString("F2")</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        <text>Sem custo extra</text>
+                                                    }
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    
+                    @if (Model.exchangeRules != null && Model.exchangeRules.Count > 0)
+                    {
+                        <div class="exchange-rules-section mt-3">
+                            <h6 class="mb-2">
+                                <i class="fas fa-exchange-alt text-info"></i>
+                                Regras de Substituição
+                            </h6>
+                            <div class="exchange-rules-list">
+                                @foreach (var rule in Model.exchangeRules)
+                                {
+                                    <div class="exchange-rule" data-rule-id="@rule.id">
+                                        <small class="text-muted">
+                                            <i class="fas fa-arrow-right"></i>
+                                            @rule.description (@rule.ratioDescription)
+                                        </small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="selection-summary mt-4 p-3 bg-light rounded">
+                    <h6 class="mb-2">Resumo da Seleção</h6>
+                    <div id="selectionSummary" class="selection-details">
+                        <p class="text-muted">Nenhum item selecionado</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="btnConfirmGroupAdd" disabled>
+                    <i class="fas fa-shopping-cart"></i> Adicionar ao Carrinho
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

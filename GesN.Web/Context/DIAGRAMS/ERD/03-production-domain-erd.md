@@ -1,114 +1,114 @@
-# 🏭 ERD - DOMÍNIO DE PRODUÇÃO
+﻿# ðŸ­ ERD - DOMÃNIO DE PRODUÃ‡ÃƒO
 
-## 🎯 Visão Geral
-Diagrama Entity-Relationship completo do Domínio de Produção, mostrando como as demandas são geradas automaticamente a partir de OrderItems e como são gerenciadas através de ProductComposition e ProductionOrder. Este domínio traduz vendas em tarefas de produção executáveis.
+## ðŸŽ¯ VisÃ£o Geral
+Diagrama Entity-Relationship completo do DomÃ­nio de ProduÃ§Ã£o, mostrando como as demandas sÃ£o geradas automaticamente a partir de OrderItems e como sÃ£o gerenciadas atravÃ©s de ProductComposition e ProductionOrder. Este domÃ­nio traduz vendas em tarefas de produÃ§Ã£o executÃ¡veis.
 
-## 🗄️ Diagrama de Entidades e Relacionamentos
+## ðŸ—„ï¸ Diagrama de Entidades e Relacionamentos
 
 ```mermaid
 erDiagram
-    %% === DOMÍNIO DE PRODUÇÃO ===
+    %% === DOMÃNIO DE PRODUÃ‡ÃƒO ===
     
-    %% === DEMANDA DE PRODUÇÃO ===
+    %% === DEMANDA DE PRODUÃ‡ÃƒO ===
     DEMAND {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string OrderItemId FK "Item pedido origem"
         string ProductId FK "Produto a produzir"
-        string ProductionOrderId FK "Ordem produção (opcional)"
+        string ProductionOrderId FK "Ordem produÃ§Ã£o (opcional)"
         int Quantity "Quantidade a produzir"
         datetime RequiredDate "Data limite entrega"
-        datetime StartDate "Data início produção"
-        datetime CompletionDate "Data conclusão"
+        datetime StartDate "Data inÃ­cio produÃ§Ã£o"
+        datetime CompletionDate "Data conclusÃ£o"
         string DemandStatus "Pending|Confirmed|InProduction|Finalizando|Ready|Delivered|Cancelled"
         string Priority "Low|Normal|High|Urgent"
         decimal EstimatedCost "Custo estimado"
         decimal ActualCost "Custo real"
         int EstimatedTimeMinutes "Tempo estimado (min)"
         int ActualTimeMinutes "Tempo real (min)"
-        string Notes "Observações"
+        string Notes "ObservaÃ§Ãµes"
         string StateCode "Active|Inactive"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
-        string CreatedBy "Usuário criador"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
+        string CreatedBy "UsuÃ¡rio criador"
     }
 
-    %% === COMPOSIÇÃO DO PRODUTO ===
+    %% === COMPOSIÃ‡ÃƒO DO PRODUTO ===
     PRODUCT_COMPOSITION {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string DemandId FK "Demanda pai"
         string ProductComponentId FK "Componente escolhido"
         string HierarchyName "Nome hierarquia"
         string ComponentName "Nome componente"
         int Quantity "Quantidade componente"
         string Status "Pending|InProgress|Completed|Cancelled"
-        datetime StartTime "Início processamento"
+        datetime StartTime "InÃ­cio processamento"
         datetime CompletionTime "Fim processamento"
         decimal ComponentCost "Custo do componente"
         int ProcessingTimeMinutes "Tempo processamento"
-        string WorkstationId "Estação de trabalho"
-        string OperatorId "Operador responsável"
-        string QualityNotes "Observações qualidade"
+        string WorkstationId "EstaÃ§Ã£o de trabalho"
+        string OperatorId "Operador responsÃ¡vel"
+        string QualityNotes "ObservaÃ§Ãµes qualidade"
         string StateCode "Active|Inactive"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
     }
 
-    %% === ORDEM DE PRODUÇÃO ===
+    %% === ORDEM DE PRODUÃ‡ÃƒO ===
     PRODUCTION_ORDER {
-        string Id PK "GUID único"
-        string OrderNumber "Número sequencial"
-        string BatchNumber "Número do lote"
+        string Id PK "GUID Ãºnico"
+        string OrderNumber "NÃºmero sequencial"
+        string BatchNumber "NÃºmero do lote"
         datetime ScheduledDate "Data agendada"
-        datetime StartDate "Data início"
-        datetime CompletionDate "Data conclusão"
+        datetime StartDate "Data inÃ­cio"
+        datetime CompletionDate "Data conclusÃ£o"
         string ProductionStatus "Draft|Scheduled|InProgress|Completed|Cancelled"
         string ProductionType "Regular|Express|Batch"
         decimal TotalEstimatedCost "Custo total estimado"
         decimal TotalActualCost "Custo total real"
         int TotalEstimatedTime "Tempo total estimado"
         int TotalActualTime "Tempo total real"
-        string SupervisorId "Supervisor responsável"
-        string Notes "Observações gerais"
+        string SupervisorId "Supervisor responsÃ¡vel"
+        string Notes "ObservaÃ§Ãµes gerais"
         string StateCode "Active|Inactive"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
-        string CreatedBy "Usuário criador"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
+        string CreatedBy "UsuÃ¡rio criador"
     }
 
-    %% === INTEGRAÇÕES COM OUTROS DOMÍNIOS ===
+    %% === INTEGRAÃ‡Ã•ES COM OUTROS DOMÃNIOS ===
 
     %% VENDAS (ORIGEM DAS DEMANDAS)
     ORDER_ITEM {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string OrderEntryId FK "Pedido pai"
         string ProductId FK "Produto"
         int Quantity "Quantidade pedida"
-        string ProductConfiguration "JSON configuração"
+        string ProductConfiguration "JSON configuraÃ§Ã£o"
         string ItemStatus "Pending|Confirmed|InProduction|Completed"
-        datetime CreatedDate "Data de criação"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
     }
 
     ORDER_ENTRY {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string CustomerId FK "Cliente"
         datetime DeliveryDate "Data entrega"
         string OrderStatus "Pending|Confirmed|InProduction|Ready|Delivered"
         decimal TotalValue "Valor total"
     }
 
-    %% PRODUTO (ESPECIFICAÇÕES)
+    %% PRODUTO (ESPECIFICAÃ‡Ã•ES)
     PRODUCT {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string ProductType "Simple|Composite|Group"
         string Name "Nome produto"
         int AssemblyTime "Tempo montagem"
-        string AssemblyInstructions "Instruções"
+        string AssemblyInstructions "InstruÃ§Ãµes"
         decimal Cost "Custo base"
     }
 
-    %% COMPONENTES (CONFIGURAÇÃO)
+    %% COMPONENTES (CONFIGURAÃ‡ÃƒO)
     PRODUCT_COMPONENT {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string Name "Nome componente"
         string ProductComponentHierarchyId FK "Hierarquia"
         decimal AdditionalCost "Custo adicional"
@@ -117,52 +117,52 @@ erDiagram
 
     %% COMPRAS (CONSUMO DE INGREDIENTES)
     INGREDIENT_STOCK {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string IngredientId FK "Ingrediente"
         decimal CurrentQuantity "Qtd atual estoque"
-        decimal MinimumLevel "Nível mínimo"
+        decimal MinimumLevel "NÃ­vel mÃ­nimo"
         string UnitOfMeasure "Unidade medida"
-        datetime LastUpdated "Última atualização"
+        datetime LastUpdated "Ãšltima atualizaÃ§Ã£o"
     }
 
     INGREDIENT_CONSUMPTION {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string DemandId FK "Demanda consumidora"
         string IngredientId FK "Ingrediente consumido"
         decimal QuantityConsumed "Quantidade consumida"
         datetime ConsumptionDate "Data do consumo"
-        string Notes "Observações"
+        string Notes "ObservaÃ§Ãµes"
     }
 
     %% ==========================================
     %% RELACIONAMENTOS PRINCIPAIS
     %% ==========================================
 
-    %% FLUXO DE PRODUÇÃO
+    %% FLUXO DE PRODUÃ‡ÃƒO
     DEMAND ||--o{ PRODUCT_COMPOSITION : "detalha tarefas"
     PRODUCTION_ORDER ||--o{ DEMAND : "agrupa demandas"
 
     %% ==========================================
-    %% INTEGRAÇÕES COM OUTROS DOMÍNIOS
+    %% INTEGRAÃ‡Ã•ES COM OUTROS DOMÃNIOS
     %% ==========================================
 
-    %% VENDAS → PRODUÇÃO (Automático)
+    %% VENDAS â†’ PRODUÃ‡ÃƒO (AutomÃ¡tico)
     ORDER_ITEM ||--o{ DEMAND : "gera automaticamente"
-    ORDER_ENTRY ||--o{ ORDER_ITEM : "contém"
+    ORDER_ENTRY ||--o{ ORDER_ITEM : "contÃ©m"
 
-    %% PRODUTO → PRODUÇÃO (Consulta)
-    PRODUCT ||--o{ DEMAND : "especifica produção"
+    %% PRODUTO â†’ PRODUÃ‡ÃƒO (Consulta)
+    PRODUCT ||--o{ DEMAND : "especifica produÃ§Ã£o"
     PRODUCT_COMPONENT ||--o{ PRODUCT_COMPOSITION : "define componente"
 
-    %% PRODUÇÃO → COMPRAS (Consumo)
+    %% PRODUÃ‡ÃƒO â†’ COMPRAS (Consumo)
     DEMAND ||--o{ INGREDIENT_CONSUMPTION : "consome ingredientes"
     INGREDIENT_STOCK ||--o{ INGREDIENT_CONSUMPTION : "fornece estoque"
 
     %% ==========================================
-    %% STYLING POR DOMÍNIO
+    %% STYLING POR DOMÃNIO
     %% ==========================================
     
-    %% PRODUÇÃO = Dourado (#fba81d)
+    %% PRODUÃ‡ÃƒO = Dourado (#fba81d)
     DEMAND {
         background-color "#fba81d"
         color "black"
@@ -221,48 +221,48 @@ erDiagram
     }
 ```
 
-## 📋 Detalhes das Entidades
+## ðŸ“‹ Detalhes das Entidades
 
-### **🎯 DEMAND (Demanda de Produção)**
-- **Propósito**: Ordem de produção gerada automaticamente a partir de OrderItem
+### **ðŸŽ¯ DEMAND (Demanda de ProduÃ§Ã£o)**
+- **PropÃ³sito**: Ordem de produÃ§Ã£o gerada automaticamente a partir de OrderItem
 - **Relacionamento**: N:1 com OrderItem (origem), 1:N com ProductComposition (detalhamento)
-- **Status Flow**: Pending → Confirmed → InProduction → Finalizando → Ready → Delivered
-- **Características**: Quantidade, data limite, custos estimados/reais, tempos
+- **Status Flow**: Pending â†’ Confirmed â†’ InProduction â†’ Finalizando â†’ Ready â†’ Delivered
+- **CaracterÃ­sticas**: Quantidade, data limite, custos estimados/reais, tempos
 
-### **🧩 PRODUCT_COMPOSITION (Tarefa de Produção)**
-- **Propósito**: Detalha componentes específicos de uma demanda (especialmente para ProductType.Composite)
+### **ðŸ§© PRODUCT_COMPOSITION (Tarefa de ProduÃ§Ã£o)**
+- **PropÃ³sito**: Detalha componentes especÃ­ficos de uma demanda (especialmente para ProductType.Composite)
 - **Relacionamento**: N:1 com Demand, N:1 com ProductComponent
-- **Características**: Quantidade, tempos de processamento, estação de trabalho, operador
-- **Rastreamento**: Status individual por componente (Pending → InProgress → Completed)
+- **CaracterÃ­sticas**: Quantidade, tempos de processamento, estaÃ§Ã£o de trabalho, operador
+- **Rastreamento**: Status individual por componente (Pending â†’ InProgress â†’ Completed)
 
-### **📋 PRODUCTION_ORDER (Ordem de Produção)**
-- **Propósito**: Agrupa múltiplas demandas para otimização de recursos e cronograma
+### **ðŸ“‹ PRODUCTION_ORDER (Ordem de ProduÃ§Ã£o)**
+- **PropÃ³sito**: Agrupa mÃºltiplas demandas para otimizaÃ§Ã£o de recursos e cronograma
 - **Relacionamento**: 1:N com Demand
-- **Características**: Lote, agendamento, custos totais, supervisor responsável
-- **Ciclo**: Draft → Scheduled → InProgress → Completed
+- **CaracterÃ­sticas**: Lote, agendamento, custos totais, supervisor responsÃ¡vel
+- **Ciclo**: Draft â†’ Scheduled â†’ InProgress â†’ Completed
 
-### **🔗 Entidades de Integração**
+### **ðŸ”— Entidades de IntegraÃ§Ã£o**
 
-#### **ORDER_ITEM** *(Origem do Domínio de Vendas)*
+#### **ORDER_ITEM** *(Origem do DomÃ­nio de Vendas)*
 - **Relacionamento**: 1:N com Demand
-- **Regra Crítica**: Toda alteração em OrderItem deve propagar para Demands relacionadas
+- **Regra CrÃ­tica**: Toda alteraÃ§Ã£o em OrderItem deve propagar para Demands relacionadas
 
-#### **PRODUCT** *(Especificação do Domínio de Produto)*
+#### **PRODUCT** *(EspecificaÃ§Ã£o do DomÃ­nio de Produto)*
 - **Relacionamento**: 1:N com Demand
 - **Dados Utilizados**: AssemblyTime, AssemblyInstructions, Cost
 
-#### **INGREDIENT_CONSUMPTION** *(Integração com Domínio de Compras)*
+#### **INGREDIENT_CONSUMPTION** *(IntegraÃ§Ã£o com DomÃ­nio de Compras)*
 - **Relacionamento**: N:1 com Demand, N:1 com IngredientStock
-- **Propósito**: Registrar consumo de ingredientes durante produção
+- **PropÃ³sito**: Registrar consumo de ingredientes durante produÃ§Ã£o
 
-## 🔄 Fluxos de Criação Automática de Demandas
+## ðŸ”„ Fluxos de CriaÃ§Ã£o AutomÃ¡tica de Demandas
 
-### **📊 Regra de Geração: 1 OrderItem → 1:N Demand**
+### **ðŸ“Š Regra de GeraÃ§Ã£o: 1 OrderItem â†’ 1:N Demand**
 
 #### **ProductType.Simple**
 ```
 OrderItem: 50x "Coxinha Comum"
-↓
+â†“
 Demand: 50x "Coxinha Comum" (DemandStatus: Pending)
 ```
 
@@ -274,122 +274,122 @@ OrderItem: 1x "Bolo p/ 20 pessoas"
         "recheio": ["brigadeiro", "morango"], 
         "cobertura": "chantilly"
     }
-↓
+â†“
 Demand: 1x "Bolo p/ 20 pessoas" (DemandStatus: Pending)
-├── ProductComposition: Massa Branca (Status: Pending)
-├── ProductComposition: Recheio Brigadeiro (Status: Pending)  
-├── ProductComposition: Recheio Morango (Status: Pending)
-└── ProductComposition: Cobertura Chantilly (Status: Pending)
+â”œâ”€â”€ ProductComposition: Massa Branca (Status: Pending)
+â”œâ”€â”€ ProductComposition: Recheio Brigadeiro (Status: Pending)  
+â”œâ”€â”€ ProductComposition: Recheio Morango (Status: Pending)
+â””â”€â”€ ProductComposition: Cobertura Chantilly (Status: Pending)
 ```
 
 #### **ProductType.Group**
 ```
 OrderItem: 1x "Kit Festa 50 pessoas"
-    Configuração: {
+    ConfiguraÃ§Ã£o: {
         "bolo": 1x "Bolo p/ 50 pessoas",
         "salgados": 500x "Coxinha",
         "doces": 200x "Cajuzinho"
     }
-↓
+â†“
 Demand 1: 1x "Bolo p/ 50 pessoas" + ProductComposition detalhada
 Demand 2: 500x "Coxinha" 
 Demand 3: 200x "Cajuzinho"
 ```
 
-### **📈 Sincronização de Status**
+### **ðŸ“ˆ SincronizaÃ§Ã£o de Status**
 
-#### **OrderEntry.OrderStatus → Demand.DemandStatus**
+#### **OrderEntry.OrderStatus â†’ Demand.DemandStatus**
 ```
-OrderEntry "SentToProduction" → Todas Demands relacionadas:
-1. DemandStatus: Pending → Confirmed
-2. Criação de ProductionOrder agrupando as Demands
-3. ProductionOrder.ProductionStatus: Draft → Scheduled
-```
-
-#### **Demand.DemandStatus → OrderItem.ItemStatus**
-```
-Demand "Completed" → OrderItem "Completed"
-Todas Demands de um OrderItem "Completed" → OrderItem "Completed"
+OrderEntry "SentToProduction" â†’ Todas Demands relacionadas:
+1. DemandStatus: Pending â†’ Confirmed
+2. CriaÃ§Ã£o de ProductionOrder agrupando as Demands
+3. ProductionOrder.ProductionStatus: Draft â†’ Scheduled
 ```
 
-## 🏗️ Processo de Execução de Produção
+#### **Demand.DemandStatus â†’ OrderItem.ItemStatus**
+```
+Demand "Completed" â†’ OrderItem "Completed"
+Todas Demands de um OrderItem "Completed" â†’ OrderItem "Completed"
+```
+
+## ðŸ—ï¸ Processo de ExecuÃ§Ã£o de ProduÃ§Ã£o
 
 ### **1. Planejamento (ProductionOrder)**
 ```
 1. Sistema agrupa Demands por:
    - Data de entrega (RequiredDate)
-   - Tipo de produto (otimização de setup)
+   - Tipo de produto (otimizaÃ§Ã£o de setup)
    - Prioridade (Priority)
 
 2. Cria ProductionOrder com:
    - Agendamento otimizado
-   - Alocação de recursos
+   - AlocaÃ§Ã£o de recursos
    - Estimativas de tempo e custo
 ```
 
-### **2. Execução (ProductComposition)**
+### **2. ExecuÃ§Ã£o (ProductComposition)**
 ```
 1. Para cada Demand na ProductionOrder:
    a. Lista ProductComposition relacionadas
    b. Ordena por AssemblyOrder (hierarquia)
    c. Executa componente por componente:
-      - Status: Pending → InProgress
+      - Status: Pending â†’ InProgress
       - Registra StartTime
       - Aloca workstation e operator
       - Consome ingredientes (IngredientConsumption)
       - Registra CompletionTime
-      - Status: InProgress → Completed
+      - Status: InProgress â†’ Completed
 
-2. Quando todas ProductComposition estão "Completed":
-   - Demand.DemandStatus: InProduction → Ready
+2. Quando todas ProductComposition estÃ£o "Completed":
+   - Demand.DemandStatus: InProduction â†’ Ready
 ```
 
 ### **3. Controle de Qualidade**
 ```
 1. QualityNotes em ProductComposition
-2. Validação de especificações
-3. Aprovação final da Demand
-4. DemandStatus: Ready → Delivered
+2. ValidaÃ§Ã£o de especificaÃ§Ãµes
+3. AprovaÃ§Ã£o final da Demand
+4. DemandStatus: Ready â†’ Delivered
 ```
 
-## 📊 Métricas de Produção
+## ðŸ“Š MÃ©tricas de ProduÃ§Ã£o
 
 ### **Por Demand**
-- **Eficiência Temporal**: ActualTimeMinutes vs EstimatedTimeMinutes
-- **Eficiência de Custo**: ActualCost vs EstimatedCost
+- **EficiÃªncia Temporal**: ActualTimeMinutes vs EstimatedTimeMinutes
+- **EficiÃªncia de Custo**: ActualCost vs EstimatedCost
 - **Taxa de Qualidade**: QualityNotes vs ProductComposition completadas
 
 ### **Por ProductionOrder**
-- **Throughput**: Demands processadas por período
-- **Utilização de Recursos**: Tempo de workstation ocupado
+- **Throughput**: Demands processadas por perÃ­odo
+- **UtilizaÃ§Ã£o de Recursos**: Tempo de workstation ocupado
 - **Cumprimento de Prazo**: Delivered vs RequiredDate
 
-## 🎯 Eventos de Domínio Gerados
+## ðŸŽ¯ Eventos de DomÃ­nio Gerados
 
 - **DemandCreated**: Nova demanda gerada a partir de OrderItem
-- **DemandStatusChanged**: Mudança de status de demanda
-- **ProductionStarted**: Início de processamento de ProductComposition
-- **ComponentCompleted**: Componente específico finalizado
+- **DemandStatusChanged**: MudanÃ§a de status de demanda
+- **ProductionStarted**: InÃ­cio de processamento de ProductComposition
+- **ComponentCompleted**: Componente especÃ­fico finalizado
 - **DemandCompleted**: Toda a demanda finalizada
 - **IngredientConsumed**: Consumo de ingrediente registrado
-- **ProductionOrderCompleted**: Lote de produção finalizado
+- **ProductionOrderCompleted**: Lote de produÃ§Ã£o finalizado
 
-## 🚨 Alertas e Validações
+## ðŸš¨ Alertas e ValidaÃ§Ãµes
 
-### **Alertas Críticos**
-- **Demand Atrasada**: RequiredDate < hoje E DemandStatus ≠ Ready|Delivered
+### **Alertas CrÃ­ticos**
+- **Demand Atrasada**: RequiredDate < hoje E DemandStatus â‰  Ready|Delivered
 - **Componente Parado**: ProductComposition InProgress > 2 horas sem update
-- **Ingrediente Insuficiente**: Tentativa de consumo > IngredientStock disponível
+- **Ingrediente Insuficiente**: Tentativa de consumo > IngredientStock disponÃ­vel
 
-### **Validações de Negócio**
-- Demand só pode ser cancelada se OrderItem for cancelado
-- ProductComposition só pode ser criada para ProductType.Composite
-- IngredientConsumption deve respeitar estoque disponível
-- ProductionOrder só pode agrupar Demands com status Confirmed
+### **ValidaÃ§Ãµes de NegÃ³cio**
+- Demand sÃ³ pode ser cancelada se OrderItem for cancelado
+- ProductComposition sÃ³ pode ser criada para ProductType.Composite
+- IngredientConsumption deve respeitar estoque disponÃ­vel
+- ProductionOrder sÃ³ pode agrupar Demands com status Confirmed
 
 ---
 
 **Arquivo**: `03-production-domain-erd.md`  
-**Domínio**: Produção (#fba81d)  
+**DomÃ­nio**: ProduÃ§Ã£o (#fba81d)  
 **Tipo**: Entity-Relationship Diagram  
-**Nível**: Detalhado + Fluxos Automáticos + Integrações
+**NÃ­vel**: Detalhado + Fluxos AutomÃ¡ticos + IntegraÃ§Ãµes

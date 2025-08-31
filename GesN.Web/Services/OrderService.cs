@@ -619,5 +619,61 @@ namespace GesN.Web.Services
                 return order;
             }
         }
+
+        /// <summary>
+        /// Recalcula os totais do pedido baseado nos itens atuais
+        /// </summary>
+        public async Task<bool> RecalculateOrderTotalsAsync(string orderId)
+        {
+            try
+            {
+                var order = await _orderRepository.GetByIdAsync(orderId);
+                if (order == null)
+                {
+                    _logger.LogWarning("Pedido não encontrado para recalcular totais: {OrderId}", orderId);
+                    return false;
+                }
+
+                // Carregar todos os itens do pedido
+                var items = await _orderItemRepository.GetByOrderIdAsync(orderId);
+                var itemsList = items.ToList();
+
+                // Calcular totais
+                decimal subtotal = 0;
+                decimal totalDiscounts = 0;
+                decimal totalTaxes = 0;
+
+                foreach (var item in itemsList)
+                {
+                    var itemSubtotal = item.Quantity * item.UnitPrice;
+                    subtotal += itemSubtotal;
+                    totalDiscounts += item.DiscountAmount;
+                    totalTaxes += item.TaxAmount;
+                }
+
+                // Atualizar campos calculados do pedido
+                order.Subtotal = subtotal;
+                order.DiscountAmount = totalDiscounts;
+                order.TaxAmount = totalTaxes;
+                order.TotalAmount = subtotal + totalTaxes - totalDiscounts;
+                order.LastModifiedAt = DateTime.UtcNow;
+
+                // Salvar as alterações
+                var result = await _orderRepository.UpdateAsync(order);
+                
+                if (result)
+                {
+                    _logger.LogInformation("Totais do pedido recalculados com sucesso: {OrderId}, Total: {Total}", 
+                        orderId, order.TotalAmount);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao recalcular totais do pedido: {OrderId}", orderId);
+                return false;
+            }
+        }
     }
 } 

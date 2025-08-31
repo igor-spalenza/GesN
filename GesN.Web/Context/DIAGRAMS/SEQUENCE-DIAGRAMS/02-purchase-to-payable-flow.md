@@ -1,34 +1,34 @@
-# 🔄 SEQUENCE DIAGRAM - PurchaseOrder → AccountPayable Flow
+﻿# ðŸ”„ SEQUENCE DIAGRAM - PurchaseOrder â†’ AccountPayable Flow
 
-## 🎯 Visão Geral
-Diagrama de sequência detalhado mostrando o fluxo automático de criação de contas a pagar a partir da aprovação de pagamento de ordens de compra. Este fluxo crítico conecta os domínios de Compras e Financeiro, garantindo que todas as obrigações financeiras sejam devidamente registradas e programadas para pagamento.
+## ðŸŽ¯ VisÃ£o Geral
+Diagrama de sequÃªncia detalhado mostrando o fluxo automÃ¡tico de criaÃ§Ã£o de contas a pagar a partir da aprovaÃ§Ã£o de pagamento de ordens de compra. Este fluxo crÃ­tico conecta os domÃ­nios de Compras e Financeiro, garantindo que todas as obrigaÃ§Ãµes financeiras sejam devidamente registradas e programadas para pagamento.
 
-## 📊 Complexidade do Fluxo
-- **⚠️ Média Complexidade**: Cross-domain integration, payment scheduling, financial calculations
-- **👥 Participantes**: 6+ system components
-- **🔄 Interações**: 15+ interactions per purchase order
-- **🌐 Cross-Domain**: Purchasing → Financial integration
-- **📋 Validações**: Payment approval, budget validation, supplier verification
+## ðŸ“Š Complexidade do Fluxo
+- **âš ï¸ MÃ©dia Complexidade**: Cross-domain integration, payment scheduling, financial calculations
+- **ðŸ‘¥ Participantes**: 6+ system components
+- **ðŸ”„ InteraÃ§Ãµes**: 15+ interactions per purchase order
+- **ðŸŒ Cross-Domain**: Purchasing â†’ Financial integration
+- **ðŸ“‹ ValidaÃ§Ãµes**: Payment approval, budget validation, supplier verification
 
-## 🎯 Trigger Event
-**PaymentApproved** (Purchasing Domain) → Automatic AccountPayable creation
+## ðŸŽ¯ Trigger Event
+**PaymentApproved** (Purchasing Domain) â†’ Automatic AccountPayable creation
 
-## 📝 Sequence Diagram
+## ðŸ“ Sequence Diagram
 
 ```mermaid
 sequenceDiagram
-    participant UI as 👤 User Interface
-    participant PC as 🛒 Purchasing Controller
-    participant PS as ⚙️ Purchasing Service
-    participant PR as 🗄️ Purchasing Repository
-    participant EB as 📡 Event Bus
-    participant FS as 💳 Financial Service
-    participant FR as 🗄️ Financial Repository
-    participant VS as ✅ Validation Service
-    participant NS as 🔔 Notification Service
-    participant DB as 💾 Database
+    participant UI as ðŸ‘¤ User Interface
+    participant PC as ðŸ›’ Purchasing Controller
+    participant PS as âš™ï¸ Purchasing Service
+    participant PR as ðŸ—„ï¸ Purchasing Repository
+    participant EB as ðŸ“¡ Event Bus
+    participant FS as ðŸ’³ Financial Service
+    participant FR as ðŸ—„ï¸ Financial Repository
+    participant VS as âœ… Validation Service
+    participant NS as ðŸ”” Notification Service
+    participant DB as ðŸ’¾ Database
     
-    Note over UI, DB: PurchaseOrder → AccountPayable Flow (Triggered by Payment Approval)
+    Note over UI, DB: PurchaseOrder â†’ AccountPayable Flow (Triggered by Payment Approval)
     
     %% ==========================================
     %% PURCHASING DOMAIN - PAYMENT APPROVAL
@@ -122,7 +122,7 @@ sequenceDiagram
     %% ==========================================
     
     Note over FS: Process payment terms and calculate schedule
-    alt Payment Terms = "À Vista" (Immediate)
+    alt Payment Terms = "Ã€ Vista" (Immediate)
         FS->>FS: CreateImmediatePayment(purchaseData)
         FS->>FS: CalculateSingleDueDate(approvalDate, terms)
         
@@ -266,304 +266,304 @@ sequenceDiagram
     end
 ```
 
-## 🎯 Detailed Component Responsibilities
+## ðŸŽ¯ Detailed Component Responsibilities
 
-### **🛒 Purchasing Controller**
+### **ðŸ›’ Purchasing Controller**
 ```
 Responsibilities:
-├── 🔐 Validate user authorization for payment approval
-├── 📋 HTTP request validation and routing
-├── 💰 Payment approval workflow initiation
-├── 📊 Return appropriate response codes
-└── 🔍 Log approval-related activities
+â”œâ”€â”€ ðŸ” Validate user authorization for payment approval
+â”œâ”€â”€ ðŸ“‹ HTTP request validation and routing
+â”œâ”€â”€ ðŸ’° Payment approval workflow initiation
+â”œâ”€â”€ ðŸ“Š Return appropriate response codes
+â””â”€â”€ ðŸ” Log approval-related activities
 
 Authorization Levels:
-├── 👤 Standard User: < $1,000
-├── 👑 Manager: < $10,000
-├── 💼 Director: < $50,000
-└── 🏢 Executive: Any amount
+â”œâ”€â”€ ðŸ‘¤ Standard User: < $1,000
+â”œâ”€â”€ ðŸ‘‘ Manager: < $10,000
+â”œâ”€â”€ ðŸ’¼ Director: < $50,000
+â””â”€â”€ ðŸ¢ Executive: Any amount
 ```
 
-### **⚙️ Purchasing Service**
+### **âš™ï¸ Purchasing Service**
 ```
 Payment Approval Logic:
-├── 📋 Purchase order validation and verification
-├── 💰 Payment amount calculation and verification
-├── 📅 Payment terms interpretation and application
-├── 📊 Supplier status and relationship validation
-└── 📡 Cross-domain event coordination
+â”œâ”€â”€ ðŸ“‹ Purchase order validation and verification
+â”œâ”€â”€ ðŸ’° Payment amount calculation and verification
+â”œâ”€â”€ ðŸ“… Payment terms interpretation and application
+â”œâ”€â”€ ðŸ“Š Supplier status and relationship validation
+â””â”€â”€ ðŸ“¡ Cross-domain event coordination
 
 Calculation Responsibilities:
-├── 💰 Net payment amount (total - discounts)
-├── 📅 Due date calculation based on terms
-├── 🏦 Payment method determination
-├── 💸 Early payment discount evaluation
-└── 📊 Budget impact assessment
+â”œâ”€â”€ ðŸ’° Net payment amount (total - discounts)
+â”œâ”€â”€ ðŸ“… Due date calculation based on terms
+â”œâ”€â”€ ðŸ¦ Payment method determination
+â”œâ”€â”€ ðŸ’¸ Early payment discount evaluation
+â””â”€â”€ ðŸ“Š Budget impact assessment
 
 Data Preparation:
-├── 📦 AccountPayable entity data mapping
-├── 📅 Payment schedule data preparation
-├── 🏢 Supplier financial information compilation
-├── 📊 Purchase order reference data
-└── 💾 Audit trail data preparation
+â”œâ”€â”€ ðŸ“¦ AccountPayable entity data mapping
+â”œâ”€â”€ ðŸ“… Payment schedule data preparation
+â”œâ”€â”€ ðŸ¢ Supplier financial information compilation
+â”œâ”€â”€ ðŸ“Š Purchase order reference data
+â””â”€â”€ ðŸ’¾ Audit trail data preparation
 ```
 
-### **💳 Financial Service**
+### **ðŸ’³ Financial Service**
 ```
 AccountPayable Creation Logic:
-├── 📊 Financial validation and business rules
-├── 💰 Payment terms processing and interpretation
-├── 📅 Payment schedule generation
-├── 💸 Cash flow impact calculation
-└── 🔔 Alert and notification management
+â”œâ”€â”€ ðŸ“Š Financial validation and business rules
+â”œâ”€â”€ ðŸ’° Payment terms processing and interpretation
+â”œâ”€â”€ ðŸ“… Payment schedule generation
+â”œâ”€â”€ ðŸ’¸ Cash flow impact calculation
+â””â”€â”€ ðŸ”” Alert and notification management
 
 Payment Terms Handling:
-├── 💵 À Vista: Immediate payment processing
-├── 📊 Parcelado: Installment schedule creation
-├── 📅 Prazo Fixo: Fixed term due date calculation
-├── 💰 Early Payment: Discount calculation
-└── 🏦 Custom Terms: Flexible payment arrangements
+â”œâ”€â”€ ðŸ’µ Ã€ Vista: Immediate payment processing
+â”œâ”€â”€ ðŸ“Š Parcelado: Installment schedule creation
+â”œâ”€â”€ ðŸ“… Prazo Fixo: Fixed term due date calculation
+â”œâ”€â”€ ðŸ’° Early Payment: Discount calculation
+â””â”€â”€ ðŸ¦ Custom Terms: Flexible payment arrangements
 
 Financial Impact Analysis:
-├── 💸 Cash flow projection updates
-├── 📊 Budget utilization tracking
-├── 🏦 Working capital impact assessment
-├── 📈 Financial ratio impact evaluation
-└── ⚠️ Alert threshold monitoring
+â”œâ”€â”€ ðŸ’¸ Cash flow projection updates
+â”œâ”€â”€ ðŸ“Š Budget utilization tracking
+â”œâ”€â”€ ðŸ¦ Working capital impact assessment
+â”œâ”€â”€ ðŸ“ˆ Financial ratio impact evaluation
+â””â”€â”€ âš ï¸ Alert threshold monitoring
 ```
 
-## 💰 Payment Terms Processing
+## ðŸ’° Payment Terms Processing
 
-### **📅 Payment Terms Types**
+### **ðŸ“… Payment Terms Types**
 ```
-À Vista (Immediate Payment):
-├── 📅 Due Date: Approval date + 0-3 days
-├── 💰 Discount: Often includes early payment discount
-├── 🏦 Method: Bank transfer, cash, check
-├── 💸 Cash Flow: Immediate outflow
-└── 📊 Frequency: Common for small suppliers
+Ã€ Vista (Immediate Payment):
+â”œâ”€â”€ ðŸ“… Due Date: Approval date + 0-3 days
+â”œâ”€â”€ ðŸ’° Discount: Often includes early payment discount
+â”œâ”€â”€ ðŸ¦ Method: Bank transfer, cash, check
+â”œâ”€â”€ ðŸ’¸ Cash Flow: Immediate outflow
+â””â”€â”€ ðŸ“Š Frequency: Common for small suppliers
 
 Parcelado (Installment Payment):
-├── 📅 Due Dates: Monthly installments
-├── 💰 Interest: May include interest charges
-├── 📊 Installments: 2-12 payments typically
-├── 💸 Cash Flow: Spread over time
-└── 📋 Use Case: Large purchases, equipment
+â”œâ”€â”€ ðŸ“… Due Dates: Monthly installments
+â”œâ”€â”€ ðŸ’° Interest: May include interest charges
+â”œâ”€â”€ ðŸ“Š Installments: 2-12 payments typically
+â”œâ”€â”€ ðŸ’¸ Cash Flow: Spread over time
+â””â”€â”€ ðŸ“‹ Use Case: Large purchases, equipment
 
 Prazo Fixo (Fixed Term):
-├── 📅 Due Date: Approval date + fixed days (30/60/90)
-├── 💰 Standard: Most common business terms
-├── 🏦 Method: Bank transfer typically
-├── 💸 Cash Flow: Single future outflow
-└── 📊 Supplier Relationship: Standard terms
+â”œâ”€â”€ ðŸ“… Due Date: Approval date + fixed days (30/60/90)
+â”œâ”€â”€ ðŸ’° Standard: Most common business terms
+â”œâ”€â”€ ðŸ¦ Method: Bank transfer typically
+â”œâ”€â”€ ðŸ’¸ Cash Flow: Single future outflow
+â””â”€â”€ ðŸ“Š Supplier Relationship: Standard terms
 
 Custom Terms:
-├── 📅 Due Date: Negotiated terms
-├── 💰 Complex: May include milestones
-├── 📊 Special Cases: Large contracts
-├── 💸 Cash Flow: Varies by agreement
-└── 📋 Approval: Requires special authorization
+â”œâ”€â”€ ðŸ“… Due Date: Negotiated terms
+â”œâ”€â”€ ðŸ’° Complex: May include milestones
+â”œâ”€â”€ ðŸ“Š Special Cases: Large contracts
+â”œâ”€â”€ ðŸ’¸ Cash Flow: Varies by agreement
+â””â”€â”€ ðŸ“‹ Approval: Requires special authorization
 ```
 
-### **💰 Calculation Logic**
+### **ðŸ’° Calculation Logic**
 ```
 Payment Amount Calculation:
-├── 🧮 Base Amount = Sum of all received items
-├── 💸 Discounts Applied = Early payment, volume, etc.
-├── 📊 Taxes Included = As per local regulations
-├── 💰 Final Amount = Base - Discounts + Taxes
-└── ✅ Validation = Amount matches purchase order
+â”œâ”€â”€ ðŸ§® Base Amount = Sum of all received items
+â”œâ”€â”€ ðŸ’¸ Discounts Applied = Early payment, volume, etc.
+â”œâ”€â”€ ðŸ“Š Taxes Included = As per local regulations
+â”œâ”€â”€ ðŸ’° Final Amount = Base - Discounts + Taxes
+â””â”€â”€ âœ… Validation = Amount matches purchase order
 
 Due Date Calculation:
-├── 📅 Start Date = Payment approval date
-├── ⏰ Business Days = Exclude weekends/holidays
-├── 📊 Supplier Terms = Apply negotiated terms
-├── 📅 Final Due Date = Start + Terms (business days)
-└── ✅ Validation = Date is in future and reasonable
+â”œâ”€â”€ ðŸ“… Start Date = Payment approval date
+â”œâ”€â”€ â° Business Days = Exclude weekends/holidays
+â”œâ”€â”€ ðŸ“Š Supplier Terms = Apply negotiated terms
+â”œâ”€â”€ ðŸ“… Final Due Date = Start + Terms (business days)
+â””â”€â”€ âœ… Validation = Date is in future and reasonable
 
 Installment Calculation:
-├── 💰 Principal = Total amount / installment count
-├── 📊 Interest = Applied to remaining balance
-├── 📅 Schedule = Monthly intervals from approval
-├── 💸 Final Amount = Principal + accrued interest
-└── ✅ Validation = Sum equals total amount
+â”œâ”€â”€ ðŸ’° Principal = Total amount / installment count
+â”œâ”€â”€ ðŸ“Š Interest = Applied to remaining balance
+â”œâ”€â”€ ðŸ“… Schedule = Monthly intervals from approval
+â”œâ”€â”€ ðŸ’¸ Final Amount = Principal + accrued interest
+â””â”€â”€ âœ… Validation = Sum equals total amount
 ```
 
-## 🔒 Validation and Security
+## ðŸ”’ Validation and Security
 
-### **✅ Purchase Order Validations**
+### **âœ… Purchase Order Validations**
 ```
 Status Validations:
-├── ✅ Purchase order exists and is accessible
-├── ✅ Status is "Received" (items confirmed received)
-├── ✅ Not already approved for payment
-├── ✅ Not cancelled or voided
-└── ✅ All required fields are populated
+â”œâ”€â”€ âœ… Purchase order exists and is accessible
+â”œâ”€â”€ âœ… Status is "Received" (items confirmed received)
+â”œâ”€â”€ âœ… Not already approved for payment
+â”œâ”€â”€ âœ… Not cancelled or voided
+â””â”€â”€ âœ… All required fields are populated
 
 Financial Validations:
-├── 💰 Total amount is positive and reasonable
-├── 🏦 Supplier bank details are valid
-├── 📊 Budget allocation is sufficient
-├── 💸 Payment method is supported
-└── 📅 Payment terms are valid
+â”œâ”€â”€ ðŸ’° Total amount is positive and reasonable
+â”œâ”€â”€ ðŸ¦ Supplier bank details are valid
+â”œâ”€â”€ ðŸ“Š Budget allocation is sufficient
+â”œâ”€â”€ ðŸ’¸ Payment method is supported
+â””â”€â”€ ðŸ“… Payment terms are valid
 
 Supplier Validations:
-├── 🏢 Supplier is active and not blocked
-├── 💰 No outstanding issues or disputes
-├── 🏦 Banking information is current
-├── 📊 Credit status is acceptable
-└── 📋 Contract terms are valid
+â”œâ”€â”€ ðŸ¢ Supplier is active and not blocked
+â”œâ”€â”€ ðŸ’° No outstanding issues or disputes
+â”œâ”€â”€ ðŸ¦ Banking information is current
+â”œâ”€â”€ ðŸ“Š Credit status is acceptable
+â””â”€â”€ ðŸ“‹ Contract terms are valid
 ```
 
-### **🔐 Authorization Matrix**
+### **ðŸ” Authorization Matrix**
 ```
 Approval Limits by Role:
-├── 👤 Purchasing Agent: $0 - $1,000
-├── 👑 Purchasing Manager: $1,001 - $10,000
-├── 💼 Department Director: $10,001 - $50,000
-├── 🏢 Finance Director: $50,001 - $250,000
-└── 👔 Executive: $250,001+
+â”œâ”€â”€ ðŸ‘¤ Purchasing Agent: $0 - $1,000
+â”œâ”€â”€ ðŸ‘‘ Purchasing Manager: $1,001 - $10,000
+â”œâ”€â”€ ðŸ’¼ Department Director: $10,001 - $50,000
+â”œâ”€â”€ ðŸ¢ Finance Director: $50,001 - $250,000
+â””â”€â”€ ðŸ‘” Executive: $250,001+
 
 Additional Requirements:
-├── 🔏 Dual approval for amounts > $25,000
-├── 📊 Budget owner approval for budget impact
-├── 👑 Department head approval for new suppliers
-├── 💼 Finance approval for payment term changes
-└── 🏢 Executive approval for policy exceptions
+â”œâ”€â”€ ðŸ” Dual approval for amounts > $25,000
+â”œâ”€â”€ ðŸ“Š Budget owner approval for budget impact
+â”œâ”€â”€ ðŸ‘‘ Department head approval for new suppliers
+â”œâ”€â”€ ðŸ’¼ Finance approval for payment term changes
+â””â”€â”€ ðŸ¢ Executive approval for policy exceptions
 ```
 
-## 📊 Financial Impact Analysis
+## ðŸ“Š Financial Impact Analysis
 
-### **💸 Cash Flow Calculations**
+### **ðŸ’¸ Cash Flow Calculations**
 ```
 Immediate Impact:
-├── 💰 Current Cash Position Assessment
-├── 📊 Available Credit Line Evaluation
-├── 💸 Immediate Liquidity Requirements
-├── 📅 Other Payments Due Same Period
-└── ⚠️ Cash Flow Alert Thresholds
+â”œâ”€â”€ ðŸ’° Current Cash Position Assessment
+â”œâ”€â”€ ðŸ“Š Available Credit Line Evaluation
+â”œâ”€â”€ ðŸ’¸ Immediate Liquidity Requirements
+â”œâ”€â”€ ðŸ“… Other Payments Due Same Period
+â””â”€â”€ âš ï¸ Cash Flow Alert Thresholds
 
 Projected Impact:
-├── 📈 7-day cash flow projection update
-├── 📊 30-day cash flow projection update
-├── 💰 90-day cash flow trend analysis
-├── 📅 Seasonal payment pattern consideration
-└── 🎯 Working capital impact assessment
+â”œâ”€â”€ ðŸ“ˆ 7-day cash flow projection update
+â”œâ”€â”€ ðŸ“Š 30-day cash flow projection update
+â”œâ”€â”€ ðŸ’° 90-day cash flow trend analysis
+â”œâ”€â”€ ðŸ“… Seasonal payment pattern consideration
+â””â”€â”€ ðŸŽ¯ Working capital impact assessment
 
 Risk Assessment:
-├── ⚠️ Liquidity risk evaluation
-├── 📊 Concentration risk (single supplier)
-├── 💰 Credit risk (supplier default)
-├── 📅 Timing risk (payment clustering)
-└── 🏦 Banking relationship impact
+â”œâ”€â”€ âš ï¸ Liquidity risk evaluation
+â”œâ”€â”€ ðŸ“Š Concentration risk (single supplier)
+â”œâ”€â”€ ðŸ’° Credit risk (supplier default)
+â”œâ”€â”€ ðŸ“… Timing risk (payment clustering)
+â””â”€â”€ ðŸ¦ Banking relationship impact
 ```
 
-### **📋 Alert Thresholds**
+### **ðŸ“‹ Alert Thresholds**
 ```
 Cash Flow Alerts:
-├── 🚨 Critical: Available cash < 7 days operating expense
-├── ⚠️ Warning: Available cash < 15 days operating expense
-├── 📊 Notice: Single payment > 5% of monthly budget
-├── 💰 Large: Single payment > $50,000
-└── 📅 Timing: Multiple large payments same week
+â”œâ”€â”€ ðŸš¨ Critical: Available cash < 7 days operating expense
+â”œâ”€â”€ âš ï¸ Warning: Available cash < 15 days operating expense
+â”œâ”€â”€ ðŸ“Š Notice: Single payment > 5% of monthly budget
+â”œâ”€â”€ ðŸ’° Large: Single payment > $50,000
+â””â”€â”€ ðŸ“… Timing: Multiple large payments same week
 
 Operational Alerts:
-├── 🏢 Supplier Concentration: > 20% of monthly spend
-├── 📊 Budget Variance: Payment exceeds budget by > 10%
-├── 💸 Payment Terms: Terms longer than 60 days
-├── 🏦 Banking: Payment method change from standard
-└── 📅 Timing: Payment due during cash flow shortage
+â”œâ”€â”€ ðŸ¢ Supplier Concentration: > 20% of monthly spend
+â”œâ”€â”€ ðŸ“Š Budget Variance: Payment exceeds budget by > 10%
+â”œâ”€â”€ ðŸ’¸ Payment Terms: Terms longer than 60 days
+â”œâ”€â”€ ðŸ¦ Banking: Payment method change from standard
+â””â”€â”€ ðŸ“… Timing: Payment due during cash flow shortage
 ```
 
-## 🔄 Error Handling and Recovery
+## ðŸ”„ Error Handling and Recovery
 
-### **❌ Error Scenarios**
+### **âŒ Error Scenarios**
 ```
 Financial Validation Failures:
-├── 💰 Insufficient budget allocation
-├── 🏦 Supplier account blocked/frozen
-├── 📊 Payment amount exceeds limits
-├── 📅 Invalid payment terms specified
-└── 💸 Cash flow constraint violation
+â”œâ”€â”€ ðŸ’° Insufficient budget allocation
+â”œâ”€â”€ ðŸ¦ Supplier account blocked/frozen
+â”œâ”€â”€ ðŸ“Š Payment amount exceeds limits
+â”œâ”€â”€ ðŸ“… Invalid payment terms specified
+â””â”€â”€ ðŸ’¸ Cash flow constraint violation
 
 Technical Failures:
-├── 🗄️ Database transaction timeout
-├── 📡 Event publishing failure
-├── 💾 Data consistency violation
-├── 🔌 External service unavailable
-└── 🚨 System resource exhaustion
+â”œâ”€â”€ ðŸ—„ï¸ Database transaction timeout
+â”œâ”€â”€ ðŸ“¡ Event publishing failure
+â”œâ”€â”€ ðŸ’¾ Data consistency violation
+â”œâ”€â”€ ðŸ”Œ External service unavailable
+â””â”€â”€ ðŸš¨ System resource exhaustion
 
 Business Logic Errors:
-├── 📋 Purchase order status inconsistency
-├── 🏢 Supplier status change during processing
-├── 💰 Concurrent payment approval conflict
-├── 📊 Budget allocation race condition
-└── 📅 Due date calculation error
+â”œâ”€â”€ ðŸ“‹ Purchase order status inconsistency
+â”œâ”€â”€ ðŸ¢ Supplier status change during processing
+â”œâ”€â”€ ðŸ’° Concurrent payment approval conflict
+â”œâ”€â”€ ðŸ“Š Budget allocation race condition
+â””â”€â”€ ðŸ“… Due date calculation error
 ```
 
-### **🔧 Recovery Mechanisms**
+### **ðŸ”§ Recovery Mechanisms**
 ```
 Retry Strategies:
-├── 🔁 Exponential backoff for transient failures
-├── 🎯 Circuit breaker for external services
-├── 📊 Dead letter queue for failed events
-├── 🚨 Manual intervention for business errors
-└── 🔄 Automatic reconciliation processes
+â”œâ”€â”€ ðŸ” Exponential backoff for transient failures
+â”œâ”€â”€ ðŸŽ¯ Circuit breaker for external services
+â”œâ”€â”€ ðŸ“Š Dead letter queue for failed events
+â”œâ”€â”€ ðŸš¨ Manual intervention for business errors
+â””â”€â”€ ðŸ”„ Automatic reconciliation processes
 
 Compensation Actions:
-├── 🔄 Reverse AccountPayable creation on failure
-├── 📊 Restore purchase order status
-├── 💰 Release budget allocation
-├── 📡 Publish compensation events
-└── 🔔 Notify relevant stakeholders
+â”œâ”€â”€ ðŸ”„ Reverse AccountPayable creation on failure
+â”œâ”€â”€ ðŸ“Š Restore purchase order status
+â”œâ”€â”€ ðŸ’° Release budget allocation
+â”œâ”€â”€ ðŸ“¡ Publish compensation events
+â””â”€â”€ ðŸ”” Notify relevant stakeholders
 
 Data Integrity Recovery:
-├── 📊 Cross-domain consistency checks
-├── 🎯 Reconciliation reporting
-├── 🔄 Manual correction workflows
-├── 📋 Audit trail maintenance
-└── 🚨 Health check monitoring
+â”œâ”€â”€ ðŸ“Š Cross-domain consistency checks
+â”œâ”€â”€ ðŸŽ¯ Reconciliation reporting
+â”œâ”€â”€ ðŸ”„ Manual correction workflows
+â”œâ”€â”€ ðŸ“‹ Audit trail maintenance
+â””â”€â”€ ðŸš¨ Health check monitoring
 ```
 
-## 📈 Performance and Monitoring
+## ðŸ“ˆ Performance and Monitoring
 
-### **⚡ Performance Targets**
+### **âš¡ Performance Targets**
 ```
 Response Time SLAs:
-├── 🎯 Payment approval response: < 3 seconds
-├── 📊 AccountPayable creation: < 5 seconds
-├── 💸 Cash flow update: < 2 seconds
-├── 🔔 Notification delivery: < 10 seconds
-└── 📋 Cross-domain sync: < 15 seconds
+â”œâ”€â”€ ðŸŽ¯ Payment approval response: < 3 seconds
+â”œâ”€â”€ ðŸ“Š AccountPayable creation: < 5 seconds
+â”œâ”€â”€ ðŸ’¸ Cash flow update: < 2 seconds
+â”œâ”€â”€ ðŸ”” Notification delivery: < 10 seconds
+â””â”€â”€ ðŸ“‹ Cross-domain sync: < 15 seconds
 
 Throughput Targets:
-├── 📊 100+ payment approvals per hour
-├── 💰 1000+ AccountPayable records per day
-├── 📈 Support 50+ concurrent approvals
-└── 🎯 Maintain > 99.5% success rate
+â”œâ”€â”€ ðŸ“Š 100+ payment approvals per hour
+â”œâ”€â”€ ðŸ’° 1000+ AccountPayable records per day
+â”œâ”€â”€ ðŸ“ˆ Support 50+ concurrent approvals
+â””â”€â”€ ðŸŽ¯ Maintain > 99.5% success rate
 ```
 
-### **📊 Monitoring Metrics**
+### **ðŸ“Š Monitoring Metrics**
 ```
 Business Metrics:
-├── 💰 Average payment approval time
-├── 📊 Payment approval success rate
-├── 💸 Cash flow projection accuracy
-├── 🏦 Supplier payment compliance
-└── 📅 Due date accuracy
+â”œâ”€â”€ ðŸ’° Average payment approval time
+â”œâ”€â”€ ðŸ“Š Payment approval success rate
+â”œâ”€â”€ ðŸ’¸ Cash flow projection accuracy
+â”œâ”€â”€ ðŸ¦ Supplier payment compliance
+â””â”€â”€ ðŸ“… Due date accuracy
 
 Technical Metrics:
-├── 🔌 Cross-domain event latency
-├── 📊 Database transaction performance
-├── 💾 System resource utilization
-├── 🚨 Error rate by component
-└── 📈 Alert response effectiveness
+â”œâ”€â”€ ðŸ”Œ Cross-domain event latency
+â”œâ”€â”€ ðŸ“Š Database transaction performance
+â”œâ”€â”€ ðŸ’¾ System resource utilization
+â”œâ”€â”€ ðŸš¨ Error rate by component
+â””â”€â”€ ðŸ“ˆ Alert response effectiveness
 ```
 
 ---
 
 **Arquivo**: `02-purchase-to-payable-flow.md`  
-**Fluxo**: PurchaseOrder → AccountPayable (Automático)  
-**Domínios**: Purchasing → Financial  
-**Complexidade**: ⚠️ Média (6+ participantes, 15+ interações)  
-**Atualização**: 16/06/2025
+**Fluxo**: PurchaseOrder â†’ AccountPayable (AutomÃ¡tico)  
+**DomÃ­nios**: Purchasing â†’ Financial  
+**Complexidade**: âš ï¸ MÃ©dia (6+ participantes, 15+ interaÃ§Ãµes)  
+**AtualizaÃ§Ã£o**: 16/06/2025

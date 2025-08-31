@@ -7,6 +7,9 @@
 }
 
 <link href="~/css/SalesDomain.css" rel="stylesheet" />
+<link href="~/css/CompositeProductModal.css" rel="stylesheet" />
+<link href="~/css/GroupProductModal.css" rel="stylesheet" />
+<link href="~/css/OrderEdit.css" rel="stylesheet" />
 
 <div class="index-main">
     
@@ -61,8 +64,13 @@
                 <i class="fas fa-times"></i>
             </button>
             
-            <div class="catalog-sidebar-content">
-                @await Html.PartialAsync("_ProductCatalog", new GesN.Web.Models.ViewModels.Production.ProductCatalogViewModel())
+            <div class="catalog-sidebar-content" id="productCatalogContainer">
+                <!-- Catálogo será carregado dinamicamente via AJAX quando necessário -->
+                <div class="d-flex justify-content-center my-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando catálogo...</span>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -95,10 +103,17 @@
 
 
 @section Scripts {
+    <!-- Carregar dependências em ordem correta -->
     <script src="~/js/interfaces/common.js" asp-append-version="true"></script>
     <script src="~/js/interfaces/order.js" asp-append-version="true"></script>
     <script src="~/js/interfaces/product-catalog.js" asp-append-version="true"></script>
-    <script src="~/js/managers/OrderManager.js" asp-append-version="true"></script>
+    <script src="~/js/interfaces/order-item.js" asp-append-version="true"></script>
+    
+    <!-- Managers devem ser carregados em ordem específica -->
+    <script src="~/js/managers/OrderItemManager.js" asp-append-version="true"></script>
     <script src="~/js/managers/ProductCatalogManager.js" asp-append-version="true"></script>
+    <script src="~/js/managers/OrderManager.js" asp-append-version="true"></script>
+
+
 
 } 

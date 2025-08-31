@@ -1,44 +1,44 @@
-# 🏭 DIAGRAMA DE ESTADOS - CICLO DE VIDA DA DEMANDA
+﻿# ðŸ­ DIAGRAMA DE ESTADOS - CICLO DE VIDA DA DEMANDA
 
-## 🎯 Visão Geral
-Diagrama de estados completo mostrando o ciclo de vida de uma Demand (Demanda de Produção), desde sua criação automática a partir de OrderItem até a entrega final, incluindo sincronização com ProductComposition e ProductionOrder.
+## ðŸŽ¯ VisÃ£o Geral
+Diagrama de estados completo mostrando o ciclo de vida de uma Demand (Demanda de ProduÃ§Ã£o), desde sua criaÃ§Ã£o automÃ¡tica a partir de OrderItem atÃ© a entrega final, incluindo sincronizaÃ§Ã£o com ProductComposition e ProductionOrder.
 
-## 🔄 Diagrama Principal de Estados
+## ðŸ”„ Diagrama Principal de Estados
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Pending : 🆕 Criação automática<br/>OrderItem criado/editado
+    [*] --> Pending : ðŸ†• CriaÃ§Ã£o automÃ¡tica<br/>OrderItem criado/editado
     
     %% === ESTADOS PRINCIPAIS ===
-    Pending --> Confirmed : ✅ OrderEntry confirmada<br/>Auto: Sistema confirma todas Demands
-    Confirmed --> InProduction : ⚙️ ProductionOrder inicia<br/>Manual: Supervisor/operador
-    InProduction --> Finalizando : 🔧 Produção quase completa<br/>Auto: Últimas ProductComposition
-    Finalizando --> Ready : 📦 Produção finalizada<br/>Auto: Todas tarefas completas
-    Ready --> Delivered : 🚚 Produto entregue<br/>Auto: OrderEntry delivered
+    Pending --> Confirmed : âœ… OrderEntry confirmada<br/>Auto: Sistema confirma todas Demands
+    Confirmed --> InProduction : âš™ï¸ ProductionOrder inicia<br/>Manual: Supervisor/operador
+    InProduction --> Finalizando : ðŸ”§ ProduÃ§Ã£o quase completa<br/>Auto: Ãšltimas ProductComposition
+    Finalizando --> Ready : ðŸ“¦ ProduÃ§Ã£o finalizada<br/>Auto: Todas tarefas completas
+    Ready --> Delivered : ðŸšš Produto entregue<br/>Auto: OrderEntry delivered
     
     %% === CANCELAMENTOS ===
-    Pending --> Cancelled : ❌ OrderItem cancelado<br/>Auto: Propagação automática
-    Confirmed --> Cancelled : ❌ OrderEntry cancelada<br/>Auto: Propagação automática  
-    InProduction --> Cancelled : ❌ Problema na produção<br/>Manual: Supervisor cancela
+    Pending --> Cancelled : âŒ OrderItem cancelado<br/>Auto: PropagaÃ§Ã£o automÃ¡tica
+    Confirmed --> Cancelled : âŒ OrderEntry cancelada<br/>Auto: PropagaÃ§Ã£o automÃ¡tica  
+    InProduction --> Cancelled : âŒ Problema na produÃ§Ã£o<br/>Manual: Supervisor cancela
     
     %% === ESTADOS FINAIS ===
-    Delivered --> [*] : 🎉 Demanda completamente finalizada
-    Cancelled --> [*] : 🚫 Demanda cancelada
+    Delivered --> [*] : ðŸŽ‰ Demanda completamente finalizada
+    Cancelled --> [*] : ðŸš« Demanda cancelada
     
     %% === STYLING POR FASE ===
     
-    %% CRIAÇÃO E CONFIRMAÇÃO
+    %% CRIAÃ‡ÃƒO E CONFIRMAÃ‡ÃƒO
     classDef pending fill:#fef3c7,stroke:#f59e0b,stroke-width:3px,color:black
     class Pending pending
     
     classDef confirmed fill:#d1fae5,stroke:#10b981,stroke-width:3px,color:black
     class Confirmed confirmed
     
-    %% PRODUÇÃO
+    %% PRODUÃ‡ÃƒO
     classDef production fill:#fed7aa,stroke:#f97316,stroke-width:3px,color:black
     class InProduction,Finalizando production
     
-    %% FINALIZAÇÃO
+    %% FINALIZAÃ‡ÃƒO
     classDef ready fill:#dbeafe,stroke:#3b82f6,stroke-width:3px,color:black
     class Ready ready
     
@@ -50,39 +50,39 @@ stateDiagram-v2
     class Cancelled cancelled
 ```
 
-## 📋 Detalhamento dos Estados
+## ðŸ“‹ Detalhamento dos Estados
 
-### **🟡 PENDING (Pendente)**
+### **ðŸŸ¡ PENDING (Pendente)**
 ```
-📌 Estado Inicial
-├── Origem: OrderItem criado automaticamente
-├── Descrição: Demanda criada mas não confirmada
-├── Permitido: Aguardar confirmação do pedido
-├── Bloqueado: Não inicia produção
-└── Próximo Estado: Confirmed ou Cancelled
+ðŸ“Œ Estado Inicial
+â”œâ”€â”€ Origem: OrderItem criado automaticamente
+â”œâ”€â”€ DescriÃ§Ã£o: Demanda criada mas nÃ£o confirmada
+â”œâ”€â”€ Permitido: Aguardar confirmaÃ§Ã£o do pedido
+â”œâ”€â”€ Bloqueado: NÃ£o inicia produÃ§Ã£o
+â””â”€â”€ PrÃ³ximo Estado: Confirmed ou Cancelled
 
-Criação Automática:
-├── 🔗 OrderItemId: Vinculada ao item origem
-├── 📦 ProductId: Produto a ser produzido
-├── 🔢 Quantity: Quantidade solicitada
-├── 📅 RequiredDate: OrderEntry.DeliveryDate
-└── 🏭 ProductionOrderId: null (ainda não agrupada)
+CriaÃ§Ã£o AutomÃ¡tica:
+â”œâ”€â”€ ðŸ”— OrderItemId: Vinculada ao item origem
+â”œâ”€â”€ ðŸ“¦ ProductId: Produto a ser produzido
+â”œâ”€â”€ ðŸ”¢ Quantity: Quantidade solicitada
+â”œâ”€â”€ ðŸ“… RequiredDate: OrderEntry.DeliveryDate
+â””â”€â”€ ðŸ­ ProductionOrderId: null (ainda nÃ£o agrupada)
 ```
 
 **Dados Iniciais da Demand:**
 ```mermaid
 flowchart TD
-    A[OrderItem criado/editado] --> B{🎯 Product.ProductType}
+    A[OrderItem criado/editado] --> B{ðŸŽ¯ Product.ProductType}
     
-    B -->|Simple| C[🏭 Criar Demand Simple<br/>Quantity = OrderItem.Quantity]
+    B -->|Simple| C[ðŸ­ Criar Demand Simple<br/>Quantity = OrderItem.Quantity]
     
-    B -->|Composite| D[🏭 Criar Demand Composite<br/>+ ProductComposition]
-    D --> E[🧩 Para cada componente<br/>em ProductConfiguration]
-    E --> F[📝 Criar ProductComposition<br/>Status: Pending]
+    B -->|Composite| D[ðŸ­ Criar Demand Composite<br/>+ ProductComposition]
+    D --> E[ðŸ§© Para cada componente<br/>em ProductConfiguration]
+    E --> F[ðŸ“ Criar ProductComposition<br/>Status: Pending]
     
-    B -->|Group| G[🏭 Explodir em N Demands<br/>um por produto concreto]
+    B -->|Group| G[ðŸ­ Explodir em N Demands<br/>um por produto concreto]
     
-    C --> H[🔄 Demand Status: Pending]
+    C --> H[ðŸ”„ Demand Status: Pending]
     F --> H
     G --> H
     
@@ -98,77 +98,77 @@ flowchart TD
 Para ProductType.Composite:
 
 Demand 1:N ProductComposition
-├── HierarchyName: "Massa"
-│   └── ComponentName: "Massa de Chocolate"
-├── HierarchyName: "Recheio"  
-│   ├── ComponentName: "Recheio Brigadeiro"
-│   └── ComponentName: "Recheio Morango"
-└── HierarchyName: "Cobertura"
-    └── ComponentName: "Cobertura Chantilly"
+â”œâ”€â”€ HierarchyName: "Massa"
+â”‚   â””â”€â”€ ComponentName: "Massa de Chocolate"
+â”œâ”€â”€ HierarchyName: "Recheio"  
+â”‚   â”œâ”€â”€ ComponentName: "Recheio Brigadeiro"
+â”‚   â””â”€â”€ ComponentName: "Recheio Morango"
+â””â”€â”€ HierarchyName: "Cobertura"
+    â””â”€â”€ ComponentName: "Cobertura Chantilly"
 
 Todas ProductComposition iniciam com Status: Pending
 ```
 
-### **🟢 CONFIRMED (Confirmada)**
+### **ðŸŸ¢ CONFIRMED (Confirmada)**
 ```
-📌 Estado de Aprovação
-├── Trigger: OrderEntry.OrderStatus = "Confirmed"
-├── Descrição: Demanda aprovada para produção
-├── Permitido: Agrupar em ProductionOrder
-├── Bloqueado: Ainda não pode iniciar produção física
-└── Próximo Estado: InProduction ou Cancelled
+ðŸ“Œ Estado de AprovaÃ§Ã£o
+â”œâ”€â”€ Trigger: OrderEntry.OrderStatus = "Confirmed"
+â”œâ”€â”€ DescriÃ§Ã£o: Demanda aprovada para produÃ§Ã£o
+â”œâ”€â”€ Permitido: Agrupar em ProductionOrder
+â”œâ”€â”€ Bloqueado: Ainda nÃ£o pode iniciar produÃ§Ã£o fÃ­sica
+â””â”€â”€ PrÃ³ximo Estado: InProduction ou Cancelled
 
-Sincronização Automática:
-├── 🔄 Todas Demands do OrderEntry → Confirmed
-├── 🏭 Disponíveis para agrupamento em ProductionOrder
-└── 📊 Estimativas de custo e tempo calculadas
+SincronizaÃ§Ã£o AutomÃ¡tica:
+â”œâ”€â”€ ðŸ”„ Todas Demands do OrderEntry â†’ Confirmed
+â”œâ”€â”€ ðŸ­ DisponÃ­veis para agrupamento em ProductionOrder
+â””â”€â”€ ðŸ“Š Estimativas de custo e tempo calculadas
 ```
 
-**Ações no Estado Confirmed:**
-- ✅ Aguardar agrupamento em ProductionOrder
-- ✅ Cálculo de estimativas (tempo/custo)
-- ✅ Validação de ingredientes disponíveis
-- ✅ Cancelar se OrderEntry for cancelada
-- ⛔ Iniciar produção sem ProductionOrder
+**AÃ§Ãµes no Estado Confirmed:**
+- âœ… Aguardar agrupamento em ProductionOrder
+- âœ… CÃ¡lculo de estimativas (tempo/custo)
+- âœ… ValidaÃ§Ã£o de ingredientes disponÃ­veis
+- âœ… Cancelar se OrderEntry for cancelada
+- â›” Iniciar produÃ§Ã£o sem ProductionOrder
 
 **Agrupamento em ProductionOrder:**
 ```mermaid
 flowchart TD
-    A[OrderEntry: SentToProduction] --> B[🔍 Buscar Demands Confirmed<br/>do mesmo pedido]
-    B --> C[🏭 Criar ProductionOrder]
-    C --> D[🔗 Vincular Demands à PO]
-    D --> E[📈 Demand.ProductionOrderId = PO.Id]
-    E --> F[📊 PO Status: Scheduled]
+    A[OrderEntry: SentToProduction] --> B[ðŸ” Buscar Demands Confirmed<br/>do mesmo pedido]
+    B --> C[ðŸ­ Criar ProductionOrder]
+    C --> D[ðŸ”— Vincular Demands Ã  PO]
+    D --> E[ðŸ“ˆ Demand.ProductionOrderId = PO.Id]
+    E --> F[ðŸ“Š PO Status: Scheduled]
     
     classDef productionOrderStyle fill:#fba81d,stroke:#fba81d,stroke-width:2px,color:black
     class A,B,C,D,E,F productionOrderStyle
 ```
 
-### **🔴 IN_PRODUCTION (Em Produção)**
+### **ðŸ”´ IN_PRODUCTION (Em ProduÃ§Ã£o)**
 ```
-📌 Estado de Produção Ativa
-├── Trigger: ProductionOrder iniciada manualmente
-├── Descrição: Produção física em andamento
-├── Permitido: Executar ProductComposition sequencialmente
-├── Bloqueado: Editar configurações
-└── Próximo Estado: Finalizando ou Cancelled
+ðŸ“Œ Estado de ProduÃ§Ã£o Ativa
+â”œâ”€â”€ Trigger: ProductionOrder iniciada manualmente
+â”œâ”€â”€ DescriÃ§Ã£o: ProduÃ§Ã£o fÃ­sica em andamento
+â”œâ”€â”€ Permitido: Executar ProductComposition sequencialmente
+â”œâ”€â”€ Bloqueado: Editar configuraÃ§Ãµes
+â””â”€â”€ PrÃ³ximo Estado: Finalizando ou Cancelled
 
-Execução por Tipo:
-├── 📦 Simple: Produção direta sem decomposição
-├── 🧩 Composite: Executar ProductComposition em ordem
-└── 📊 Tracking em tempo real de progresso
+ExecuÃ§Ã£o por Tipo:
+â”œâ”€â”€ ðŸ“¦ Simple: ProduÃ§Ã£o direta sem decomposiÃ§Ã£o
+â”œâ”€â”€ ðŸ§© Composite: Executar ProductComposition em ordem
+â””â”€â”€ ðŸ“Š Tracking em tempo real de progresso
 ```
 
-**Fluxo de Execução por Tipo:**
+**Fluxo de ExecuÃ§Ã£o por Tipo:**
 
 #### **Simple Product:**
 ```mermaid
 flowchart TD
-    A[Demand Simple: InProduction] --> B[⏰ StartTime = now()]
-    B --> C[🏭 Executar produção direta]
-    C --> D[🥘 Consumir ingredientes]
-    D --> E[⏰ CompletionTime = now()]
-    E --> F[📈 Status: Finalizando]
+    A[Demand Simple: InProduction] --> B[â° StartTime = now()]
+    B --> C[ðŸ­ Executar produÃ§Ã£o direta]
+    C --> D[ðŸ¥˜ Consumir ingredientes]
+    D --> E[â° CompletionTime = now()]
+    E --> F[ðŸ“ˆ Status: Finalizando]
     
     classDef simpleStyle fill:#a7f3d0,stroke:#00a86b,stroke-width:2px,color:black
     class A,B,C,D,E,F simpleStyle
@@ -177,20 +177,20 @@ flowchart TD
 #### **Composite Product:**
 ```mermaid
 flowchart TD
-    A[Demand Composite: InProduction] --> B[📋 Listar ProductComposition<br/>ordenadas por HierarchyName]
-    B --> C[🔧 Para cada ProductComposition]
+    A[Demand Composite: InProduction] --> B[ðŸ“‹ Listar ProductComposition<br/>ordenadas por HierarchyName]
+    B --> C[ðŸ”§ Para cada ProductComposition]
     
-    C --> D[📈 Status: Pending → InProgress]
-    D --> E[⏰ StartTime = now()]
-    E --> F[🏭 Executar tarefa específica]
-    F --> G[🥘 Consumir ingredientes]
-    G --> H[⏰ CompletionTime = now()]
-    H --> I[📈 Status: InProgress → Completed]
+    C --> D[ðŸ“ˆ Status: Pending â†’ InProgress]
+    D --> E[â° StartTime = now()]
+    E --> F[ðŸ­ Executar tarefa especÃ­fica]
+    F --> G[ðŸ¥˜ Consumir ingredientes]
+    G --> H[â° CompletionTime = now()]
+    H --> I[ðŸ“ˆ Status: InProgress â†’ Completed]
     
-    I --> J{🔄 Mais ProductComposition?}
+    I --> J{ðŸ”„ Mais ProductComposition?}
     J -->|Sim| C
-    J -->|Não| K[✅ Todas Completed]
-    K --> L[📈 Demand Status: Finalizando]
+    J -->|NÃ£o| K[âœ… Todas Completed]
+    K --> L[ðŸ“ˆ Demand Status: Finalizando]
     
     classDef compositeStyle fill:#6ee7b7,stroke:#00a86b,stroke-width:2px,color:black
     class A,B,C,D,E,F,G,H,I,J,K,L compositeStyle
@@ -199,51 +199,51 @@ flowchart TD
 **Monitoramento em Tempo Real:**
 ```
 Dashboard mostra para cada Demand InProduction:
-├── ⏰ Tempo decorrido vs estimado
-├── 💰 Custo acumulado vs estimado  
-├── 📊 % progresso (ProductComposition completed)
-├── 🧑‍🏭 Operador(es) responsável(is)
-├── 🥘 Ingredientes consumidos
-└── 🚨 Alertas de atraso ou problemas
+â”œâ”€â”€ â° Tempo decorrido vs estimado
+â”œâ”€â”€ ðŸ’° Custo acumulado vs estimado  
+â”œâ”€â”€ ðŸ“Š % progresso (ProductComposition completed)
+â”œâ”€â”€ ðŸ§‘â€ðŸ­ Operador(es) responsÃ¡vel(is)
+â”œâ”€â”€ ðŸ¥˜ Ingredientes consumidos
+â””â”€â”€ ðŸš¨ Alertas de atraso ou problemas
 ```
 
-### **🟠 FINALIZANDO (Finalizando)**
+### **ðŸŸ  FINALIZANDO (Finalizando)**
 ```
-📌 Estado de Finalização
-├── Trigger: Produção física completa
-├── Descrição: Embalagem, controle qualidade final
-├── Permitido: Últimos ajustes e validações
-├── Bloqueado: Alterar produção principal
-└── Próximo Estado: Ready
+ðŸ“Œ Estado de FinalizaÃ§Ã£o
+â”œâ”€â”€ Trigger: ProduÃ§Ã£o fÃ­sica completa
+â”œâ”€â”€ DescriÃ§Ã£o: Embalagem, controle qualidade final
+â”œâ”€â”€ Permitido: Ãšltimos ajustes e validaÃ§Ãµes
+â”œâ”€â”€ Bloqueado: Alterar produÃ§Ã£o principal
+â””â”€â”€ PrÃ³ximo Estado: Ready
 
-Atividades de Finalização:
-├── 📦 Embalagem final do produto
-├── 🔍 Controle de qualidade final
-├── 🏷️ Etiquetagem e identificação
-├── 📊 Registro de custos e tempos reais
-└── ✅ Aprovação final para entrega
+Atividades de FinalizaÃ§Ã£o:
+â”œâ”€â”€ ðŸ“¦ Embalagem final do produto
+â”œâ”€â”€ ðŸ” Controle de qualidade final
+â”œâ”€â”€ ðŸ·ï¸ Etiquetagem e identificaÃ§Ã£o
+â”œâ”€â”€ ðŸ“Š Registro de custos e tempos reais
+â””â”€â”€ âœ… AprovaÃ§Ã£o final para entrega
 ```
 
-**Validações de Finalização:**
-- ✅ Todas ProductComposition com Status "Completed"
-- ✅ Controle de qualidade aprovado
-- ✅ Produto corretamente embalado
-- ✅ Etiquetas e documentação prontas
-- ✅ Custos reais registrados
+**ValidaÃ§Ãµes de FinalizaÃ§Ã£o:**
+- âœ… Todas ProductComposition com Status "Completed"
+- âœ… Controle de qualidade aprovado
+- âœ… Produto corretamente embalado
+- âœ… Etiquetas e documentaÃ§Ã£o prontas
+- âœ… Custos reais registrados
 
-**Processo de Finalização:**
+**Processo de FinalizaÃ§Ã£o:**
 ```mermaid
 flowchart TD
-    A[Demand: Finalizando] --> B[📦 Embalagem final]
-    B --> C[🔍 Controle qualidade]
-    C --> D{✅ Qualidade aprovada?}
+    A[Demand: Finalizando] --> B[ðŸ“¦ Embalagem final]
+    B --> C[ðŸ” Controle qualidade]
+    C --> D{âœ… Qualidade aprovada?}
     
-    D -->|Não| E[🔄 Voltar para correção<br/>Status: InProduction]
-    D -->|Sim| F[🏷️ Etiquetagem]
+    D -->|NÃ£o| E[ðŸ”„ Voltar para correÃ§Ã£o<br/>Status: InProduction]
+    D -->|Sim| F[ðŸ·ï¸ Etiquetagem]
     
-    F --> G[📊 Registrar custos/tempos reais]
-    G --> H[✅ Aprovação final]
-    H --> I[📈 Status: Ready]
+    F --> G[ðŸ“Š Registrar custos/tempos reais]
+    G --> H[âœ… AprovaÃ§Ã£o final]
+    H --> I[ðŸ“ˆ Status: Ready]
     
     E --> A
     
@@ -254,177 +254,177 @@ flowchart TD
     class E errorStyle
 ```
 
-### **🔵 READY (Pronta)**
+### **ðŸ”µ READY (Pronta)**
 ```
-📌 Estado de Produto Finalizado
-├── Trigger: Finalização aprovada automaticamente
-├── Descrição: Produto pronto para entrega
-├── Permitido: Expedição e entrega
-├── Bloqueado: Alterações de produção
-└── Próximo Estado: Delivered
+ðŸ“Œ Estado de Produto Finalizado
+â”œâ”€â”€ Trigger: FinalizaÃ§Ã£o aprovada automaticamente
+â”œâ”€â”€ DescriÃ§Ã£o: Produto pronto para entrega
+â”œâ”€â”€ Permitido: ExpediÃ§Ã£o e entrega
+â”œâ”€â”€ Bloqueado: AlteraÃ§Ãµes de produÃ§Ã£o
+â””â”€â”€ PrÃ³ximo Estado: Delivered
 
-Integração com OrderEntry:
-├── 🔍 Verificar se todas Demands do pedido estão Ready
-├── 📈 Se sim: OrderEntry Status → ReadyForDelivery
-└── 📧 Notificar cliente sobre conclusão
+IntegraÃ§Ã£o com OrderEntry:
+â”œâ”€â”€ ðŸ” Verificar se todas Demands do pedido estÃ£o Ready
+â”œâ”€â”€ ðŸ“ˆ Se sim: OrderEntry Status â†’ ReadyForDelivery
+â””â”€â”€ ðŸ“§ Notificar cliente sobre conclusÃ£o
 ```
 
-**Verificação de Conclusão do Pedido:**
+**VerificaÃ§Ã£o de ConclusÃ£o do Pedido:**
 ```mermaid
 flowchart TD
-    A[Demand: Ready] --> B[🔍 Verificar outras Demands<br/>do mesmo OrderEntry]
-    B --> C{🎯 Todas Demands<br/>estão Ready?}
+    A[Demand: Ready] --> B[ðŸ” Verificar outras Demands<br/>do mesmo OrderEntry]
+    B --> C{ðŸŽ¯ Todas Demands<br/>estÃ£o Ready?}
     
-    C -->|Não| D[⏰ Aguardar outras Demands]
-    C -->|Sim| E[📈 OrderEntry Status:<br/>ReadyForDelivery]
+    C -->|NÃ£o| D[â° Aguardar outras Demands]
+    C -->|Sim| E[ðŸ“ˆ OrderEntry Status:<br/>ReadyForDelivery]
     
-    E --> F[📧 Notificar cliente<br/>sobre conclusão]
-    F --> G[📦 Preparar para logística]
+    E --> F[ðŸ“§ Notificar cliente<br/>sobre conclusÃ£o]
+    F --> G[ðŸ“¦ Preparar para logÃ­stica]
     
     classDef readyStyle fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:black
     class A,B,C,D,E,F,G readyStyle
 ```
 
-### **🟣 DELIVERED (Entregue)**
+### **ðŸŸ£ DELIVERED (Entregue)**
 ```
-📌 Estado Final de Sucesso
-├── Trigger: OrderEntry marcada como Delivered
-├── Descrição: Produto entregue ao cliente
-├── Permitido: Consulta e análise
-├── Bloqueado: Qualquer alteração
-└── Próximo Estado: [Finalizado]
+ðŸ“Œ Estado Final de Sucesso
+â”œâ”€â”€ Trigger: OrderEntry marcada como Delivered
+â”œâ”€â”€ DescriÃ§Ã£o: Produto entregue ao cliente
+â”œâ”€â”€ Permitido: Consulta e anÃ¡lise
+â”œâ”€â”€ Bloqueado: Qualquer alteraÃ§Ã£o
+â””â”€â”€ PrÃ³ximo Estado: [Finalizado]
 
-Sincronização Automática:
-├── 🔄 Todas Demands do OrderEntry → Delivered
-├── 📊 Atualizar métricas de produção
-├── 💰 Calcular lucratividade por Demand
-└── 📈 Atualizar histórico de performance
-```
-
-### **❌ CANCELLED (Cancelada)**
-```
-📌 Estado Final de Cancelamento
-├── Trigger: OrderItem/OrderEntry cancelados ou problema produção
-├── Descrição: Demanda cancelada em qualquer fase
-├── Permitido: Consulta e auditoria
-├── Bloqueado: Reativação
-└── Próximo Estado: [Finalizado]
-
-Reversões Necessárias:
-├── 🥘 Reverter consumo de ingredientes (se aplicável)
-├── 🏭 Liberar recursos de produção
-├── 📊 Cancelar ProductComposition relacionadas
-└── 📈 Atualizar ProductionOrder (se agrupada)
+SincronizaÃ§Ã£o AutomÃ¡tica:
+â”œâ”€â”€ ðŸ”„ Todas Demands do OrderEntry â†’ Delivered
+â”œâ”€â”€ ðŸ“Š Atualizar mÃ©tricas de produÃ§Ã£o
+â”œâ”€â”€ ðŸ’° Calcular lucratividade por Demand
+â””â”€â”€ ðŸ“ˆ Atualizar histÃ³rico de performance
 ```
 
-## ⚡ Sincronização entre Estados
-
-### **🔄 Sincronização com OrderEntry:**
+### **âŒ CANCELLED (Cancelada)**
 ```
-OrderEntry Status Changed → Demand Status Changes:
+ðŸ“Œ Estado Final de Cancelamento
+â”œâ”€â”€ Trigger: OrderItem/OrderEntry cancelados ou problema produÃ§Ã£o
+â”œâ”€â”€ DescriÃ§Ã£o: Demanda cancelada em qualquer fase
+â”œâ”€â”€ Permitido: Consulta e auditoria
+â”œâ”€â”€ Bloqueado: ReativaÃ§Ã£o
+â””â”€â”€ PrÃ³ximo Estado: [Finalizado]
+
+ReversÃµes NecessÃ¡rias:
+â”œâ”€â”€ ðŸ¥˜ Reverter consumo de ingredientes (se aplicÃ¡vel)
+â”œâ”€â”€ ðŸ­ Liberar recursos de produÃ§Ã£o
+â”œâ”€â”€ ðŸ“Š Cancelar ProductComposition relacionadas
+â””â”€â”€ ðŸ“ˆ Atualizar ProductionOrder (se agrupada)
+```
+
+## âš¡ SincronizaÃ§Ã£o entre Estados
+
+### **ðŸ”„ SincronizaÃ§Ã£o com OrderEntry:**
+```
+OrderEntry Status Changed â†’ Demand Status Changes:
 
 OrderEntry: Confirmed
-├── 🔄 Todas Demands relacionadas: Pending → Confirmed
-└── ⚡ Automático e instantâneo
+â”œâ”€â”€ ðŸ”„ Todas Demands relacionadas: Pending â†’ Confirmed
+â””â”€â”€ âš¡ AutomÃ¡tico e instantÃ¢neo
 
 OrderEntry: SentToProduction  
-├── 🏭 Criar ProductionOrder
-├── 🔗 Agrupar Demands
-└── 📊 PO Status: Scheduled
+â”œâ”€â”€ ðŸ­ Criar ProductionOrder
+â”œâ”€â”€ ðŸ”— Agrupar Demands
+â””â”€â”€ ðŸ“Š PO Status: Scheduled
 
 OrderEntry: Cancelled
-├── 🔄 Todas Demands relacionadas: [Any] → Cancelled  
-├── 🥘 Reverter consumos de ingrediente
-└── 🏭 Cancelar ProductionOrder se existir
+â”œâ”€â”€ ðŸ”„ Todas Demands relacionadas: [Any] â†’ Cancelled  
+â”œâ”€â”€ ðŸ¥˜ Reverter consumos de ingrediente
+â””â”€â”€ ðŸ­ Cancelar ProductionOrder se existir
 ```
 
-### **🧩 Sincronização com ProductComposition:**
+### **ðŸ§© SincronizaÃ§Ã£o com ProductComposition:**
 ```
 Demand: InProduction
-├── 📋 Listar ProductComposition relacionadas
-├── 🔄 Executar sequencialmente
-└── ⏰ Tracking individual de cada tarefa
+â”œâ”€â”€ ðŸ“‹ Listar ProductComposition relacionadas
+â”œâ”€â”€ ðŸ”„ Executar sequencialmente
+â””â”€â”€ â° Tracking individual de cada tarefa
 
 Todas ProductComposition: Completed
-├── 📈 Demand Status: InProduction → Finalizando
-└── ⚡ Verificação automática contínua
+â”œâ”€â”€ ðŸ“ˆ Demand Status: InProduction â†’ Finalizando
+â””â”€â”€ âš¡ VerificaÃ§Ã£o automÃ¡tica contÃ­nua
 ```
 
-### **🏭 Sincronização com ProductionOrder:**
+### **ðŸ­ SincronizaÃ§Ã£o com ProductionOrder:**
 ```
 ProductionOrder: InProgress
-├── 🔄 Todas Demands vinculadas podem iniciar
-└── 📊 Tracking consolidado de progresso
+â”œâ”€â”€ ðŸ”„ Todas Demands vinculadas podem iniciar
+â””â”€â”€ ðŸ“Š Tracking consolidado de progresso
 
 Todas Demands: Ready
-├── 📈 ProductionOrder Status: Completed
-└── 📊 Calcular métricas finais da PO
+â”œâ”€â”€ ðŸ“ˆ ProductionOrder Status: Completed
+â””â”€â”€ ðŸ“Š Calcular mÃ©tricas finais da PO
 ```
 
-## 🚨 Validações e Restrições
+## ðŸš¨ ValidaÃ§Ãµes e RestriÃ§Ãµes
 
-### **Restrições por Estado:**
+### **RestriÃ§Ãµes por Estado:**
 ```
-Estado          │ Editar Config │ Cancelar │ Iniciar Prod │ Entregar
-═══════════════════════════════════════════════════════════════════
-Pending         │      ⚠️       │    ✅    │      ⛔      │    ⛔
-Confirmed       │      ⛔       │    ✅    │      ⚠️      │    ⛔
-InProduction    │      ⛔       │    ⚠️    │      N/A     │    ⛔
-Finalizando     │      ⛔       │    ⚠️    │      N/A     │    ⛔
-Ready           │      ⛔       │    ⛔    │      N/A     │    ✅
-Delivered       │      ⛔       │    ⛔    │      N/A     │    N/A
+Estado          â”‚ Editar Config â”‚ Cancelar â”‚ Iniciar Prod â”‚ Entregar
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+Pending         â”‚      âš ï¸       â”‚    âœ…    â”‚      â›”      â”‚    â›”
+Confirmed       â”‚      â›”       â”‚    âœ…    â”‚      âš ï¸      â”‚    â›”
+InProduction    â”‚      â›”       â”‚    âš ï¸    â”‚      N/A     â”‚    â›”
+Finalizando     â”‚      â›”       â”‚    âš ï¸    â”‚      N/A     â”‚    â›”
+Ready           â”‚      â›”       â”‚    â›”    â”‚      N/A     â”‚    âœ…
+Delivered       â”‚      â›”       â”‚    â›”    â”‚      N/A     â”‚    N/A
 
-Legenda: ✅ Permitido | ⛔ Bloqueado | ⚠️ Com restrições | N/A Não aplicável
-```
-
-### **Condições para Mudança de Estado:**
-```
-Pending → Confirmed:
-├── ✅ OrderEntry deve estar Confirmed
-├── ✅ Product deve estar ativo
-└── ✅ Ingredientes suficientes (warning se não)
-
-Confirmed → InProduction:
-├── ✅ Deve estar vinculada a ProductionOrder
-├── ✅ ProductionOrder deve estar InProgress
-└── ✅ Recursos de produção disponíveis
-
-InProduction → Finalizando:
-├── ✅ Todas ProductComposition devem estar Completed
-├── ✅ Tempos de produção registrados
-└── ✅ Ingredientes consumidos registrados
-
-Finalizando → Ready:
-├── ✅ Controle de qualidade aprovado
-├── ✅ Produto corretamente embalado
-└── ✅ Custos reais registrados
+Legenda: âœ… Permitido | â›” Bloqueado | âš ï¸ Com restriÃ§Ãµes | N/A NÃ£o aplicÃ¡vel
 ```
 
-## 🎯 Eventos de Domínio por Transição
+### **CondiÃ§Ãµes para MudanÃ§a de Estado:**
+```
+Pending â†’ Confirmed:
+â”œâ”€â”€ âœ… OrderEntry deve estar Confirmed
+â”œâ”€â”€ âœ… Product deve estar ativo
+â””â”€â”€ âœ… Ingredientes suficientes (warning se nÃ£o)
+
+Confirmed â†’ InProduction:
+â”œâ”€â”€ âœ… Deve estar vinculada a ProductionOrder
+â”œâ”€â”€ âœ… ProductionOrder deve estar InProgress
+â””â”€â”€ âœ… Recursos de produÃ§Ã£o disponÃ­veis
+
+InProduction â†’ Finalizando:
+â”œâ”€â”€ âœ… Todas ProductComposition devem estar Completed
+â”œâ”€â”€ âœ… Tempos de produÃ§Ã£o registrados
+â””â”€â”€ âœ… Ingredientes consumidos registrados
+
+Finalizando â†’ Ready:
+â”œâ”€â”€ âœ… Controle de qualidade aprovado
+â”œâ”€â”€ âœ… Produto corretamente embalado
+â””â”€â”€ âœ… Custos reais registrados
+```
+
+## ðŸŽ¯ Eventos de DomÃ­nio por TransiÃ§Ã£o
 
 ```
 DemandStatusChanged:
-├── DemandId: ID da demanda
-├── From: Estado anterior
-├── To: Novo estado
-├── Timestamp: Data/hora da mudança
-├── TriggeredBy: Usuário ou sistema
-├── Reason: Motivo da mudança
-└── ProductionOrderId: PO relacionada (se aplicável)
+â”œâ”€â”€ DemandId: ID da demanda
+â”œâ”€â”€ From: Estado anterior
+â”œâ”€â”€ To: Novo estado
+â”œâ”€â”€ Timestamp: Data/hora da mudanÃ§a
+â”œâ”€â”€ TriggeredBy: UsuÃ¡rio ou sistema
+â”œâ”€â”€ Reason: Motivo da mudanÃ§a
+â””â”€â”€ ProductionOrderId: PO relacionada (se aplicÃ¡vel)
 
-Eventos Específicos:
-├── DemandCreated: Nova demanda gerada
-├── DemandConfirmed: Demanda confirmada para produção
-├── ProductionStarted: Início da produção física
-├── ComponentCompleted: ProductComposition finalizada
-├── DemandFinalized: Demanda pronta para entrega
-├── DemandDelivered: Demanda entregue
-└── DemandCancelled: Demanda cancelada
+Eventos EspecÃ­ficos:
+â”œâ”€â”€ DemandCreated: Nova demanda gerada
+â”œâ”€â”€ DemandConfirmed: Demanda confirmada para produÃ§Ã£o
+â”œâ”€â”€ ProductionStarted: InÃ­cio da produÃ§Ã£o fÃ­sica
+â”œâ”€â”€ ComponentCompleted: ProductComposition finalizada
+â”œâ”€â”€ DemandFinalized: Demanda pronta para entrega
+â”œâ”€â”€ DemandDelivered: Demanda entregue
+â””â”€â”€ DemandCancelled: Demanda cancelada
 ```
 
 ---
 
 **Arquivo**: `demand-lifecycle.md`  
-**Domínio**: Produção (#fba81d)  
+**DomÃ­nio**: ProduÃ§Ã£o (#fba81d)  
 **Tipo**: State Diagram  
-**Foco**: Ciclo Completo Demand + Sincronização com ProductComposition
+**Foco**: Ciclo Completo Demand + SincronizaÃ§Ã£o com ProductComposition

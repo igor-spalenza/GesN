@@ -1,31 +1,31 @@
-# 📦 EVENT STORMING - DOMÍNIO DE PRODUTO
+﻿# ðŸ“¦ EVENT STORMING - DOMÃNIO DE PRODUTO
 
-## 🎯 Visão Geral
-Event Storming do Domínio de Produto mapeando comandos, eventos, agregados e políticas relacionados ao gerenciamento de catálogo de produtos, incluindo produtos simples, compostos e grupos. Inclui eventos de alto nível e micro-eventos para tracking detalhado.
+## ðŸŽ¯ VisÃ£o Geral
+Event Storming do DomÃ­nio de Produto mapeando comandos, eventos, agregados e polÃ­ticas relacionados ao gerenciamento de catÃ¡logo de produtos, incluindo produtos simples, compostos e grupos. Inclui eventos de alto nÃ­vel e micro-eventos para tracking detalhado.
 
-## 🎨 Convenções Visuais
-- **📋 [Comando]** - Azul - Ação executada por usuário/sistema
-- **⚡ Evento** - Laranja - Fato que aconteceu no domínio
-- **👤 (Ator)** - Verde - Quem executa o comando
-- **📊 {Agregado}** - Roxo - Entidade que processa comando
-- **🔄 Política** - Cinza - Regra "quando X então Y"
-- **⚠️ (!Hotspot!)** - Rosa - Complexidade/problema identificado
+## ðŸŽ¨ ConvenÃ§Ãµes Visuais
+- **ðŸ“‹ [Comando]** - Azul - AÃ§Ã£o executada por usuÃ¡rio/sistema
+- **âš¡ Evento** - Laranja - Fato que aconteceu no domÃ­nio
+- **ðŸ‘¤ (Ator)** - Verde - Quem executa o comando
+- **ðŸ“Š {Agregado}** - Roxo - Entidade que processa comando
+- **ðŸ”„ PolÃ­tica** - Cinza - Regra "quando X entÃ£o Y"
+- **âš ï¸ (!Hotspot!)** - Rosa - Complexidade/problema identificado
 
-## ⚡ Event Storming Timeline
+## âš¡ Event Storming Timeline
 
-### **🔄 Fluxo Principal - Gestão de Produtos**
+### **ðŸ”„ Fluxo Principal - GestÃ£o de Produtos**
 
 ```mermaid
 journey
     title Product Domain Event Timeline
-    section Criação de Produto
+    section CriaÃ§Ã£o de Produto
       Gerente decide criar produto         : 5: Gerente
       [CreateProduct]                      : 3: Sistema
       ProductCreated                       : 5: Sistema
       [ValidateProduct]                    : 4: Sistema
       ProductValidated                     : 5: Sistema
       
-    section Configuração (Composite)
+    section ConfiguraÃ§Ã£o (Composite)
       [DefineComponentHierarchy]           : 3: Gerente
       ComponentHierarchyDefined            : 5: Sistema
       [AddProductComponent]                : 3: Gerente
@@ -33,7 +33,7 @@ journey
       [LinkComponentToHierarchy]           : 4: Sistema
       ComponentLinkedToProduct             : 5: Sistema
       
-    section Configuração (Group)
+    section ConfiguraÃ§Ã£o (Group)
       [DefineGroupRules]                   : 3: Gerente
       GroupRulesDefined                    : 5: Sistema
       [AddGroupItem]                       : 3: Gerente
@@ -41,362 +41,362 @@ journey
       [SetExchangeRule]                    : 4: Gerente
       ExchangeRuleConfigured               : 5: Sistema
       
-    section Ativação
+    section AtivaÃ§Ã£o
       [ActivateProduct]                    : 4: Gerente
       ProductActivated                     : 5: Sistema
       ProductCatalogUpdated                : 5: Sistema
 ```
 
-### **📋 Comandos por Ator**
+### **ðŸ“‹ Comandos por Ator**
 
-#### **👑 Gestores (Product Managers)**
+#### **ðŸ‘‘ Gestores (Product Managers)**
 ```
 [CreateProduct]
-├── Input: ProductType, Name, Description, Price
-├── Validations: Name unique, Price > 0, Valid ProductType
-├── Output: ProductId
-└── Events: ProductCreated
+â”œâ”€â”€ Input: ProductType, Name, Description, Price
+â”œâ”€â”€ Validations: Name unique, Price > 0, Valid ProductType
+â”œâ”€â”€ Output: ProductId
+â””â”€â”€ Events: ProductCreated
 
 [UpdateProduct] 
-├── Input: ProductId, UpdateData
-├── Validations: Product exists, Business rules
-├── Output: Success/Failure
-└── Events: ProductUpdated
+â”œâ”€â”€ Input: ProductId, UpdateData
+â”œâ”€â”€ Validations: Product exists, Business rules
+â”œâ”€â”€ Output: Success/Failure
+â””â”€â”€ Events: ProductUpdated
 
 [ActivateProduct]
-├── Input: ProductId
-├── Validations: Product valid, Complete configuration
-├── Output: Success/Failure
-└── Events: ProductActivated, ProductCatalogUpdated
+â”œâ”€â”€ Input: ProductId
+â”œâ”€â”€ Validations: Product valid, Complete configuration
+â”œâ”€â”€ Output: Success/Failure
+â””â”€â”€ Events: ProductActivated, ProductCatalogUpdated
 
 [DeactivateProduct]
-├── Input: ProductId, Reason
-├── Validations: No active orders using product
-├── Output: Success/Failure
-└── Events: ProductDeactivated, ProductCatalogUpdated
+â”œâ”€â”€ Input: ProductId, Reason
+â”œâ”€â”€ Validations: No active orders using product
+â”œâ”€â”€ Output: Success/Failure
+â””â”€â”€ Events: ProductDeactivated, ProductCatalogUpdated
 
 [DefineComponentHierarchy]
-├── Input: HierarchyName, Description, ProductId
-├── Validations: Unique hierarchy name per product
-├── Output: HierarchyId
-└── Events: ComponentHierarchyDefined
+â”œâ”€â”€ Input: HierarchyName, Description, ProductId
+â”œâ”€â”€ Validations: Unique hierarchy name per product
+â”œâ”€â”€ Output: HierarchyId
+â””â”€â”€ Events: ComponentHierarchyDefined
 
 [AddProductComponent]
-├── Input: ComponentName, HierarchyId, AdditionalCost
-├── Validations: Component name unique in hierarchy
-├── Output: ComponentId
-└── Events: ProductComponentAdded
+â”œâ”€â”€ Input: ComponentName, HierarchyId, AdditionalCost
+â”œâ”€â”€ Validations: Component name unique in hierarchy
+â”œâ”€â”€ Output: ComponentId
+â””â”€â”€ Events: ProductComponentAdded
 
 [SetExchangeRule]
-├── Input: SourceItemId, TargetItemId, ExchangeRatio
-├── Validations: Valid items, Logical ratio
-├── Output: RuleId
-└── Events: ExchangeRuleConfigured
+â”œâ”€â”€ Input: SourceItemId, TargetItemId, ExchangeRatio
+â”œâ”€â”€ Validations: Valid items, Logical ratio
+â”œâ”€â”€ Output: RuleId
+â””â”€â”€ Events: ExchangeRuleConfigured
 ```
 
-#### **⚙️ Sistema (Automático)**
+#### **âš™ï¸ Sistema (AutomÃ¡tico)**
 ```
 [ValidateProduct]
-├── Trigger: ProductCreated, ProductUpdated
-├── Business Rules: Type-specific validation
-├── Auto-execution: Background process
-└── Events: ProductValidated, ProductValidationFailed
+â”œâ”€â”€ Trigger: ProductCreated, ProductUpdated
+â”œâ”€â”€ Business Rules: Type-specific validation
+â”œâ”€â”€ Auto-execution: Background process
+â””â”€â”€ Events: ProductValidated, ProductValidationFailed
 
 [UpdateProductCatalog]
-├── Trigger: ProductActivated, ProductDeactivated
-├── Actions: Refresh cache, Update search index
-├── Auto-execution: Event-driven
-└── Events: ProductCatalogUpdated
+â”œâ”€â”€ Trigger: ProductActivated, ProductDeactivated
+â”œâ”€â”€ Actions: Refresh cache, Update search index
+â”œâ”€â”€ Auto-execution: Event-driven
+â””â”€â”€ Events: ProductCatalogUpdated
 
 [CalculateProductCost]
-├── Trigger: ProductComponentAdded, IngredientCostChanged
-├── Actions: Recalculate total cost
-├── Auto-execution: Event-driven
-└── Events: ProductCostRecalculated
+â”œâ”€â”€ Trigger: ProductComponentAdded, IngredientCostChanged
+â”œâ”€â”€ Actions: Recalculate total cost
+â”œâ”€â”€ Auto-execution: Event-driven
+â””â”€â”€ Events: ProductCostRecalculated
 
 [LinkComponentToHierarchy]
-├── Trigger: ProductComponentAdded
-├── Actions: Create relationship record
-├── Auto-execution: Immediately after component creation
-└── Events: ComponentLinkedToProduct
+â”œâ”€â”€ Trigger: ProductComponentAdded
+â”œâ”€â”€ Actions: Create relationship record
+â”œâ”€â”€ Auto-execution: Immediately after component creation
+â””â”€â”€ Events: ComponentLinkedToProduct
 ```
 
-#### **👥 Clientes (Indiretamente via Vendas)**
+#### **ðŸ‘¥ Clientes (Indiretamente via Vendas)**
 ```
 [SelectProductConfiguration] (via Sales Domain)
-├── Input: ProductId, ComponentSelections
-├── Validations: Valid configuration, Component availability
-├── Cross-domain: Validates against Product domain
-└── Events: ProductConfigurationSelected
+â”œâ”€â”€ Input: ProductId, ComponentSelections
+â”œâ”€â”€ Validations: Valid configuration, Component availability
+â”œâ”€â”€ Cross-domain: Validates against Product domain
+â””â”€â”€ Events: ProductConfigurationSelected
 ```
 
-### **⚡ Eventos de Alto Nível**
+### **âš¡ Eventos de Alto NÃ­vel**
 
-#### **📦 Product Lifecycle Events**
+#### **ðŸ“¦ Product Lifecycle Events**
 ```
 ProductCreated
-├── Data: ProductId, ProductType, Name, Price, CreatedBy
-├── Triggers: [ValidateProduct], Cache refresh
-├── Integrations: Sales (catalog update), Reporting
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: ProductId, ProductType, Name, Price, CreatedBy
+â”œâ”€â”€ Triggers: [ValidateProduct], Cache refresh
+â”œâ”€â”€ Integrations: Sales (catalog update), Reporting
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 ProductValidated
-├── Data: ProductId, ValidationResult, ValidationRules
-├── Triggers: [ActivateProduct] (if valid)
-├── Integrations: Sales (availability update)
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ProductId, ValidationResult, ValidationRules
+â”œâ”€â”€ Triggers: [ActivateProduct] (if valid)
+â”œâ”€â”€ Integrations: Sales (availability update)
+â””â”€â”€ Importance: âš ï¸ High
 
 ProductActivated
-├── Data: ProductId, ActivatedBy, ActivationDate
-├── Triggers: [UpdateProductCatalog], Cache invalidation
-├── Integrations: Sales (make available), Reporting
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: ProductId, ActivatedBy, ActivationDate
+â”œâ”€â”€ Triggers: [UpdateProductCatalog], Cache invalidation
+â”œâ”€â”€ Integrations: Sales (make available), Reporting
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 ProductDeactivated
-├── Data: ProductId, Reason, DeactivatedBy
-├── Triggers: [UpdateProductCatalog], Order validation updates
-├── Integrations: Sales (remove availability), Production (stop usage)
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: ProductId, Reason, DeactivatedBy
+â”œâ”€â”€ Triggers: [UpdateProductCatalog], Order validation updates
+â”œâ”€â”€ Integrations: Sales (remove availability), Production (stop usage)
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 ProductCatalogUpdated
-├── Data: UpdateType, ProductIds, Timestamp
-├── Triggers: Cache refresh, Search index update
-├── Integrations: Sales (catalog sync), External APIs
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: UpdateType, ProductIds, Timestamp
+â”œâ”€â”€ Triggers: Cache refresh, Search index update
+â”œâ”€â”€ Integrations: Sales (catalog sync), External APIs
+â””â”€â”€ Importance: âš ï¸ High
 ```
 
-#### **🧩 Component Configuration Events**
+#### **ðŸ§© Component Configuration Events**
 ```
 ComponentHierarchyDefined
-├── Data: HierarchyId, ProductId, HierarchyName, Description
-├── Triggers: [AddProductComponent] availability
-├── Integrations: Sales (configuration options)
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: HierarchyId, ProductId, HierarchyName, Description
+â”œâ”€â”€ Triggers: [AddProductComponent] availability
+â”œâ”€â”€ Integrations: Sales (configuration options)
+â””â”€â”€ Importance: âš ï¸ High
 
 ProductComponentAdded  
-├── Data: ComponentId, HierarchyId, ComponentName, AdditionalCost
-├── Triggers: [LinkComponentToHierarchy], [CalculateProductCost]
-├── Integrations: Sales (configuration update), Cost calculation
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ComponentId, HierarchyId, ComponentName, AdditionalCost
+â”œâ”€â”€ Triggers: [LinkComponentToHierarchy], [CalculateProductCost]
+â”œâ”€â”€ Integrations: Sales (configuration update), Cost calculation
+â””â”€â”€ Importance: âš ï¸ High
 
 ComponentLinkedToProduct
-├── Data: ProductId, ComponentId, HierarchyId, LinkRules
-├── Triggers: Configuration validation, Price recalculation
-├── Integrations: Sales (available options update)
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: ProductId, ComponentId, HierarchyId, LinkRules
+â”œâ”€â”€ Triggers: Configuration validation, Price recalculation
+â”œâ”€â”€ Integrations: Sales (available options update)
+â””â”€â”€ Importance: ðŸ“Š Medium
 ```
 
-#### **📦 Group Management Events**
+#### **ðŸ“¦ Group Management Events**
 ```
 GroupRulesDefined
-├── Data: ProductId, RuleType, RuleParameters
-├── Triggers: [AddGroupItem] validation rules
-├── Integrations: Sales (group configuration logic)
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ProductId, RuleType, RuleParameters
+â”œâ”€â”€ Triggers: [AddGroupItem] validation rules
+â”œâ”€â”€ Integrations: Sales (group configuration logic)
+â””â”€â”€ Importance: âš ï¸ High
 
 GroupItemAdded
-├── Data: GroupItemId, ProductId, ItemType (Product/Category), Quantity
-├── Triggers: [ValidateGroupConfiguration], Price recalculation
-├── Integrations: Sales (group options), Inventory
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: GroupItemId, ProductId, ItemType (Product/Category), Quantity
+â”œâ”€â”€ Triggers: [ValidateGroupConfiguration], Price recalculation
+â”œâ”€â”€ Integrations: Sales (group options), Inventory
+â””â”€â”€ Importance: âš ï¸ High
 
 ExchangeRuleConfigured
-├── Data: RuleId, SourceItemId, TargetItemId, ExchangeRatio
-├── Triggers: Group validation update, Sales rule sync
-├── Integrations: Sales (exchange options)
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: RuleId, SourceItemId, TargetItemId, ExchangeRatio
+â”œâ”€â”€ Triggers: Group validation update, Sales rule sync
+â”œâ”€â”€ Integrations: Sales (exchange options)
+â””â”€â”€ Importance: ðŸ“Š Medium
 ```
 
-### **🔍 Micro-Eventos (Tracking Detalhado)**
+### **ðŸ” Micro-Eventos (Tracking Detalhado)**
 
-#### **📊 Configuration Micro-Events**
+#### **ðŸ“Š Configuration Micro-Events**
 ```
 ComponentSelectionValidated
-├── Data: ComponentId, ProductId, ValidationResult, SelectionContext
-├── Purpose: Detailed tracking of configuration attempts
-├── Used by: Analytics, Error tracking, User experience
-└── Frequency: High (every configuration attempt)
+â”œâ”€â”€ Data: ComponentId, ProductId, ValidationResult, SelectionContext
+â”œâ”€â”€ Purpose: Detailed tracking of configuration attempts
+â”œâ”€â”€ Used by: Analytics, Error tracking, User experience
+â””â”€â”€ Frequency: High (every configuration attempt)
 
 PriceCalculationTriggered
-├── Data: ProductId, CalculationType, InputParameters, Timestamp
-├── Purpose: Track pricing calculation requests
-├── Used by: Performance monitoring, Business analytics
-└── Frequency: Medium (price calculations)
+â”œâ”€â”€ Data: ProductId, CalculationType, InputParameters, Timestamp
+â”œâ”€â”€ Purpose: Track pricing calculation requests
+â”œâ”€â”€ Used by: Performance monitoring, Business analytics
+â””â”€â”€ Frequency: Medium (price calculations)
 
 ProductConfigurationCached
-├── Data: ProductId, CacheKey, ConfigurationData, ExpirationTime
-├── Purpose: Cache management and performance optimization
-├── Used by: Cache invalidation, Performance monitoring
-└── Frequency: High (caching operations)
+â”œâ”€â”€ Data: ProductId, CacheKey, ConfigurationData, ExpirationTime
+â”œâ”€â”€ Purpose: Cache management and performance optimization
+â”œâ”€â”€ Used by: Cache invalidation, Performance monitoring
+â””â”€â”€ Frequency: High (caching operations)
 
 ValidationRuleApplied
-├── Data: ProductId, RuleName, RuleResult, ValidationContext
-├── Purpose: Detailed validation tracking for compliance
-├── Used by: Audit trail, Business rule analysis
-└── Frequency: Medium (validation operations)
+â”œâ”€â”€ Data: ProductId, RuleName, RuleResult, ValidationContext
+â”œâ”€â”€ Purpose: Detailed validation tracking for compliance
+â”œâ”€â”€ Used by: Audit trail, Business rule analysis
+â””â”€â”€ Frequency: Medium (validation operations)
 ```
 
-#### **🔧 System Micro-Events**
+#### **ðŸ”§ System Micro-Events**
 ```
 ProductSearchIndexed
-├── Data: ProductId, IndexType, IndexedFields, IndexingTime
-├── Purpose: Search functionality monitoring
-├── Used by: Performance monitoring, Search optimization
-└── Frequency: Medium (indexing operations)
+â”œâ”€â”€ Data: ProductId, IndexType, IndexedFields, IndexingTime
+â”œâ”€â”€ Purpose: Search functionality monitoring
+â”œâ”€â”€ Used by: Performance monitoring, Search optimization
+â””â”€â”€ Frequency: Medium (indexing operations)
 
 CategoryRelationshipUpdated
-├── Data: ProductId, CategoryId, RelationshipType, UpdatedBy
-├── Purpose: Track category assignments
-├── Used by: Catalog organization, Analytics
-└── Frequency: Low (category changes)
+â”œâ”€â”€ Data: ProductId, CategoryId, RelationshipType, UpdatedBy
+â”œâ”€â”€ Purpose: Track category assignments
+â”œâ”€â”€ Used by: Catalog organization, Analytics
+â””â”€â”€ Frequency: Low (category changes)
 
 SKUGenerationRequested
-├── Data: ProductId, SKUPattern, GenerationResult, RequestedBy
-├── Purpose: Track SKU generation for inventory
-├── Used by: Inventory tracking, Audit
-└── Frequency: Low (new products)
+â”œâ”€â”€ Data: ProductId, SKUPattern, GenerationResult, RequestedBy
+â”œâ”€â”€ Purpose: Track SKU generation for inventory
+â”œâ”€â”€ Used by: Inventory tracking, Audit
+â””â”€â”€ Frequency: Low (new products)
 
 IngredientLinkageUpdated
-├── Data: ProductId, IngredientId, LinkageType, Quantity
-├── Purpose: Track product-ingredient relationships
-├── Used by: Cost calculation, Production planning
-└── Frequency: Medium (recipe changes)
+â”œâ”€â”€ Data: ProductId, IngredientId, LinkageType, Quantity
+â”œâ”€â”€ Purpose: Track product-ingredient relationships
+â”œâ”€â”€ Used by: Cost calculation, Production planning
+â””â”€â”€ Frequency: Medium (recipe changes)
 ```
 
-### **📊 Agregados e Responsabilidades**
+### **ðŸ“Š Agregados e Responsabilidades**
 
-#### **🎯 Product Aggregate**
+#### **ðŸŽ¯ Product Aggregate**
 ```
 {Product}
-├── Entities: Product (Simple/Composite/Group)
-├── Value Objects: ProductType, Price, SKU
-├── Invariants: 
-│   ├── Name must be unique
-│   ├── Price must be positive
-│   ├── SKU must be unique if provided
-│   └── ProductType cannot change after creation
-├── Events Published:
-│   ├── ProductCreated, ProductUpdated
-│   ├── ProductActivated, ProductDeactivated
-│   └── ProductValidated, ProductValidationFailed
-└── Commands Handled:
-    ├── CreateProduct, UpdateProduct
-    ├── ActivateProduct, DeactivateProduct
-    └── ValidateProduct
+â”œâ”€â”€ Entities: Product (Simple/Composite/Group)
+â”œâ”€â”€ Value Objects: ProductType, Price, SKU
+â”œâ”€â”€ Invariants: 
+â”‚   â”œâ”€â”€ Name must be unique
+â”‚   â”œâ”€â”€ Price must be positive
+â”‚   â”œâ”€â”€ SKU must be unique if provided
+â”‚   â””â”€â”€ ProductType cannot change after creation
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ ProductCreated, ProductUpdated
+â”‚   â”œâ”€â”€ ProductActivated, ProductDeactivated
+â”‚   â””â”€â”€ ProductValidated, ProductValidationFailed
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreateProduct, UpdateProduct
+    â”œâ”€â”€ ActivateProduct, DeactivateProduct
+    â””â”€â”€ ValidateProduct
 ```
 
-#### **🧩 ProductComponentHierarchy Aggregate**
+#### **ðŸ§© ProductComponentHierarchy Aggregate**
 ```
 {ProductComponentHierarchy}
-├── Entities: ProductComponentHierarchy, ProductComponent
-├── Value Objects: HierarchyName, ComponentName, AdditionalCost
-├── Invariants:
-│   ├── Hierarchy name unique per product
-│   ├── Component name unique per hierarchy
-│   ├── AdditionalCost >= 0
-│   └── Cannot delete hierarchy with linked components
-├── Events Published:
-│   ├── ComponentHierarchyDefined
-│   ├── ProductComponentAdded
-│   └── ComponentLinkedToProduct
-└── Commands Handled:
-    ├── DefineComponentHierarchy
-    ├── AddProductComponent
-    └── LinkComponentToHierarchy
+â”œâ”€â”€ Entities: ProductComponentHierarchy, ProductComponent
+â”œâ”€â”€ Value Objects: HierarchyName, ComponentName, AdditionalCost
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Hierarchy name unique per product
+â”‚   â”œâ”€â”€ Component name unique per hierarchy
+â”‚   â”œâ”€â”€ AdditionalCost >= 0
+â”‚   â””â”€â”€ Cannot delete hierarchy with linked components
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ ComponentHierarchyDefined
+â”‚   â”œâ”€â”€ ProductComponentAdded
+â”‚   â””â”€â”€ ComponentLinkedToProduct
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ DefineComponentHierarchy
+    â”œâ”€â”€ AddProductComponent
+    â””â”€â”€ LinkComponentToHierarchy
 ```
 
-#### **📦 ProductGroup Aggregate**
+#### **ðŸ“¦ ProductGroup Aggregate**
 ```
 {ProductGroup}
-├── Entities: ProductGroup, ProductGroupItem, ProductGroupExchangeRule
-├── Value Objects: GroupConfiguration, ExchangeRatio
-├── Invariants:
-│   ├── Group must have at least one item
-│   ├── Exchange rules must be logical (ratio > 0)
-│   ├── Cannot have circular exchange rules
-│   └── Group items must reference valid products/categories
-├── Events Published:
-│   ├── GroupRulesDefined
-│   ├── GroupItemAdded
-│   └── ExchangeRuleConfigured
-└── Commands Handled:
-    ├── DefineGroupRules
-    ├── AddGroupItem
-    └── SetExchangeRule
+â”œâ”€â”€ Entities: ProductGroup, ProductGroupItem, ProductGroupExchangeRule
+â”œâ”€â”€ Value Objects: GroupConfiguration, ExchangeRatio
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Group must have at least one item
+â”‚   â”œâ”€â”€ Exchange rules must be logical (ratio > 0)
+â”‚   â”œâ”€â”€ Cannot have circular exchange rules
+â”‚   â””â”€â”€ Group items must reference valid products/categories
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ GroupRulesDefined
+â”‚   â”œâ”€â”€ GroupItemAdded
+â”‚   â””â”€â”€ ExchangeRuleConfigured
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ DefineGroupRules
+    â”œâ”€â”€ AddGroupItem
+    â””â”€â”€ SetExchangeRule
 ```
 
-#### **📂 ProductCategory Aggregate**
+#### **ðŸ“‚ ProductCategory Aggregate**
 ```
 {ProductCategory}
-├── Entities: ProductCategory
-├── Value Objects: CategoryName, CategoryDescription
-├── Invariants:
-│   ├── Category name must be unique
-│   ├── Cannot delete category with linked products
-│   └── Category hierarchy must be acyclic
-├── Events Published:
-│   ├── CategoryCreated, CategoryUpdated
-│   ├── CategoryActivated, CategoryDeactivated
-│   └── CategoryHierarchyChanged
-└── Commands Handled:
-    ├── CreateCategory, UpdateCategory
-    ├── ActivateCategory, DeactivateCategory
-    └── ReorganizeCategoryHierarchy
+â”œâ”€â”€ Entities: ProductCategory
+â”œâ”€â”€ Value Objects: CategoryName, CategoryDescription
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Category name must be unique
+â”‚   â”œâ”€â”€ Cannot delete category with linked products
+â”‚   â””â”€â”€ Category hierarchy must be acyclic
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ CategoryCreated, CategoryUpdated
+â”‚   â”œâ”€â”€ CategoryActivated, CategoryDeactivated
+â”‚   â””â”€â”€ CategoryHierarchyChanged
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreateCategory, UpdateCategory
+    â”œâ”€â”€ ActivateCategory, DeactivateCategory
+    â””â”€â”€ ReorganizeCategoryHierarchy
 ```
 
-### **🔄 Políticas de Negócio (Business Rules)**
+### **ðŸ”„ PolÃ­ticas de NegÃ³cio (Business Rules)**
 
-#### **⚙️ Product Validation Policies**
+#### **âš™ï¸ Product Validation Policies**
 ```
-"Quando ProductCreated, então ValidateProduct"
-├── Rule Engine: Check product type specific rules
-├── Auto-execution: Background service
-├── Failure handling: Mark as invalid, notify creator
-└── Integration: Blocks activation until valid
+"Quando ProductCreated, entÃ£o ValidateProduct"
+â”œâ”€â”€ Rule Engine: Check product type specific rules
+â”œâ”€â”€ Auto-execution: Background service
+â”œâ”€â”€ Failure handling: Mark as invalid, notify creator
+â””â”€â”€ Integration: Blocks activation until valid
 
-"Quando ProductComponentAdded, então CalculateProductCost"
-├── Cost calculation: Base price + sum of component costs
-├── Auto-execution: Immediate
-├── Cache invalidation: Clear pricing cache
-└── Integration: Update pricing in Sales domain
+"Quando ProductComponentAdded, entÃ£o CalculateProductCost"
+â”œâ”€â”€ Cost calculation: Base price + sum of component costs
+â”œâ”€â”€ Auto-execution: Immediate
+â”œâ”€â”€ Cache invalidation: Clear pricing cache
+â””â”€â”€ Integration: Update pricing in Sales domain
 
-"Quando ProductValidated successfully, então Enable for activation"
-├── Validation check: All business rules passed
-├── State change: Ready for activation
-├── Notification: Notify product manager
-└── Integration: Make available for sales configuration
-```
-
-#### **🔗 Cross-Domain Integration Policies**
-```
-"Quando ProductActivated, então Update Sales Catalog"
-├── Event propagation: ProductActivated → Sales domain
-├── Sales action: Add to available products
-├── Cache update: Refresh product catalog cache
-└── Search update: Update product search index
-
-"Quando ProductDeactivated, então Block New Orders"
-├── Event propagation: ProductDeactivated → Sales domain
-├── Sales action: Remove from available products
-├── Order validation: Reject new orders with this product
-└── Production: Complete existing demands, block new ones
-
-"Quando ComponentLinkedToProduct, então Update Configuration Options"
-├── Event propagation: ComponentLinkedToProduct → Sales domain
-├── Sales action: Update available configuration options
-├── Validation rules: Update component selection validation
-└── Price calculation: Update dynamic pricing rules
+"Quando ProductValidated successfully, entÃ£o Enable for activation"
+â”œâ”€â”€ Validation check: All business rules passed
+â”œâ”€â”€ State change: Ready for activation
+â”œâ”€â”€ Notification: Notify product manager
+â””â”€â”€ Integration: Make available for sales configuration
 ```
 
-### **⚠️ Hotspots e Complexidades**
+#### **ðŸ”— Cross-Domain Integration Policies**
+```
+"Quando ProductActivated, entÃ£o Update Sales Catalog"
+â”œâ”€â”€ Event propagation: ProductActivated â†’ Sales domain
+â”œâ”€â”€ Sales action: Add to available products
+â”œâ”€â”€ Cache update: Refresh product catalog cache
+â””â”€â”€ Search update: Update product search index
 
-#### **🚨 Complexidades Identificadas**
+"Quando ProductDeactivated, entÃ£o Block New Orders"
+â”œâ”€â”€ Event propagation: ProductDeactivated â†’ Sales domain
+â”œâ”€â”€ Sales action: Remove from available products
+â”œâ”€â”€ Order validation: Reject new orders with this product
+â””â”€â”€ Production: Complete existing demands, block new ones
+
+"Quando ComponentLinkedToProduct, entÃ£o Update Configuration Options"
+â”œâ”€â”€ Event propagation: ComponentLinkedToProduct â†’ Sales domain
+â”œâ”€â”€ Sales action: Update available configuration options
+â”œâ”€â”€ Validation rules: Update component selection validation
+â””â”€â”€ Price calculation: Update dynamic pricing rules
+```
+
+### **âš ï¸ Hotspots e Complexidades**
+
+#### **ðŸš¨ Complexidades Identificadas**
 
 ##### **(!ProductTypeStrategy!)**
 ```
 Problema: Different validation logic per ProductType
 Impacto: Complex branching logic, hard to extend
-Solução: Strategy pattern por ProductType
+SoluÃ§Ã£o: Strategy pattern por ProductType
 Prioridade: High - Affects extensibility
 ```
 
@@ -404,7 +404,7 @@ Prioridade: High - Affects extensibility
 ```
 Problema: Complex validation rules for Composite Products
 Impacto: Performance issues, hard to maintain
-Solução: Rule engine with cacheable validation
+SoluÃ§Ã£o: Rule engine with cacheable validation
 Prioridade: High - Affects user experience
 ```
 
@@ -412,7 +412,7 @@ Prioridade: High - Affects user experience
 ```
 Problema: Complex exchange ratio calculations for Groups
 Impacto: Business logic scattered across layers
-Solução: Domain service for exchange calculations
+SoluÃ§Ã£o: Domain service for exchange calculations
 Prioridade: Medium - Business critical but contained
 ```
 
@@ -420,58 +420,58 @@ Prioridade: Medium - Business critical but contained
 ```
 Problema: Event ordering between Product and Sales domains
 Impacto: Race conditions, inconsistent state
-Solução: Event sequencing and idempotency
+SoluÃ§Ã£o: Event sequencing and idempotency
 Prioridade: High - Data integrity risk
 ```
 
-#### **📊 Métricas e Alertas**
+#### **ðŸ“Š MÃ©tricas e Alertas**
 
-##### **🎯 Business Metrics**
+##### **ðŸŽ¯ Business Metrics**
 ```
 Product Creation Rate:
-├── Metric: Products created per day
-├── Alert: < 1 product/day (business slowdown)
-├── Dashboard: Product management KPIs
-└── Usage: Business health monitoring
+â”œâ”€â”€ Metric: Products created per day
+â”œâ”€â”€ Alert: < 1 product/day (business slowdown)
+â”œâ”€â”€ Dashboard: Product management KPIs
+â””â”€â”€ Usage: Business health monitoring
 
 Configuration Error Rate:
-├── Metric: % failed product configurations
-├── Alert: > 5% error rate (UX issue)
-├── Dashboard: Product quality metrics
-└── Usage: Product manager feedback
+â”œâ”€â”€ Metric: % failed product configurations
+â”œâ”€â”€ Alert: > 5% error rate (UX issue)
+â”œâ”€â”€ Dashboard: Product quality metrics
+â””â”€â”€ Usage: Product manager feedback
 
 Validation Processing Time:
-├── Metric: Average time to validate product
-├── Alert: > 10 seconds (performance issue)
-├── Dashboard: System performance
-└── Usage: Technical optimization
+â”œâ”€â”€ Metric: Average time to validate product
+â”œâ”€â”€ Alert: > 10 seconds (performance issue)
+â”œâ”€â”€ Dashboard: System performance
+â””â”€â”€ Usage: Technical optimization
 ```
 
-##### **⚡ Technical Metrics**
+##### **âš¡ Technical Metrics**
 ```
 Event Processing Latency:
-├── Metric: Time from command to event published
-├── Alert: > 1 second (system performance)
-├── Dashboard: Event system health
-└── Usage: Performance optimization
+â”œâ”€â”€ Metric: Time from command to event published
+â”œâ”€â”€ Alert: > 1 second (system performance)
+â”œâ”€â”€ Dashboard: Event system health
+â””â”€â”€ Usage: Performance optimization
 
 Cache Hit Ratio:
-├── Metric: % product data served from cache
-├── Alert: < 80% hit ratio (cache efficiency)
-├── Dashboard: Caching performance
-└── Usage: Infrastructure optimization
+â”œâ”€â”€ Metric: % product data served from cache
+â”œâ”€â”€ Alert: < 80% hit ratio (cache efficiency)
+â”œâ”€â”€ Dashboard: Caching performance
+â””â”€â”€ Usage: Infrastructure optimization
 
 Cross-Domain Event Failures:
-├── Metric: Failed event propagations to other domains
-├── Alert: > 1% failure rate (integration issue)
-├── Dashboard: Domain integration health
-└── Usage: System reliability monitoring
+â”œâ”€â”€ Metric: Failed event propagations to other domains
+â”œâ”€â”€ Alert: > 1% failure rate (integration issue)
+â”œâ”€â”€ Dashboard: Domain integration health
+â””â”€â”€ Usage: System reliability monitoring
 ```
 
 ---
 
 **Arquivo**: `product-domain-events.md`  
-**Domínio**: Produto (#00a86b)  
+**DomÃ­nio**: Produto (#00a86b)  
 **Tipo**: Event Storming  
-**Granularidade**: Alto nível + Micro-eventos  
-**Atualização**: 16/06/2025
+**Granularidade**: Alto nÃ­vel + Micro-eventos  
+**AtualizaÃ§Ã£o**: 16/06/2025

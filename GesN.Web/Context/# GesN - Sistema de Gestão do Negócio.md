@@ -1,25 +1,25 @@
-# GesN - Sistema de Gestão do Negócio
+﻿# GesN - Sistema de GestÃ£o do NegÃ³cio
 
-O GesN é um sistema de gestão integrada projetado para gerenciar os processos de Vendas, Produção, Financeiro e Compras de uma empresa.
+O GesN Ã© um sistema de gestÃ£o integrada projetado para gerenciar os processos de Vendas, ProduÃ§Ã£o, Financeiro e Compras de uma empresa.
 
-## ✨ Domínios e Funcionalidades Principais
+## âœ¨ DomÃ­nios e Funcionalidades Principais
 
 -   **Vendas:**
-    -   Gestão de Clientes (`Customer`)
-    -   Gestão de Pedidos (`OrderEntry`) com itens e status
-    -   Gestão de Contratos (`Contract`)
--   **Produção:**
-    -   Catálogo de Produtos (`Product`) com suporte a produtos Simples, Compostos e Grupos.
-    -   Gestão de Categorias de Produtos (`ProductCategory`)
-    -   Gestão de Fornecedores (`Supplier`) e Ingredientes (`Ingredient`)
-    -   Ordens de Produção (`ProductionOrder`)
+    -   GestÃ£o de Clientes (`Customer`)
+    -   GestÃ£o de Pedidos (`OrderEntry`) com itens e status
+    -   GestÃ£o de Contratos (`Contract`)
+-   **ProduÃ§Ã£o:**
+    -   CatÃ¡logo de Produtos (`Product`) com suporte a produtos Simples, Compostos e Grupos.
+    -   GestÃ£o de Categorias de Produtos (`ProductCategory`)
+    -   GestÃ£o de Fornecedores (`Supplier`) e Ingredientes (`Ingredient`)
+    -   Ordens de ProduÃ§Ã£o (`ProductionOrder`)
 -   **Financeiro:**
-    -   Gestão de Transações Financeiras (`FinancialTransaction`)
-    -   Categorias de Transação e Métodos de Pagamento
--   **Administração:**
-    -   Controle de Usuários, Funções (`Roles`) e Permissões (`Claims`)
+    -   GestÃ£o de TransaÃ§Ãµes Financeiras (`FinancialTransaction`)
+    -   Categorias de TransaÃ§Ã£o e MÃ©todos de Pagamento
+-   **AdministraÃ§Ã£o:**
+    -   Controle de UsuÃ¡rios, FunÃ§Ãµes (`Roles`) e PermissÃµes (`Claims`)
 
-## 🚀 Tecnologias Utilizadas
+## ðŸš€ Tecnologias Utilizadas
 
 -   **Backend:** ASP.NET Core MVC, C#
 -   **Banco de Dados:** SQLite
@@ -33,9 +33,9 @@ O GesN é um sistema de gestão integrada projetado para gerenciar os processos 
     -   Select2.js
     -   Algolia Autocomplete.js
 
-## 🏁 Como Iniciar
+## ðŸ Como Iniciar
 
-1.  Clone o repositório.
-2.  Configure a string de conexão no arquivo `appsettings.json`.
-3.  A inicialização do banco de dados é gerenciada pela classe `DbInit.cs` na primeira execução.
+1.  Clone o repositÃ³rio.
+2.  Configure a string de conexÃ£o no arquivo `appsettings.json`.
+3.  A inicializaÃ§Ã£o do banco de dados Ã© gerenciada pela classe `DbInit.cs` na primeira execuÃ§Ã£o.
 4.  Execute o projeto (`dotnet run`).

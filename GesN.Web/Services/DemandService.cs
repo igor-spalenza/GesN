@@ -442,10 +442,89 @@ namespace GesN.Web.Services
 
         public async Task<bool> CreateDemandFromOrderItemAsync(string orderItemId, string userId)
         {
-            // Implementar lógica para criar demanda a partir de um OrderItem
-            await Task.CompletedTask;
-            return true;
+            try
+            {
+                // Buscar o OrderItem
+                var orderItem = await _orderItemRepository.GetByIdAsync(orderItemId);
+                if (orderItem == null)
+                {
+                    _logger.LogError("OrderItem {OrderItemId} não encontrado ao criar demanda", orderItemId);
+                    return false;
+                }
+
+                // Buscar dados do produto
+                var product = await _productRepository.GetByIdAsync(orderItem.ProductId);
+                if (product == null)
+                {
+                    _logger.LogError("Produto {ProductId} não encontrado ao criar demanda para OrderItem {OrderItemId}", 
+                        orderItem.ProductId, orderItemId);
+                    return false;
+                }
+
+                // Verificar se é produto que gera demanda (Composite, mas não Simple nem Group)
+                if (product.ProductType != ProductType.Composite)
+                {
+                    _logger.LogInformation("Produto {ProductId} do tipo {ProductType} não gera demanda automática", 
+                        product.Id, product.ProductType);
+                    return true; // Sucesso, mas sem criar demanda
+                }
+
+                // Verificar se já existe demanda para este OrderItem
+                var existingDemands = await _demandRepository.GetByOrderItemIdAsync(orderItemId);
+                if (existingDemands.Any())
+                {
+                    _logger.LogInformation("Demanda já existe para OrderItem {OrderItemId}", orderItemId);
+                    return true; // Já existe, considerar sucesso
+                }
+
+                // Criar nova demanda
+                var demand = new Demand
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ProductId = product.Id,
+                    OrderItemId = orderItemId,
+                    Quantity = orderItem.Quantity.ToString(),
+                    Status = DemandStatus.Pending,
+                    ExpectedDate = DateTime.Today.AddDays(product.AssemblyTime > 0 ? product.AssemblyTime : 7),
+                    Notes = !string.IsNullOrEmpty(orderItem.Notes) ? $"Observações do item: {orderItem.Notes}" : null,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = userId,
+                    LastModifiedAt = DateTime.UtcNow,
+                    LastModifiedBy = userId,
+                    StateCode = ObjectState.Active
+                };
+
+                // Salvar demanda
+                var demandId = await _demandRepository.CreateAsync(demand);
+
+                if (!string.IsNullOrEmpty(demandId))
+                {
+                    _logger.LogInformation("Demanda {DemandId} criada automaticamente para OrderItem {OrderItemId} - Produto {ProductName}", 
+                        demandId, orderItemId, product.Name);
+
+                    // Para produtos compostos, criar também ProductComposition se necessário
+                    if (product.ProductType == ProductType.Composite)
+                    {
+                        // NOTA: ProductComposition será implementado em versão futura
+                        // Por enquanto, apenas a Demand é criada para produtos compostos
+                        _logger.LogInformation("Demand {DemandId} criada para produto composto {ProductName}. ProductComposition será implementado posteriormente.", 
+                            demandId, product.Name);
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao criar demanda a partir do OrderItem {OrderItemId}", orderItemId);
+                return false;
+            }
         }
+
+        // NOTA: CreateProductCompositionFromOrderItemAsync será implementado
+        // quando ProductCompositionRepository estiver disponível
 
         public async Task<IEnumerable<Demand>> GetDemandsForProductionPlanningAsync()
         {

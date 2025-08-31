@@ -1,73 +1,73 @@
-# 🎨 CONVENÇÕES VISUAIS E LEGENDAS - DIAGRAMAS GesN
+﻿# ðŸŽ¨ CONVENÃ‡Ã•ES VISUAIS E LEGENDAS - DIAGRAMAS GesN
 
-## 🎯 Visão Geral
-Este documento define as convenções visuais, cores e simbologias utilizadas em todos os diagramas do sistema GesN, garantindo consistência e facilidade de interpretação.
+## ðŸŽ¯ VisÃ£o Geral
+Este documento define as convenÃ§Ãµes visuais, cores e simbologias utilizadas em todos os diagramas do sistema GesN, garantindo consistÃªncia e facilidade de interpretaÃ§Ã£o.
 
-## 🌈 Cores por Domínio
+## ðŸŒˆ Cores por DomÃ­nio
 
-### **🎨 Paleta Principal**
-| Domínio | Cor Hex | Cor RGB | Exemplo Visual | Uso |
+### **ðŸŽ¨ Paleta Principal**
+| DomÃ­nio | Cor Hex | Cor RGB | Exemplo Visual | Uso |
 |---------|---------|---------|----------------|-----|
-| **📦 Produto** | `#00a86b` | RGB(0, 168, 107) | ![#00a86b](https://via.placeholder.com/20x20/00a86b/ffffff?text=+) | Entidades, backgrounds, borders |
-| **💰 Vendas** | `#f36b21` | RGB(243, 107, 33) | ![#f36b21](https://via.placeholder.com/20x20/f36b21/ffffff?text=+) | Entidades, backgrounds, borders |
-| **🏭 Produção** | `#fba81d` | RGB(251, 168, 29) | ![#fba81d](https://via.placeholder.com/20x20/fba81d/000000?text=+) | Entidades, backgrounds, borders |
-| **🛒 Compras** | `#0562aa` | RGB(5, 98, 170) | ![#0562aa](https://via.placeholder.com/20x20/0562aa/ffffff?text=+) | Entidades, backgrounds, borders |
-| **💳 Financeiro** | `#083e61` | RGB(8, 62, 97) | ![#083e61](https://via.placeholder.com/20x20/083e61/ffffff?text=+) | Entidades, backgrounds, borders |
+| **ðŸ“¦ Produto** | `#00a86b` | RGB(0, 168, 107) | ![#00a86b](https://via.placeholder.com/20x20/00a86b/ffffff?text=+) | Entidades, backgrounds, borders |
+| **ðŸ’° Vendas** | `#f36b21` | RGB(243, 107, 33) | ![#f36b21](https://via.placeholder.com/20x20/f36b21/ffffff?text=+) | Entidades, backgrounds, borders |
+| **ðŸ­ ProduÃ§Ã£o** | `#fba81d` | RGB(251, 168, 29) | ![#fba81d](https://via.placeholder.com/20x20/fba81d/000000?text=+) | Entidades, backgrounds, borders |
+| **ðŸ›’ Compras** | `#0562aa` | RGB(5, 98, 170) | ![#0562aa](https://via.placeholder.com/20x20/0562aa/ffffff?text=+) | Entidades, backgrounds, borders |
+| **ðŸ’³ Financeiro** | `#083e61` | RGB(8, 62, 97) | ![#083e61](https://via.placeholder.com/20x20/083e61/ffffff?text=+) | Entidades, backgrounds, borders |
 
-### **🎨 Variações Tonais**
+### **ðŸŽ¨ VariaÃ§Ãµes Tonais**
 
 #### **Produto (Verde)**
 - **Escuro**: `#00a86b` - Entidades principais
-- **Médio**: `#2dd4aa` - Entidades relacionadas  
-- **Claro**: `#a7f3d0` - Interfaces/serviços
-- **Extra Claro**: `#6ee7b7` - Implementações
+- **MÃ©dio**: `#2dd4aa` - Entidades relacionadas  
+- **Claro**: `#a7f3d0` - Interfaces/serviÃ§os
+- **Extra Claro**: `#6ee7b7` - ImplementaÃ§Ãµes
 
 #### **Vendas (Laranja)**
 - **Escuro**: `#f36b21` - Entidades principais
-- **Médio**: `#ff8a50` - Entidades relacionadas
-- **Claro**: `#fed7aa` - Processos secundários
+- **MÃ©dio**: `#ff8a50` - Entidades relacionadas
+- **Claro**: `#fed7aa` - Processos secundÃ¡rios
 - **Extra Claro**: `#fef3c7` - Estados pendentes
 
-#### **Produção (Dourado)**
+#### **ProduÃ§Ã£o (Dourado)**
 - **Escuro**: `#fba81d` - Entidades principais
-- **Médio**: `#fcd34d` - Processos ativos
+- **MÃ©dio**: `#fcd34d` - Processos ativos
 - **Claro**: `#fed7aa` - Processos em andamento
 - **Extra Claro**: `#fef3c7` - Estados iniciais
 
 #### **Compras (Azul)**
 - **Escuro**: `#0562aa` - Entidades principais
-- **Médio**: `#3b82f6` - Processos ativos
-- **Claro**: `#93c5fd` - Estados intermediários
+- **MÃ©dio**: `#3b82f6` - Processos ativos
+- **Claro**: `#93c5fd` - Estados intermediÃ¡rios
 - **Extra Claro**: `#dbeafe` - Estados iniciais
 
 #### **Financeiro (Azul Escuro)**
 - **Escuro**: `#083e61` - Entidades principais
-- **Médio**: `#1e40af` - Transações
+- **MÃ©dio**: `#1e40af` - TransaÃ§Ãµes
 - **Claro**: `#3b82f6` - Estados parciais
 - **Extra Claro**: `#dbeafe` - Estados pendentes
 
-### **🎨 Cores Especiais**
+### **ðŸŽ¨ Cores Especiais**
 
 #### **Estados e Status**
 | Estado | Cor | Uso |
 |--------|-----|-----|
-| **✅ Sucesso/Completo** | `#10b981` (Verde claro) | Estados finalizados |
-| **⚠️ Atenção/Parcial** | `#f59e0b` (Amarelo) | Estados intermediários |
-| **🚨 Erro/Crítico** | `#ef4444` (Vermelho) | Estados de erro |
-| **⏰ Pendente** | `#6b7280` (Cinza) | Estados aguardando |
-| **❌ Cancelado** | `#e5e7eb` (Cinza claro) | Estados cancelados |
+| **âœ… Sucesso/Completo** | `#10b981` (Verde claro) | Estados finalizados |
+| **âš ï¸ AtenÃ§Ã£o/Parcial** | `#f59e0b` (Amarelo) | Estados intermediÃ¡rios |
+| **ðŸš¨ Erro/CrÃ­tico** | `#ef4444` (Vermelho) | Estados de erro |
+| **â° Pendente** | `#6b7280` (Cinza) | Estados aguardando |
+| **âŒ Cancelado** | `#e5e7eb` (Cinza claro) | Estados cancelados |
 
 #### **Tipos Especiais**
 | Tipo | Cor | Uso |
 |------|-----|-----|
-| **🤖 Automático** | `#8b5cf6` (Roxo) | Processos automáticos |
-| **👤 Manual** | `#3b82f6` (Azul) | Ações do usuário |
-| **🔗 Integração** | `#64748b` (Cinza escuro) | Conexões entre domínios |
-| **📊 Métrica** | `#059669` (Verde escuro) | Indicadores e KPIs |
+| **ðŸ¤– AutomÃ¡tico** | `#8b5cf6` (Roxo) | Processos automÃ¡ticos |
+| **ðŸ‘¤ Manual** | `#3b82f6` (Azul) | AÃ§Ãµes do usuÃ¡rio |
+| **ðŸ”— IntegraÃ§Ã£o** | `#64748b` (Cinza escuro) | ConexÃµes entre domÃ­nios |
+| **ðŸ“Š MÃ©trica** | `#059669` (Verde escuro) | Indicadores e KPIs |
 
-## 📊 Simbolos e Relacionamentos
+## ðŸ“Š Simbolos e Relacionamentos
 
-### **🔗 Tipos de Relacionamentos (ERD)**
+### **ðŸ”— Tipos de Relacionamentos (ERD)**
 
 #### **Cardinalidade**
 ```
@@ -83,162 +83,162 @@ Entity1 }o--o{ Entity2
 Opcional
 Entity1 ||--o| Entity2
 
-Obrigatório
+ObrigatÃ³rio
 Entity1 ||--|| Entity2
 ```
 
-#### **Herança e Especialização**
+#### **HeranÃ§a e EspecializaÃ§Ã£o**
 ```
-Herança (TPH)
+HeranÃ§a (TPH)
 ParentEntity <|-- ChildEntity
 
-Implementação de Interface
+ImplementaÃ§Ã£o de Interface
 Interface <|.. Implementation
 
-Composição
+ComposiÃ§Ã£o
 Container ||--o{ Component
 
-Agregação
+AgregaÃ§Ã£o
 Whole o--o{ Part
 ```
 
-### **⚡ Símbolos de Estado (State Diagrams)**
+### **âš¡ SÃ­mbolos de Estado (State Diagrams)**
 
-#### **Transições**
-| Símbolo | Significado | Exemplo |
+#### **TransiÃ§Ãµes**
+| SÃ­mbolo | Significado | Exemplo |
 |---------|-------------|---------|
-| `→` | Transição automática | `Pending → Confirmed` |
-| `↗️` | Transição manual | `Draft ↗️ Sent` |
-| `⚠️` | Transição condicional | `InProgress ⚠️ Completed` |
-| `🚨` | Transição de exceção | `Any 🚨 Cancelled` |
-| `🔄` | Transição bidirecional | `Active 🔄 Inactive` |
+| `â†’` | TransiÃ§Ã£o automÃ¡tica | `Pending â†’ Confirmed` |
+| `â†—ï¸` | TransiÃ§Ã£o manual | `Draft â†—ï¸ Sent` |
+| `âš ï¸` | TransiÃ§Ã£o condicional | `InProgress âš ï¸ Completed` |
+| `ðŸš¨` | TransiÃ§Ã£o de exceÃ§Ã£o | `Any ðŸš¨ Cancelled` |
+| `ðŸ”„` | TransiÃ§Ã£o bidirecional | `Active ðŸ”„ Inactive` |
 
 #### **Estados Especiais**
-| Símbolo | Estado | Cor | Descrição |
+| SÃ­mbolo | Estado | Cor | DescriÃ§Ã£o |
 |---------|--------|-----|-----------|
-| `[*]` | Estado inicial | `#e5e7eb` | Início do fluxo |
+| `[*]` | Estado inicial | `#e5e7eb` | InÃ­cio do fluxo |
 | `[*]` | Estado final | `#10b981` | Fim bem-sucedido |
-| `⚠️` | Estado de warning | `#f59e0b` | Atenção necessária |
-| `🚨` | Estado crítico | `#ef4444` | Intervenção urgente |
-| `⏰` | Estado temporizado | `#6b7280` | Com timeout |
+| `âš ï¸` | Estado de warning | `#f59e0b` | AtenÃ§Ã£o necessÃ¡ria |
+| `ðŸš¨` | Estado crÃ­tico | `#ef4444` | IntervenÃ§Ã£o urgente |
+| `â°` | Estado temporizado | `#6b7280` | Com timeout |
 
-### **🔄 Símbolos de Processo (Flowcharts)**
+### **ðŸ”„ SÃ­mbolos de Processo (Flowcharts)**
 
 #### **Elementos de Fluxo**
 ```mermaid
 flowchart TD
-    A[📋 Processo] --> B{🤔 Decisão}
-    B -->|Sim| C[✅ Ação Positiva]
-    B -->|Não| D[❌ Ação Negativa]
-    C --> E((🔄 Conectivo))
+    A[ðŸ“‹ Processo] --> B{ðŸ¤” DecisÃ£o}
+    B -->|Sim| C[âœ… AÃ§Ã£o Positiva]
+    B -->|NÃ£o| D[âŒ AÃ§Ã£o Negativa]
+    C --> E((ðŸ”„ Conectivo))
     D --> E
-    E --> F[🎉 Fim]
+    E --> F[ðŸŽ‰ Fim]
 ```
 
 #### **Tipos de Elementos**
 | Forma | Uso | Exemplo |
 |-------|-----|---------|
-| `[Retângulo]` | Processo/Ação | `[Criar OrderItem]` |
-| `{Losango}` | Decisão | `{Produto ativo?}` |
-| `((Círculo))` | Conectivo | `((Consolidação))` |
-| `[/Paralelogramo/]` | Input/Output | `[/Dados do usuário/]` |
-| `((Círculo Duplo))` | Estado final | `((Finalizado))` |
+| `[RetÃ¢ngulo]` | Processo/AÃ§Ã£o | `[Criar OrderItem]` |
+| `{Losango}` | DecisÃ£o | `{Produto ativo?}` |
+| `((CÃ­rculo))` | Conectivo | `((ConsolidaÃ§Ã£o))` |
+| `[/Paralelogramo/]` | Input/Output | `[/Dados do usuÃ¡rio/]` |
+| `((CÃ­rculo Duplo))` | Estado final | `((Finalizado))` |
 
-### **🎭 Ícones e Emojis por Contexto**
+### **ðŸŽ­ Ãcones e Emojis por Contexto**
 
-#### **Domínios**
-- **📦 Produto**: Caixa, pacote, item
-- **💰 Vendas**: Dinheiro, carrinho, pedido
-- **🏭 Produção**: Fábrica, engrenagem, produção
-- **🛒 Compras**: Carrinho de compras, fornecedor
-- **💳 Financeiro**: Cartão, transação, conta
+#### **DomÃ­nios**
+- **ðŸ“¦ Produto**: Caixa, pacote, item
+- **ðŸ’° Vendas**: Dinheiro, carrinho, pedido
+- **ðŸ­ ProduÃ§Ã£o**: FÃ¡brica, engrenagem, produÃ§Ã£o
+- **ðŸ›’ Compras**: Carrinho de compras, fornecedor
+- **ðŸ’³ Financeiro**: CartÃ£o, transaÃ§Ã£o, conta
 
 #### **Entidades Principais**
-- **👤 Customer**: Cliente, usuário
-- **📋 Order**: Pedido, lista
-- **🏷️ Product**: Produto, item
-- **🏭 Demand**: Demanda de produção
-- **🛒 Purchase**: Compra, aquisição
-- **💰 Account**: Conta financeira
-- **💳 Transaction**: Transação, pagamento
+- **ðŸ‘¤ Customer**: Cliente, usuÃ¡rio
+- **ðŸ“‹ Order**: Pedido, lista
+- **ðŸ·ï¸ Product**: Produto, item
+- **ðŸ­ Demand**: Demanda de produÃ§Ã£o
+- **ðŸ›’ Purchase**: Compra, aquisiÃ§Ã£o
+- **ðŸ’° Account**: Conta financeira
+- **ðŸ’³ Transaction**: TransaÃ§Ã£o, pagamento
 
-#### **Estados e Ações**
-- **🆕 Novo**: Criação, início
-- **⚡ Automático**: Processo automático
-- **👤 Manual**: Ação do usuário
-- **✅ Sucesso**: Completado, OK
-- **⚠️ Atenção**: Warning, cuidado
-- **🚨 Crítico**: Erro, problema
-- **❌ Cancelado**: Cancelamento
-- **🔄 Em andamento**: Processando
-- **⏰ Aguardando**: Pendente, timeout
+#### **Estados e AÃ§Ãµes**
+- **ðŸ†• Novo**: CriaÃ§Ã£o, inÃ­cio
+- **âš¡ AutomÃ¡tico**: Processo automÃ¡tico
+- **ðŸ‘¤ Manual**: AÃ§Ã£o do usuÃ¡rio
+- **âœ… Sucesso**: Completado, OK
+- **âš ï¸ AtenÃ§Ã£o**: Warning, cuidado
+- **ðŸš¨ CrÃ­tico**: Erro, problema
+- **âŒ Cancelado**: Cancelamento
+- **ðŸ”„ Em andamento**: Processando
+- **â° Aguardando**: Pendente, timeout
 
 #### **Tecnologias e Sistemas**
-- **🤖 IA**: Inteligência artificial
-- **📄 Documento**: Arquivo, nota fiscal
-- **🔍 Busca**: Pesquisa, localização
-- **📊 Métrica**: Indicador, KPI
-- **🔔 Notificação**: Alerta, comunicação
-- **🏦 Banco**: Conta bancária, financeiro
+- **ðŸ¤– IA**: InteligÃªncia artificial
+- **ðŸ“„ Documento**: Arquivo, nota fiscal
+- **ðŸ” Busca**: Pesquisa, localizaÃ§Ã£o
+- **ðŸ“Š MÃ©trica**: Indicador, KPI
+- **ðŸ”” NotificaÃ§Ã£o**: Alerta, comunicaÃ§Ã£o
+- **ðŸ¦ Banco**: Conta bancÃ¡ria, financeiro
 
-## 📏 Dimensões e Espaçamento
+## ðŸ“ DimensÃµes e EspaÃ§amento
 
-### **Tamanhos Padrão**
+### **Tamanhos PadrÃ£o**
 ```
 Caixas de Entidade: 120x60px
-Losangos de Decisão: 100x80px  
-Círculos de Estado: 80x80px
+Losangos de DecisÃ£o: 100x80px  
+CÃ­rculos de Estado: 80x80px
 Conectores: 60x60px
 ```
 
-### **Espaçamento**
+### **EspaÃ§amento**
 ```
 Entre elementos: 40px
-Entre níveis: 60px
+Entre nÃ­veis: 60px
 Margens do diagrama: 20px
-Largura de linha: 2px (padrão), 3px (destaque)
+Largura de linha: 2px (padrÃ£o), 3px (destaque)
 ```
 
 ### **Fontes e Textos**
 ```
-Título do diagrama: 18px, Bold
+TÃ­tulo do diagrama: 18px, Bold
 Labels de entidade: 14px, Bold  
 Propriedades: 12px, Normal
-Descrições: 11px, Italic
-Anotações: 10px, Normal
+DescriÃ§Ãµes: 11px, Italic
+AnotaÃ§Ãµes: 10px, Normal
 ```
 
-## 🛠️ Aplicação por Tipo de Diagrama
+## ðŸ› ï¸ AplicaÃ§Ã£o por Tipo de Diagrama
 
-### **📊 Entity-Relationship Diagrams (ERD)**
-- **Background**: Cor do domínio (escura)
+### **ðŸ“Š Entity-Relationship Diagrams (ERD)**
+- **Background**: Cor do domÃ­nio (escura)
 - **Texto**: Branco ou preto (contraste)
-- **Bordas**: Cor do domínio (mesma do background)
+- **Bordas**: Cor do domÃ­nio (mesma do background)
 - **Relacionamentos**: Linhas cinza escuro (`#374151`)
 - **Entidades externas**: Cinza claro (`#e5e7eb`)
 
-### **🏗️ Class Diagrams**
-- **Classes principais**: Cor escura do domínio
-- **Classes relacionadas**: Cor média do domínio
-- **Interfaces**: Cor clara do domínio
-- **Implementações**: Cor extra clara do domínio
-- **Herança**: Linhas com seta triangular
-- **Implementação**: Linhas tracejadas
+### **ðŸ—ï¸ Class Diagrams**
+- **Classes principais**: Cor escura do domÃ­nio
+- **Classes relacionadas**: Cor mÃ©dia do domÃ­nio
+- **Interfaces**: Cor clara do domÃ­nio
+- **ImplementaÃ§Ãµes**: Cor extra clara do domÃ­nio
+- **HeranÃ§a**: Linhas com seta triangular
+- **ImplementaÃ§Ã£o**: Linhas tracejadas
 
-### **🔄 Process Flowcharts**
-- **Processos principais**: Cor do domínio responsável
-- **Decisões**: Amarelo (`#fef3c7`)
-- **Integrações**: Cor do domínio destino
+### **ðŸ”„ Process Flowcharts**
+- **Processos principais**: Cor do domÃ­nio responsÃ¡vel
+- **DecisÃµes**: Amarelo (`#fef3c7`)
+- **IntegraÃ§Ãµes**: Cor do domÃ­nio destino
 - **Estados finais**: Verde (`#d1fae5`) ou vermelho (`#fecaca`)
 
-### **📈 State Diagrams**
+### **ðŸ“ˆ State Diagrams**
 - **Estados normais**: Cores tonais por fase
 - **Estados finais de sucesso**: Verde (`#d1fae5`)
 - **Estados de erro**: Vermelho (`#fecaca`)
 - **Estados pendentes**: Amarelo (`#fef3c7`)
-- **Transições**: Linhas com labels descritivos
+- **TransiÃ§Ãµes**: Linhas com labels descritivos
 
-## 🔧 Implementação Técnica
+## ðŸ”§ ImplementaÃ§Ã£o TÃ©cnica
 
 ### **Mermaid CSS Classes**
 ```css
@@ -254,7 +254,7 @@ classDef errorStyle fill:#fecaca,stroke:#ef4444,stroke-width:2px,color:black
 classDef pendingStyle fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:black
 ```
 
-### **Aplicação de Classes**
+### **AplicaÃ§Ã£o de Classes**
 ```mermaid
 graph TD
     A[Entidade Principal]
@@ -271,6 +271,6 @@ graph TD
 ---
 
 **Arquivo**: `colors-and-conventions.md`  
-**Versão**: 1.0  
-**Atualização**: 16/06/2025  
-**Uso**: Referência para todos os diagramas do sistema GesN
+**VersÃ£o**: 1.0  
+**AtualizaÃ§Ã£o**: 16/06/2025  
+**Uso**: ReferÃªncia para todos os diagramas do sistema GesN

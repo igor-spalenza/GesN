@@ -1,40 +1,40 @@
-# Arquitetura do Sistema GesN (Gest„o do NegÛcio)
+Ôªø# Arquitetura do Sistema GesN (Gest√£o do Neg√≥cio)
 
-**Vers„o:** 1.0.0
-**⁄ltima AtualizaÁ„o:** YYYY-MM-DD
+**Vers√£o:** 1.0.0
+**√öltima Atualiza√ß√£o:** YYYY-MM-DD
 
-## 1. Vis„o Geral e Objetivos
+## 1. Vis√£o Geral e Objetivos
 
-### 1.1. PropÛsito do Sistema
-- DescriÁ„o do GesN como uma soluÁ„o SaaS para gerenciamento de jornadas de negÛcio.
-- DomÌnios de negÛcio atendidos: Product, Sales, Production, Purchasing, Financial.
-- P˙blico-alvo: Pequenas e mÈdias empresas que necessitam de uma gest„o integrada.
+### 1.1. Prop√≥sito do Sistema
+- Descri√ß√£o do GesN como uma solu√ß√£o SaaS para gerenciamento de jornadas de neg√≥cio.
+- Dom√≠nios de neg√≥cio atendidos: Product, Sales, Production, Purchasing, Financial.
+- P√∫blico-alvo: Pequenas e m√©dias empresas que necessitam de uma gest√£o integrada.
 
 ### 1.2. Objetivos Arquiteturais
 - **Multi-Tenancy:** Garantir isolamento de dados e processamento por cliente (tenant).
-- **Escalabilidade:** Permitir o crescimento horizontal da aplicaÁ„o adicionando novos containers.
-- **Manutenibilidade:** CÛdigo claro, modular e bem documentado para facilitar a evoluÁ„o.
-- **SeguranÁa:** Proteger os dados dos clientes e garantir acesso controlado atravÈs de papÈis e permissıes.
-- **Performance:** Respostas r·pidas da interface e processamento eficiente no backend.
+- **Escalabilidade:** Permitir o crescimento horizontal da aplica√ß√£o adicionando novos containers.
+- **Manutenibilidade:** C√≥digo claro, modular e bem documentado para facilitar a evolu√ß√£o.
+- **Seguran√ßa:** Proteger os dados dos clientes e garantir acesso controlado atrav√©s de pap√©is e permiss√µes.
+- **Performance:** Respostas r√°pidas da interface e processamento eficiente no backend.
 
-### 1.3. RestriÁıes
+### 1.3. Restri√ß√µes
 - Stack de tecnologia definida (.NET, SQLite, Docker).
-- OrÁamento e time de desenvolvimento.
+- Or√ßamento e time de desenvolvimento.
 - Hospedagem em VPS com Debian.
 
-## 2. Paisagem da Arquitetura (Vis„o de Alto NÌvel)
+## 2. Paisagem da Arquitetura (Vis√£o de Alto N√≠vel)
 
 ### 2.1. Diagrama de Contexto
-- Um diagrama mostrando as interaÁıes do sistema GesN com seus usu·rios e sistemas externos (se houver).
+- Um diagrama mostrando as intera√ß√µes do sistema GesN com seus usu√°rios e sistemas externos (se houver).
 
 ### 2.2. Diagrama de Containers
-- Um diagrama ilustrando a arquitetura de implantaÁ„o:
-  - **Usu·rio Final** acessando o sistema via navegador.
-  - **Traefik (Reverse Proxy)** recebendo as requisiÁıes no domÌnio `gesn.com.br`.
+- Um diagrama ilustrando a arquitetura de implanta√ß√£o:
+  - **Usu√°rio Final** acessando o sistema via navegador.
+  - **Traefik (Reverse Proxy)** recebendo as requisi√ß√µes no dom√≠nio `gesn.com.br`.
   - **Containers Docker** isolados por tenant.
   - Dentro de cada container:
-    - **AplicaÁ„o GesN (.NET 8)** rodando com **Kestrel**.
-    - **Banco de Dados SQLite** (arquivo `.db` especÌfico do tenant).
+    - **Aplica√ß√£o GesN (.NET 8)** rodando com **Kestrel**.
+    - **Banco de Dados SQLite** (arquivo `.db` espec√≠fico do tenant).
 
 ## 3. Arquitetura do Backend
 
@@ -42,130 +42,130 @@
 - **Linguagem:** C# 12
 - **Framework:** .NET 8 / ASP.NET Core MVC
 - **Acesso a Dados:** Dapper + Microsoft.Data.Sqlite
-- **AutenticaÁ„o e AutorizaÁ„o:** ASP.NET Core Identity
+- **Autentica√ß√£o e Autoriza√ß√£o:** ASP.NET Core Identity
 - **Servidor Web:** Kestrel
 
 ### 3.2. Estrutura do Projeto (Solution)
-- DescriÁ„o da organizaÁ„o dos projetos na soluÁ„o (ex: `GesN.Web`, `GesN.Core`, `GesN.Data`).
-- `GesN.Web`: Respons·vel pela UI, Controllers, ViewModels.
-- `GesN.Core`: ContÈm as entidades de domÌnio, interfaces de serviÁos e repositÛrios.
-- `GesN.Data`: ImplementaÁ„o do acesso a dados com Dapper e repositÛrios.
+- Descri√ß√£o da organiza√ß√£o dos projetos na solu√ß√£o (ex: `GesN.Web`, `GesN.Core`, `GesN.Data`).
+- `GesN.Web`: Respons√°vel pela UI, Controllers, ViewModels.
+- `GesN.Core`: Cont√©m as entidades de dom√≠nio, interfaces de servi√ßos e reposit√≥rios.
+- `GesN.Data`: Implementa√ß√£o do acesso a dados com Dapper e reposit√≥rios.
 
-### 3.3. Padrıes e PrincÌpios de Design
-- **MVC (Model-View-Controller):** Padr„o principal da aplicaÁ„o web.
-- **InjeÁ„o de DependÍncia (DI):** Usada extensivamente para desacoplar componentes (ex: `IProductService` injetado nos controllers).
-- **Padr„o RepositÛrio-ServiÁo:**
-  - **Camada de ServiÁo:** Orquestra a lÛgica de negÛcio (`ProductComponentHierarchyService`).
-  - **Camada de RepositÛrio:** Abstrai o acesso aos dados (Dapper).
-- **ProgramaÁ„o AssÌncrona:** Uso de `async/await` para operaÁıes de I/O.
+### 3.3. Padr√µes e Princ√≠pios de Design
+- **MVC (Model-View-Controller):** Padr√£o principal da aplica√ß√£o web.
+- **Inje√ß√£o de Depend√™ncia (DI):** Usada extensivamente para desacoplar componentes (ex: `IProductService` injetado nos controllers).
+- **Padr√£o Reposit√≥rio-Servi√ßo:**
+  - **Camada de Servi√ßo:** Orquestra a l√≥gica de neg√≥cio (`ProductComponentHierarchyService`).
+  - **Camada de Reposit√≥rio:** Abstrai o acesso aos dados (Dapper).
+- **Programa√ß√£o Ass√≠ncrona:** Uso de `async/await` para opera√ß√µes de I/O.
 
 ### 3.4. Acesso a Dados
 - **ORM:** Dapper (Micro-ORM) para performance e controle sobre as queries SQL.
 - **Banco de Dados:** SQLite 3.
-- **EstratÈgia Multi-Tenant:** Banco de dados como arquivo (`tenant_id.db`) dentro do volume de cada container, garantindo isolamento total.
-- **Migrations:** EstratÈgia para atualizaÁ„o de schema do banco de dados (ex: scripts SQL versionados, FluentMigrator, etc.).
+- **Estrat√©gia Multi-Tenant:** Banco de dados como arquivo (`tenant_id.db`) dentro do volume de cada container, garantindo isolamento total.
+- **Migrations:** Estrat√©gia para atualiza√ß√£o de schema do banco de dados (ex: scripts SQL versionados, FluentMigrator, etc.).
 
-### 3.5. AutenticaÁ„o e AutorizaÁ„o
+### 3.5. Autentica√ß√£o e Autoriza√ß√£o
 - **Framework:** ASP.NET Core Identity.
-- **EstratÈgia:** AutenticaÁ„o baseada em Cookies.
-- **AutorizaÁ„o:** Baseada em PapÈis (Roles) e Permissıes (Claims). O arquivo `Roles.js` e as `[Authorize]` nos controllers confirmam essa abordagem.
+- **Estrat√©gia:** Autentica√ß√£o baseada em Cookies.
+- **Autoriza√ß√£o:** Baseada em Pap√©is (Roles) e Permiss√µes (Claims). O arquivo `Roles.js` e as `[Authorize]` nos controllers confirmam essa abordagem.
 
 ### 3.6. API e Endpoints
-- A aplicaÁ„o n„o expıe uma API REST p˙blica, mas utiliza endpoints internos para comunicaÁ„o com o frontend.
-- **Padr„o de Endpoints:**
-  - `Controller/Action`: Retorna `PartialView` para carregar seÁıes da p·gina dinamicamente (ex: `_Grid.cshtml`).
-  - `Controller/ActionAsJson`: Retorna `JsonResult` para operaÁıes como autocomplete, salvamento de formul·rios e atualizaÁıes de status.
+- A aplica√ß√£o n√£o exp√µe uma API REST p√∫blica, mas utiliza endpoints internos para comunica√ß√£o com o frontend.
+- **Padr√£o de Endpoints:**
+  - `Controller/Action`: Retorna `PartialView` para carregar se√ß√µes da p√°gina dinamicamente (ex: `_Grid.cshtml`).
+  - `Controller/ActionAsJson`: Retorna `JsonResult` para opera√ß√µes como autocomplete, salvamento de formul√°rios e atualiza√ß√µes de status.
 
 ## 4. Arquitetura do Frontend
 
 ### 4.1. Stack de Tecnologias
 - **Core:** HTML5, CSS3, JavaScript (ES6+).
 - **Frameworks/Bibliotecas:**
-  - **jQuery:** Base para manipulaÁ„o do DOM e AJAX.
+  - **jQuery:** Base para manipula√ß√£o do DOM e AJAX.
   - **Bootstrap 5:** Estrutura de layout, componentes (Modals, Tabs, etc.) e responsividade.
-  - **DataTables.NET:** Para grids de dados interativas com paginaÁ„o, busca e ordenaÁ„o.
+  - **DataTables.NET:** Para grids de dados interativas com pagina√ß√£o, busca e ordena√ß√£o.
   - **Select2:** Melhoria de campos `<select>`.
-  - **Toastr.js:** NotificaÁıes (sucesso, erro, informaÁ„o).
-  - **Autocomplete.js (Algolia):** Para campos de busca com sugestıes.
-  - **jQuery Validation & Unobtrusive:** ValidaÁ„o de formul·rios client-side.
+  - **Toastr.js:** Notifica√ß√µes (sucesso, erro, informa√ß√£o).
+  - **Autocomplete.js (Algolia):** Para campos de busca com sugest√µes.
+  - **jQuery Validation & Unobtrusive:** Valida√ß√£o de formul√°rios client-side.
 
-### 4.2. Estrutura e Padrıes JavaScript
-- **Padr„o "Manager Object":** A convenÁ„o principal È criar um objeto JavaScript por mÛdulo/p·gina (ex: `ordersManager`, `productManager`, `rolesManager`).
+### 4.2. Estrutura e Padr√µes JavaScript
+- **Padr√£o "Manager Object":** A conven√ß√£o principal √© criar um objeto JavaScript por m√≥dulo/p√°gina (ex: `ordersManager`, `productManager`, `rolesManager`).
   - Cada "manager" encapsula o estado e os comportamentos da sua respectiva funcionalidade.
-  - FunÁıes s„o organizadas dentro do objeto (ex: `carregarLista`, `abrirEdicao`, `salvarNovoModal`).
-- **ComunicaÁ„o com Backend:** Quase exclusivamente via `$.ajax`.
-- **RenderizaÁ„o:** A renderizaÁ„o inicial È feita pelo Razor no servidor. AtualizaÁıes din‚micas (novos dados em uma grid, conte˙do de um modal) s„o feitas injetando o HTML retornado de `PartialViews` via AJAX.
+  - Fun√ß√µes s√£o organizadas dentro do objeto (ex: `carregarLista`, `abrirEdicao`, `salvarNovoModal`).
+- **Comunica√ß√£o com Backend:** Quase exclusivamente via `$.ajax`.
+- **Renderiza√ß√£o:** A renderiza√ß√£o inicial √© feita pelo Razor no servidor. Atualiza√ß√µes din√¢micas (novos dados em uma grid, conte√∫do de um modal) s√£o feitas injetando o HTML retornado de `PartialViews` via AJAX.
 
-### 4.3. Padrıes de UI/UX
-- **CRUD em Abas:** Entidades complexas como "Produto" e "Pedido" s„o editadas em abas din‚micas para permitir que o usu·rio trabalhe em m˙ltiplos itens simultaneamente.
-- **CRUD em Modal:** Entidades mais simples como "Categoria de Produto" ou a criaÁ„o inicial de um item s„o feitas em modais do Bootstrap.
-- **Grids Ricas:** O `DataTables.NET` È o padr„o para listagem de dados.
-- **Feedback ao Usu·rio:** `Toastr.js` È usado para feedback de operaÁıes (ex: "Pedido salvo com sucesso!"). Spinners s„o usados para indicar carregamento.
+### 4.3. Padr√µes de UI/UX
+- **CRUD em Abas:** Entidades complexas como "Produto" e "Pedido" s√£o editadas em abas din√¢micas para permitir que o usu√°rio trabalhe em m√∫ltiplos itens simultaneamente.
+- **CRUD em Modal:** Entidades mais simples como "Categoria de Produto" ou a cria√ß√£o inicial de um item s√£o feitas em modais do Bootstrap.
+- **Grids Ricas:** O `DataTables.NET` √© o padr√£o para listagem de dados.
+- **Feedback ao Usu√°rio:** `Toastr.js` √© usado para feedback de opera√ß√µes (ex: "Pedido salvo com sucesso!"). Spinners s√£o usados para indicar carregamento.
 
-## 5. Infraestrutura e ImplantaÁ„o (DevOps)
+## 5. Infraestrutura e Implanta√ß√£o (DevOps)
 
 ### 5.1. Ambiente de Hospedagem
 - **Provedor:** VPS (DigitalOcean, Vultr, etc.).
 - **Sistema Operacional:** Debian.
 
-### 5.2. ContainerizaÁ„o
+### 5.2. Containeriza√ß√£o
 - **Tecnologia:** Docker.
-- **EstratÈgia Multi-Tenant:** Um container Docker por tenant. O provisionamento de um novo tenant implica em criar um novo container com sua prÛpria configuraÁ„o e volume de dados.
-- **OrquestraÁ„o:** (Atualmente manual/scripted). Mencionar planos futuros para Kubernetes/Swarm se aplic·vel.
+- **Estrat√©gia Multi-Tenant:** Um container Docker por tenant. O provisionamento de um novo tenant implica em criar um novo container com sua pr√≥pria configura√ß√£o e volume de dados.
+- **Orquestra√ß√£o:** (Atualmente manual/scripted). Mencionar planos futuros para Kubernetes/Swarm se aplic√°vel.
 
 ### 5.3. Proxy Reverso e Roteamento
 - **Tecnologia:** Traefik.
-- **FunÁ„o:**
-  - Ponto de entrada ˙nico para todas as requisiÁıes HTTP/S.
+- **Fun√ß√£o:**
+  - Ponto de entrada √∫nico para todas as requisi√ß√µes HTTP/S.
   - Gerenciamento de certificados SSL/TLS (Let's Encrypt).
-  - Roteamento de requisiÁıes para o container do tenant correto baseado no subdomÌnio (ex: `clienteA.gesn.com.br`) ou outro identificador.
+  - Roteamento de requisi√ß√µes para o container do tenant correto baseado no subdom√≠nio (ex: `clienteA.gesn.com.br`) ou outro identificador.
 
 ### 5.4. Processo de Build e Deploy (CI/CD)
 - (Descrever o processo atual ou o processo desejado).
 - **Exemplo de fluxo:**
-  1. Push para o repositÛrio Git (ex: `main` branch).
-  2. AÁ„o do GitHub Actions / Jenkins / Azure DevOps È acionada.
+  1. Push para o reposit√≥rio Git (ex: `main` branch).
+  2. A√ß√£o do GitHub Actions / Jenkins / Azure DevOps √© acionada.
   3. Build do projeto .NET.
-  4. Build da imagem Docker da aplicaÁ„o.
+  4. Build da imagem Docker da aplica√ß√£o.
   5. Push da imagem para um Docker Registry (Docker Hub, GitHub Packages).
-  6. Conex„o via SSH no VPS e execuÁ„o de um script para `docker-compose pull` e `docker-compose up -d` para atualizar a aplicaÁ„o.
+  6. Conex√£o via SSH no VPS e execu√ß√£o de um script para `docker-compose pull` e `docker-compose up -d` para atualizar a aplica√ß√£o.
 
-## 6. TÛpicos Transversais (Cross-Cutting Concerns)
+## 6. T√≥picos Transversais (Cross-Cutting Concerns)
 
 ### 6.1. Logging
-- **Framework:** `ILogger` (implementaÁ„o via Serilog, NLog, etc.).
-- **EstratÈgia:** Logs s„o escritos para o console (coletados pelo Docker) e/ou para arquivos de log dentro do volume do container.
+- **Framework:** `ILogger` (implementa√ß√£o via Serilog, NLog, etc.).
+- **Estrat√©gia:** Logs s√£o escritos para o console (coletados pelo Docker) e/ou para arquivos de log dentro do volume do container.
 
 ### 6.2. Tratamento de Erros
-- **Backend:** Middlewares para capturar exceÁıes n„o tratadas. Blocos `try-catch` nos controllers para erros esperados, retornando `JsonResult` com `{ success: false, message: "..." }`.
+- **Backend:** Middlewares para capturar exce√ß√µes n√£o tratadas. Blocos `try-catch` nos controllers para erros esperados, retornando `JsonResult` com `{ success: false, message: "..." }`.
 - **Frontend:** Uso dos callbacks `.fail()` ou `.error()` do `$.ajax` para tratar respostas de erro do servidor e exibir mensagens via `toastr.error()`.
 
-### 6.3. SeguranÁa
-- **PrevenÁ„o de CSRF:** Uso de `[ValidateAntiForgeryToken]` em todas as aÁıes `POST` que alteram estado.
-- **PrevenÁ„o de XSS:** Razor Views encodam saÌdas por padr„o. Cuidado extra na injeÁ„o de HTML via JavaScript.
-- **Gerenciamento de Segredos:** Como as connection strings e outras chaves s„o gerenciadas (ex: `appsettings.json`, vari·veis de ambiente do Docker).
+### 6.3. Seguran√ßa
+- **Preven√ß√£o de CSRF:** Uso de `[ValidateAntiForgeryToken]` em todas as a√ß√µes `POST` que alteram estado.
+- **Preven√ß√£o de XSS:** Razor Views encodam sa√≠das por padr√£o. Cuidado extra na inje√ß√£o de HTML via JavaScript.
+- **Gerenciamento de Segredos:** Como as connection strings e outras chaves s√£o gerenciadas (ex: `appsettings.json`, vari√°veis de ambiente do Docker).
 
-## 7. ApÍndices
+## 7. Ap√™ndices
 
 ### 7.1. Pacotes NuGet Principais
 - **Dapper:** Micro-ORM de alta performance para executar queries SQL e mapear resultados para objetos C#.
 - **Microsoft.Data.Sqlite:** Provedor de dados ADO.NET para interagir com o banco de dados SQLite.
-- **Microsoft.AspNetCore.Identity:** Framework para gerenciamento de usu·rios, papÈis, claims e autenticaÁ„o. (Nota: A persistÍncia pode ser customizada para Dapper ou usar o `Identity.EntityFrameworkCore` se for uma exceÁ„o).
+- **Microsoft.AspNetCore.Identity:** Framework para gerenciamento de usu√°rios, pap√©is, claims e autentica√ß√£o. (Nota: A persist√™ncia pode ser customizada para Dapper ou usar o `Identity.EntityFrameworkCore` se for uma exce√ß√£o).
 
 ### 7.2. Bibliotecas Client-Side
-- **jquery:** Biblioteca fundamental para manipulaÁ„o de DOM, eventos e AJAX.
+- **jquery:** Biblioteca fundamental para manipula√ß√£o de DOM, eventos e AJAX.
 - **bootstrap:** Framework CSS para layout, componentes visuais e responsividade.
-- **datatables.net:** Plugin jQuery para criaÁ„o de tabelas de dados avanÁadas.
-- **select2:** Plugin jQuery que substitui e melhora os campos de seleÁ„o `<select>`.
-- **toastr.js:** Biblioteca para exibir notificaÁıes "toast" n„o-intrusivas.
-- **autocomplete.js:** Biblioteca para criar experiÍncias de busca com autocompletar.
-- **jquery-validation/jquery-validation-unobtrusive:** Plugins para validaÁ„o de formul·rios no lado do cliente, integrados com os Data Annotations do .NET.
-- **jquery.mask:** Plugin para aplicar m·scaras de entrada em campos de formul·rio (ex: CPF, telefone, moeda).
+- **datatables.net:** Plugin jQuery para cria√ß√£o de tabelas de dados avan√ßadas.
+- **select2:** Plugin jQuery que substitui e melhora os campos de sele√ß√£o `<select>`.
+- **toastr.js:** Biblioteca para exibir notifica√ß√µes "toast" n√£o-intrusivas.
+- **autocomplete.js:** Biblioteca para criar experi√™ncias de busca com autocompletar.
+- **jquery-validation/jquery-validation-unobtrusive:** Plugins para valida√ß√£o de formul√°rios no lado do cliente, integrados com os Data Annotations do .NET.
+- **jquery.mask:** Plugin para aplicar m√°scaras de entrada em campos de formul√°rio (ex: CPF, telefone, moeda).
 - **jquery.qrcode:** Plugin para gerar QR Codes no lado do cliente.
 
-### 7.3. ConvenÁıes de CÛdigo
-- **C#:** Estilo de cÛdigo (PascalCase para mÈtodos e propriedades, etc.).
-- **JavaScript:** Padr„o "Manager Object", uso de `const` para o objeto principal, nomes de funÁıes.
-- **CSS:** Metodologia (ex: BEM) se aplic·vel, ou convenÁıes de nomenclatura.
-- **Git:** ConvenÁıes para nomes de branch e mensagens de commit.
+### 7.3. Conven√ß√µes de C√≥digo
+- **C#:** Estilo de c√≥digo (PascalCase para m√©todos e propriedades, etc.).
+- **JavaScript:** Padr√£o "Manager Object", uso de `const` para o objeto principal, nomes de fun√ß√µes.
+- **CSS:** Metodologia (ex: BEM) se aplic√°vel, ou conven√ß√µes de nomenclatura.
+- **Git:** Conven√ß√µes para nomes de branch e mensagens de commit.
 

@@ -1,33 +1,33 @@
-# 💳 EVENT STORMING - DOMÍNIO FINANCEIRO
+﻿# ðŸ’³ EVENT STORMING - DOMÃNIO FINANCEIRO
 
-## 🎯 Visão Geral
-Event Storming do Domínio Financeiro mapeando todo o fluxo de gestão financeira, desde a geração automática de contas a receber e a pagar até a conciliação bancária, incluindo processamento de pagamentos, controle de fluxo de caixa, e geração de relatórios financeiros com integrações críticas com todos os outros domínios.
+## ðŸŽ¯ VisÃ£o Geral
+Event Storming do DomÃ­nio Financeiro mapeando todo o fluxo de gestÃ£o financeira, desde a geraÃ§Ã£o automÃ¡tica de contas a receber e a pagar atÃ© a conciliaÃ§Ã£o bancÃ¡ria, incluindo processamento de pagamentos, controle de fluxo de caixa, e geraÃ§Ã£o de relatÃ³rios financeiros com integraÃ§Ãµes crÃ­ticas com todos os outros domÃ­nios.
 
-## 🎨 Convenções Visuais
-- **📋 [Comando]** - Azul - Ação executada por usuário/sistema
-- **⚡ Evento** - Laranja - Fato que aconteceu no domínio
-- **👤 (Ator)** - Verde - Quem executa o comando
-- **📊 {Agregado}** - Roxo - Entidade que processa comando
-- **🔄 Política** - Cinza - Regra "quando X então Y"
-- **⚠️ (!Hotspot!)** - Rosa - Complexidade/problema identificado
-- **🏦 <Banking System>** - Vermelho - Sistema bancário externo
-- **📊 <BI System>** - Vermelho - Sistema de Business Intelligence
+## ðŸŽ¨ ConvenÃ§Ãµes Visuais
+- **ðŸ“‹ [Comando]** - Azul - AÃ§Ã£o executada por usuÃ¡rio/sistema
+- **âš¡ Evento** - Laranja - Fato que aconteceu no domÃ­nio
+- **ðŸ‘¤ (Ator)** - Verde - Quem executa o comando
+- **ðŸ“Š {Agregado}** - Roxo - Entidade que processa comando
+- **ðŸ”„ PolÃ­tica** - Cinza - Regra "quando X entÃ£o Y"
+- **âš ï¸ (!Hotspot!)** - Rosa - Complexidade/problema identificado
+- **ðŸ¦ <Banking System>** - Vermelho - Sistema bancÃ¡rio externo
+- **ðŸ“Š <BI System>** - Vermelho - Sistema de Business Intelligence
 
-## ⚡ Event Storming Timeline
+## âš¡ Event Storming Timeline
 
-### **🔄 Fluxo Principal - Gestão Financeira Completa**
+### **ðŸ”„ Fluxo Principal - GestÃ£o Financeira Completa**
 
 ```mermaid
 journey
     title Financial Domain Event Timeline
-    section Geração Automática (AR)
+    section GeraÃ§Ã£o AutomÃ¡tica (AR)
       OrderConfirmed (Sales)               : 5: Sistema
       [CreateAccountReceivable]            : 4: Sistema
       AccountReceivableCreated             : 5: Sistema
       [CalculateInstallments]              : 4: Sistema
       InstallmentsGenerated                : 5: Sistema
       
-    section Geração Automática (AP)
+    section GeraÃ§Ã£o AutomÃ¡tica (AP)
       PaymentApproved (Purchasing)         : 5: Sistema
       [CreateAccountPayable]               : 4: Sistema
       AccountPayableCreated                : 5: Sistema
@@ -44,7 +44,7 @@ journey
       [UpdateAccountPayable]               : 4: Sistema
       AccountPayableUpdated                : 5: Sistema
       
-    section Conciliação e Controle
+    section ConciliaÃ§Ã£o e Controle
       [ReconcileBankTransaction]           : 3: Operador
       TransactionReconciled                : 5: Sistema
       [GenerateCashFlowReport]             : 4: Sistema
@@ -53,714 +53,714 @@ journey
       OverdueAccountsIdentified            : 5: Sistema
 ```
 
-### **📋 Comandos por Ator**
+### **ðŸ“‹ Comandos por Ator**
 
-#### **🤖 Sistema (Automático - Cross-Domain Integration)**
+#### **ðŸ¤– Sistema (AutomÃ¡tico - Cross-Domain Integration)**
 ```
 [CreateAccountReceivable]
-├── Trigger: OrderConfirmed event from Sales domain
-├── Input: OrderEntry data, Customer info, Payment terms
-├── Calculation: Total amount, Due dates, Payment method
-├── Installment logic: Break down payment if needed
-├── Output: AccountReceivableId
-└── Events: AccountReceivableCreated, InstallmentsGenerated
+â”œâ”€â”€ Trigger: OrderConfirmed event from Sales domain
+â”œâ”€â”€ Input: OrderEntry data, Customer info, Payment terms
+â”œâ”€â”€ Calculation: Total amount, Due dates, Payment method
+â”œâ”€â”€ Installment logic: Break down payment if needed
+â”œâ”€â”€ Output: AccountReceivableId
+â””â”€â”€ Events: AccountReceivableCreated, InstallmentsGenerated
 
 [CreateAccountPayable]
-├── Trigger: PaymentApproved event from Purchasing domain
-├── Input: PurchaseOrder data, Supplier info, Payment terms
-├── Calculation: Total amount, Due dates, Payment schedule
-├── Output: AccountPayableId
-└── Events: AccountPayableCreated, PaymentScheduled
+â”œâ”€â”€ Trigger: PaymentApproved event from Purchasing domain
+â”œâ”€â”€ Input: PurchaseOrder data, Supplier info, Payment terms
+â”œâ”€â”€ Calculation: Total amount, Due dates, Payment schedule
+â”œâ”€â”€ Output: AccountPayableId
+â””â”€â”€ Events: AccountPayableCreated, PaymentScheduled
 
 [CalculateInstallments]
-├── Trigger: AccountReceivableCreated (if installment payment)
-├── Input: TotalAmount, PaymentTerms, InstallmentCount
-├── Complex calculation: Interest rates, Due dates, Amounts per installment
-├── Output: InstallmentIds[]
-└── Events: InstallmentsGenerated
+â”œâ”€â”€ Trigger: AccountReceivableCreated (if installment payment)
+â”œâ”€â”€ Input: TotalAmount, PaymentTerms, InstallmentCount
+â”œâ”€â”€ Complex calculation: Interest rates, Due dates, Amounts per installment
+â”œâ”€â”€ Output: InstallmentIds[]
+â””â”€â”€ Events: InstallmentsGenerated
 
 [UpdateCashFlow]
-├── Trigger: PaymentReceived, PaymentMade, TransactionReconciled
-├── Input: TransactionData, Impact type (In/Out)
-├── Calculation: Current balance, Projected cash flow
-├── Auto-execution: Real-time after financial events
-└── Events: CashFlowUpdated
+â”œâ”€â”€ Trigger: PaymentReceived, PaymentMade, TransactionReconciled
+â”œâ”€â”€ Input: TransactionData, Impact type (In/Out)
+â”œâ”€â”€ Calculation: Current balance, Projected cash flow
+â”œâ”€â”€ Auto-execution: Real-time after financial events
+â””â”€â”€ Events: CashFlowUpdated
 
 [IdentifyOverdueAccounts]
-├── Trigger: Daily scheduler (end of day)
-├── Input: All pending accounts, Current date
-├── Overdue detection: Compare due dates with current date
-├── Alert generation: Create overdue alerts with severity
-├── Output: OverdueAccountIds[]
-└── Events: OverdueAccountsIdentified, OverdueAlertsGenerated
+â”œâ”€â”€ Trigger: Daily scheduler (end of day)
+â”œâ”€â”€ Input: All pending accounts, Current date
+â”œâ”€â”€ Overdue detection: Compare due dates with current date
+â”œâ”€â”€ Alert generation: Create overdue alerts with severity
+â”œâ”€â”€ Output: OverdueAccountIds[]
+â””â”€â”€ Events: OverdueAccountsIdentified, OverdueAlertsGenerated
 
 [CalculateFinancialMetrics]
-├── Trigger: CashFlowUpdated, MonthlyScheduler
-├── Input: All financial transactions, Period data
-├── Complex calculations: Revenue, Profit, Margins, Ratios
-├── Output: FinancialMetrics
-└── Events: FinancialMetricsCalculated
+â”œâ”€â”€ Trigger: CashFlowUpdated, MonthlyScheduler
+â”œâ”€â”€ Input: All financial transactions, Period data
+â”œâ”€â”€ Complex calculations: Revenue, Profit, Margins, Ratios
+â”œâ”€â”€ Output: FinancialMetrics
+â””â”€â”€ Events: FinancialMetricsCalculated
 
 [GenerateAutoReports]
-├── Trigger: Daily, Weekly, Monthly schedulers
-├── Input: Report type, Period, Recipients
-├── Report generation: Cash flow, Aging, Performance reports
-├── Output: ReportIds[]
-└── Events: AutoReportGenerated, ReportDelivered
+â”œâ”€â”€ Trigger: Daily, Weekly, Monthly schedulers
+â”œâ”€â”€ Input: Report type, Period, Recipients
+â”œâ”€â”€ Report generation: Cash flow, Aging, Performance reports
+â”œâ”€â”€ Output: ReportIds[]
+â””â”€â”€ Events: AutoReportGenerated, ReportDelivered
 ```
 
-#### **💰 Operadores Financeiros (Finance Team)**
+#### **ðŸ’° Operadores Financeiros (Finance Team)**
 ```
 [ProcessCustomerPayment]
-├── Input: CustomerId, PaymentAmount, PaymentMethod, PaymentDate, Reference
-├── Validations: Customer exists, Amount > 0, Valid payment method
-├── Payment allocation: Apply to specific AR or oldest debt
-├── Output: PaymentId
-└── Events: PaymentReceived, AccountReceivableUpdated
+â”œâ”€â”€ Input: CustomerId, PaymentAmount, PaymentMethod, PaymentDate, Reference
+â”œâ”€â”€ Validations: Customer exists, Amount > 0, Valid payment method
+â”œâ”€â”€ Payment allocation: Apply to specific AR or oldest debt
+â”œâ”€â”€ Output: PaymentId
+â””â”€â”€ Events: PaymentReceived, AccountReceivableUpdated
 
 [ProcessSupplierPayment]
-├── Input: SupplierId, PaymentAmount, PaymentMethod, PaymentDate, Reference
-├── Validations: Supplier exists, AP exists, Amount valid
-├── Payment processing: Bank transfer, Check, Cash
-├── Output: PaymentId
-└── Events: PaymentMade, AccountPayableUpdated
+â”œâ”€â”€ Input: SupplierId, PaymentAmount, PaymentMethod, PaymentDate, Reference
+â”œâ”€â”€ Validations: Supplier exists, AP exists, Amount valid
+â”œâ”€â”€ Payment processing: Bank transfer, Check, Cash
+â”œâ”€â”€ Output: PaymentId
+â””â”€â”€ Events: PaymentMade, AccountPayableUpdated
 
 [ReconcileBankTransaction]
-├── Input: BankTransactionId, SystemTransactionId, ReconciliationNotes
-├── Validations: Amounts match, Dates align, Not already reconciled
-├── Complex matching: Fuzzy matching for similar amounts/dates
-├── Output: ReconciliationId
-└── Events: TransactionReconciled, BankStatementUpdated
+â”œâ”€â”€ Input: BankTransactionId, SystemTransactionId, ReconciliationNotes
+â”œâ”€â”€ Validations: Amounts match, Dates align, Not already reconciled
+â”œâ”€â”€ Complex matching: Fuzzy matching for similar amounts/dates
+â”œâ”€â”€ Output: ReconciliationId
+â””â”€â”€ Events: TransactionReconciled, BankStatementUpdated
 
 [CreateManualTransaction]
-├── Input: TransactionType, Amount, Description, Category, Date
-├── Validations: Valid transaction type, Amount != 0, Required fields
-├── Transaction processing: Direct cash flow impact
-├── Output: TransactionId
-└── Events: ManualTransactionCreated, CashFlowUpdated
+â”œâ”€â”€ Input: TransactionType, Amount, Description, Category, Date
+â”œâ”€â”€ Validations: Valid transaction type, Amount != 0, Required fields
+â”œâ”€â”€ Transaction processing: Direct cash flow impact
+â”œâ”€â”€ Output: TransactionId
+â””â”€â”€ Events: ManualTransactionCreated, CashFlowUpdated
 
 [AdjustAccountBalance]
-├── Input: AccountId, AdjustmentAmount, AdjustmentReason, ApprovedBy
-├── Validations: Account exists, Valid reason, Proper authorization
-├── Complex adjustment: Recalculate all related accounts
-├── Output: AdjustmentId
-└── Events: AccountBalanceAdjusted, AdjustmentAudited
+â”œâ”€â”€ Input: AccountId, AdjustmentAmount, AdjustmentReason, ApprovedBy
+â”œâ”€â”€ Validations: Account exists, Valid reason, Proper authorization
+â”œâ”€â”€ Complex adjustment: Recalculate all related accounts
+â”œâ”€â”€ Output: AdjustmentId
+â””â”€â”€ Events: AccountBalanceAdjusted, AdjustmentAudited
 
 [GenerateFinancialReport]
-├── Input: ReportType, Period, Filters, Recipients
-├── Validations: Valid period, Authorized to generate report
-├── Complex generation: Aggregate data, Apply business rules
-├── Output: ReportId
-└── Events: FinancialReportGenerated, ReportDelivered
+â”œâ”€â”€ Input: ReportType, Period, Filters, Recipients
+â”œâ”€â”€ Validations: Valid period, Authorized to generate report
+â”œâ”€â”€ Complex generation: Aggregate data, Apply business rules
+â”œâ”€â”€ Output: ReportId
+â””â”€â”€ Events: FinancialReportGenerated, ReportDelivered
 
 [ConfigurePaymentTerms]
-├── Input: CustomerType/SupplierType, PaymentTermsData, ApprovedBy
-├── Validations: Valid terms, Authorized to configure
-├── Impact analysis: Effect on existing and future accounts
-├── Output: PaymentTermsId
-└── Events: PaymentTermsConfigured, TermsApplied
+â”œâ”€â”€ Input: CustomerType/SupplierType, PaymentTermsData, ApprovedBy
+â”œâ”€â”€ Validations: Valid terms, Authorized to configure
+â”œâ”€â”€ Impact analysis: Effect on existing and future accounts
+â”œâ”€â”€ Output: PaymentTermsId
+â””â”€â”€ Events: PaymentTermsConfigured, TermsApplied
 
 [ProcessRefund]
-├── Input: AccountReceivableId, RefundAmount, RefundReason, ApprovedBy
-├── Validations: AR exists, Amount <= original, Valid reason
-├── Complex processing: Partial vs full refund, Impact on cash flow
-├── Output: RefundId
-└── Events: RefundProcessed, AccountReceivableAdjusted
+â”œâ”€â”€ Input: AccountReceivableId, RefundAmount, RefundReason, ApprovedBy
+â”œâ”€â”€ Validations: AR exists, Amount <= original, Valid reason
+â”œâ”€â”€ Complex processing: Partial vs full refund, Impact on cash flow
+â”œâ”€â”€ Output: RefundId
+â””â”€â”€ Events: RefundProcessed, AccountReceivableAdjusted
 
 [ManageCreditLimit]
-├── Input: CustomerId, NewCreditLimit, ChangeReason, ApprovedBy
-├── Validations: Customer exists, Authorized to change, Valid amount
-├── Risk assessment: Credit history, Current debt
-├── Output: CreditLimitChangeId
-└── Events: CreditLimitUpdated, CreditRiskAssessed
+â”œâ”€â”€ Input: CustomerId, NewCreditLimit, ChangeReason, ApprovedBy
+â”œâ”€â”€ Validations: Customer exists, Authorized to change, Valid amount
+â”œâ”€â”€ Risk assessment: Credit history, Current debt
+â”œâ”€â”€ Output: CreditLimitChangeId
+â””â”€â”€ Events: CreditLimitUpdated, CreditRiskAssessed
 ```
 
-#### **👑 Gestores Financeiros (Finance Managers)**
+#### **ðŸ‘‘ Gestores Financeiros (Finance Managers)**
 ```
 [ApproveLargeTTransactions]
-├── Input: TransactionId, ApprovalNotes, ApprovalLevel
-├── Validations: Transaction exists, Authorized approval level
-├── Approval workflow: Multi-level approval for large amounts
-├── Output: ApprovalId
-└── Events: TransactionApproved, ApprovalWorkflowCompleted
+â”œâ”€â”€ Input: TransactionId, ApprovalNotes, ApprovalLevel
+â”œâ”€â”€ Validations: Transaction exists, Authorized approval level
+â”œâ”€â”€ Approval workflow: Multi-level approval for large amounts
+â”œâ”€â”€ Output: ApprovalId
+â””â”€â”€ Events: TransactionApproved, ApprovalWorkflowCompleted
 
 [SetCreditPolicies]
-├── Input: PolicyType, PolicyRules, EffectiveDate, ApprovedBy
-├── Validations: Valid policy type, Rules consistent
-├── Policy implementation: Apply to new and existing customers
-├── Output: PolicyId
-└── Events: CreditPolicyUpdated, PolicyImplemented
+â”œâ”€â”€ Input: PolicyType, PolicyRules, EffectiveDate, ApprovedBy
+â”œâ”€â”€ Validations: Valid policy type, Rules consistent
+â”œâ”€â”€ Policy implementation: Apply to new and existing customers
+â”œâ”€â”€ Output: PolicyId
+â””â”€â”€ Events: CreditPolicyUpdated, PolicyImplemented
 
 [ReviewFinancialPerformance]
-├── Input: Period, ReviewCriteria, PerformanceTargets
-├── Validations: Valid period, Appropriate metrics
-├── Performance analysis: Compare actual vs targets
-├── Output: PerformanceReviewId
-└── Events: PerformanceReviewed, ActionsIdentified
+â”œâ”€â”€ Input: Period, ReviewCriteria, PerformanceTargets
+â”œâ”€â”€ Validations: Valid period, Appropriate metrics
+â”œâ”€â”€ Performance analysis: Compare actual vs targets
+â”œâ”€â”€ Output: PerformanceReviewId
+â””â”€â”€ Events: PerformanceReviewed, ActionsIdentified
 
 [ConfigureAlertThresholds]
-├── Input: AlertType, ThresholdValues, Recipients, Escalation
-├── Validations: Valid alert types, Reasonable thresholds
-├── Alert configuration: Cash flow, Overdue, Credit alerts
-├── Output: AlertConfigId
-└── Events: AlertThresholdsConfigured, AlertingEnabled
+â”œâ”€â”€ Input: AlertType, ThresholdValues, Recipients, Escalation
+â”œâ”€â”€ Validations: Valid alert types, Reasonable thresholds
+â”œâ”€â”€ Alert configuration: Cash flow, Overdue, Credit alerts
+â”œâ”€â”€ Output: AlertConfigId
+â””â”€â”€ Events: AlertThresholdsConfigured, AlertingEnabled
 ```
 
-#### **🏦 Sistema Bancário (External Integration)**
+#### **ðŸ¦ Sistema BancÃ¡rio (External Integration)**
 ```
 [ImportBankStatement]
-├── Input: BankStatementFile, BankAccount, StatementPeriod
-├── File processing: Parse bank statement format
-├── Transaction extraction: Extract all transactions
-├── Output: BankTransactionIds[]
-└── Events: BankStatementImported, TransactionsExtracted
+â”œâ”€â”€ Input: BankStatementFile, BankAccount, StatementPeriod
+â”œâ”€â”€ File processing: Parse bank statement format
+â”œâ”€â”€ Transaction extraction: Extract all transactions
+â”œâ”€â”€ Output: BankTransactionIds[]
+â””â”€â”€ Events: BankStatementImported, TransactionsExtracted
 
 [ProcessBankingWebhook]
-├── Input: WebhookData, BankAccount, TransactionData
-├── Real-time processing: Immediate transaction notification
-├── Validation: Verify webhook authenticity
-├── Output: BankTransactionId
-└── Events: RealTimeBankTransactionReceived
+â”œâ”€â”€ Input: WebhookData, BankAccount, TransactionData
+â”œâ”€â”€ Real-time processing: Immediate transaction notification
+â”œâ”€â”€ Validation: Verify webhook authenticity
+â”œâ”€â”€ Output: BankTransactionId
+â””â”€â”€ Events: RealTimeBankTransactionReceived
 ```
 
-### **⚡ Eventos de Alto Nível**
+### **âš¡ Eventos de Alto NÃ­vel**
 
-#### **💰 Account Receivable Events**
+#### **ðŸ’° Account Receivable Events**
 ```
 AccountReceivableCreated
-├── Data: ARId, OrderId, CustomerId, TotalAmount, DueDate, PaymentTerms
-├── Triggers: [CalculateInstallments] (if needed), Customer credit check
-├── Integrations: Sales (AR reference), Customer management
-└── Importance: 🚨 Critical - Revenue recognition
+â”œâ”€â”€ Data: ARId, OrderId, CustomerId, TotalAmount, DueDate, PaymentTerms
+â”œâ”€â”€ Triggers: [CalculateInstallments] (if needed), Customer credit check
+â”œâ”€â”€ Integrations: Sales (AR reference), Customer management
+â””â”€â”€ Importance: ðŸš¨ Critical - Revenue recognition
 
 InstallmentsGenerated
-├── Data: ARId, InstallmentIds[], InstallmentSchedule, TotalAmount
-├── Triggers: Payment reminder scheduling, Customer notification
-├── Integrations: Customer communication, Payment processing
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ARId, InstallmentIds[], InstallmentSchedule, TotalAmount
+â”œâ”€â”€ Triggers: Payment reminder scheduling, Customer notification
+â”œâ”€â”€ Integrations: Customer communication, Payment processing
+â””â”€â”€ Importance: âš ï¸ High
 
 PaymentReceived
-├── Data: PaymentId, ARId, CustomerId, PaymentAmount, PaymentMethod, PaymentDate
-├── Triggers: [UpdateAccountReceivable], [UpdateCashFlow], Customer notification
-├── Integrations: Sales (order status), Cash flow management
-└── Importance: 🚨 Critical - Cash flow impact
+â”œâ”€â”€ Data: PaymentId, ARId, CustomerId, PaymentAmount, PaymentMethod, PaymentDate
+â”œâ”€â”€ Triggers: [UpdateAccountReceivable], [UpdateCashFlow], Customer notification
+â”œâ”€â”€ Integrations: Sales (order status), Cash flow management
+â””â”€â”€ Importance: ðŸš¨ Critical - Cash flow impact
 
 AccountReceivableUpdated
-├── Data: ARId, OldBalance, NewBalance, UpdateReason, RemainingAmount
-├── Triggers: AR aging calculation, Customer status update
-├── Integrations: Customer management, Credit management
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ARId, OldBalance, NewBalance, UpdateReason, RemainingAmount
+â”œâ”€â”€ Triggers: AR aging calculation, Customer status update
+â”œâ”€â”€ Integrations: Customer management, Credit management
+â””â”€â”€ Importance: âš ï¸ High
 
 AccountReceivableFullyPaid
-├── Data: ARId, OrderId, CustomerId, TotalPaid, FinalPaymentDate
-├── Triggers: Order completion notification, Customer loyalty update
-├── Integrations: Sales (order fulfillment), Customer management
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: ARId, OrderId, CustomerId, TotalPaid, FinalPaymentDate
+â”œâ”€â”€ Triggers: Order completion notification, Customer loyalty update
+â”œâ”€â”€ Integrations: Sales (order fulfillment), Customer management
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 OverduePaymentIdentified
-├── Data: ARId, CustomerId, OverdueAmount, DaysPastDue, SeverityLevel
-├── Triggers: Customer notification, Collection workflow, Credit hold
-├── Integrations: Customer communication, Credit management
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ARId, CustomerId, OverdueAmount, DaysPastDue, SeverityLevel
+â”œâ”€â”€ Triggers: Customer notification, Collection workflow, Credit hold
+â”œâ”€â”€ Integrations: Customer communication, Credit management
+â””â”€â”€ Importance: âš ï¸ High
 ```
 
-#### **🧾 Account Payable Events**
+#### **ðŸ§¾ Account Payable Events**
 ```
 AccountPayableCreated
-├── Data: APId, PurchaseOrderId, SupplierId, TotalAmount, DueDate, PaymentTerms
-├── Triggers: [SchedulePayment], Cash flow planning
-├── Integrations: Purchasing (AP reference), Supplier management
-└── Importance: 🚨 Critical - Financial obligation
+â”œâ”€â”€ Data: APId, PurchaseOrderId, SupplierId, TotalAmount, DueDate, PaymentTerms
+â”œâ”€â”€ Triggers: [SchedulePayment], Cash flow planning
+â”œâ”€â”€ Integrations: Purchasing (AP reference), Supplier management
+â””â”€â”€ Importance: ðŸš¨ Critical - Financial obligation
 
 PaymentScheduled
-├── Data: APId, ScheduledDate, PaymentAmount, PaymentMethod, ApprovalRequired
-├── Triggers: Approval workflow (if needed), Cash flow reservation
-├── Integrations: Approval systems, Cash flow management
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: APId, ScheduledDate, PaymentAmount, PaymentMethod, ApprovalRequired
+â”œâ”€â”€ Triggers: Approval workflow (if needed), Cash flow reservation
+â”œâ”€â”€ Integrations: Approval systems, Cash flow management
+â””â”€â”€ Importance: âš ï¸ High
 
 PaymentMade
-├── Data: PaymentId, APId, SupplierId, PaymentAmount, PaymentMethod, PaymentDate
-├── Triggers: [UpdateAccountPayable], [UpdateCashFlow], Supplier notification
-├── Integrations: Purchasing (payment confirmation), Supplier management
-└── Importance: 🚨 Critical - Cash flow impact
+â”œâ”€â”€ Data: PaymentId, APId, SupplierId, PaymentAmount, PaymentMethod, PaymentDate
+â”œâ”€â”€ Triggers: [UpdateAccountPayable], [UpdateCashFlow], Supplier notification
+â”œâ”€â”€ Integrations: Purchasing (payment confirmation), Supplier management
+â””â”€â”€ Importance: ðŸš¨ Critical - Cash flow impact
 
 AccountPayableUpdated
-├── Data: APId, OldBalance, NewBalance, UpdateReason, RemainingAmount
-├── Triggers: AP aging calculation, Supplier relationship update
-├── Integrations: Supplier management, Purchase planning
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: APId, OldBalance, NewBalance, UpdateReason, RemainingAmount
+â”œâ”€â”€ Triggers: AP aging calculation, Supplier relationship update
+â”œâ”€â”€ Integrations: Supplier management, Purchase planning
+â””â”€â”€ Importance: âš ï¸ High
 
 AccountPayableFullyPaid
-├── Data: APId, PurchaseOrderId, SupplierId, TotalPaid, FinalPaymentDate
-├── Triggers: Purchase completion notification, Supplier performance update
-├── Integrations: Purchasing (purchase closure), Supplier evaluation
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: APId, PurchaseOrderId, SupplierId, TotalPaid, FinalPaymentDate
+â”œâ”€â”€ Triggers: Purchase completion notification, Supplier performance update
+â”œâ”€â”€ Integrations: Purchasing (purchase closure), Supplier evaluation
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 OverduePaymentToSupplier
-├── Data: APId, SupplierId, OverdueAmount, DaysPastDue, RiskLevel
-├── Triggers: Supplier notification, Relationship risk assessment
-├── Integrations: Supplier management, Purchase planning
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: APId, SupplierId, OverdueAmount, DaysPastDue, RiskLevel
+â”œâ”€â”€ Triggers: Supplier notification, Relationship risk assessment
+â”œâ”€â”€ Integrations: Supplier management, Purchase planning
+â””â”€â”€ Importance: âš ï¸ High
 ```
 
-#### **💸 Cash Flow Events**
+#### **ðŸ’¸ Cash Flow Events**
 ```
 CashFlowUpdated
-├── Data: CurrentBalance, PreviousBalance, TransactionType, Impact, Timestamp
-├── Triggers: [CalculateFinancialMetrics], Cash flow alerts
-├── Integrations: Business intelligence, Executive dashboards
-└── Importance: 🚨 Critical - Business health indicator
+â”œâ”€â”€ Data: CurrentBalance, PreviousBalance, TransactionType, Impact, Timestamp
+â”œâ”€â”€ Triggers: [CalculateFinancialMetrics], Cash flow alerts
+â”œâ”€â”€ Integrations: Business intelligence, Executive dashboards
+â””â”€â”€ Importance: ðŸš¨ Critical - Business health indicator
 
 CashFlowProjectionCalculated
-├── Data: ProjectionPeriod, ProjectedInflows, ProjectedOutflows, NetCashFlow
-├── Triggers: Business planning, Investment decisions
-├── Integrations: Strategic planning, Budget management
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ProjectionPeriod, ProjectedInflows, ProjectedOutflows, NetCashFlow
+â”œâ”€â”€ Triggers: Business planning, Investment decisions
+â”œâ”€â”€ Integrations: Strategic planning, Budget management
+â””â”€â”€ Importance: âš ï¸ High
 
 LowCashFlowAlertTriggered
-├── Data: CurrentBalance, MinimumThreshold, ProjectedShortfall, Urgency
-├── Triggers: Management notification, Emergency cash actions
-├── Integrations: Management dashboards, Alert systems
-└── Importance: 🚨 Critical
+â”œâ”€â”€ Data: CurrentBalance, MinimumThreshold, ProjectedShortfall, Urgency
+â”œâ”€â”€ Triggers: Management notification, Emergency cash actions
+â”œâ”€â”€ Integrations: Management dashboards, Alert systems
+â””â”€â”€ Importance: ðŸš¨ Critical
 
 CashFlowReportGenerated
-├── Data: ReportId, Period, InFlows, OutFlows, NetFlow, Trends
-├── Triggers: Stakeholder distribution, Performance analysis
-├── Integrations: Reporting systems, Business intelligence
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: ReportId, Period, InFlows, OutFlows, NetFlow, Trends
+â”œâ”€â”€ Triggers: Stakeholder distribution, Performance analysis
+â”œâ”€â”€ Integrations: Reporting systems, Business intelligence
+â””â”€â”€ Importance: ðŸ“Š Medium
 ```
 
-#### **🏦 Banking and Reconciliation Events**
+#### **ðŸ¦ Banking and Reconciliation Events**
 ```
 BankStatementImported
-├── Data: StatementId, BankAccount, Period, TransactionCount, ImportStatus
-├── Triggers: [ReconcileBankTransaction] for each transaction
-├── Integrations: Banking systems, Reconciliation workflows
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: StatementId, BankAccount, Period, TransactionCount, ImportStatus
+â”œâ”€â”€ Triggers: [ReconcileBankTransaction] for each transaction
+â”œâ”€â”€ Integrations: Banking systems, Reconciliation workflows
+â””â”€â”€ Importance: âš ï¸ High
 
 TransactionReconciled
-├── Data: ReconciliationId, BankTransactionId, SystemTransactionId, MatchType
-├── Triggers: Reconciliation reporting, Discrepancy identification
-├── Integrations: Audit trails, Financial reporting
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: ReconciliationId, BankTransactionId, SystemTransactionId, MatchType
+â”œâ”€â”€ Triggers: Reconciliation reporting, Discrepancy identification
+â”œâ”€â”€ Integrations: Audit trails, Financial reporting
+â””â”€â”€ Importance: âš ï¸ High
 
 ReconciliationDiscrepancyFound
-├── Data: DiscrepancyId, BankTransaction, SystemTransaction, Difference, Severity
-├── Triggers: Investigation workflow, Finance team notification
-├── Integrations: Audit processes, Error resolution
-└── Importance: ⚠️ High
+â”œâ”€â”€ Data: DiscrepancyId, BankTransaction, SystemTransaction, Difference, Severity
+â”œâ”€â”€ Triggers: Investigation workflow, Finance team notification
+â”œâ”€â”€ Integrations: Audit processes, Error resolution
+â””â”€â”€ Importance: âš ï¸ High
 
 BankStatementFullyReconciled
-├── Data: StatementId, ReconciliationSummary, UnmatchedTransactions, CompletionDate
-├── Triggers: Period closing, Audit preparation
-├── Integrations: Financial reporting, Audit systems
-└── Importance: 📊 Medium
+â”œâ”€â”€ Data: StatementId, ReconciliationSummary, UnmatchedTransactions, CompletionDate
+â”œâ”€â”€ Triggers: Period closing, Audit preparation
+â”œâ”€â”€ Integrations: Financial reporting, Audit systems
+â””â”€â”€ Importance: ðŸ“Š Medium
 ```
 
-### **🔍 Micro-Eventos (Tracking Detalhado)**
+### **ðŸ” Micro-Eventos (Tracking Detalhado)**
 
-#### **📊 Performance Tracking**
+#### **ðŸ“Š Performance Tracking**
 ```
 PaymentProcessingTimeTracked
-├── Data: PaymentId, ProcessingStage, StartTime, EndTime, Duration
-├── Purpose: Track payment processing efficiency
-├── Used by: Process optimization, Performance monitoring
-└── Frequency: Every payment transaction
+â”œâ”€â”€ Data: PaymentId, ProcessingStage, StartTime, EndTime, Duration
+â”œâ”€â”€ Purpose: Track payment processing efficiency
+â”œâ”€â”€ Used by: Process optimization, Performance monitoring
+â””â”€â”€ Frequency: Every payment transaction
 
 AccountAgingCalculated
-├── Data: AccountId, AccountType, AgingBucket, Amount, CalculationDate
-├── Purpose: Track receivables and payables aging
-├── Used by: Collections, Cash flow planning, Risk management
-└── Frequency: Daily aging calculation
+â”œâ”€â”€ Data: AccountId, AccountType, AgingBucket, Amount, CalculationDate
+â”œâ”€â”€ Purpose: Track receivables and payables aging
+â”œâ”€â”€ Used by: Collections, Cash flow planning, Risk management
+â””â”€â”€ Frequency: Daily aging calculation
 
 FinancialRatioCalculated
-├── Data: RatioType, RatioValue, CalculationPeriod, ComparisonData
-├── Purpose: Track key financial performance indicators
-├── Used by: Performance monitoring, Business intelligence
-└── Frequency: Monthly calculations
+â”œâ”€â”€ Data: RatioType, RatioValue, CalculationPeriod, ComparisonData
+â”œâ”€â”€ Purpose: Track key financial performance indicators
+â”œâ”€â”€ Used by: Performance monitoring, Business intelligence
+â””â”€â”€ Frequency: Monthly calculations
 
 CashConversionCycleCalculated
-├── Data: Period, DSO, DPO, DIO, CashConversionDays, Trend
-├── Purpose: Monitor working capital efficiency
-├── Used by: Working capital management, Performance optimization
-└── Frequency: Monthly cycle calculations
+â”œâ”€â”€ Data: Period, DSO, DPO, DIO, CashConversionDays, Trend
+â”œâ”€â”€ Purpose: Monitor working capital efficiency
+â”œâ”€â”€ Used by: Working capital management, Performance optimization
+â””â”€â”€ Frequency: Monthly cycle calculations
 ```
 
-#### **🔧 Process Monitoring**
+#### **ðŸ”§ Process Monitoring**
 ```
 PaymentMethodUsageTracked
-├── Data: PaymentMethod, TransactionCount, TotalAmount, SuccessRate
-├── Purpose: Monitor payment method preferences and success rates
-├── Used by: Payment strategy, Customer experience optimization
-└── Frequency: Payment transactions
+â”œâ”€â”€ Data: PaymentMethod, TransactionCount, TotalAmount, SuccessRate
+â”œâ”€â”€ Purpose: Monitor payment method preferences and success rates
+â”œâ”€â”€ Used by: Payment strategy, Customer experience optimization
+â””â”€â”€ Frequency: Payment transactions
 
 CreditLimitUtilizationMonitored
-├── Data: CustomerId, CreditLimit, CurrentDebt, UtilizationRate, RiskLevel
-├── Purpose: Track customer credit usage and risk
-├── Used by: Credit management, Risk assessment
-└── Frequency: Credit transactions
+â”œâ”€â”€ Data: CustomerId, CreditLimit, CurrentDebt, UtilizationRate, RiskLevel
+â”œâ”€â”€ Purpose: Track customer credit usage and risk
+â”œâ”€â”€ Used by: Credit management, Risk assessment
+â””â”€â”€ Frequency: Credit transactions
 
 ApprovalWorkflowTracked
-├── Data: WorkflowId, ApprovalLevel, ApprovalTime, ApproverID, DecisionOutcome
-├── Purpose: Monitor approval process efficiency
-├── Used by: Workflow optimization, Authority delegation
-└── Frequency: Approval workflows
+â”œâ”€â”€ Data: WorkflowId, ApprovalLevel, ApprovalTime, ApproverID, DecisionOutcome
+â”œâ”€â”€ Purpose: Monitor approval process efficiency
+â”œâ”€â”€ Used by: Workflow optimization, Authority delegation
+â””â”€â”€ Frequency: Approval workflows
 
 CollectionActionTracked
-├── Data: AccountId, ActionType, ActionDate, Outcome, EffectivenessScore
-├── Purpose: Track collections process effectiveness
-├── Used by: Collections optimization, Customer relationship management
-└── Frequency: Collection activities
+â”œâ”€â”€ Data: AccountId, ActionType, ActionDate, Outcome, EffectivenessScore
+â”œâ”€â”€ Purpose: Track collections process effectiveness
+â”œâ”€â”€ Used by: Collections optimization, Customer relationship management
+â””â”€â”€ Frequency: Collection activities
 ```
 
-#### **🌐 Integration Monitoring**
+#### **ðŸŒ Integration Monitoring**
 ```
 CrossDomainAccountCreationSynced
-├── Data: AccountId, SourceDomain, CreationLatency, SyncStatus, DataIntegrity
-├── Purpose: Monitor cross-domain account creation synchronization
-├── Used by: Integration health, Data consistency monitoring
-└── Frequency: Account creation events
+â”œâ”€â”€ Data: AccountId, SourceDomain, CreationLatency, SyncStatus, DataIntegrity
+â”œâ”€â”€ Purpose: Monitor cross-domain account creation synchronization
+â”œâ”€â”€ Used by: Integration health, Data consistency monitoring
+â””â”€â”€ Frequency: Account creation events
 
 BankingAPIResponseTracked
-├── Data: APIEndpoint, ResponseTime, StatusCode, DataVolumeProcessed
-├── Purpose: Monitor banking system integration performance
-├── Used by: Integration optimization, System reliability
-└── Frequency: Banking API calls
+â”œâ”€â”€ Data: APIEndpoint, ResponseTime, StatusCode, DataVolumeProcessed
+â”œâ”€â”€ Purpose: Monitor banking system integration performance
+â”œâ”€â”€ Used by: Integration optimization, System reliability
+â””â”€â”€ Frequency: Banking API calls
 
 ReportGenerationPerformanceTracked
-├── Data: ReportType, GenerationTime, DataVolume, DeliveryMethod, Success
-├── Purpose: Monitor report generation system performance
-├── Used by: Reporting optimization, System capacity planning
-└── Frequency: Report generations
+â”œâ”€â”€ Data: ReportType, GenerationTime, DataVolume, DeliveryMethod, Success
+â”œâ”€â”€ Purpose: Monitor report generation system performance
+â”œâ”€â”€ Used by: Reporting optimization, System capacity planning
+â””â”€â”€ Frequency: Report generations
 
 FinancialDataExportTracked
-├── Data: ExportType, RecordCount, ExportTime, Destination, DataIntegrity
-├── Purpose: Monitor financial data export to external systems
-├── Used by: Integration monitoring, Data quality assurance
-└── Frequency: Data export operations
+â”œâ”€â”€ Data: ExportType, RecordCount, ExportTime, Destination, DataIntegrity
+â”œâ”€â”€ Purpose: Monitor financial data export to external systems
+â”œâ”€â”€ Used by: Integration monitoring, Data quality assurance
+â””â”€â”€ Frequency: Data export operations
 ```
 
-### **📊 Agregados e Responsabilidades**
+### **ðŸ“Š Agregados e Responsabilidades**
 
-#### **💰 AccountReceivable Aggregate**
+#### **ðŸ’° AccountReceivable Aggregate**
 ```
 {AccountReceivable}
-├── Entities: AccountReceivable, PaymentInstallment, Payment
-├── Value Objects: PaymentStatus, PaymentTerms, PaymentMethod
-├── Invariants:
-│   ├── Total amount must be > 0
-│   ├── Due date must be >= creation date
-│   ├── Paid amount cannot exceed total amount
-│   ├── Payment installments sum must equal total amount
-│   └── Cannot delete AR with payments received
-├── Events Published:
-│   ├── AccountReceivableCreated, InstallmentsGenerated
-│   ├── PaymentReceived, AccountReceivableUpdated
-│   ├── AccountReceivableFullyPaid, OverduePaymentIdentified
-│   └── CreditLimitUtilizationChanged
-└── Commands Handled:
-    ├── CreateAccountReceivable, ProcessCustomerPayment
-    ├── UpdateAccountReceivable, CalculateInstallments
-    ├── ProcessRefund, AdjustAccountBalance
-    └── IdentifyOverduePayments
+â”œâ”€â”€ Entities: AccountReceivable, PaymentInstallment, Payment
+â”œâ”€â”€ Value Objects: PaymentStatus, PaymentTerms, PaymentMethod
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Total amount must be > 0
+â”‚   â”œâ”€â”€ Due date must be >= creation date
+â”‚   â”œâ”€â”€ Paid amount cannot exceed total amount
+â”‚   â”œâ”€â”€ Payment installments sum must equal total amount
+â”‚   â””â”€â”€ Cannot delete AR with payments received
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ AccountReceivableCreated, InstallmentsGenerated
+â”‚   â”œâ”€â”€ PaymentReceived, AccountReceivableUpdated
+â”‚   â”œâ”€â”€ AccountReceivableFullyPaid, OverduePaymentIdentified
+â”‚   â””â”€â”€ CreditLimitUtilizationChanged
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreateAccountReceivable, ProcessCustomerPayment
+    â”œâ”€â”€ UpdateAccountReceivable, CalculateInstallments
+    â”œâ”€â”€ ProcessRefund, AdjustAccountBalance
+    â””â”€â”€ IdentifyOverduePayments
 ```
 
-#### **🧾 AccountPayable Aggregate**
+#### **ðŸ§¾ AccountPayable Aggregate**
 ```
 {AccountPayable}
-├── Entities: AccountPayable, ScheduledPayment, Payment
-├── Value Objects: PaymentStatus, PaymentTerms, PaymentMethod
-├── Invariants:
-│   ├── Total amount must be > 0
-│   ├── Due date must be >= creation date
-│   ├── Paid amount cannot exceed total amount
-│   ├── Scheduled payments sum must equal total amount
-│   └── Cannot delete AP without proper approval
-├── Events Published:
-│   ├── AccountPayableCreated, PaymentScheduled
-│   ├── PaymentMade, AccountPayableUpdated
-│   ├── AccountPayableFullyPaid, OverduePaymentToSupplier
-│   └── SupplierPaymentImpact
-└── Commands Handled:
-    ├── CreateAccountPayable, ProcessSupplierPayment
-    ├── UpdateAccountPayable, SchedulePayment
-    ├── ApprovePayment, AdjustAccountBalance
-    └── IdentifyOverduePayments
+â”œâ”€â”€ Entities: AccountPayable, ScheduledPayment, Payment
+â”œâ”€â”€ Value Objects: PaymentStatus, PaymentTerms, PaymentMethod
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Total amount must be > 0
+â”‚   â”œâ”€â”€ Due date must be >= creation date
+â”‚   â”œâ”€â”€ Paid amount cannot exceed total amount
+â”‚   â”œâ”€â”€ Scheduled payments sum must equal total amount
+â”‚   â””â”€â”€ Cannot delete AP without proper approval
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ AccountPayableCreated, PaymentScheduled
+â”‚   â”œâ”€â”€ PaymentMade, AccountPayableUpdated
+â”‚   â”œâ”€â”€ AccountPayableFullyPaid, OverduePaymentToSupplier
+â”‚   â””â”€â”€ SupplierPaymentImpact
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreateAccountPayable, ProcessSupplierPayment
+    â”œâ”€â”€ UpdateAccountPayable, SchedulePayment
+    â”œâ”€â”€ ApprovePayment, AdjustAccountBalance
+    â””â”€â”€ IdentifyOverduePayments
 ```
 
-#### **💸 Transaction Aggregate**
+#### **ðŸ’¸ Transaction Aggregate**
 ```
 {Transaction}
-├── Entities: Transaction, BankTransaction
-├── Value Objects: TransactionType, TransactionStatus, ReconciliationStatus
-├── Invariants:
-│   ├── Amount cannot be zero
-│   ├── Transaction date must be valid
-│   ├── Transaction type must be defined
-│   ├── Reconciled transactions cannot be modified
-│   └── Manual transactions must have proper authorization
-├── Events Published:
-│   ├── TransactionCreated, ManualTransactionCreated
-│   ├── TransactionReconciled, ReconciliationDiscrepancyFound
-│   ├── BankStatementImported, CashFlowUpdated
-│   └── TransactionAudited
-└── Commands Handled:
-    ├── CreateManualTransaction, ReconcileBankTransaction
-    ├── ImportBankStatement, ProcessBankingWebhook
-    ├── IdentifyReconciliationDiscrepancies
-    └── AuditTransaction
+â”œâ”€â”€ Entities: Transaction, BankTransaction
+â”œâ”€â”€ Value Objects: TransactionType, TransactionStatus, ReconciliationStatus
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Amount cannot be zero
+â”‚   â”œâ”€â”€ Transaction date must be valid
+â”‚   â”œâ”€â”€ Transaction type must be defined
+â”‚   â”œâ”€â”€ Reconciled transactions cannot be modified
+â”‚   â””â”€â”€ Manual transactions must have proper authorization
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ TransactionCreated, ManualTransactionCreated
+â”‚   â”œâ”€â”€ TransactionReconciled, ReconciliationDiscrepancyFound
+â”‚   â”œâ”€â”€ BankStatementImported, CashFlowUpdated
+â”‚   â””â”€â”€ TransactionAudited
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ CreateManualTransaction, ReconcileBankTransaction
+    â”œâ”€â”€ ImportBankStatement, ProcessBankingWebhook
+    â”œâ”€â”€ IdentifyReconciliationDiscrepancies
+    â””â”€â”€ AuditTransaction
 ```
 
-#### **📊 FinancialReport Aggregate**
+#### **ðŸ“Š FinancialReport Aggregate**
 ```
 {FinancialReport}
-├── Entities: FinancialReport, ReportSection, ReportMetric
-├── Value Objects: ReportType, ReportPeriod, ReportStatus
-├── Invariants:
-│   ├── Report period must be valid
-│   ├── Report data must be consistent
-│   ├── Generated reports cannot be modified
-│   ├── Automated reports must have valid schedules
-│   └── Report access must be authorized
-├── Events Published:
-│   ├── FinancialReportGenerated, AutoReportGenerated
-│   ├── ReportDelivered, ReportAccessGranted
-│   ├── FinancialMetricsCalculated, PerformanceReviewed
-│   └── ReportingPolicyUpdated
-└── Commands Handled:
-    ├── GenerateFinancialReport, ScheduleAutoReport
-    ├── DeliverReport, CalculateFinancialMetrics
-    ├── ReviewFinancialPerformance
-    └── ConfigureReportingPolicy
+â”œâ”€â”€ Entities: FinancialReport, ReportSection, ReportMetric
+â”œâ”€â”€ Value Objects: ReportType, ReportPeriod, ReportStatus
+â”œâ”€â”€ Invariants:
+â”‚   â”œâ”€â”€ Report period must be valid
+â”‚   â”œâ”€â”€ Report data must be consistent
+â”‚   â”œâ”€â”€ Generated reports cannot be modified
+â”‚   â”œâ”€â”€ Automated reports must have valid schedules
+â”‚   â””â”€â”€ Report access must be authorized
+â”œâ”€â”€ Events Published:
+â”‚   â”œâ”€â”€ FinancialReportGenerated, AutoReportGenerated
+â”‚   â”œâ”€â”€ ReportDelivered, ReportAccessGranted
+â”‚   â”œâ”€â”€ FinancialMetricsCalculated, PerformanceReviewed
+â”‚   â””â”€â”€ ReportingPolicyUpdated
+â””â”€â”€ Commands Handled:
+    â”œâ”€â”€ GenerateFinancialReport, ScheduleAutoReport
+    â”œâ”€â”€ DeliverReport, CalculateFinancialMetrics
+    â”œâ”€â”€ ReviewFinancialPerformance
+    â””â”€â”€ ConfigureReportingPolicy
 ```
 
-### **🔄 Políticas de Negócio (Business Rules)**
+### **ðŸ”„ PolÃ­ticas de NegÃ³cio (Business Rules)**
 
-#### **💰 Account Management Policies**
+#### **ðŸ’° Account Management Policies**
 ```
-"Quando OrderConfirmed (Sales), então CreateAccountReceivable"
-├── Automatic AR creation: Based on order data and payment terms
-├── Payment terms application: Customer-specific or default terms
-├── Installment calculation: Break down payments if configured
-├── Auto-execution: Immediate after order confirmation
-└── Integration: Sales domain order data, Customer payment terms
+"Quando OrderConfirmed (Sales), entÃ£o CreateAccountReceivable"
+â”œâ”€â”€ Automatic AR creation: Based on order data and payment terms
+â”œâ”€â”€ Payment terms application: Customer-specific or default terms
+â”œâ”€â”€ Installment calculation: Break down payments if configured
+â”œâ”€â”€ Auto-execution: Immediate after order confirmation
+â””â”€â”€ Integration: Sales domain order data, Customer payment terms
 
-"Quando PaymentApproved (Purchasing), então CreateAccountPayable"
-├── Automatic AP creation: Based on purchase data and supplier terms
-├── Payment scheduling: According to supplier payment terms
-├── Cash flow impact: Schedule outflows for cash planning
-├── Auto-execution: Immediate after payment approval
-└── Integration: Purchasing domain purchase data, Supplier terms
+"Quando PaymentApproved (Purchasing), entÃ£o CreateAccountPayable"
+â”œâ”€â”€ Automatic AP creation: Based on purchase data and supplier terms
+â”œâ”€â”€ Payment scheduling: According to supplier payment terms
+â”œâ”€â”€ Cash flow impact: Schedule outflows for cash planning
+â”œâ”€â”€ Auto-execution: Immediate after payment approval
+â””â”€â”€ Integration: Purchasing domain purchase data, Supplier terms
 
-"Quando PaymentReceived, então UpdateAccountReceivableAndCashFlow"
-├── Payment allocation: Apply to specific AR or oldest debt
-├── Cash flow update: Immediate cash inflow impact
-├── Customer status update: Update credit status and payment history
-├── Auto-execution: Real-time payment processing
-└── Integration: Customer management, Cash flow planning
-```
-
-#### **📊 Cash Flow Management Policies**
-```
-"Quando CashFlowUpdated, então CheckCashFlowThresholds"
-├── Threshold monitoring: Compare current balance with minimum levels
-├── Alert generation: Trigger low cash flow alerts
-├── Projection calculation: Update cash flow projections
-├── Auto-execution: Real-time after cash flow changes
-└── Integration: Alert systems, Management dashboards
-
-"Quando LowCashFlowAlertTriggered, então NotifyManagementAndSuggestActions"
-├── Escalation workflow: Immediate notification to finance managers
-├── Action suggestions: Accelerate collections, delay payments
-├── Scenario analysis: Provide cash flow projections
-├── Auto-execution: Immediate when thresholds breached
-└── Integration: Management notification, Action planning
-
-"Quando FinancialMetricsCalculated, então UpdateBusinessIntelligence"
-├── KPI updating: Revenue, profit margins, efficiency ratios
-├── Trend analysis: Compare with historical data
-├── Performance alerts: Identify significant deviations
-├── Auto-execution: Monthly calculation cycles
-└── Integration: Business intelligence systems, Executive dashboards
+"Quando PaymentReceived, entÃ£o UpdateAccountReceivableAndCashFlow"
+â”œâ”€â”€ Payment allocation: Apply to specific AR or oldest debt
+â”œâ”€â”€ Cash flow update: Immediate cash inflow impact
+â”œâ”€â”€ Customer status update: Update credit status and payment history
+â”œâ”€â”€ Auto-execution: Real-time payment processing
+â””â”€â”€ Integration: Customer management, Cash flow planning
 ```
 
-#### **🏦 Reconciliation and Control Policies**
+#### **ðŸ“Š Cash Flow Management Policies**
 ```
-"Quando BankStatementImported, então AutoReconcileMatchingTransactions"
-├── Automatic matching: Exact amount and date matches
-├── Fuzzy matching: Similar amounts within tolerance
-├── Exception handling: Flag unmatched transactions
-├── Auto-execution: Immediate after statement import
-└── Integration: Banking systems, Reconciliation workflows
+"Quando CashFlowUpdated, entÃ£o CheckCashFlowThresholds"
+â”œâ”€â”€ Threshold monitoring: Compare current balance with minimum levels
+â”œâ”€â”€ Alert generation: Trigger low cash flow alerts
+â”œâ”€â”€ Projection calculation: Update cash flow projections
+â”œâ”€â”€ Auto-execution: Real-time after cash flow changes
+â””â”€â”€ Integration: Alert systems, Management dashboards
 
-"Quando ReconciliationDiscrepancyFound, então TriggerInvestigationWorkflow"
-├── Discrepancy classification: Amount, timing, missing transactions
-├── Investigation assignment: Route to appropriate finance team member
-├── Resolution tracking: Monitor investigation progress
-├── Auto-execution: When discrepancies identified
-└── Integration: Investigation workflows, Audit trails
+"Quando LowCashFlowAlertTriggered, entÃ£o NotifyManagementAndSuggestActions"
+â”œâ”€â”€ Escalation workflow: Immediate notification to finance managers
+â”œâ”€â”€ Action suggestions: Accelerate collections, delay payments
+â”œâ”€â”€ Scenario analysis: Provide cash flow projections
+â”œâ”€â”€ Auto-execution: Immediate when thresholds breached
+â””â”€â”€ Integration: Management notification, Action planning
 
-"Quando OverdueAccountsIdentified, então InitiateCollectionActions"
-├── Collection strategy: Email reminders, phone calls, escalation
-├── Customer segmentation: Different approaches per customer type
-├── Impact assessment: Credit holds, delivery restrictions
-├── Auto-execution: Daily overdue processing
-└── Integration: Customer communication, Credit management
-```
-
-#### **⚠️ Risk Management Policies**
-```
-"Quando CreditLimitExceeded, então TriggerCreditHoldProcess"
-├── Credit evaluation: Review customer payment history
-├── Business impact: Hold new orders, require payment
-├── Escalation workflow: Manager approval for exceptions
-├── Auto-execution: When credit limits exceeded
-└── Integration: Sales domain order blocking, Customer management
-
-"Quando SupplierPaymentOverdue, então AssessSupplierRisk"
-├── Relationship impact: Evaluate effect on supplier relationship
-├── Supply chain risk: Assess impact on procurement
-├── Resolution prioritization: Focus on critical suppliers
-├── Auto-execution: When supplier payments become overdue
-└── Integration: Purchasing domain, Supplier management
+"Quando FinancialMetricsCalculated, entÃ£o UpdateBusinessIntelligence"
+â”œâ”€â”€ KPI updating: Revenue, profit margins, efficiency ratios
+â”œâ”€â”€ Trend analysis: Compare with historical data
+â”œâ”€â”€ Performance alerts: Identify significant deviations
+â”œâ”€â”€ Auto-execution: Monthly calculation cycles
+â””â”€â”€ Integration: Business intelligence systems, Executive dashboards
 ```
 
-### **⚠️ Hotspots e Complexidades**
+#### **ðŸ¦ Reconciliation and Control Policies**
+```
+"Quando BankStatementImported, entÃ£o AutoReconcileMatchingTransactions"
+â”œâ”€â”€ Automatic matching: Exact amount and date matches
+â”œâ”€â”€ Fuzzy matching: Similar amounts within tolerance
+â”œâ”€â”€ Exception handling: Flag unmatched transactions
+â”œâ”€â”€ Auto-execution: Immediate after statement import
+â””â”€â”€ Integration: Banking systems, Reconciliation workflows
 
-#### **🚨 Complexidades Críticas**
+"Quando ReconciliationDiscrepancyFound, entÃ£o TriggerInvestigationWorkflow"
+â”œâ”€â”€ Discrepancy classification: Amount, timing, missing transactions
+â”œâ”€â”€ Investigation assignment: Route to appropriate finance team member
+â”œâ”€â”€ Resolution tracking: Monitor investigation progress
+â”œâ”€â”€ Auto-execution: When discrepancies identified
+â””â”€â”€ Integration: Investigation workflows, Audit trails
+
+"Quando OverdueAccountsIdentified, entÃ£o InitiateCollectionActions"
+â”œâ”€â”€ Collection strategy: Email reminders, phone calls, escalation
+â”œâ”€â”€ Customer segmentation: Different approaches per customer type
+â”œâ”€â”€ Impact assessment: Credit holds, delivery restrictions
+â”œâ”€â”€ Auto-execution: Daily overdue processing
+â””â”€â”€ Integration: Customer communication, Credit management
+```
+
+#### **âš ï¸ Risk Management Policies**
+```
+"Quando CreditLimitExceeded, entÃ£o TriggerCreditHoldProcess"
+â”œâ”€â”€ Credit evaluation: Review customer payment history
+â”œâ”€â”€ Business impact: Hold new orders, require payment
+â”œâ”€â”€ Escalation workflow: Manager approval for exceptions
+â”œâ”€â”€ Auto-execution: When credit limits exceeded
+â””â”€â”€ Integration: Sales domain order blocking, Customer management
+
+"Quando SupplierPaymentOverdue, entÃ£o AssessSupplierRisk"
+â”œâ”€â”€ Relationship impact: Evaluate effect on supplier relationship
+â”œâ”€â”€ Supply chain risk: Assess impact on procurement
+â”œâ”€â”€ Resolution prioritization: Focus on critical suppliers
+â”œâ”€â”€ Auto-execution: When supplier payments become overdue
+â””â”€â”€ Integration: Purchasing domain, Supplier management
+```
+
+### **âš ï¸ Hotspots e Complexidades**
+
+#### **ðŸš¨ Complexidades CrÃ­ticas**
 
 ##### **(!CrossDomainFinancialSync!)**
 ```
 Problema: Real-time synchronization of financial data across all domains
-Cenário: Sales creates AR, Purchasing creates AP, Production affects costs
+CenÃ¡rio: Sales creates AR, Purchasing creates AP, Production affects costs
 Impacto: Financial data consistency, reporting accuracy, cash flow precision
-Solução: Event-driven architecture with eventual consistency
+SoluÃ§Ã£o: Event-driven architecture with eventual consistency
 Prioridade: Critical - Financial data integrity
 ```
 
 ##### **(!BankReconciliationComplexity!)**
 ```
 Problema: Complex bank reconciliation with multiple matching strategies
-Cenário: Similar amounts, timing differences, bank fees, currency conversions
+CenÃ¡rio: Similar amounts, timing differences, bank fees, currency conversions
 Impacto: Manual reconciliation workload, audit compliance, accuracy
-Solução: ML-based matching with human oversight
+SoluÃ§Ã£o: ML-based matching with human oversight
 Prioridade: High - Operational efficiency and compliance
 ```
 
 ##### **(!CashFlowProjectionAccuracy!)**
 ```
 Problema: Accurate cash flow projections considering all business variables
-Cenário: Seasonal patterns, customer payment behavior, supplier terms
+CenÃ¡rio: Seasonal patterns, customer payment behavior, supplier terms
 Impacto: Business planning, investment decisions, liquidity management
-Solução: Predictive analytics with business intelligence
+SoluÃ§Ã£o: Predictive analytics with business intelligence
 Prioridade: High - Strategic business decisions
 ```
 
 ##### **(!FinancialReportingCompliance!)**
 ```
 Problema: Ensuring financial reports comply with accounting standards
-Cenário: Revenue recognition, expense matching, audit requirements
+CenÃ¡rio: Revenue recognition, expense matching, audit requirements
 Impacto: Compliance risk, audit findings, financial accuracy
-Solução: Built-in compliance rules with audit trails
+SoluÃ§Ã£o: Built-in compliance rules with audit trails
 Prioridade: Critical - Regulatory compliance
 ```
 
 ##### **(!PaymentProcessingResilience!)**
 ```
 Problema: Resilient payment processing with multiple payment methods
-Cenário: Payment gateway failures, bank system downtime, large volumes
+CenÃ¡rio: Payment gateway failures, bank system downtime, large volumes
 Impacto: Customer experience, cash flow delays, operational disruption
-Solução: Multi-gateway strategy with fallback mechanisms
+SoluÃ§Ã£o: Multi-gateway strategy with fallback mechanisms
 Prioridade: High - Operational continuity
 ```
 
-#### **📊 Métricas e Alertas**
+#### **ðŸ“Š MÃ©tricas e Alertas**
 
-##### **🎯 Financial Performance Metrics**
+##### **ðŸŽ¯ Financial Performance Metrics**
 ```
 Days Sales Outstanding (DSO):
-├── Metric: Average time to collect receivables
-├── Alert: DSO > 45 days
-├── Dashboard: Collections efficiency
-└── Usage: Credit policy optimization
+â”œâ”€â”€ Metric: Average time to collect receivables
+â”œâ”€â”€ Alert: DSO > 45 days
+â”œâ”€â”€ Dashboard: Collections efficiency
+â””â”€â”€ Usage: Credit policy optimization
 
 Days Payable Outstanding (DPO):
-├── Metric: Average time to pay suppliers
-├── Alert: DPO < supplier terms - 5 days
-├── Dashboard: Supplier relationship management
-└── Usage: Cash flow optimization
+â”œâ”€â”€ Metric: Average time to pay suppliers
+â”œâ”€â”€ Alert: DPO < supplier terms - 5 days
+â”œâ”€â”€ Dashboard: Supplier relationship management
+â””â”€â”€ Usage: Cash flow optimization
 
 Operating Cash Flow Ratio:
-├── Metric: Cash flow from operations / Current liabilities
-├── Alert: Ratio < 0.4 (poor liquidity)
-├── Dashboard: Financial health monitoring
-└── Usage: Liquidity management
+â”œâ”€â”€ Metric: Cash flow from operations / Current liabilities
+â”œâ”€â”€ Alert: Ratio < 0.4 (poor liquidity)
+â”œâ”€â”€ Dashboard: Financial health monitoring
+â””â”€â”€ Usage: Liquidity management
 
 Account Receivable Turnover:
-├── Metric: Annual sales / Average accounts receivable
-├── Alert: Turnover declining > 10%
-├── Dashboard: Collections effectiveness
-└── Usage: Credit and collections optimization
+â”œâ”€â”€ Metric: Annual sales / Average accounts receivable
+â”œâ”€â”€ Alert: Turnover declining > 10%
+â”œâ”€â”€ Dashboard: Collections effectiveness
+â””â”€â”€ Usage: Credit and collections optimization
 ```
 
-##### **⚡ Technical Performance Metrics**
+##### **âš¡ Technical Performance Metrics**
 ```
 Cross-Domain Sync Latency:
-├── Metric: Time from source event to financial account creation
-├── Alert: Latency > 60 seconds
-├── Dashboard: Integration health
-└── Usage: System optimization
+â”œâ”€â”€ Metric: Time from source event to financial account creation
+â”œâ”€â”€ Alert: Latency > 60 seconds
+â”œâ”€â”€ Dashboard: Integration health
+â””â”€â”€ Usage: System optimization
 
 Payment Processing Success Rate:
-├── Metric: % successful payment transactions
-├── Alert: Success rate < 98%
-├── Dashboard: Payment system health
-└── Usage: Payment gateway optimization
+â”œâ”€â”€ Metric: % successful payment transactions
+â”œâ”€â”€ Alert: Success rate < 98%
+â”œâ”€â”€ Dashboard: Payment system health
+â””â”€â”€ Usage: Payment gateway optimization
 
 Bank Reconciliation Accuracy:
-├── Metric: % automatically reconciled transactions
-├── Alert: Auto-reconciliation rate < 85%
-├── Dashboard: Reconciliation efficiency
-└── Usage: Process automation improvement
+â”œâ”€â”€ Metric: % automatically reconciled transactions
+â”œâ”€â”€ Alert: Auto-reconciliation rate < 85%
+â”œâ”€â”€ Dashboard: Reconciliation efficiency
+â””â”€â”€ Usage: Process automation improvement
 
 Financial Report Generation Time:
-├── Metric: Time to generate standard financial reports
-├── Alert: Generation time > 5 minutes
-├── Dashboard: Reporting system performance
-└── Usage: Infrastructure optimization
+â”œâ”€â”€ Metric: Time to generate standard financial reports
+â”œâ”€â”€ Alert: Generation time > 5 minutes
+â”œâ”€â”€ Dashboard: Reporting system performance
+â””â”€â”€ Usage: Infrastructure optimization
 ```
 
-##### **🔍 Business Intelligence Metrics**
+##### **ðŸ” Business Intelligence Metrics**
 ```
 Revenue Recognition Accuracy:
-├── Metric: % revenue correctly recognized per accounting standards
-├── Alert: Accuracy < 99%
-├── Dashboard: Compliance monitoring
-└── Usage: Audit preparation, Process improvement
+â”œâ”€â”€ Metric: % revenue correctly recognized per accounting standards
+â”œâ”€â”€ Alert: Accuracy < 99%
+â”œâ”€â”€ Dashboard: Compliance monitoring
+â””â”€â”€ Usage: Audit preparation, Process improvement
 
 Cash Flow Forecasting Accuracy:
-├── Metric: Variance between forecasted and actual cash flow
-├── Alert: Variance > 15%
-├── Dashboard: Planning accuracy
-└── Usage: Forecasting model improvement
+â”œâ”€â”€ Metric: Variance between forecasted and actual cash flow
+â”œâ”€â”€ Alert: Variance > 15%
+â”œâ”€â”€ Dashboard: Planning accuracy
+â””â”€â”€ Usage: Forecasting model improvement
 
 Customer Payment Behavior Analysis:
-├── Metric: Payment patterns by customer segment
-├── Alert: Deteriorating payment patterns
-├── Dashboard: Customer risk monitoring
-└── Usage: Credit policy and collection strategy
+â”œâ”€â”€ Metric: Payment patterns by customer segment
+â”œâ”€â”€ Alert: Deteriorating payment patterns
+â”œâ”€â”€ Dashboard: Customer risk monitoring
+â””â”€â”€ Usage: Credit policy and collection strategy
 
 Supplier Payment Optimization:
-├── Metric: Savings from payment timing optimization
-├── Alert: Missed early payment discounts
-├── Dashboard: Supplier relationship value
-└── Usage: Payment strategy optimization
+â”œâ”€â”€ Metric: Savings from payment timing optimization
+â”œâ”€â”€ Alert: Missed early payment discounts
+â”œâ”€â”€ Dashboard: Supplier relationship value
+â””â”€â”€ Usage: Payment strategy optimization
 ```
 
 ---
 
 **Arquivo**: `financial-domain-events.md`  
-**Domínio**: Financeiro (#083e61)  
+**DomÃ­nio**: Financeiro (#083e61)  
 **Tipo**: Event Storming  
-**Granularidade**: Alto nível + Micro-eventos + Cross-domain integrations  
-**Atualização**: 16/06/2025
+**Granularidade**: Alto nÃ­vel + Micro-eventos + Cross-domain integrations  
+**AtualizaÃ§Ã£o**: 16/06/2025

@@ -1,59 +1,59 @@
-# 📊 DIAGRAMAS ESPECÍFICOS POR DOMÍNIO - SISTEMA GesN
+﻿# ðŸ“Š DIAGRAMAS ESPECÃFICOS POR DOMÃNIO - SISTEMA GesN
 
-Este diretório contém diagramas detalhados de cada domínio do sistema GesN, organizados por tipo e complexidade.
+Este diretÃ³rio contÃ©m diagramas detalhados de cada domÃ­nio do sistema GesN, organizados por tipo e complexidade.
 
-## 🗂️ ESTRUTURA DE ARQUIVOS
+## ðŸ—‚ï¸ ESTRUTURA DE ARQUIVOS
 
 ```
 DIAGRAMS/
-├── DIAGRAMS_OVERVIEW.md (este arquivo)
-├── ERD/
-│   ├── 01-product-domain-erd.md
-│   ├── 02-sales-domain-erd.md
-│   ├── 03-production-domain-erd.md
-│   ├── 04-purchasing-domain-erd.md
-│   └── 05-financial-domain-erd.md
-├── PROCESS-FLOWS/
-│   ├── 01-product-creation-flow.md
-│   ├── 02-sales-order-flow.md
-│   ├── 03-production-demand-flow.md
-│   ├── 04-purchasing-flow.md
-│   └── 05-financial-flow.md
-├── STATE-DIAGRAMS/
-│   ├── order-lifecycle.md
-│   ├── demand-lifecycle.md
-│   ├── purchase-order-lifecycle.md
-│   └── account-lifecycle.md
-├── CLASS-DIAGRAMS/
-│   └── product-tph-inheritance.md
-└── LEGENDS/
-    └── colors-and-conventions.md
+â”œâ”€â”€ DIAGRAMS_OVERVIEW.md (este arquivo)
+â”œâ”€â”€ ERD/
+â”‚   â”œâ”€â”€ 01-product-domain-erd.md
+â”‚   â”œâ”€â”€ 02-sales-domain-erd.md
+â”‚   â”œâ”€â”€ 03-production-domain-erd.md
+â”‚   â”œâ”€â”€ 04-purchasing-domain-erd.md
+â”‚   â””â”€â”€ 05-financial-domain-erd.md
+â”œâ”€â”€ PROCESS-FLOWS/
+â”‚   â”œâ”€â”€ 01-product-creation-flow.md
+â”‚   â”œâ”€â”€ 02-sales-order-flow.md
+â”‚   â”œâ”€â”€ 03-production-demand-flow.md
+â”‚   â”œâ”€â”€ 04-purchasing-flow.md
+â”‚   â””â”€â”€ 05-financial-flow.md
+â”œâ”€â”€ STATE-DIAGRAMS/
+â”‚   â”œâ”€â”€ order-lifecycle.md
+â”‚   â”œâ”€â”€ demand-lifecycle.md
+â”‚   â”œâ”€â”€ purchase-order-lifecycle.md
+â”‚   â””â”€â”€ account-lifecycle.md
+â”œâ”€â”€ CLASS-DIAGRAMS/
+â”‚   â””â”€â”€ product-tph-inheritance.md
+â””â”€â”€ LEGENDS/
+    â””â”€â”€ colors-and-conventions.md
 ```
 
-## 🎨 CONVENÇÕES VISUAIS
+## ðŸŽ¨ CONVENÃ‡Ã•ES VISUAIS
 
-### **Cores por Domínio:**
+### **Cores por DomÃ­nio:**
 - **Produto**: #00a86b (verde)
 - **Vendas**: #f36b21 (laranja)
-- **Produção**: #fba81d (dourado)
+- **ProduÃ§Ã£o**: #fba81d (dourado)
 - **Compras**: #0562aa (azul)
 - **Financeiro**: #083e61 (azul escuro)
 
 ### **Tipos de Relacionamentos:**
-- **1:1**: Linha simples com extremidades |—|
-- **1:N**: Linha simples com extremidades |—<
-- **N:N**: Linha simples com extremidades >—<
+- **1:1**: Linha simples com extremidades |â€”|
+- **1:N**: Linha simples com extremidades |â€”<
+- **N:N**: Linha simples com extremidades >â€”<
 - **Opcional**: Linha tracejada
-- **Herança**: Linha com triângulo ▲
+- **HeranÃ§a**: Linha com triÃ¢ngulo â–²
 
-### **Níveis de Detalhamento:**
+### **NÃ­veis de Detalhamento:**
 - **ERD**: Entidades completas com propriedades e tipos
-- **Fluxos**: Processos step-by-step com decisões
-- **Estados**: Transições de status com condições
-- **Classes**: Estrutura de herança e interfaces
+- **Fluxos**: Processos step-by-step com decisÃµes
+- **Estados**: TransiÃ§Ãµes de status com condiÃ§Ãµes
+- **Classes**: Estrutura de heranÃ§a e interfaces
 
 ---
 
 **Criado em**: 16/06/2025  
-**Versão**: 1.0  
-**Responsável**: Igor Spalenza Chaves
+**VersÃ£o**: 1.0  
+**ResponsÃ¡vel**: Igor Spalenza Chaves
