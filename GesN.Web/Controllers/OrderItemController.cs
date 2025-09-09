@@ -242,6 +242,13 @@ namespace GesN.Web.Controllers
                     _logger.LogWarning("Falha ao criar demanda de produção para OrderItem {OrderItemId}", orderItem.Id);
                 }
 
+                // **TODO: IMPLEMENTAR ProductComposition**
+                // Para produtos compostos, após criar a Demand, precisamos criar registros de ProductComposition
+                // baseados nas configurações de componentes (request.ComponentConfigurations)
+                // Isso será implementado quando ProductCompositionRepository estiver disponível
+                _logger.LogInformation("OrderItem {OrderItemId} criado para produto composto {ProductName} com {ComponentsCount} componentes configurados. ProductComposition será implementado posteriormente.", 
+                    orderItem.Id, product.Name, request.ComponentConfigurations?.Count ?? 0);
+
                 // Recalcular totais do pedido
                 await _orderService.RecalculateOrderTotalsAsync(request.OrderId);
 
@@ -421,6 +428,16 @@ namespace GesN.Web.Controllers
                     // Salvar OrderItem individual
                     await _orderItemService.CreateAsync(orderItem);
 
+                    // **INTEGRAÇÃO COM PRODUÇÃO** - Criar Demand para cada produto selecionado do grupo
+                    var demandService = HttpContext.RequestServices.GetRequiredService<IDemandService>();
+                    var demandCreated = await demandService.CreateDemandFromOrderItemAsync(orderItem.Id, userId);
+                    
+                    if (!demandCreated)
+                    {
+                        _logger.LogWarning("Falha ao criar demanda de produção para OrderItem {OrderItemId} do grupo {GroupName}", 
+                            orderItem.Id, product.Name);
+                    }
+
                     createdOrderItems.Add(new
                     {
                         id = orderItem.Id,
@@ -429,11 +446,12 @@ namespace GesN.Web.Controllers
                         groupReference = product.Name,
                         quantity = orderItem.Quantity,
                         unitPrice = orderItem.UnitPrice,
-                        total = orderItem.Quantity * orderItem.UnitPrice
+                        total = orderItem.Quantity * orderItem.UnitPrice,
+                        demandCreated = demandCreated
                     });
 
-                    _logger.LogInformation("OrderItem {OrderItemId} criado para produto {ProductName} do grupo {GroupName}", 
-                        orderItem.Id, selectedProduct.Name, product.Name);
+                    _logger.LogInformation("OrderItem {OrderItemId} criado para produto {ProductName} do grupo {GroupName}. Demanda criada: {DemandCreated}", 
+                        orderItem.Id, selectedProduct.Name, product.Name, demandCreated);
                 }
 
                 // Recalcular totais do pedido

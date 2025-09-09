@@ -114,7 +114,7 @@ interface RemoveItemResponse {
 // ===================================
 
 interface CatalogToOrderItemEvents {
-    onSimpleProductSelected?: (productId: string, quantity: number) => void;
+    onSimpleProductSelected?: (productId: string, quantity: number, notes?: string) => void;
     onCompositeProductConfigured?: (productId: string, config: CompositeItemConfiguration[]) => void;
     onGroupProductConfigured?: (productId: string, config: GroupItemConfiguration[]) => void;
 }
@@ -190,3 +190,5 @@ interface OrderItemMetrics {
     mostExpensiveItem?: OrderItemData;
     categoryBreakdown: Record<string, number>;
 }
+
+

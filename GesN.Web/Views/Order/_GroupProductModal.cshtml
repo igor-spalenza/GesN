@@ -204,3 +204,138 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Calcular preço total quando seleções ou quantidades mudarem
+    function updateGroupPricing() {
+        const groupQuantity = parseInt((document.getElementById('groupQuantity') as HTMLInputElement)?.value) || 1;
+        let totalPrice = 0;
+        
+        // Somar preços de cada item selecionado
+        document.querySelectorAll('.group-item-section').forEach((section: any) => {
+            const selector = section.querySelector('.product-selector');
+            const quantityInput = section.querySelector('.item-quantity');
+            
+            if (selector && quantityInput) {
+                const selectedOption = selector.selectedOptions[0];
+                if (selectedOption && selectedOption.value) {
+                    const effectivePrice = parseFloat(selectedOption.getAttribute('data-effective-price')) || 0;
+                    const itemQuantity = parseInt(quantityInput.value) || 0;
+                    totalPrice += effectivePrice * itemQuantity;
+                }
+            }
+        });
+        
+        const finalTotal = totalPrice * groupQuantity;
+        document.getElementById('groupTotalDisplay').textContent = `R$ ${finalTotal.toFixed(2)}`;
+        
+        // Habilitar/desabilitar botão baseado na seleção de itens obrigatórios
+        updateConfirmButtonState();
+    }
+    
+    // Verificar se todos os itens obrigatórios estão selecionados
+    function updateConfirmButtonState() {
+        let allRequiredSelected = true;
+        
+        document.querySelectorAll('.group-item-section.required-item').forEach((section: any) => {
+            const selector = section.querySelector('.product-selector');
+            if (!selector || !selector.value) {
+                allRequiredSelected = false;
+            }
+        });
+        
+        const confirmButton = document.getElementById('btnConfirmGroupAdd') as HTMLButtonElement;
+        if (confirmButton) {
+            confirmButton.disabled = !allRequiredSelected;
+        }
+    }
+    
+    // Event listeners para mudanças
+    document.getElementById('groupQuantity')?.addEventListener('input', updateGroupPricing);
+    
+    document.querySelectorAll('.product-selector').forEach(selector => {
+        selector.addEventListener('change', function() {
+            updateGroupPricing();
+            
+            // Habilitar quantity input quando produto for selecionado
+            const section = this.closest('.group-item-section');
+            const quantityInput = section?.querySelector('.item-quantity');
+            if (quantityInput) {
+                quantityInput.disabled = !this.value;
+            }
+        });
+    });
+    
+    document.querySelectorAll('.item-quantity').forEach(input => {
+        input.addEventListener('input', updateGroupPricing);
+    });
+    
+    // Configurar botão de confirmação
+    const confirmButton = document.getElementById('btnConfirmGroupAdd');
+    if (confirmButton) {
+        confirmButton.addEventListener('click', function() {
+            const productId = '@Model.id';
+            const groupQuantity = parseInt((document.getElementById('groupQuantity') as HTMLInputElement)?.value) || 1;
+            
+            // Coletar configurações dos itens selecionados
+            const configurations: GroupItemConfiguration[] = [];
+            let hasValidationErrors = false;
+            
+            document.querySelectorAll('.group-item-section').forEach((section: any) => {
+                const groupItemId = section.getAttribute('data-group-item-id');
+                const isRequired = section.classList.contains('required-item');
+                const selector = section.querySelector('.product-selector');
+                const quantityInput = section.querySelector('.item-quantity');
+                
+                if (isRequired && (!selector || !selector.value)) {
+                    hasValidationErrors = true;
+                    const itemName = section.querySelector('.group-item-title').textContent.trim();
+                    toastr.error(`Selecione um produto para ${itemName}`);
+                    return;
+                }
+                
+                if (selector && selector.value) {
+                    const selectedOption = selector.selectedOptions[0];
+                    const quantity = parseInt(quantityInput?.value) || 1;
+                    const extraPrice = parseFloat(section.querySelector('.item-quantity')?.closest('.group-item-content')?.querySelector('.quantity-info')?.textContent?.match(/R\$ ([\d,]+\.[\d]+)/)?.[1]?.replace(',', '') || '0') || 0;
+                    
+                    configurations.push({
+                        groupItemId: groupItemId,
+                        selectedProductId: selector.value,
+                        quantity: quantity,
+                        groupItemName: section.querySelector('.group-item-title').textContent.trim().replace('*', '').trim(),
+                        productName: selectedOption.textContent.split(' - ')[0].trim(),
+                        extraPrice: extraPrice,
+                        itemType: section.querySelector('.group-item-header small').textContent.includes('Produto') ? 'Produto' : 'Categoria'
+                    });
+                }
+            });
+            
+            if (hasValidationErrors) {
+                return;
+            }
+            
+            if (configurations.length === 0) {
+                toastr.error('Selecione pelo menos um produto do grupo');
+                return;
+            }
+            
+            // Confirmar adição através do ProductCatalogManager
+            if (window.productCatalogManager) {
+                window.productCatalogManager.confirmGroupAddToCart(productId, configurations);
+                
+                // Fechar modal
+                $('#groupProductModal').modal('hide');
+            } else {
+                console.error('❌ ProductCatalogManager não está disponível');
+                toastr.error('Erro interno: gerenciador de catálogo não encontrado');
+            }
+        });
+    }
+    
+    // Inicializar estado
+    updateGroupPricing();
+});
+</script>

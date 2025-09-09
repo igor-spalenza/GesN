@@ -5,10 +5,7 @@
 /* ===================================
    CONTAINER PRINCIPAL
    ===================================*/
-.container-fluid {
-    padding: 1rem;
-    max-width: 100%;
-}
+/* Removido override global de .container-fluid - isso afetava todas as páginas */
 
 #editOrderContainer {
     background: #f8f9fa;

@@ -52,6 +52,12 @@ class OrderItemManager {
         }
     }
     /**
+     * Obtém o ID do pedido atual
+     */
+    getCurrentOrderId() {
+        return this.orderId;
+    }
+    /**
      * Limpa o estado do manager
      */
     destroy() {
@@ -337,12 +343,6 @@ class OrderItemManager {
      */
     isReady() {
         return !this.isLoading && !!this.orderId;
-    }
-    /**
-     * Obtém o ID do pedido atual
-     */
-    getCurrentOrderId() {
-        return this.orderId;
     }
     /**
      * Verifica se há itens no carrinho

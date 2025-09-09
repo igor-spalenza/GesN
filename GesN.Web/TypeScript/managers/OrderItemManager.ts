@@ -60,6 +60,13 @@ class OrderItemManager {
     }
     
     /**
+     * Obtém o ID do pedido atual
+     */
+    public getCurrentOrderId(): string {
+        return this.orderId;
+    }
+    
+    /**
      * Limpa o estado do manager
      */
     public destroy(): void {
@@ -394,13 +401,6 @@ class OrderItemManager {
      */
     public isReady(): boolean {
         return !this.isLoading && !!this.orderId;
-    }
-    
-    /**
-     * Obtém o ID do pedido atual
-     */
-    public getCurrentOrderId(): string {
-        return this.orderId;
     }
     
     /**

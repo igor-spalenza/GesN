@@ -243,13 +243,13 @@ class ProductCatalogManager {
     // ===================================
     async addSimpleToCart(productId, quantity = 1) {
         try {
-            console.log(`➕ Adicionando produto simples ao carrinho: ${productId}`);
-            this.events.onSimpleProductSelected?.(productId, quantity);
+            console.log(`➕ Abrindo modal para produto simples: ${productId}`);
+            await this.showSimpleProductModal(productId, quantity);
         }
         catch (error) {
-            console.error('❌ Erro ao adicionar produto simples:', error);
+            console.error('❌ Erro ao abrir modal de produto simples:', error);
             this.events.onError?.({
-                action: 'add-simple-product',
+                action: 'show-simple-modal',
                 message: error instanceof Error ? error.message : String(error),
                 details: { productId, quantity },
                 timestamp: Date.now()
@@ -259,6 +259,24 @@ class ProductCatalogManager {
     // ===================================
     // MODAIS DE CONFIGURAÇÃO
     // ===================================
+    async showSimpleProductModal(productId, initialQuantity = 1) {
+        try {
+            console.log(`🔧 Abrindo modal de produto simples: ${productId}`);
+            const response = await $.get(`/Order/SimpleProductModal/${productId}?initialQuantity=${initialQuantity}`);
+            // Garantir que o container do modal existe
+            let $modal = $('#simpleProductModal');
+            if ($modal.length === 0) {
+                $('body').append('<div id="simpleProductModalContainer"></div>');
+                $modal = $('#simpleProductModalContainer');
+            }
+            $modal.html(response);
+            $modal.find('#simpleProductModal').modal('show');
+        }
+        catch (error) {
+            console.error('❌ Erro ao abrir modal de produto simples:', error);
+            this.showToast('error', 'Erro ao carregar configuração do produto');
+        }
+    }
     async showCompositeProductModal(productId, initialQuantity = 1) {
         try {
             console.log(`🔧 Abrindo modal de produto composto: ${productId}`);
@@ -284,6 +302,10 @@ class ProductCatalogManager {
             console.error('❌ Erro ao abrir modal de grupo de produtos:', error);
             this.showToast('error', 'Erro ao carregar configuração do grupo');
         }
+    }
+    confirmSimpleAddToCart(productId, quantity, notes) {
+        console.log(`✅ Confirmando adição de produto simples:`, { productId, quantity, notes });
+        this.events.onSimpleProductSelected?.(productId, quantity, notes);
     }
     confirmCompositeAddToCart(productId, config) {
         console.log(`✅ Confirmando adição de produto composto:`, { productId, config });

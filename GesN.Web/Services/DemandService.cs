@@ -461,13 +461,10 @@ namespace GesN.Web.Services
                     return false;
                 }
 
-                // Verificar se é produto que gera demanda (Composite, mas não Simple nem Group)
-                if (product.ProductType != ProductType.Composite)
-                {
-                    _logger.LogInformation("Produto {ProductId} do tipo {ProductType} não gera demanda automática", 
-                        product.Id, product.ProductType);
-                    return true; // Sucesso, mas sem criar demanda
-                }
+                // NOVO REQUISITO: TODOS os produtos geram demanda (Simple, Composite, Group)
+                // Apenas produtos inativos ou inválidos não geram demanda
+                _logger.LogInformation("Criando demanda para produto {ProductId} do tipo {ProductType}", 
+                    product.Id, product.ProductType);
 
                 // Verificar se já existe demanda para este OrderItem
                 var existingDemands = await _demandRepository.GetByOrderItemIdAsync(orderItemId);

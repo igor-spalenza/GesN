@@ -106,7 +106,7 @@
                                         var typeDisplay = product.ProductType switch
                                         {
                                             GesN.Web.Models.Enumerators.ProductType.Simple => "Simples",
-                                            GesN.Web.Models.Enumerators.ProductType.Composite => "Composto", 
+                                             GesN.Web.Models.Enumerators.ProductType.Composite => "Composto", 
                                             GesN.Web.Models.Enumerators.ProductType.Group => "Grupo",
                                             _ => "Desconhecido"
                                         };
@@ -122,7 +122,7 @@
                                                 data-product-id="@product.Id" 
                                                 data-product-name="@product.Name"
                                                 title="Adicionar produto simples">
-                                            <i class="bi bi-add"></i>
+                                            <i class="bi bi-cart-plus-fill"></i>
                                         </button>
                                     }
                                     else if (product.ProductType == GesN.Web.Models.Enumerators.ProductType.Composite)
@@ -131,7 +131,7 @@
                                                 data-product-id="@product.Id" 
                                                 data-product-name="@product.Name"
                                                 title="Configurar produto composto">
-                                            <i class="bi bi-add"></i>
+                                            <i class="bi bi-cart-plus-fill"></i>
                                         </button>
                                     }
                                     else if (product.ProductType == GesN.Web.Models.Enumerators.ProductType.Group)
@@ -140,7 +140,7 @@
                                                 data-product-id="@product.Id" 
                                                 data-product-name="@product.Name"
                                                 title="Configurar grupo de produtos">
-                                            <i class="bi bi-add"></i>
+                                            <i class="bi bi-cart-plus-fill"></i>
                                         </button>
                                     }
                                     else

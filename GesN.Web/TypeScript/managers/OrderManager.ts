@@ -149,14 +149,20 @@ class OrderManager {
             }
 
             // ProductCatalogManager → OrderItemManager
-            catalogManager.events.onSimpleProductSelected = async (productId: string, quantity: number) => {
+            catalogManager.events.onSimpleProductSelected = async (productId: string, quantity: number, notes?: string) => {
                 try {
-                    const response = await itemManager.addSimpleItem(productId, quantity);
+                    const response = await itemManager.addSimpleItem(productId, quantity, { notes });
                     if (!response.success) {
                         console.error('Erro ao adicionar produto simples:', response.message);
+                        toastr.error(response.message || 'Erro ao adicionar produto ao carrinho');
+                    } else {
+                        toastr.success('Produto adicionado ao carrinho com sucesso!');
+                        // Recarregar lista de itens
+                        await itemManager.reloadItems(itemManager.getCurrentOrderId());
                     }
                 } catch (error) {
                     console.error('Erro no evento onSimpleProductSelected:', error);
+                    toastr.error('Erro ao adicionar produto ao carrinho');
                 }
             };
 

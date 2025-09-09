@@ -113,3 +113,103 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const unitPrice = @Model.unitPrice;
+    
+    // Calcular preço total quando componentes ou quantidade mudarem
+    function updatePricing() {
+        const quantity = parseInt((document.getElementById('productQuantity') as HTMLInputElement)?.value) || 1;
+        let additionalCost = 0;
+        
+        // Calcular custos adicionais dos componentes selecionados
+        document.querySelectorAll('input[type="radio"]:checked').forEach((radio: any) => {
+            const componentDiv = radio.closest('.component-option');
+            if (componentDiv) {
+                const cost = parseFloat(componentDiv.getAttribute('data-additional-cost')) || 0;
+                additionalCost += cost;
+            }
+        });
+        
+        const unitPriceWithAdditions = unitPrice + additionalCost;
+        const totalPrice = quantity * unitPriceWithAdditions;
+        
+        // Atualizar displays
+        document.getElementById('additionalCostDisplay').textContent = `R$ ${additionalCost.toFixed(2)}`;
+        document.getElementById('unitPriceDisplay').textContent = `R$ ${unitPriceWithAdditions.toFixed(2)}`;
+        document.getElementById('totalPriceDisplay').textContent = `R$ ${totalPrice.toFixed(2)}`;
+    }
+    
+    // Event listeners para mudanças
+    document.getElementById('productQuantity')?.addEventListener('input', updatePricing);
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', updatePricing);
+    });
+    
+    // Configurar botão de confirmação
+    const confirmButton = document.getElementById('btnConfirmCompositeAdd');
+    if (confirmButton) {
+        confirmButton.addEventListener('click', function() {
+            const productId = '@Model.id';
+            const quantity = parseInt((document.getElementById('productQuantity') as HTMLInputElement)?.value) || 1;
+            
+            // Validar seleções obrigatórias
+            const configurations: CompositeItemConfiguration[] = [];
+            let hasValidationErrors = false;
+            
+            document.querySelectorAll('.hierarchy-section').forEach((section: any) => {
+                const hierarchyId = section.getAttribute('data-hierarchy-id');
+                const isRequired = section.querySelector('.hierarchy-title .text-danger') !== null;
+                const selectedRadio = section.querySelector('input[type="radio"]:checked');
+                
+                if (isRequired && !selectedRadio) {
+                    hasValidationErrors = true;
+                    toastr.error(`Selecione um componente para ${section.querySelector('.hierarchy-title').textContent.trim()}`);
+                    return;
+                }
+                
+                if (selectedRadio) {
+                    const componentId = selectedRadio.value;
+                    const componentDiv = selectedRadio.closest('.component-option');
+                    const additionalCost = parseFloat(componentDiv.getAttribute('data-additional-cost')) || 0;
+                    const componentName = componentDiv.querySelector('.component-name').textContent.trim();
+                    const hierarchyName = section.querySelector('.hierarchy-title').textContent.trim().replace('*', '').trim();
+                    
+                    configurations.push({
+                        componentId: componentId,
+                        hierarchyId: hierarchyId,
+                        quantity: 1, // Por enquanto, sempre 1 unidade por componente
+                        componentName: componentName,
+                        hierarchyName: hierarchyName,
+                        additionalCost: additionalCost
+                    });
+                }
+            });
+            
+            if (hasValidationErrors) {
+                return;
+            }
+            
+            if (configurations.length === 0) {
+                toastr.error('Selecione pelo menos um componente');
+                return;
+            }
+            
+            // Confirmar adição através do ProductCatalogManager
+            if (window.productCatalogManager) {
+                window.productCatalogManager.confirmCompositeAddToCart(productId, configurations);
+                
+                // Fechar modal
+                $('#compositeProductModal').modal('hide');
+            } else {
+                console.error('❌ ProductCatalogManager não está disponível');
+                toastr.error('Erro interno: gerenciador de catálogo não encontrado');
+            }
+        });
+    }
+    
+    // Inicializar preços
+    updatePricing();
+});
+</script>

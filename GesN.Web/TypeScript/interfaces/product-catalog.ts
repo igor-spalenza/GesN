@@ -127,7 +127,7 @@ interface ProductCatalogEvents {
     onError?: (error: ProductCatalogError) => void;
     
     // NOVOS EVENTOS PARA COMUNICAÇÃO COM ORDERITEMMANAGER
-    onSimpleProductSelected?: (productId: string, quantity: number) => void;
+    onSimpleProductSelected?: (productId: string, quantity: number, notes?: string) => void;
     onCompositeProductConfigured?: (productId: string, config: CompositeItemConfiguration[]) => void;
     onGroupProductConfigured?: (productId: string, config: GroupItemConfiguration[]) => void;
 }

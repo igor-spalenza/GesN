@@ -15,6 +15,12 @@
 *.cshtml text eol=crlf
 *.cs text eol=crlf
 
+#############################################
+# Markdown files with UTF-8 encoding
+#############################################
+*.md text eol=crlf encoding=utf-8
+*.txt text eol=crlf encoding=utf-8
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #
