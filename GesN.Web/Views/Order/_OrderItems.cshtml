@@ -1,28 +1,71 @@
 @model IEnumerable<GesN.Web.Models.ViewModels.Sales.OrderEntryItemViewModel>
-<table class="table table-bordered table-sm">
-    <thead>
-        <tr>
-            <th>Produto</th>
-            <th>Quantidade</th>
-            <th>Preço Unitário</th>
-            <th>Desconto</th>
-            <th>Impostos</th>
-            <th>Subtotal</th>
-            <th>Total</th>
-        </tr>
-    </thead>
-    <tbody>
+
+<div class="order-items-header">
+    <h5 class="mb-0">
+        <i class="fas fa-shopping-cart"></i> Itens do Pedido
+        @if (Model?.Any() == true)
+        {
+            <span class="badge bg-primary ms-2">@Model.Count()</span>
+        }
+    </h5>
+</div>
+
+<div class="order-items-list">
+    @if (Model?.Any() == true)
+    {
         @foreach (var item in Model)
         {
-            <tr>
-                <td>@(item.ProductName ?? item.ProductId)</td>
-                <td>@item.Quantity</td>
-                <td>@item.UnitPrice.ToString("C")</td>
-                <td>@item.DiscountAmount.ToString("C")</td>
-                <td>@item.TaxAmount.ToString("C")</td>
-                <td>@item.Subtotal.ToString("C")</td>
-                <td>@item.TotalPrice.ToString("C")</td>
-            </tr>
+            <div class="order-item-card" data-item-id="@item.Id">
+                <div class="item-main-info">
+                    <div class="item-product-name">
+                        <strong>@(item.ProductName ?? "Produto não identificado")</strong>
+                    </div>
+                    <div class="item-details">
+                        <span class="item-quantity">
+                            <i class="fas fa-hashtag"></i> @item.Quantity
+                        </span>
+                        <span class="item-price">
+                            <i class="fas fa-tag"></i> @item.UnitPrice.ToString("C")
+                        </span>
+                        <span class="item-total">
+                            <i class="fas fa-calculator"></i> @item.TotalPrice.ToString("C")
+                        </span>
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <div class="btn-group-vertical btn-group-sm">
+                        <button type="button" class="btn btn-outline-primary btn-edit-item" 
+                                data-item-id="@item.Id" title="Editar quantidade">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-remove-item" 
+                                data-item-id="@item.Id" title="Remover item">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         }
-    </tbody>
-</table> 
+        
+        <div class="order-items-summary">
+            <div class="summary-row">
+                <span class="summary-label">Total de Itens:</span>
+                <span class="summary-value">@Model.Count()</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Valor Total:</span>
+                <span class="summary-value currency">@Model.Sum(i => i.TotalPrice).ToString("C")</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="order-items-empty">
+            <div class="empty-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <h6 class="empty-title">Carrinho Vazio</h6>
+            <p class="empty-message">Adicione produtos do catálogo para começar a montar o pedido.</p>
+        </div>
+    }
+</div> 

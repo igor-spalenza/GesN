@@ -1,33 +1,33 @@
-# 🧩 SEQUENCE DIAGRAM - Product Configuration Flow
+﻿# ðŸ§© SEQUENCE DIAGRAM - Product Configuration Flow
 
-## 🎯 Visão Geral
-Diagrama de sequência detalhado mostrando o fluxo interativo de configuração de produtos compostos e grupos durante a criação de pedidos. Este fluxo crítico envolve validação em tempo real, cálculo dinâmico de preços, e interface rica para seleção de componentes, proporcionando uma experiência completa de customização de produtos.
+## ðŸŽ¯ VisÃ£o Geral
+Diagrama de sequÃªncia detalhado mostrando o fluxo interativo de configuraÃ§Ã£o de produtos compostos e grupos durante a criaÃ§Ã£o de pedidos. Este fluxo crÃ­tico envolve validaÃ§Ã£o em tempo real, cÃ¡lculo dinÃ¢mico de preÃ§os, e interface rica para seleÃ§Ã£o de componentes, proporcionando uma experiÃªncia completa de customizaÃ§Ã£o de produtos.
 
-## 📊 Complexidade do Fluxo
-- **🚨 Alta Complexidade**: Interactive UI, real-time validation, dynamic pricing, complex business rules
-- **👥 Participantes**: 8+ system components
-- **🔄 Interações**: 30+ interactions per configuration session
-- **🌐 Cross-Domain**: Sales ↔ Product integration
-- **🎨 Frontend Heavy**: Rich JavaScript interactions, real-time updates
+## ðŸ“Š Complexidade do Fluxo
+- **ðŸš¨ Alta Complexidade**: Interactive UI, real-time validation, dynamic pricing, complex business rules
+- **ðŸ‘¥ Participantes**: 8+ system components
+- **ðŸ”„ InteraÃ§Ãµes**: 30+ interactions per configuration session
+- **ðŸŒ Cross-Domain**: Sales â†” Product integration
+- **ðŸŽ¨ Frontend Heavy**: Rich JavaScript interactions, real-time updates
 
-## 🎯 Trigger Event
-**AddOrderItem** (ProductType = Composite or Group) → Configuration interface activation
+## ðŸŽ¯ Trigger Event
+**AddOrderItem** (ProductType = Composite or Group) â†’ Configuration interface activation
 
-## 📝 Sequence Diagram
+## ðŸ“ Sequence Diagram
 
 ```mermaid
 sequenceDiagram
-    participant UI as 👤 User Interface
-    participant JS as ⚡ JavaScript (Product.js)
-    participant SC as 🎮 Sales Controller  
-    participant SS as ⚙️ Sales Service
-    participant PS as 📦 Product Service
-    participant VS as ✅ Validation Service
-    participant CS as 💰 Calculation Service
-    participant SR as 🗄️ Sales Repository
-    participant PR as 🗄️ Product Repository
-    participant Cache as 💾 Cache Service
-    participant DB as 🗄️ Database
+    participant UI as ðŸ‘¤ User Interface
+    participant JS as âš¡ JavaScript (Product.js)
+    participant SC as ðŸŽ® Sales Controller  
+    participant SS as âš™ï¸ Sales Service
+    participant PS as ðŸ“¦ Product Service
+    participant VS as âœ… Validation Service
+    participant CS as ðŸ’° Calculation Service
+    participant SR as ðŸ—„ï¸ Sales Repository
+    participant PR as ðŸ—„ï¸ Product Repository
+    participant Cache as ðŸ’¾ Cache Service
+    participant DB as ðŸ—„ï¸ Database
     
     Note over UI, DB: Product Configuration Flow (Composite/Group Products)
     
@@ -338,385 +338,385 @@ sequenceDiagram
     end
 ```
 
-## 🎯 Detailed Component Responsibilities
+## ðŸŽ¯ Detailed Component Responsibilities
 
-### **👤 User Interface**
+### **ðŸ‘¤ User Interface**
 ```
 Configuration Modal Features:
-├── 🎨 Rich interactive product configuration interface
-├── 🖱️ Drag-and-drop component selection (advanced mode)
-├── 📊 Real-time price calculator with breakdown
-├── 🔍 Component search and filtering capabilities
-└── 📱 Responsive design for mobile/tablet usage
+â”œâ”€â”€ ðŸŽ¨ Rich interactive product configuration interface
+â”œâ”€â”€ ðŸ–±ï¸ Drag-and-drop component selection (advanced mode)
+â”œâ”€â”€ ðŸ“Š Real-time price calculator with breakdown
+â”œâ”€â”€ ðŸ” Component search and filtering capabilities
+â””â”€â”€ ðŸ“± Responsive design for mobile/tablet usage
 
 Visual Feedback:
-├── 🎯 Color-coded validation states (green/yellow/red)
-├── 💰 Dynamic price updates with highlighting
-├── ⚠️ Warning indicators for constraints
-├── ✅ Completion progress indicators
-└── 🔄 Loading states for async operations
+â”œâ”€â”€ ðŸŽ¯ Color-coded validation states (green/yellow/red)
+â”œâ”€â”€ ðŸ’° Dynamic price updates with highlighting
+â”œâ”€â”€ âš ï¸ Warning indicators for constraints
+â”œâ”€â”€ âœ… Completion progress indicators
+â””â”€â”€ ðŸ”„ Loading states for async operations
 
 User Experience:
-├── ⌨️ Keyboard navigation and shortcuts
-├── 🔙 Undo/redo configuration changes
-├── 💾 Auto-save draft configurations
-├── 📋 Configuration templates for common setups
-└── 🎯 Smart defaults and recommendations
+â”œâ”€â”€ âŒ¨ï¸ Keyboard navigation and shortcuts
+â”œâ”€â”€ ðŸ”™ Undo/redo configuration changes
+â”œâ”€â”€ ðŸ’¾ Auto-save draft configurations
+â”œâ”€â”€ ðŸ“‹ Configuration templates for common setups
+â””â”€â”€ ðŸŽ¯ Smart defaults and recommendations
 ```
 
-### **⚡ JavaScript (Product.js)**
+### **âš¡ JavaScript (Product.js)**
 ```
 Configuration State Management:
-├── 📊 Real-time configuration state tracking
-├── 🔄 Event-driven updates and validations
-├── 💾 Local storage for draft configurations
-├── 🎯 Optimistic UI updates with rollback
-└── 📡 WebSocket integration for real-time collaboration
+â”œâ”€â”€ ðŸ“Š Real-time configuration state tracking
+â”œâ”€â”€ ðŸ”„ Event-driven updates and validations
+â”œâ”€â”€ ðŸ’¾ Local storage for draft configurations
+â”œâ”€â”€ ðŸŽ¯ Optimistic UI updates with rollback
+â””â”€â”€ ðŸ“¡ WebSocket integration for real-time collaboration
 
 Dynamic Interface Rendering:
-├── 🏗️ Component tree rendering and navigation
-├── 🎨 Conditional display based on selections
-├── 📊 Price breakdown visualization
-├── ⚠️ Validation message display and formatting
-└── 🔄 Progressive loading for large configurations
+â”œâ”€â”€ ðŸ—ï¸ Component tree rendering and navigation
+â”œâ”€â”€ ðŸŽ¨ Conditional display based on selections
+â”œâ”€â”€ ðŸ“Š Price breakdown visualization
+â”œâ”€â”€ âš ï¸ Validation message display and formatting
+â””â”€â”€ ðŸ”„ Progressive loading for large configurations
 
 Client-Side Validation:
-├── ✅ Input format and range validation
-├── 🧮 Real-time calculation verification
-├── 🎯 Business rule enforcement (client-side)
-├── 📊 Dependency checking between components
-└── 💾 Offline validation with cached rules
+â”œâ”€â”€ âœ… Input format and range validation
+â”œâ”€â”€ ðŸ§® Real-time calculation verification
+â”œâ”€â”€ ðŸŽ¯ Business rule enforcement (client-side)
+â”œâ”€â”€ ðŸ“Š Dependency checking between components
+â””â”€â”€ ðŸ’¾ Offline validation with cached rules
 ```
 
-### **📦 Product Service**
+### **ðŸ“¦ Product Service**
 ```
 Configuration Logic:
-├── 🏗️ Product hierarchy management and traversal
-├── 🧩 Component compatibility matrix processing
-├── 📊 Business rule engine integration
-├── 💰 Pricing rule application and calculation
-└── 📈 Configuration analytics and optimization
+â”œâ”€â”€ ðŸ—ï¸ Product hierarchy management and traversal
+â”œâ”€â”€ ðŸ§© Component compatibility matrix processing
+â”œâ”€â”€ ðŸ“Š Business rule engine integration
+â”œâ”€â”€ ðŸ’° Pricing rule application and calculation
+â””â”€â”€ ðŸ“ˆ Configuration analytics and optimization
 
 Validation Engine:
-├── ✅ Multi-level validation (syntax, business, inventory)
-├── 🎯 Cross-component dependency validation
-├── 📊 Inventory commitment and availability checking
-├── 💰 Price limit and customer-specific validation
-└── 📋 Configuration completeness verification
+â”œâ”€â”€ âœ… Multi-level validation (syntax, business, inventory)
+â”œâ”€â”€ ðŸŽ¯ Cross-component dependency validation
+â”œâ”€â”€ ðŸ“Š Inventory commitment and availability checking
+â”œâ”€â”€ ðŸ’° Price limit and customer-specific validation
+â””â”€â”€ ðŸ“‹ Configuration completeness verification
 
 Caching Strategy:
-├── 💾 Product configuration data caching
-├── 🔄 Invalidation on product updates
-├── 📊 Performance metrics and cache hit rates
-├── 🎯 Preemptive cache warming for popular products
-└── 💡 Intelligent cache partitioning by customer segment
+â”œâ”€â”€ ðŸ’¾ Product configuration data caching
+â”œâ”€â”€ ðŸ”„ Invalidation on product updates
+â”œâ”€â”€ ðŸ“Š Performance metrics and cache hit rates
+â”œâ”€â”€ ðŸŽ¯ Preemptive cache warming for popular products
+â””â”€â”€ ðŸ’¡ Intelligent cache partitioning by customer segment
 ```
 
-### **💰 Calculation Service**
+### **ðŸ’° Calculation Service**
 ```
 Pricing Engine:
-├── 🧮 Base price calculation with component costs
-├── 📊 Volume discount application and tiering
-├── 💸 Customer-specific pricing and contracts
-├── 🎯 Dynamic pricing based on demand/inventory
-└── 📈 Price optimization and testing framework
+â”œâ”€â”€ ðŸ§® Base price calculation with component costs
+â”œâ”€â”€ ðŸ“Š Volume discount application and tiering
+â”œâ”€â”€ ðŸ’¸ Customer-specific pricing and contracts
+â”œâ”€â”€ ðŸŽ¯ Dynamic pricing based on demand/inventory
+â””â”€â”€ ðŸ“ˆ Price optimization and testing framework
 
 Cost Calculation:
-├── 💰 Component individual cost calculation
-├── 🧮 Quantity-based pricing tiers
-├── 📊 Bundle and package pricing logic
-├── 💸 Tax calculation and jurisdiction handling
-└── 🎯 Currency conversion for international pricing
+â”œâ”€â”€ ðŸ’° Component individual cost calculation
+â”œâ”€â”€ ðŸ§® Quantity-based pricing tiers
+â”œâ”€â”€ ðŸ“Š Bundle and package pricing logic
+â”œâ”€â”€ ðŸ’¸ Tax calculation and jurisdiction handling
+â””â”€â”€ ðŸŽ¯ Currency conversion for international pricing
 
 Performance Optimization:
-├── ⚡ Memoization of expensive calculations
-├── 📊 Parallel processing for complex configurations
-├── 💾 Result caching with smart invalidation
-├── 🎯 Incremental calculation updates
-└── 📈 Performance monitoring and optimization
+â”œâ”€â”€ âš¡ Memoization of expensive calculations
+â”œâ”€â”€ ðŸ“Š Parallel processing for complex configurations
+â”œâ”€â”€ ðŸ’¾ Result caching with smart invalidation
+â”œâ”€â”€ ðŸŽ¯ Incremental calculation updates
+â””â”€â”€ ðŸ“ˆ Performance monitoring and optimization
 ```
 
-## 🧩 Configuration Types and Rules
+## ðŸ§© Configuration Types and Rules
 
-### **🔶 Composite Product Configuration**
+### **ðŸ”¶ Composite Product Configuration**
 ```
 Hierarchy-Based Selection:
-├── 🌳 Component Tree Structure (parent → child relationships)
-├── 📊 Selection Rules (min/max quantities per hierarchy)
-├── 🎯 Dependency Rules (component A requires component B)
-├── 💰 Pricing Impact (base price + component additional costs)
-└── 📋 Validation Rules (business constraints and compatibility)
+â”œâ”€â”€ ðŸŒ³ Component Tree Structure (parent â†’ child relationships)
+â”œâ”€â”€ ðŸ“Š Selection Rules (min/max quantities per hierarchy)
+â”œâ”€â”€ ðŸŽ¯ Dependency Rules (component A requires component B)
+â”œâ”€â”€ ðŸ’° Pricing Impact (base price + component additional costs)
+â””â”€â”€ ðŸ“‹ Validation Rules (business constraints and compatibility)
 
 Example: Birthday Cake Configuration
-├── 🎂 Base (Hierarchy): Massa do Bolo
-│   ├── Chocolate (Component): +R$ 5.00
-│   ├── Vanilla (Component): +R$ 3.00
-│   └── Red Velvet (Component): +R$ 8.00
-├── 🍓 Filling (Hierarchy): Recheio - Min: 1, Max: 3
-│   ├── Strawberry (Component): +R$ 4.00
-│   ├── Chocolate (Component): +R$ 3.00
-│   └── Cream (Component): +R$ 2.00
-├── 🎨 Topping (Hierarchy): Cobertura - Min: 1, Max: 1
-│   ├── Chocolate Ganache (Component): +R$ 6.00
-│   ├── Buttercream (Component): +R$ 4.00
-│   └── Fondant (Component): +R$ 10.00
-└── 🎁 Decoration (Hierarchy): Decoração - Optional
-    ├── Custom Message (Component): +R$ 5.00
-    └── Edible Flowers (Component): +R$ 8.00
+â”œâ”€â”€ ðŸŽ‚ Base (Hierarchy): Massa do Bolo
+â”‚   â”œâ”€â”€ Chocolate (Component): +R$ 5.00
+â”‚   â”œâ”€â”€ Vanilla (Component): +R$ 3.00
+â”‚   â””â”€â”€ Red Velvet (Component): +R$ 8.00
+â”œâ”€â”€ ðŸ“ Filling (Hierarchy): Recheio - Min: 1, Max: 3
+â”‚   â”œâ”€â”€ Strawberry (Component): +R$ 4.00
+â”‚   â”œâ”€â”€ Chocolate (Component): +R$ 3.00
+â”‚   â””â”€â”€ Cream (Component): +R$ 2.00
+â”œâ”€â”€ ðŸŽ¨ Topping (Hierarchy): Cobertura - Min: 1, Max: 1
+â”‚   â”œâ”€â”€ Chocolate Ganache (Component): +R$ 6.00
+â”‚   â”œâ”€â”€ Buttercream (Component): +R$ 4.00
+â”‚   â””â”€â”€ Fondant (Component): +R$ 10.00
+â””â”€â”€ ðŸŽ Decoration (Hierarchy): DecoraÃ§Ã£o - Optional
+    â”œâ”€â”€ Custom Message (Component): +R$ 5.00
+    â””â”€â”€ Edible Flowers (Component): +R$ 8.00
 
 Business Rules:
-├── 🎯 Red Velvet base requires Cream Cheese filling
-├── 💰 Fondant topping incompatible with Cream filling
-├── 📊 Maximum 3 fillings total
-└── 🎨 Custom message requires minimum 24h notice
+â”œâ”€â”€ ðŸŽ¯ Red Velvet base requires Cream Cheese filling
+â”œâ”€â”€ ðŸ’° Fondant topping incompatible with Cream filling
+â”œâ”€â”€ ðŸ“Š Maximum 3 fillings total
+â””â”€â”€ ðŸŽ¨ Custom message requires minimum 24h notice
 ```
 
-### **🔸 Group Product Configuration**
+### **ðŸ”¸ Group Product Configuration**
 ```
 Group Item Selection:
-├── 📦 Predefined Product Bundle (multiple individual products)
-├── 📊 Quantity Flexibility (min/max per group item)
-├── 🔄 Exchange Rules (substitute products within limits)
-├── 💰 Group Pricing (bundle discount vs individual prices)
-└── 📋 Group Constraints (total quantity limits, compatibility)
+â”œâ”€â”€ ðŸ“¦ Predefined Product Bundle (multiple individual products)
+â”œâ”€â”€ ðŸ“Š Quantity Flexibility (min/max per group item)
+â”œâ”€â”€ ðŸ”„ Exchange Rules (substitute products within limits)
+â”œâ”€â”€ ðŸ’° Group Pricing (bundle discount vs individual prices)
+â””â”€â”€ ðŸ“‹ Group Constraints (total quantity limits, compatibility)
 
 Example: Party Kit for 50 People
-├── 🎂 Main Item: Birthday Cake for 50 people
-│   ├── Base Quantity: 1 (Fixed)
-│   ├── Substitution: Wedding Cake (+R$ 50.00)
-│   └── Configuration: Requires individual cake configuration
-├── 🍤 Savory Items: Minimum 100 units total
-│   ├── Coxinhas: 50 units (Changeable: 30-80)
-│   ├── Pastéis: 30 units (Changeable: 20-50)
-│   └── Exchange Option: Sfihas (+R$ 1.00 per unit)
-├── 🍬 Sweet Items: Minimum 50 units total
-│   ├── Brigadeiros: 30 units (Changeable: 20-60)
-│   ├── Beijinhos: 20 units (Changeable: 10-40)
-│   └── Exchange Option: Truffles (+R$ 2.00 per unit)
-└── 🥤 Beverages: Optional
-    ├── Soft Drinks: 0 units (Changeable: 0-100)
-    └── Juices: 0 units (Changeable: 0-50)
+â”œâ”€â”€ ðŸŽ‚ Main Item: Birthday Cake for 50 people
+â”‚   â”œâ”€â”€ Base Quantity: 1 (Fixed)
+â”‚   â”œâ”€â”€ Substitution: Wedding Cake (+R$ 50.00)
+â”‚   â””â”€â”€ Configuration: Requires individual cake configuration
+â”œâ”€â”€ ðŸ¤ Savory Items: Minimum 100 units total
+â”‚   â”œâ”€â”€ Coxinhas: 50 units (Changeable: 30-80)
+â”‚   â”œâ”€â”€ PastÃ©is: 30 units (Changeable: 20-50)
+â”‚   â””â”€â”€ Exchange Option: Sfihas (+R$ 1.00 per unit)
+â”œâ”€â”€ ðŸ¬ Sweet Items: Minimum 50 units total
+â”‚   â”œâ”€â”€ Brigadeiros: 30 units (Changeable: 20-60)
+â”‚   â”œâ”€â”€ Beijinhos: 20 units (Changeable: 10-40)
+â”‚   â””â”€â”€ Exchange Option: Truffles (+R$ 2.00 per unit)
+â””â”€â”€ ðŸ¥¤ Beverages: Optional
+    â”œâ”€â”€ Soft Drinks: 0 units (Changeable: 0-100)
+    â””â”€â”€ Juices: 0 units (Changeable: 0-50)
 
 Exchange Rules:
-├── 🔄 1 Coxinha ↔ 1 Pastel (no cost difference)
-├── 💰 1 Coxinha → 1 Sfihá (+R$ 1.00)
-├── 🍬 2 Brigadeiros ↔ 1 Truffle (+R$ 2.00)
-└── 📊 Maximum 30% of items can be exchanged
+â”œâ”€â”€ ðŸ”„ 1 Coxinha â†” 1 Pastel (no cost difference)
+â”œâ”€â”€ ðŸ’° 1 Coxinha â†’ 1 SfihÃ¡ (+R$ 1.00)
+â”œâ”€â”€ ðŸ¬ 2 Brigadeiros â†” 1 Truffle (+R$ 2.00)
+â””â”€â”€ ðŸ“Š Maximum 30% of items can be exchanged
 ```
 
-## 🔄 Real-Time Validation Framework
+## ðŸ”„ Real-Time Validation Framework
 
-### **✅ Validation Layers**
+### **âœ… Validation Layers**
 ```
 Client-Side Validation (Immediate):
-├── 🎯 Input format validation (numbers, ranges)
-├── 📊 Basic business rule checking (min/max quantities)
-├── 💰 Price threshold warnings
-├── 🔍 Required field completion checking
-└── 🎨 UI constraint enforcement
+â”œâ”€â”€ ðŸŽ¯ Input format validation (numbers, ranges)
+â”œâ”€â”€ ðŸ“Š Basic business rule checking (min/max quantities)
+â”œâ”€â”€ ðŸ’° Price threshold warnings
+â”œâ”€â”€ ðŸ” Required field completion checking
+â””â”€â”€ ðŸŽ¨ UI constraint enforcement
 
 Server-Side Validation (Real-time):
-├── 📦 Inventory availability checking
-├── 🧩 Component compatibility validation
-├── 💰 Customer-specific pricing validation
-├── 📊 Business rule engine execution
-└── 🎯 Cross-component dependency checking
+â”œâ”€â”€ ðŸ“¦ Inventory availability checking
+â”œâ”€â”€ ðŸ§© Component compatibility validation
+â”œâ”€â”€ ðŸ’° Customer-specific pricing validation
+â”œâ”€â”€ ðŸ“Š Business rule engine execution
+â””â”€â”€ ðŸŽ¯ Cross-component dependency checking
 
 Final Validation (Before Save):
-├── ✅ Complete configuration validation
-├── 📊 Final inventory commitment
-├── 💰 Final price calculation and approval
-├── 🎯 Customer credit limit verification
-└── 📋 Regulatory compliance checking
+â”œâ”€â”€ âœ… Complete configuration validation
+â”œâ”€â”€ ðŸ“Š Final inventory commitment
+â”œâ”€â”€ ðŸ’° Final price calculation and approval
+â”œâ”€â”€ ðŸŽ¯ Customer credit limit verification
+â””â”€â”€ ðŸ“‹ Regulatory compliance checking
 ```
 
-### **⚡ Real-Time Feedback**
+### **âš¡ Real-Time Feedback**
 ```
 Visual Indicators:
-├── 🟢 Valid Selection: Green checkmark, enabled state
-├── 🟡 Warning: Yellow triangle, constraint notification
-├── 🔴 Invalid: Red X, disabled state, error message
-├── ⏳ Processing: Spinner, "Validating..." message
-└── 💾 Saved: Blue checkmark, "Configuration saved"
+â”œâ”€â”€ ðŸŸ¢ Valid Selection: Green checkmark, enabled state
+â”œâ”€â”€ ðŸŸ¡ Warning: Yellow triangle, constraint notification
+â”œâ”€â”€ ðŸ”´ Invalid: Red X, disabled state, error message
+â”œâ”€â”€ â³ Processing: Spinner, "Validating..." message
+â””â”€â”€ ðŸ’¾ Saved: Blue checkmark, "Configuration saved"
 
 Interactive Elements:
-├── 🎨 Hover Effects: Show additional cost/info on hover
-├── 📊 Progress Bars: Configuration completion percentage
-├── 💰 Price Animations: Smooth transitions for price changes
-├── 🔍 Tooltips: Detailed component information
-└── 📋 Context Menus: Quick actions (remove, exchange, info)
+â”œâ”€â”€ ðŸŽ¨ Hover Effects: Show additional cost/info on hover
+â”œâ”€â”€ ðŸ“Š Progress Bars: Configuration completion percentage
+â”œâ”€â”€ ðŸ’° Price Animations: Smooth transitions for price changes
+â”œâ”€â”€ ðŸ” Tooltips: Detailed component information
+â””â”€â”€ ðŸ“‹ Context Menus: Quick actions (remove, exchange, info)
 
 Performance Optimizations:
-├── ⚡ Debounced Validation: 300ms delay for user input
-├── 💾 Cached Results: Store validation results temporarily
-├── 🎯 Incremental Updates: Only validate changed components
-├── 📊 Batch Processing: Group multiple validations
-└── 🔄 Progressive Loading: Load configuration data as needed
+â”œâ”€â”€ âš¡ Debounced Validation: 300ms delay for user input
+â”œâ”€â”€ ðŸ’¾ Cached Results: Store validation results temporarily
+â”œâ”€â”€ ðŸŽ¯ Incremental Updates: Only validate changed components
+â”œâ”€â”€ ðŸ“Š Batch Processing: Group multiple validations
+â””â”€â”€ ðŸ”„ Progressive Loading: Load configuration data as needed
 ```
 
-## 💰 Dynamic Pricing Calculations
+## ðŸ’° Dynamic Pricing Calculations
 
-### **🧮 Pricing Formula**
+### **ðŸ§® Pricing Formula**
 ```
 Base Product Price Calculation:
-├── 💰 Base Price = Product.UnitPrice × Quantity
-├── 📊 Component Costs = Σ(Component.AdditionalCost × ComponentQuantity)
-├── 🎯 Configuration Total = Base Price + Component Costs
-├── 💸 Customer Discount = Configuration Total × Customer.DiscountRate
-├── 📊 Final Price = Configuration Total - Customer Discount + Taxes
-└── ✅ Validation = Final Price >= Minimum Margin
+â”œâ”€â”€ ðŸ’° Base Price = Product.UnitPrice Ã— Quantity
+â”œâ”€â”€ ðŸ“Š Component Costs = Î£(Component.AdditionalCost Ã— ComponentQuantity)
+â”œâ”€â”€ ðŸŽ¯ Configuration Total = Base Price + Component Costs
+â”œâ”€â”€ ðŸ’¸ Customer Discount = Configuration Total Ã— Customer.DiscountRate
+â”œâ”€â”€ ðŸ“Š Final Price = Configuration Total - Customer Discount + Taxes
+â””â”€â”€ âœ… Validation = Final Price >= Minimum Margin
 
 Component Cost Calculation:
-├── 🧩 Individual Component Cost = Component.AdditionalCost
-├── 📊 Quantity Multiplier = ComponentQuantity × Component.QuantityMultiplier
-├── 💰 Total Component Cost = Individual Cost × Quantity Multiplier
-├── 🎯 Hierarchy Discounts = Apply volume discounts per hierarchy
-└── 📋 Business Rules = Apply special pricing rules
+â”œâ”€â”€ ðŸ§© Individual Component Cost = Component.AdditionalCost
+â”œâ”€â”€ ðŸ“Š Quantity Multiplier = ComponentQuantity Ã— Component.QuantityMultiplier
+â”œâ”€â”€ ðŸ’° Total Component Cost = Individual Cost Ã— Quantity Multiplier
+â”œâ”€â”€ ðŸŽ¯ Hierarchy Discounts = Apply volume discounts per hierarchy
+â””â”€â”€ ðŸ“‹ Business Rules = Apply special pricing rules
 
 Group Product Pricing:
-├── 📦 Individual Item Prices = Σ(GroupItem.UnitPrice × Quantity)
-├── 💸 Group Discount = Individual Total × Group.DiscountPercentage
-├── 🔄 Exchange Costs = Σ(ExchangeRule.CostDifference)
-├── 💰 Final Group Price = Individual Total - Group Discount + Exchange Costs
-└── ✅ Bundle Savings = Individual Total - Final Group Price
+â”œâ”€â”€ ðŸ“¦ Individual Item Prices = Î£(GroupItem.UnitPrice Ã— Quantity)
+â”œâ”€â”€ ðŸ’¸ Group Discount = Individual Total Ã— Group.DiscountPercentage
+â”œâ”€â”€ ðŸ”„ Exchange Costs = Î£(ExchangeRule.CostDifference)
+â”œâ”€â”€ ðŸ’° Final Group Price = Individual Total - Group Discount + Exchange Costs
+â””â”€â”€ âœ… Bundle Savings = Individual Total - Final Group Price
 ```
 
-### **📊 Price Breakdown Display**
+### **ðŸ“Š Price Breakdown Display**
 ```
 Detailed Price Information:
-├── 💰 Base Product: R$ 45.00
-├── 📊 Components:
-│   ├── Extra Chocolate Filling: +R$ 3.00
-│   ├── Premium Topping: +R$ 6.00
-│   └── Custom Decoration: +R$ 5.00
-├── 🎯 Subtotal: R$ 59.00
-├── 💸 Customer Discount (10%): -R$ 5.90
-├── 📊 Taxes (12%): +R$ 6.37
-└── 💰 Final Total: R$ 59.47
+â”œâ”€â”€ ðŸ’° Base Product: R$ 45.00
+â”œâ”€â”€ ðŸ“Š Components:
+â”‚   â”œâ”€â”€ Extra Chocolate Filling: +R$ 3.00
+â”‚   â”œâ”€â”€ Premium Topping: +R$ 6.00
+â”‚   â””â”€â”€ Custom Decoration: +R$ 5.00
+â”œâ”€â”€ ðŸŽ¯ Subtotal: R$ 59.00
+â”œâ”€â”€ ðŸ’¸ Customer Discount (10%): -R$ 5.90
+â”œâ”€â”€ ðŸ“Š Taxes (12%): +R$ 6.37
+â””â”€â”€ ðŸ’° Final Total: R$ 59.47
 
 Interactive Elements:
-├── 🖱️ Click component to see details
-├── 🔍 Hover for cost breakdown explanation
-├── 📊 Toggle between detailed/summary view
-├── 💱 Currency format based on user locale
-└── 📈 Compare with similar configurations
+â”œâ”€â”€ ðŸ–±ï¸ Click component to see details
+â”œâ”€â”€ ðŸ” Hover for cost breakdown explanation
+â”œâ”€â”€ ðŸ“Š Toggle between detailed/summary view
+â”œâ”€â”€ ðŸ’± Currency format based on user locale
+â””â”€â”€ ðŸ“ˆ Compare with similar configurations
 ```
 
-## 🔧 Error Handling and User Experience
+## ðŸ”§ Error Handling and User Experience
 
-### **❌ Error Categories**
+### **âŒ Error Categories**
 ```
 Validation Errors:
-├── 🎯 Missing Required Selections
-│   └── "Please select a base for your cake"
-├── 📊 Quantity Constraint Violations
-│   └── "Maximum 3 fillings allowed"
-├── 🧩 Component Compatibility Issues
-│   └── "Fondant topping not compatible with cream filling"
-├── 💰 Price or Credit Limit Exceeded
-│   └── "Configuration exceeds customer credit limit"
-└── 📦 Inventory Availability Issues
-    └── "Premium chocolate currently out of stock"
+â”œâ”€â”€ ðŸŽ¯ Missing Required Selections
+â”‚   â””â”€â”€ "Please select a base for your cake"
+â”œâ”€â”€ ðŸ“Š Quantity Constraint Violations
+â”‚   â””â”€â”€ "Maximum 3 fillings allowed"
+â”œâ”€â”€ ðŸ§© Component Compatibility Issues
+â”‚   â””â”€â”€ "Fondant topping not compatible with cream filling"
+â”œâ”€â”€ ðŸ’° Price or Credit Limit Exceeded
+â”‚   â””â”€â”€ "Configuration exceeds customer credit limit"
+â””â”€â”€ ðŸ“¦ Inventory Availability Issues
+    â””â”€â”€ "Premium chocolate currently out of stock"
 
 Technical Errors:
-├── 🔌 Network Connectivity Issues
-│   └── "Unable to connect. Working in offline mode."
-├── ⏱️ Timeout Errors
-│   └── "Validation taking longer than expected..."
-├── 💾 Data Consistency Issues
-│   └── "Product configuration has been updated. Please refresh."
-└── 🚨 System Errors
-    └── "Unexpected error occurred. Please try again."
+â”œâ”€â”€ ðŸ”Œ Network Connectivity Issues
+â”‚   â””â”€â”€ "Unable to connect. Working in offline mode."
+â”œâ”€â”€ â±ï¸ Timeout Errors
+â”‚   â””â”€â”€ "Validation taking longer than expected..."
+â”œâ”€â”€ ðŸ’¾ Data Consistency Issues
+â”‚   â””â”€â”€ "Product configuration has been updated. Please refresh."
+â””â”€â”€ ðŸš¨ System Errors
+    â””â”€â”€ "Unexpected error occurred. Please try again."
 
 Business Logic Errors:
-├── 📋 Configuration Rule Violations
-│   └── "This combination violates business rules"
-├── 🎯 Customer-Specific Restrictions
-│   └── "This option not available for your customer type"
-├── 📅 Time-Based Constraints
-│   └── "Custom decorations require 24h advance notice"
-└── 🏢 Supplier Availability Issues
-    └── "Component temporarily unavailable from supplier"
+â”œâ”€â”€ ðŸ“‹ Configuration Rule Violations
+â”‚   â””â”€â”€ "This combination violates business rules"
+â”œâ”€â”€ ðŸŽ¯ Customer-Specific Restrictions
+â”‚   â””â”€â”€ "This option not available for your customer type"
+â”œâ”€â”€ ðŸ“… Time-Based Constraints
+â”‚   â””â”€â”€ "Custom decorations require 24h advance notice"
+â””â”€â”€ ðŸ¢ Supplier Availability Issues
+    â””â”€â”€ "Component temporarily unavailable from supplier"
 ```
 
-### **🔄 Recovery Mechanisms**
+### **ðŸ”„ Recovery Mechanisms**
 ```
 Automatic Recovery:
-├── 🔁 Auto-retry Failed Validations (3 attempts with backoff)
-├── 💾 Auto-save Draft Configuration (every 30 seconds)
-├── 🔄 Smart Refresh on Data Updates (reactive updates)
-├── 🎯 Alternative Suggestions (when constraints violated)
-└── 📊 Graceful Degradation (offline mode capabilities)
+â”œâ”€â”€ ðŸ” Auto-retry Failed Validations (3 attempts with backoff)
+â”œâ”€â”€ ðŸ’¾ Auto-save Draft Configuration (every 30 seconds)
+â”œâ”€â”€ ðŸ”„ Smart Refresh on Data Updates (reactive updates)
+â”œâ”€â”€ ðŸŽ¯ Alternative Suggestions (when constraints violated)
+â””â”€â”€ ðŸ“Š Graceful Degradation (offline mode capabilities)
 
 User-Assisted Recovery:
-├── 🎯 Guided Error Resolution (step-by-step instructions)
-├── 💡 Smart Suggestions (alternative configurations)
-├── 📞 Contact Support Integration (for complex issues)
-├── 🔙 Configuration History (revert to previous version)
-└── 📋 Export/Import Configuration (backup/restore)
+â”œâ”€â”€ ðŸŽ¯ Guided Error Resolution (step-by-step instructions)
+â”œâ”€â”€ ðŸ’¡ Smart Suggestions (alternative configurations)
+â”œâ”€â”€ ðŸ“ž Contact Support Integration (for complex issues)
+â”œâ”€â”€ ðŸ”™ Configuration History (revert to previous version)
+â””â”€â”€ ðŸ“‹ Export/Import Configuration (backup/restore)
 
 Prevention Strategies:
-├── ✅ Proactive Validation (prevent invalid states)
-├── 📊 Real-time Inventory Checking (prevent stock issues)
-├── 🎯 Smart Defaults (reduce configuration errors)
-├── 📋 Configuration Templates (proven combinations)
-└── 🎓 User Education (tooltips, help documentation)
+â”œâ”€â”€ âœ… Proactive Validation (prevent invalid states)
+â”œâ”€â”€ ðŸ“Š Real-time Inventory Checking (prevent stock issues)
+â”œâ”€â”€ ðŸŽ¯ Smart Defaults (reduce configuration errors)
+â”œâ”€â”€ ðŸ“‹ Configuration Templates (proven combinations)
+â””â”€â”€ ðŸŽ“ User Education (tooltips, help documentation)
 ```
 
-## 📈 Performance and Analytics
+## ðŸ“ˆ Performance and Analytics
 
-### **⚡ Performance Optimization**
+### **âš¡ Performance Optimization**
 ```
 Frontend Performance:
-├── ⚡ Virtual Scrolling for Large Component Lists
-├── 💾 Component Data Lazy Loading
-├── 🎯 Optimized DOM Updates (React/Vue patterns)
-├── 📊 Debounced User Input Processing
-└── 🔄 Smart Caching of Configuration State
+â”œâ”€â”€ âš¡ Virtual Scrolling for Large Component Lists
+â”œâ”€â”€ ðŸ’¾ Component Data Lazy Loading
+â”œâ”€â”€ ðŸŽ¯ Optimized DOM Updates (React/Vue patterns)
+â”œâ”€â”€ ðŸ“Š Debounced User Input Processing
+â””â”€â”€ ðŸ”„ Smart Caching of Configuration State
 
 Backend Performance:
-├── 💾 Aggressive Caching of Product Configuration Data
-├── 📊 Database Query Optimization (indexed joins)
-├── 🎯 Parallel Processing of Validation Rules
-├── ⚡ Microservice Architecture for Scalability
-└── 📈 Load Balancing for High-Volume Operations
+â”œâ”€â”€ ðŸ’¾ Aggressive Caching of Product Configuration Data
+â”œâ”€â”€ ðŸ“Š Database Query Optimization (indexed joins)
+â”œâ”€â”€ ðŸŽ¯ Parallel Processing of Validation Rules
+â”œâ”€â”€ âš¡ Microservice Architecture for Scalability
+â””â”€â”€ ðŸ“ˆ Load Balancing for High-Volume Operations
 
 Network Optimization:
-├── 📦 Compressed Response Payloads (gzip)
-├── 🔄 HTTP/2 Server Push for Related Resources
-├── 💾 CDN Distribution for Static Assets
-├── 📊 API Response Caching (Redis)
-└── 🎯 Optimized JSON Serialization
+â”œâ”€â”€ ðŸ“¦ Compressed Response Payloads (gzip)
+â”œâ”€â”€ ðŸ”„ HTTP/2 Server Push for Related Resources
+â”œâ”€â”€ ðŸ’¾ CDN Distribution for Static Assets
+â”œâ”€â”€ ðŸ“Š API Response Caching (Redis)
+â””â”€â”€ ðŸŽ¯ Optimized JSON Serialization
 ```
 
-### **📊 Analytics and Insights**
+### **ðŸ“Š Analytics and Insights**
 ```
 Configuration Analytics:
-├── 📈 Most Popular Component Combinations
-├── 🎯 Abandonment Points in Configuration Flow
-├── 💰 Average Configuration Value and Trends
-├── ⏱️ Time-to-Configure Metrics by Product Type
-└── 🔄 Configuration Change Patterns
+â”œâ”€â”€ ðŸ“ˆ Most Popular Component Combinations
+â”œâ”€â”€ ðŸŽ¯ Abandonment Points in Configuration Flow
+â”œâ”€â”€ ðŸ’° Average Configuration Value and Trends
+â”œâ”€â”€ â±ï¸ Time-to-Configure Metrics by Product Type
+â””â”€â”€ ðŸ”„ Configuration Change Patterns
 
 Business Intelligence:
-├── 💰 Revenue Impact of Configuration Features
-├── 📊 Component Profitability Analysis
-├── 🎯 Customer Preference Patterns
-├── 📈 Seasonal Configuration Trends
-└── 🧩 Cross-sell Opportunity Identification
+â”œâ”€â”€ ðŸ’° Revenue Impact of Configuration Features
+â”œâ”€â”€ ðŸ“Š Component Profitability Analysis
+â”œâ”€â”€ ðŸŽ¯ Customer Preference Patterns
+â”œâ”€â”€ ðŸ“ˆ Seasonal Configuration Trends
+â””â”€â”€ ðŸ§© Cross-sell Opportunity Identification
 
 User Experience Metrics:
-├── 😊 Configuration Completion Rate
-├── ⏱️ Average Configuration Time
-├── 🔄 Error Rate by Configuration Step
-├── 📱 Mobile vs Desktop Usage Patterns
-└── 🎯 User Satisfaction Scores (post-configuration survey)
+â”œâ”€â”€ ðŸ˜Š Configuration Completion Rate
+â”œâ”€â”€ â±ï¸ Average Configuration Time
+â”œâ”€â”€ ðŸ”„ Error Rate by Configuration Step
+â”œâ”€â”€ ðŸ“± Mobile vs Desktop Usage Patterns
+â””â”€â”€ ðŸŽ¯ User Satisfaction Scores (post-configuration survey)
 ```
 
 ---
 
 **Arquivo**: `05-product-configuration-flow.md`  
 **Fluxo**: Product Configuration (Interactive Composite/Group Product Setup)  
-**Domínios**: Sales ↔ Product  
-**Complexidade**: 🚨 Alta (8+ participantes, 30+ interações, rica interface)  
-**Atualização**: 16/06/2025
+**DomÃ­nios**: Sales â†” Product  
+**Complexidade**: ðŸš¨ Alta (8+ participantes, 30+ interaÃ§Ãµes, rica interface)  
+**AtualizaÃ§Ã£o**: 16/06/2025

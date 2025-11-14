@@ -456,4 +456,22 @@ namespace GesN.Web.Models.ViewModels.Production
         /// </summary>
         public bool IsComposite => ProductType == ProductType.Composite;
     }
+
+    public class ProductCatalogViewModel
+    {
+        public IEnumerable<Product> Products { get; set; } = new List<Product>();
+        public int CurrentPage { get; set; } = 1;
+        public int PageSize { get; set; } = 5;
+        public int TotalProducts { get; set; } = 0;
+        public string? CurrentCategory { get; set; }
+        public string? SearchTerm { get; set; }
+
+        // Propriedades calculadas
+        public int TotalPages => (int)Math.Ceiling((double)TotalProducts / PageSize);
+        public bool HasPreviousPage => CurrentPage > 1;
+        public bool HasNextPage => CurrentPage < TotalPages;
+        public string PaginationInfo => TotalProducts > 0 
+            ? $"{((CurrentPage - 1) * PageSize) + 1}-{Math.Min(CurrentPage * PageSize, TotalProducts)} of {TotalProducts}"
+            : "0-0 of 0";
+    }
 } 

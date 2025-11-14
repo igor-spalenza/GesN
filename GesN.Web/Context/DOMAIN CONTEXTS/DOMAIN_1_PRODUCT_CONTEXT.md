@@ -1,4 +1,4 @@
-# Descrição Funcional de Software - Domínio de Produto
+﻿# Descrição Funcional de Software - Domínio de Produto
 
 ## 1. Visão Geral
 
@@ -142,4 +142,3 @@ A seguir, um resumo da jornada do usuário para parametrizar o catálogo.
 7. Acessar a aba "Regras de Troca".
 8. (Opcional) Criar as regras de troca e proporção entre os itens adicionados.
 9. Salvar o produto.
-

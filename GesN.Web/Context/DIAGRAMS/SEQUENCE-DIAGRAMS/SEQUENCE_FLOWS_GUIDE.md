@@ -1,151 +1,151 @@
-# 🔄 SEQUENCE DIAGRAMS - SISTEMA GesN
+﻿# ðŸ”„ SEQUENCE DIAGRAMS - SISTEMA GesN
 
-## 🎯 Visão Geral
-Diagramas de sequência detalhados mostrando as interações entre objetos ao longo do tempo para os fluxos mais críticos do sistema GesN. Cada diagrama inclui validações internas e integrações entre domínios.
+## ðŸŽ¯ VisÃ£o Geral
+Diagramas de sequÃªncia detalhados mostrando as interaÃ§Ãµes entre objetos ao longo do tempo para os fluxos mais crÃ­ticos do sistema GesN. Cada diagrama inclui validaÃ§Ãµes internas e integraÃ§Ãµes entre domÃ­nios.
 
-## 📋 Fluxos Críticos Mapeados
+## ðŸ“‹ Fluxos CrÃ­ticos Mapeados
 
-### **🔄 Fluxos Automáticos**
-
-| Fluxo | Arquivo | Trigger | Complexidade |
-|-------|---------|---------|--------------|
-| **OrderItem → Demand** | [`01-orderitem-to-demand-flow.md`](./01-orderitem-to-demand-flow.md) | OrderItem criado/editado | 🚨 Alta |
-| **PurchaseOrder → AccountPayable** | [`02-purchase-to-payable-flow.md`](./02-purchase-to-payable-flow.md) | PurchaseOrder recebida | ⚠️ Média |
-| **OrderEntry → AccountReceivable** | [`03-order-to-receivable-flow.md`](./03-order-to-receivable-flow.md) | OrderEntry confirmada | ⚠️ Média |
-
-### **🤖 Fluxos com IA/Complexidade**
+### **ðŸ”„ Fluxos AutomÃ¡ticos**
 
 | Fluxo | Arquivo | Trigger | Complexidade |
 |-------|---------|---------|--------------|
-| **IA Processing** | [`04-ai-processing-flow.md`](./04-ai-processing-flow.md) | Upload nota fiscal | 🚨 Alta |
-| **Product Configuration** | [`05-product-configuration-flow.md`](./05-product-configuration-flow.md) | Seleção produto composto | 🚨 Alta |
+| **OrderItem â†’ Demand** | [`01-orderitem-to-demand-flow.md`](./01-orderitem-to-demand-flow.md) | OrderItem criado/editado | ðŸš¨ Alta |
+| **PurchaseOrder â†’ AccountPayable** | [`02-purchase-to-payable-flow.md`](./02-purchase-to-payable-flow.md) | PurchaseOrder recebida | âš ï¸ MÃ©dia |
+| **OrderEntry â†’ AccountReceivable** | [`03-order-to-receivable-flow.md`](./03-order-to-receivable-flow.md) | OrderEntry confirmada | âš ï¸ MÃ©dia |
 
-## 🎨 Convenções dos Sequence Diagrams
+### **ðŸ¤– Fluxos com IA/Complexidade**
 
-### **🎯 Elementos Visuais**
+| Fluxo | Arquivo | Trigger | Complexidade |
+|-------|---------|---------|--------------|
+| **IA Processing** | [`04-ai-processing-flow.md`](./04-ai-processing-flow.md) | Upload nota fiscal | ðŸš¨ Alta |
+| **Product Configuration** | [`05-product-configuration-flow.md`](./05-product-configuration-flow.md) | SeleÃ§Ã£o produto composto | ðŸš¨ Alta |
 
-| Elemento | Representação | Cor | Descrição |
+## ðŸŽ¨ ConvenÃ§Ãµes dos Sequence Diagrams
+
+### **ðŸŽ¯ Elementos Visuais**
+
+| Elemento | RepresentaÃ§Ã£o | Cor | DescriÃ§Ã£o |
 |----------|---------------|-----|-----------|
-| **Actor** | `👤 User` | `#3b82f6` | Usuário humano |
-| **Controller** | `🎮 Controller` | `#8b5cf6` | Controlador web |
-| **Service** | `⚙️ Service` | Cor do domínio | Lógica de negócio |
-| **Repository** | `🗄️ Repository` | `#6b7280` | Acesso a dados |
-| **External API** | `🌐 GoogleAPI` | `#ef4444` | Sistema externo |
-| **Database** | `💾 Database` | `#374151` | Persistência |
+| **Actor** | `ðŸ‘¤ User` | `#3b82f6` | UsuÃ¡rio humano |
+| **Controller** | `ðŸŽ® Controller` | `#8b5cf6` | Controlador web |
+| **Service** | `âš™ï¸ Service` | Cor do domÃ­nio | LÃ³gica de negÃ³cio |
+| **Repository** | `ðŸ—„ï¸ Repository` | `#6b7280` | Acesso a dados |
+| **External API** | `ðŸŒ GoogleAPI` | `#ef4444` | Sistema externo |
+| **Database** | `ðŸ’¾ Database` | `#374151` | PersistÃªncia |
 
-### **🔗 Tipos de Interação**
+### **ðŸ”— Tipos de InteraÃ§Ã£o**
 
-| Símbolo | Tipo | Descrição |
+| SÃ­mbolo | Tipo | DescriÃ§Ã£o |
 |---------|------|-----------|
-| `->` | **Chamada Síncrona** | Aguarda resposta |
-| `->>` | **Chamada Assíncrona** | Não aguarda resposta |
+| `->` | **Chamada SÃ­ncrona** | Aguarda resposta |
+| `->>` | **Chamada AssÃ­ncrona** | NÃ£o aguarda resposta |
 | `-->>` | **Resposta** | Retorno de dados |
-| `-x` | **Chamada que Falha** | Erro ou exceção |
-| `Note over` | **Nota/Observação** | Informação adicional |
+| `-x` | **Chamada que Falha** | Erro ou exceÃ§Ã£o |
+| `Note over` | **Nota/ObservaÃ§Ã£o** | InformaÃ§Ã£o adicional |
 
-### **⚡ Tipos de Ativação**
+### **âš¡ Tipos de AtivaÃ§Ã£o**
 
-| Padrão | Significado |
+| PadrÃ£o | Significado |
 |--------|-------------|
-| `activate/deactivate` | Período de processamento |
+| `activate/deactivate` | PerÃ­odo de processamento |
 | `par/and` | Processamento paralelo |
-| `alt/else` | Condições alternativas |
+| `alt/else` | CondiÃ§Ãµes alternativas |
 | `opt` | Processamento opcional |
-| `loop` | Iteração |
+| `loop` | IteraÃ§Ã£o |
 
-## 📊 Métricas de Complexidade
+## ðŸ“Š MÃ©tricas de Complexidade
 
-### **🎯 Critérios de Avaliação**
+### **ðŸŽ¯ CritÃ©rios de AvaliaÃ§Ã£o**
 
-| Nível | Participantes | Interações | Cross-Domain | Validações |
+| NÃ­vel | Participantes | InteraÃ§Ãµes | Cross-Domain | ValidaÃ§Ãµes |
 |-------|---------------|------------|--------------|------------|
-| **🟢 Baixa** | 2-3 | < 10 | 0-1 | Básicas |
-| **⚠️ Média** | 4-6 | 10-20 | 1-2 | Múltiplas |
-| **🚨 Alta** | 7+ | 20+ | 2+ | Complexas |
+| **ðŸŸ¢ Baixa** | 2-3 | < 10 | 0-1 | BÃ¡sicas |
+| **âš ï¸ MÃ©dia** | 4-6 | 10-20 | 1-2 | MÃºltiplas |
+| **ðŸš¨ Alta** | 7+ | 20+ | 2+ | Complexas |
 
-### **📋 Fluxos por Complexidade**
+### **ðŸ“‹ Fluxos por Complexidade**
 
-#### **🚨 Alta Complexidade**
-1. **OrderItem → Demand**: Multiple product types, complex rules
+#### **ðŸš¨ Alta Complexidade**
+1. **OrderItem â†’ Demand**: Multiple product types, complex rules
 2. **IA Processing**: OCR, mapping, validation, user review
 3. **Product Configuration**: Hierarchies, components, pricing
 
-#### **⚠️ Média Complexidade**
-1. **PurchaseOrder → AccountPayable**: Status validation, financial creation
-2. **OrderEntry → AccountReceivable**: Payment terms, installments
+#### **âš ï¸ MÃ©dia Complexidade**
+1. **PurchaseOrder â†’ AccountPayable**: Status validation, financial creation
+2. **OrderEntry â†’ AccountReceivable**: Payment terms, installments
 
-## 🔄 Padrões de Integração
+## ðŸ”„ PadrÃµes de IntegraÃ§Ã£o
 
-### **🌐 Cross-Domain Patterns**
+### **ðŸŒ Cross-Domain Patterns**
 
-#### **1. 📋 Command-Event Pattern**
+#### **1. ðŸ“‹ Command-Event Pattern**
 ```
-Domain A → Command → Domain B → Event → Domain C
-```
-
-#### **2. 🔄 Synchronous Integration**
-```
-Service A → API Call → Service B → Response → Service A
+Domain A â†’ Command â†’ Domain B â†’ Event â†’ Domain C
 ```
 
-#### **3. ⚡ Asynchronous Integration**
+#### **2. ðŸ”„ Synchronous Integration**
 ```
-Service A → Event Bus → Service B (eventual consistency)
-```
-
-#### **4. 🤖 External API Pattern**
-```
-System → External API → Response → Process → Store
+Service A â†’ API Call â†’ Service B â†’ Response â†’ Service A
 ```
 
-## 🚨 Hotspots e Validações
+#### **3. âš¡ Asynchronous Integration**
+```
+Service A â†’ Event Bus â†’ Service B (eventual consistency)
+```
 
-### **⚠️ Pontos Críticos Identificados**
+#### **4. ðŸ¤– External API Pattern**
+```
+System â†’ External API â†’ Response â†’ Process â†’ Store
+```
 
-| Hotspot | Fluxo | Descrição | Mitigação |
+## ðŸš¨ Hotspots e ValidaÃ§Ãµes
+
+### **âš ï¸ Pontos CrÃ­ticos Identificados**
+
+| Hotspot | Fluxo | DescriÃ§Ã£o | MitigaÃ§Ã£o |
 |---------|-------|-----------|-----------|
-| **Product Type Detection** | OrderItem→Demand | Different logic per type | Strategy pattern |
+| **Product Type Detection** | OrderItemâ†’Demand | Different logic per type | Strategy pattern |
 | **IA Accuracy** | IA Processing | OCR errors, mapping fails | Human validation |
 | **Component Validation** | Product Config | Complex business rules | Rule engine |
 | **Concurrency** | Multiple flows | Race conditions | Pessimistic locking |
 | **External Dependencies** | All flows | Google APIs down | Circuit breaker |
 
-### **✅ Validações Implementadas**
+### **âœ… ValidaÃ§Ãµes Implementadas**
 
-#### **1. 📊 Business Validations**
+#### **1. ðŸ“Š Business Validations**
 - Product active status
 - Stock availability
 - Business rules compliance
 - Data consistency
 
-#### **2. 🔒 Technical Validations**
+#### **2. ðŸ”’ Technical Validations**
 - Input sanitization
 - Data format validation
 - Authorization checks
 - Rate limiting
 
-#### **3. 🌐 Integration Validations**
+#### **3. ðŸŒ Integration Validations**
 - External API availability
 - Response format validation
 - Timeout handling
 - Retry mechanisms
 
-## 📈 Performance Considerations
+## ðŸ“ˆ Performance Considerations
 
-### **⚡ Otimizações Identificadas**
+### **âš¡ OtimizaÃ§Ãµes Identificadas**
 
-| Área | Problema | Solução |
+| Ãrea | Problema | SoluÃ§Ã£o |
 |------|----------|---------|
 | **Database Queries** | N+1 problems | Eager loading |
 | **External APIs** | Latency | Caching + async |
 | **Complex Rules** | Performance | Rule caching |
 | **File Processing** | Large files | Streaming |
 
-### **📊 SLA Targets**
+### **ðŸ“Š SLA Targets**
 
 | Fluxo | Target Response Time | Availability |
 |-------|---------------------|--------------|
-| **OrderItem→Demand** | < 2s | 99.9% |
+| **OrderItemâ†’Demand** | < 2s | 99.9% |
 | **Product Config** | < 1s | 99.9% |
 | **IA Processing** | < 30s | 99.5% |
 | **Financial Creation** | < 5s | 99.9% |
@@ -153,7 +153,7 @@ System → External API → Response → Process → Store
 ---
 
 **Criado em**: 16/06/2025  
-**Versão**: 1.0  
-**Padrão**: UML Sequence Diagrams  
+**VersÃ£o**: 1.0  
+**PadrÃ£o**: UML Sequence Diagrams  
 **Ferramenta**: Mermaid + Markdown  
-**Escopo**: 5 fluxos críticos + validações completas
+**Escopo**: 5 fluxos crÃ­ticos + validaÃ§Ãµes completas

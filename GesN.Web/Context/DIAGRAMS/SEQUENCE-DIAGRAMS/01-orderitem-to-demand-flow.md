@@ -1,35 +1,35 @@
-# 🔄 SEQUENCE DIAGRAM - OrderItem → Demand Generation Flow
+﻿# ðŸ”„ SEQUENCE DIAGRAM - OrderItem â†’ Demand Generation Flow
 
-## 🎯 Visão Geral
-Diagrama de sequência detalhado mostrando o fluxo automático de geração de demands a partir de OrderItems quando um pedido é confirmado. Este é um dos fluxos mais críticos do sistema, envolvendo integração entre domínios de Vendas e Produção, com lógica complexa dependendo do tipo de produto (Simple, Composite, Group).
+## ðŸŽ¯ VisÃ£o Geral
+Diagrama de sequÃªncia detalhado mostrando o fluxo automÃ¡tico de geraÃ§Ã£o de demands a partir de OrderItems quando um pedido Ã© confirmado. Este Ã© um dos fluxos mais crÃ­ticos do sistema, envolvendo integraÃ§Ã£o entre domÃ­nios de Vendas e ProduÃ§Ã£o, com lÃ³gica complexa dependendo do tipo de produto (Simple, Composite, Group).
 
-## 📊 Complexidade do Fluxo
-- **🚨 Alta Complexidade**: Multiple product types, cross-domain integration, complex business rules
-- **👥 Participantes**: 8+ system components
-- **🔄 Interações**: 20+ interactions per order item
-- **🌐 Cross-Domain**: Sales → Production integration
-- **📋 Validações**: Product availability, configuration validation, business rules
+## ðŸ“Š Complexidade do Fluxo
+- **ðŸš¨ Alta Complexidade**: Multiple product types, cross-domain integration, complex business rules
+- **ðŸ‘¥ Participantes**: 8+ system components
+- **ðŸ”„ InteraÃ§Ãµes**: 20+ interactions per order item
+- **ðŸŒ Cross-Domain**: Sales â†’ Production integration
+- **ðŸ“‹ ValidaÃ§Ãµes**: Product availability, configuration validation, business rules
 
-## 🎯 Trigger Event
-**OrderConfirmed** (Sales Domain) → Automatic demand generation for all OrderItems
+## ðŸŽ¯ Trigger Event
+**OrderConfirmed** (Sales Domain) â†’ Automatic demand generation for all OrderItems
 
-## 📝 Sequence Diagram
+## ðŸ“ Sequence Diagram
 
 ```mermaid
 sequenceDiagram
-    participant UI as 👤 User Interface
-    participant SC as 🎮 Sales Controller
-    participant SS as ⚙️ Sales Service  
-    participant SR as 🗄️ Sales Repository
-    participant EB as 📡 Event Bus
-    participant PS as 🏭 Production Service
-    participant PR as 🗄️ Production Repository
-    participant ProdS as 📦 Product Service
-    participant VS as ✅ Validation Service
-    participant NS as 🔔 Notification Service
-    participant DB as 💾 Database
+    participant UI as ðŸ‘¤ User Interface
+    participant SC as ðŸŽ® Sales Controller
+    participant SS as âš™ï¸ Sales Service  
+    participant SR as ðŸ—„ï¸ Sales Repository
+    participant EB as ðŸ“¡ Event Bus
+    participant PS as ðŸ­ Production Service
+    participant PR as ðŸ—„ï¸ Production Repository
+    participant ProdS as ðŸ“¦ Product Service
+    participant VS as âœ… Validation Service
+    participant NS as ðŸ”” Notification Service
+    participant DB as ðŸ’¾ Database
     
-    Note over UI, DB: OrderItem → Demand Generation Flow (Triggered by OrderConfirmed)
+    Note over UI, DB: OrderItem â†’ Demand Generation Flow (Triggered by OrderConfirmed)
     
     %% ==========================================
     %% SALES DOMAIN - ORDER CONFIRMATION
@@ -256,241 +256,241 @@ sequenceDiagram
     end
 ```
 
-## 🎯 Detailed Component Responsibilities
+## ðŸŽ¯ Detailed Component Responsibilities
 
-### **🎮 Sales Controller**
+### **ðŸŽ® Sales Controller**
 ```
 Responsibilities:
-├── 🔐 Authentication and authorization validation
-├── 📋 HTTP request validation and sanitization
-├── 🎯 Route confirmation request to Sales Service
-├── 📊 Return appropriate HTTP response codes
-└── 🔍 Log controller-level events and errors
+â”œâ”€â”€ ðŸ” Authentication and authorization validation
+â”œâ”€â”€ ðŸ“‹ HTTP request validation and sanitization
+â”œâ”€â”€ ðŸŽ¯ Route confirmation request to Sales Service
+â”œâ”€â”€ ðŸ“Š Return appropriate HTTP response codes
+â””â”€â”€ ðŸ” Log controller-level events and errors
 
 Validation Points:
-├── ✅ User has permission to confirm orders
-├── ✅ Order ID format is valid
-├── ✅ Request payload is properly formatted
-└── ✅ Rate limiting and security checks
+â”œâ”€â”€ âœ… User has permission to confirm orders
+â”œâ”€â”€ âœ… Order ID format is valid
+â”œâ”€â”€ âœ… Request payload is properly formatted
+â””â”€â”€ âœ… Rate limiting and security checks
 ```
 
-### **⚙️ Sales Service**
+### **âš™ï¸ Sales Service**
 ```
 Core Business Logic:
-├── 📋 Order confirmation workflow orchestration
-├── ✅ Complex business rule validation
-├── 📊 Order status management
-├── 📡 Event publishing coordination
-└── 🔄 Cross-domain integration management
+â”œâ”€â”€ ðŸ“‹ Order confirmation workflow orchestration
+â”œâ”€â”€ âœ… Complex business rule validation
+â”œâ”€â”€ ðŸ“Š Order status management
+â”œâ”€â”€ ðŸ“¡ Event publishing coordination
+â””â”€â”€ ðŸ”„ Cross-domain integration management
 
 Validation Rules:
-├── 🏦 Customer credit limit verification
-├── 📅 Delivery date feasibility check
-├── 🧩 Product configuration completeness
-├── 📦 Order item consistency validation
-└── 💰 Pricing and total amount verification
+â”œâ”€â”€ ðŸ¦ Customer credit limit verification
+â”œâ”€â”€ ðŸ“… Delivery date feasibility check
+â”œâ”€â”€ ðŸ§© Product configuration completeness
+â”œâ”€â”€ ðŸ“¦ Order item consistency validation
+â””â”€â”€ ðŸ’° Pricing and total amount verification
 
 Event Management:
-├── 📤 Publish OrderConfirmed event
-├── 📥 Handle OrderSentToProduction event
-├── 🔄 Coordinate event sequencing
-└── 📊 Track event processing status
+â”œâ”€â”€ ðŸ“¤ Publish OrderConfirmed event
+â”œâ”€â”€ ðŸ“¥ Handle OrderSentToProduction event
+â”œâ”€â”€ ðŸ”„ Coordinate event sequencing
+â””â”€â”€ ðŸ“Š Track event processing status
 ```
 
-### **🏭 Production Service**
+### **ðŸ­ Production Service**
 ```
 Demand Generation Strategy:
-├── 🎯 ProductType-based strategy selection
-├── 📊 Demand data model construction
-├── 🧩 Complex configuration processing
-├── 🔄 Cross-domain data validation
-└── 📈 Production estimates calculation
+â”œâ”€â”€ ðŸŽ¯ ProductType-based strategy selection
+â”œâ”€â”€ ðŸ“Š Demand data model construction
+â”œâ”€â”€ ðŸ§© Complex configuration processing
+â”œâ”€â”€ ðŸ”„ Cross-domain data validation
+â””â”€â”€ ðŸ“ˆ Production estimates calculation
 
 Product Type Strategies:
-├── 🔹 Simple: 1:1 OrderItem to Demand mapping
-├── 🔶 Composite: 1:N with ProductComposition creation
-├── 🔸 Group: 1:N with product explosion and exchange rules
-└── ⚙️ Strategy pattern for extensibility
+â”œâ”€â”€ ðŸ”¹ Simple: 1:1 OrderItem to Demand mapping
+â”œâ”€â”€ ðŸ”¶ Composite: 1:N with ProductComposition creation
+â”œâ”€â”€ ðŸ”¸ Group: 1:N with product explosion and exchange rules
+â””â”€â”€ âš™ï¸ Strategy pattern for extensibility
 
 Cross-Domain Validations:
-├── 📦 Product availability verification
-├── 🧩 Configuration validation with Product domain
-├── 🥘 Ingredient availability checking
-├── ⏰ Production capacity assessment
-└── 💰 Cost estimation and validation
+â”œâ”€â”€ ðŸ“¦ Product availability verification
+â”œâ”€â”€ ðŸ§© Configuration validation with Product domain
+â”œâ”€â”€ ðŸ¥˜ Ingredient availability checking
+â”œâ”€â”€ â° Production capacity assessment
+â””â”€â”€ ðŸ’° Cost estimation and validation
 ```
 
-### **📦 Product Service Integration**
+### **ðŸ“¦ Product Service Integration**
 ```
 Product Data Retrieval:
-├── 🔍 Product lookup by ID
-├── 📊 ProductType determination
-├── 🧩 Configuration rules retrieval
-├── 📋 Component hierarchy access
-└── 🔸 Group explosion logic
+â”œâ”€â”€ ðŸ” Product lookup by ID
+â”œâ”€â”€ ðŸ“Š ProductType determination
+â”œâ”€â”€ ðŸ§© Configuration rules retrieval
+â”œâ”€â”€ ðŸ“‹ Component hierarchy access
+â””â”€â”€ ðŸ”¸ Group explosion logic
 
 Validation Services:
-├── ✅ Product configuration validation
-├── 🏗️ Component compatibility checking
-├── 📊 Quantity and constraint validation
-├── 💰 Pricing rule application
-└── 🔄 Business rule enforcement
+â”œâ”€â”€ âœ… Product configuration validation
+â”œâ”€â”€ ðŸ—ï¸ Component compatibility checking
+â”œâ”€â”€ ðŸ“Š Quantity and constraint validation
+â”œâ”€â”€ ðŸ’° Pricing rule application
+â””â”€â”€ ðŸ”„ Business rule enforcement
 ```
 
-## 💡 Business Rules and Constraints
+## ðŸ’¡ Business Rules and Constraints
 
-### **📋 Order Confirmation Rules**
+### **ðŸ“‹ Order Confirmation Rules**
 ```
 Pre-Confirmation Validations:
-├── 🏦 Customer credit limit must not be exceeded
-├── 📅 Delivery date must be achievable
-├── 🧩 All composite products must be fully configured
-├── 📦 All products must be active and available
-├── 💰 Order total must match sum of item totals
-└── 📋 Minimum order requirements must be met
+â”œâ”€â”€ ðŸ¦ Customer credit limit must not be exceeded
+â”œâ”€â”€ ðŸ“… Delivery date must be achievable
+â”œâ”€â”€ ðŸ§© All composite products must be fully configured
+â”œâ”€â”€ ðŸ“¦ All products must be active and available
+â”œâ”€â”€ ðŸ’° Order total must match sum of item totals
+â””â”€â”€ ðŸ“‹ Minimum order requirements must be met
 
 Post-Confirmation Rules:
-├── 🔒 Confirmed orders cannot be modified (only cancelled)
-├── 📊 Order status must progress through defined states
-├── 🎯 All order items must generate production demands
-├── 📡 Financial accounts must be created automatically
-└── 📅 Delivery commitments become binding
+â”œâ”€â”€ ðŸ”’ Confirmed orders cannot be modified (only cancelled)
+â”œâ”€â”€ ðŸ“Š Order status must progress through defined states
+â”œâ”€â”€ ðŸŽ¯ All order items must generate production demands
+â”œâ”€â”€ ðŸ“¡ Financial accounts must be created automatically
+â””â”€â”€ ðŸ“… Delivery commitments become binding
 ```
 
-### **🏭 Demand Generation Rules**
+### **ðŸ­ Demand Generation Rules**
 ```
 Universal Demand Rules:
-├── 📊 One OrderItem may generate 1:N Demands
-├── 🎯 Each Demand represents one concrete product
-├── 📅 Demand due date = Order delivery date - production time
-├── 📦 Demand quantity respects OrderItem quantity
-└── 🔄 Demand status starts as "Pending"
+â”œâ”€â”€ ðŸ“Š One OrderItem may generate 1:N Demands
+â”œâ”€â”€ ðŸŽ¯ Each Demand represents one concrete product
+â”œâ”€â”€ ðŸ“… Demand due date = Order delivery date - production time
+â”œâ”€â”€ ðŸ“¦ Demand quantity respects OrderItem quantity
+â””â”€â”€ ðŸ”„ Demand status starts as "Pending"
 
 Product Type Specific Rules:
-├── 🔹 Simple Products:
-│   ├── 1 OrderItem → 1 Demand (exact mapping)
-│   ├── No composition tasks required
-│   └── Straightforward production workflow
-├── 🔶 Composite Products:
-│   ├── 1 OrderItem → 1 Demand + N ProductComposition
-│   ├── Configuration must be validated
-│   ├── Component availability must be checked
-│   └── Production tasks created per component
-└── 🔸 Product Groups:
-    ├── 1 OrderItem → N Demands (one per concrete product)
-    ├── Group configuration exploded into concrete products
-    ├── Exchange rules applied if configured
-    └── Separate production workflows per concrete product
+â”œâ”€â”€ ðŸ”¹ Simple Products:
+â”‚   â”œâ”€â”€ 1 OrderItem â†’ 1 Demand (exact mapping)
+â”‚   â”œâ”€â”€ No composition tasks required
+â”‚   â””â”€â”€ Straightforward production workflow
+â”œâ”€â”€ ðŸ”¶ Composite Products:
+â”‚   â”œâ”€â”€ 1 OrderItem â†’ 1 Demand + N ProductComposition
+â”‚   â”œâ”€â”€ Configuration must be validated
+â”‚   â”œâ”€â”€ Component availability must be checked
+â”‚   â””â”€â”€ Production tasks created per component
+â””â”€â”€ ðŸ”¸ Product Groups:
+    â”œâ”€â”€ 1 OrderItem â†’ N Demands (one per concrete product)
+    â”œâ”€â”€ Group configuration exploded into concrete products
+    â”œâ”€â”€ Exchange rules applied if configured
+    â””â”€â”€ Separate production workflows per concrete product
 ```
 
-### **🔄 Integration Rules**
+### **ðŸ”„ Integration Rules**
 ```
 Cross-Domain Consistency:
-├── 📊 Order status updates must be synchronized
-├── 🎯 Demand creation must be atomic per OrderItem
-├── 📡 Event publishing must follow correct sequence
-├── 🔄 Failure in Production must notify Sales
-└── 📋 All state changes must be auditable
+â”œâ”€â”€ ðŸ“Š Order status updates must be synchronized
+â”œâ”€â”€ ðŸŽ¯ Demand creation must be atomic per OrderItem
+â”œâ”€â”€ ðŸ“¡ Event publishing must follow correct sequence
+â”œâ”€â”€ ðŸ”„ Failure in Production must notify Sales
+â””â”€â”€ ðŸ“‹ All state changes must be auditable
 
 Data Integrity Rules:
-├── 🎯 Demand must always reference valid OrderItem
-├── 📦 Product references must be consistent across domains
-├── 🧩 Configuration data must be preserved exactly
-├── 💰 Quantity and pricing must remain consistent
-└── 📅 Dates and timelines must be logically consistent
+â”œâ”€â”€ ðŸŽ¯ Demand must always reference valid OrderItem
+â”œâ”€â”€ ðŸ“¦ Product references must be consistent across domains
+â”œâ”€â”€ ðŸ§© Configuration data must be preserved exactly
+â”œâ”€â”€ ðŸ’° Quantity and pricing must remain consistent
+â””â”€â”€ ðŸ“… Dates and timelines must be logically consistent
 ```
 
-## ⚡ Performance Considerations
+## âš¡ Performance Considerations
 
-### **🚀 Optimization Strategies**
+### **ðŸš€ Optimization Strategies**
 ```
 Batch Processing:
-├── 📊 Process multiple OrderItems in single transaction
-├── 🎯 Bulk database operations where possible
-├── 📡 Batch event publishing to reduce overhead
-└── 🔄 Group similar operations together
+â”œâ”€â”€ ðŸ“Š Process multiple OrderItems in single transaction
+â”œâ”€â”€ ðŸŽ¯ Bulk database operations where possible
+â”œâ”€â”€ ðŸ“¡ Batch event publishing to reduce overhead
+â””â”€â”€ ðŸ”„ Group similar operations together
 
 Caching Strategies:
-├── 📦 Cache Product data and configurations
-├── 🧩 Cache component hierarchies and rules
-├── 💰 Cache pricing calculations
-└── ✅ Cache validation results for repeated patterns
+â”œâ”€â”€ ðŸ“¦ Cache Product data and configurations
+â”œâ”€â”€ ðŸ§© Cache component hierarchies and rules
+â”œâ”€â”€ ðŸ’° Cache pricing calculations
+â””â”€â”€ âœ… Cache validation results for repeated patterns
 
 Async Processing:
-├── 📡 Event-driven asynchronous processing
-├── 🔄 Non-blocking cross-domain calls
-├── 📊 Background demand generation processing
-└── 🎯 Parallel processing of independent OrderItems
+â”œâ”€â”€ ðŸ“¡ Event-driven asynchronous processing
+â”œâ”€â”€ ðŸ”„ Non-blocking cross-domain calls
+â”œâ”€â”€ ðŸ“Š Background demand generation processing
+â””â”€â”€ ðŸŽ¯ Parallel processing of independent OrderItems
 ```
 
-### **📊 Performance Metrics**
+### **ðŸ“Š Performance Metrics**
 ```
 Target SLAs:
-├── 🎯 OrderItem → Demand creation: < 2 seconds per item
-├── 📊 Order confirmation response: < 5 seconds total
-├── 🔄 Cross-domain event propagation: < 10 seconds
-└── 💾 Database transaction completion: < 1 second
+â”œâ”€â”€ ðŸŽ¯ OrderItem â†’ Demand creation: < 2 seconds per item
+â”œâ”€â”€ ðŸ“Š Order confirmation response: < 5 seconds total
+â”œâ”€â”€ ðŸ”„ Cross-domain event propagation: < 10 seconds
+â””â”€â”€ ðŸ’¾ Database transaction completion: < 1 second
 
 Scalability Targets:
-├── 📈 Support 1000+ OrderItems per order
-├── 🎯 Handle 100+ concurrent order confirmations
-├── 📊 Process 10,000+ demands per hour
-└── 🔄 Maintain < 1% error rate under load
+â”œâ”€â”€ ðŸ“ˆ Support 1000+ OrderItems per order
+â”œâ”€â”€ ðŸŽ¯ Handle 100+ concurrent order confirmations
+â”œâ”€â”€ ðŸ“Š Process 10,000+ demands per hour
+â””â”€â”€ ðŸ”„ Maintain < 1% error rate under load
 ```
 
-## 🚨 Error Handling and Recovery
+## ðŸš¨ Error Handling and Recovery
 
-### **🔧 Error Scenarios**
+### **ðŸ”§ Error Scenarios**
 ```
 Product Configuration Errors:
-├── ❌ Invalid component selections
-├── ❌ Incompatible component combinations
-├── ❌ Missing required components
-└── 🔄 Recovery: Reject confirmation, notify user
+â”œâ”€â”€ âŒ Invalid component selections
+â”œâ”€â”€ âŒ Incompatible component combinations
+â”œâ”€â”€ âŒ Missing required components
+â””â”€â”€ ðŸ”„ Recovery: Reject confirmation, notify user
 
 Resource Availability Errors:
-├── ❌ Insufficient ingredient stock
-├── ❌ Production capacity exceeded
-├── ❌ Component temporarily unavailable
-└── 🔄 Recovery: Create demand with "Pending" status
+â”œâ”€â”€ âŒ Insufficient ingredient stock
+â”œâ”€â”€ âŒ Production capacity exceeded
+â”œâ”€â”€ âŒ Component temporarily unavailable
+â””â”€â”€ ðŸ”„ Recovery: Create demand with "Pending" status
 
 System Integration Errors:
-├── ❌ Database transaction failures
-├── ❌ Event publishing failures
-├── ❌ Cross-domain communication timeouts
-└── 🔄 Recovery: Retry mechanism with exponential backoff
+â”œâ”€â”€ âŒ Database transaction failures
+â”œâ”€â”€ âŒ Event publishing failures
+â”œâ”€â”€ âŒ Cross-domain communication timeouts
+â””â”€â”€ ðŸ”„ Recovery: Retry mechanism with exponential backoff
 
 Business Rule Violations:
-├── ❌ Credit limit exceeded
-├── ❌ Delivery date impossible
-├── ❌ Product restrictions violated
-└── 🔄 Recovery: Block confirmation, provide clear error message
+â”œâ”€â”€ âŒ Credit limit exceeded
+â”œâ”€â”€ âŒ Delivery date impossible
+â”œâ”€â”€ âŒ Product restrictions violated
+â””â”€â”€ ðŸ”„ Recovery: Block confirmation, provide clear error message
 ```
 
-### **🔄 Recovery Mechanisms**
+### **ðŸ”„ Recovery Mechanisms**
 ```
 Retry Strategies:
-├── 🔁 Exponential backoff for transient failures
-├── 🎯 Circuit breaker for external service failures
-├── 📊 Dead letter queue for failed events
-└── 🚨 Manual intervention queue for complex errors
+â”œâ”€â”€ ðŸ” Exponential backoff for transient failures
+â”œâ”€â”€ ðŸŽ¯ Circuit breaker for external service failures
+â”œâ”€â”€ ðŸ“Š Dead letter queue for failed events
+â””â”€â”€ ðŸš¨ Manual intervention queue for complex errors
 
 Compensation Actions:
-├── 🔄 Reverse demand creation on failure
-├── 📊 Restore order status on rollback
-├── 📡 Publish compensation events
-└── 🔔 Notify relevant parties of failures
+â”œâ”€â”€ ðŸ”„ Reverse demand creation on failure
+â”œâ”€â”€ ðŸ“Š Restore order status on rollback
+â”œâ”€â”€ ðŸ“¡ Publish compensation events
+â””â”€â”€ ðŸ”” Notify relevant parties of failures
 
 Data Consistency Recovery:
-├── 📊 Eventual consistency through event replay
-├── 🎯 Reconciliation processes for data drift
-├── 🔄 Audit trail for manual correction
-└── 📋 Health check monitoring for early detection
+â”œâ”€â”€ ðŸ“Š Eventual consistency through event replay
+â”œâ”€â”€ ðŸŽ¯ Reconciliation processes for data drift
+â”œâ”€â”€ ðŸ”„ Audit trail for manual correction
+â””â”€â”€ ðŸ“‹ Health check monitoring for early detection
 ```
 
-## 📋 Validation Matrix
+## ðŸ“‹ Validation Matrix
 
-### **🎯 Validation Layers**
+### **ðŸŽ¯ Validation Layers**
 | Validation Type | Layer | Scope | Error Handling |
 |----------------|-------|-------|----------------|
 | **Input Validation** | Controller | HTTP request format | 400 Bad Request |
@@ -499,34 +499,34 @@ Data Consistency Recovery:
 | **Resource Check** | Production | Ingredient availability | Resource warning |
 | **Data Integrity** | Repository | Database constraints | Transaction rollback |
 
-### **✅ Validation Checklist**
+### **âœ… Validation Checklist**
 ```
 Order Level:
-├── ✅ Order exists and is in correct status
-├── ✅ Customer is active and has sufficient credit
-├── ✅ Delivery date is feasible
-├── ✅ All required fields are populated
-└── ✅ Order total matches calculated total
+â”œâ”€â”€ âœ… Order exists and is in correct status
+â”œâ”€â”€ âœ… Customer is active and has sufficient credit
+â”œâ”€â”€ âœ… Delivery date is feasible
+â”œâ”€â”€ âœ… All required fields are populated
+â””â”€â”€ âœ… Order total matches calculated total
 
 OrderItem Level:
-├── ✅ Product is active and available
-├── ✅ Quantity is positive and within limits
-├── ✅ Configuration is complete and valid
-├── ✅ Pricing is accurate and current
-└── ✅ Special requirements are achievable
+â”œâ”€â”€ âœ… Product is active and available
+â”œâ”€â”€ âœ… Quantity is positive and within limits
+â”œâ”€â”€ âœ… Configuration is complete and valid
+â”œâ”€â”€ âœ… Pricing is accurate and current
+â””â”€â”€ âœ… Special requirements are achievable
 
 Demand Level:
-├── ✅ Production capacity is available
-├── ✅ Required ingredients are in stock
-├── ✅ Production lead time allows delivery date
-├── ✅ All components are available
-└── ✅ Cost estimates are within budgets
+â”œâ”€â”€ âœ… Production capacity is available
+â”œâ”€â”€ âœ… Required ingredients are in stock
+â”œâ”€â”€ âœ… Production lead time allows delivery date
+â”œâ”€â”€ âœ… All components are available
+â””â”€â”€ âœ… Cost estimates are within budgets
 ```
 
 ---
 
 **Arquivo**: `01-orderitem-to-demand-flow.md`  
-**Fluxo**: OrderItem → Demand (Automático)  
-**Domínios**: Sales → Production  
-**Complexidade**: 🚨 Alta (8+ participantes, 20+ interações)  
-**Atualização**: 16/06/2025
+**Fluxo**: OrderItem â†’ Demand (AutomÃ¡tico)  
+**DomÃ­nios**: Sales â†’ Production  
+**Complexidade**: ðŸš¨ Alta (8+ participantes, 20+ interaÃ§Ãµes)  
+**AtualizaÃ§Ã£o**: 16/06/2025

@@ -5,6 +5,7 @@ using GesN.Web.Models.Entities.Production;
 using Microsoft.AspNetCore.Authorization;
 using GesN.Web.Models.Enumerators;
 using GesN.Web.Models.ViewModels.Production;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace GesN.Web.Controllers
@@ -1159,5 +1160,328 @@ namespace GesN.Web.Controllers
         }
 
         #endregion
+
+        #region Product Group Validation for Cart (FASE 3)
+
+        /// <summary>
+        /// Valida um grupo de produtos e retorna sua configuração completa
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> ValidateGroupProduct([FromBody] ValidateGroupProductRequest request)
+        {
+            try
+            {
+                // Validar dados básicos
+                if (string.IsNullOrEmpty(request.ProductId))
+                {
+                    return Json(new { success = false, message = "ID do produto é obrigatório" });
+                }
+
+                // Verificar se o produto existe e é do tipo Group
+                var product = await _productService.GetByIdAsync(request.ProductId);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = "Produto não encontrado" });
+                }
+
+                if (product.ProductType != ProductType.Group)
+                {
+                    return Json(new { success = false, message = "Produto não é do tipo grupo" });
+                }
+
+                // Verificar se o produto está ativo
+                if (product.StateCode != ObjectState.Active)
+                {
+                    return Json(new { success = false, message = "Produto não está disponível" });
+                }
+
+                // Carregar itens do grupo
+                var groupItems = await _productGroupService.GetGroupItemsWithProductDataAsync(request.ProductId);
+                var groupItemsList = groupItems.ToList();
+
+                if (!groupItemsList.Any())
+                {
+                    return Json(new { success = false, message = "Grupo de produtos não possui itens configurados" });
+                }
+
+                // Carregar regras de troca
+                var exchangeRules = await _productGroupService.GetExchangeRulesAsync(request.ProductId);
+                var exchangeRulesList = exchangeRules.ToList();
+
+                // Processar itens do grupo
+                var groupItemsWithOptions = new List<object>();
+
+                foreach (var groupItem in groupItemsList.Where(gi => gi.StateCode == ObjectState.Active))
+                {
+                    var itemData = new
+                    {
+                        id = groupItem.Id,
+                        productGroupId = groupItem.ProductGroupId,
+                        productId = groupItem.ProductId,
+                        productCategoryId = groupItem.ProductCategoryId,
+                        quantity = groupItem.Quantity,
+                        minQuantity = groupItem.MinQuantity,
+                        maxQuantity = groupItem.MaxQuantity,
+                        defaultQuantity = groupItem.DefaultQuantity,
+                        isOptional = groupItem.IsOptional,
+                        extraPrice = groupItem.ExtraPrice,
+                        itemType = groupItem.GetItemType(),
+                        displayName = groupItem.GetDisplayName(),
+                        priceInfo = groupItem.GetPriceInfo(),
+                        availabilityStatus = groupItem.GetAvailabilityStatus(),
+                        productOptions = await GetProductOptionsForGroupItem(groupItem)
+                    };
+
+                    groupItemsWithOptions.Add(itemData);
+                }
+
+                // Processar regras de troca ativas
+                var activeExchangeRules = exchangeRulesList
+                    .Where(rule => rule.IsActive && rule.CanApplyExchange())
+                    .Select(rule => new
+                    {
+                        id = rule.Id,
+                        sourceGroupItemId = rule.SourceGroupItemId,
+                        targetGroupItemId = rule.TargetGroupItemId,
+                        sourceWeight = rule.SourceGroupItemWeight,
+                        targetWeight = rule.TargetGroupItemWeight,
+                        exchangeRatio = rule.ExchangeRatio,
+                        description = rule.GetCompleteDescription(),
+                        ratioDescription = rule.GetExchangeRatioDescription()
+                    }).ToList();
+
+                // Retornar configuração completa
+                return Json(new 
+                { 
+                    success = true, 
+                    message = "Grupo de produtos validado com sucesso",
+                    product = new 
+                    {
+                        id = product.Id,
+                        name = product.Name,
+                        description = product.Description,
+                        sku = product.SKU,
+                        price = product.Price,
+                        unitPrice = product.UnitPrice,
+                        cost = product.Cost,
+                        categoryId = product.CategoryId,
+                        categoryName = product.Category,
+                        productType = product.ProductType.ToString(),
+                        assemblyTime = product.AssemblyTime,
+                        assemblyInstructions = product.AssemblyInstructions,
+                        imageUrl = product.ImageUrl,
+                        groupItems = groupItemsWithOptions,
+                        exchangeRules = activeExchangeRules,
+                        totalItems = groupItemsList.Count,
+                        requiredItems = groupItemsList.Count(gi => !gi.IsOptional),
+                        optionalItems = groupItemsList.Count(gi => gi.IsOptional)
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao validar grupo de produtos. ProductId: {ProductId}", request.ProductId);
+                return Json(new { success = false, message = "Erro interno do servidor ao validar grupo de produtos" });
+            }
+        }
+
+        /// <summary>
+        /// Obtém opções de produtos para um item de grupo (quando é categoria)
+        /// </summary>
+        private async Task<List<object>> GetProductOptionsForGroupItem(ProductGroupItem groupItem)
+        {
+            var options = new List<object>();
+
+            try
+            {
+                // Se é produto direto, retornar apenas o produto
+                if (!string.IsNullOrEmpty(groupItem.ProductId) && groupItem.Product != null)
+                {
+                    options.Add(new
+                    {
+                        id = groupItem.Product.Id,
+                        name = groupItem.Product.Name,
+                        description = groupItem.Product.Description,
+                        sku = groupItem.Product.SKU,
+                        price = groupItem.Product.UnitPrice,
+                        effectivePrice = groupItem.GetEffectivePrice(),
+                        isAvailable = groupItem.Product.StateCode == ObjectState.Active,
+                        productType = groupItem.Product.ProductType.ToString()
+                    });
+                }
+                // Se é categoria, carregar produtos da categoria
+                else if (!string.IsNullOrEmpty(groupItem.ProductCategoryId))
+                {
+                    var categoryProducts = await _productService.GetByCategoryAsync(groupItem.ProductCategoryId);
+                    var activeProducts = categoryProducts.Where(p => p.StateCode == ObjectState.Active).ToList();
+
+                    foreach (var categoryProduct in activeProducts)
+                    {
+                        options.Add(new
+                        {
+                            id = categoryProduct.Id,
+                            name = categoryProduct.Name,
+                            description = categoryProduct.Description,
+                            sku = categoryProduct.SKU,
+                            price = categoryProduct.UnitPrice,
+                            effectivePrice = categoryProduct.UnitPrice + groupItem.ExtraPrice,
+                            isAvailable = true,
+                            productType = categoryProduct.ProductType.ToString(),
+                            categoryId = groupItem.ProductCategoryId,
+                            categoryName = groupItem.ProductCategory?.Name
+                        });
+                    }
+                }
+
+                return options;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar opções para ProductGroupItem {GroupItemId}", groupItem.Id);
+                return options;
+            }
+        }
+
+        /// <summary>
+        /// Calcula preço do grupo baseado nas seleções
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> CalculateGroupPrice([FromBody] CalculateGroupPriceRequest request)
+        {
+            try
+            {
+                // Validar dados básicos
+                if (string.IsNullOrEmpty(request.ProductId))
+                {
+                    return Json(new { success = false, message = "ID do produto é obrigatório" });
+                }
+
+                if (request.GroupSelections == null || !request.GroupSelections.Any())
+                {
+                    return Json(new { success = false, message = "Seleções do grupo são obrigatórias" });
+                }
+
+                // Verificar se o produto existe e é do tipo Group
+                var product = await _productService.GetByIdAsync(request.ProductId);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = "Produto não encontrado" });
+                }
+
+                if (product.ProductType != ProductType.Group)
+                {
+                    return Json(new { success = false, message = "Produto não é do tipo grupo" });
+                }
+
+                // Calcular preço total baseado nas seleções
+                decimal totalPrice = 0;
+                var selectionDetails = new List<object>();
+
+                foreach (var selection in request.GroupSelections)
+                {
+                    // Buscar item do grupo
+                    var groupItem = await _productGroupService.GetGroupItemByIdAsync(selection.GroupItemId);
+                    if (groupItem == null)
+                    {
+                        return Json(new { success = false, message = $"Item do grupo {selection.GroupItemId} não encontrado" });
+                    }
+
+                    // Buscar produto selecionado
+                    var selectedProduct = await _productService.GetByIdAsync(selection.SelectedProductId);
+                    if (selectedProduct == null)
+                    {
+                        return Json(new { success = false, message = $"Produto selecionado {selection.SelectedProductId} não encontrado" });
+                    }
+
+                    // Calcular preço do item
+                    decimal itemPrice = selectedProduct.UnitPrice + groupItem.ExtraPrice;
+                    decimal itemTotal = itemPrice * selection.Quantity;
+                    totalPrice += itemTotal;
+
+                    selectionDetails.Add(new
+                    {
+                        groupItemId = selection.GroupItemId,
+                        selectedProductId = selection.SelectedProductId,
+                        productName = selectedProduct.Name,
+                        quantity = selection.Quantity,
+                        unitPrice = selectedProduct.UnitPrice,
+                        extraPrice = groupItem.ExtraPrice,
+                        effectivePrice = itemPrice,
+                        totalPrice = itemTotal
+                    });
+                }
+
+                // Aplicar quantidade do grupo
+                decimal finalPrice = totalPrice * request.GroupQuantity;
+
+                return Json(new 
+                { 
+                    success = true, 
+                    message = "Preço calculado com sucesso",
+                    pricing = new 
+                    {
+                        basePrice = product.UnitPrice,
+                        itemsTotal = totalPrice,
+                        groupQuantity = request.GroupQuantity,
+                        finalPrice = finalPrice,
+                        selections = selectionDetails
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao calcular preço do grupo de produtos. ProductId: {ProductId}", request.ProductId);
+                return Json(new { success = false, message = "Erro interno do servidor ao calcular preço" });
+            }
+        }
+
+        #endregion
     }
+
+    #region Group Product Request Models
+
+    /// <summary>
+    /// Request para validar grupo de produtos
+    /// </summary>
+    public class ValidateGroupProductRequest
+    {
+        [Required(ErrorMessage = "O ID do produto é obrigatório")]
+        public string ProductId { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Seleção de item do grupo
+    /// </summary>
+    public class GroupItemSelection
+    {
+        [Required(ErrorMessage = "O ID do item do grupo é obrigatório")]
+        public string GroupItemId { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "O ID do produto selecionado é obrigatório")]
+        public string SelectedProductId { get; set; } = string.Empty;
+
+        [Range(1, int.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
+        public int Quantity { get; set; } = 1;
+
+        public string? GroupItemName { get; set; }
+        public string? ProductName { get; set; }
+        public decimal ExtraPrice { get; set; } = 0;
+    }
+
+    /// <summary>
+    /// Request para calcular preço de grupo de produtos
+    /// </summary>
+    public class CalculateGroupPriceRequest
+    {
+        [Required(ErrorMessage = "O ID do produto é obrigatório")]
+        public string ProductId { get; set; } = string.Empty;
+
+        [Range(1, int.MaxValue, ErrorMessage = "A quantidade do grupo deve ser maior que zero")]
+        public int GroupQuantity { get; set; } = 1;
+
+        [Required(ErrorMessage = "Seleções do grupo são obrigatórias")]
+        public List<GroupItemSelection> GroupSelections { get; set; } = new();
+    }
+
+    #endregion
 } 

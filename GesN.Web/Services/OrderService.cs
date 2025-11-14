@@ -15,17 +15,20 @@ namespace GesN.Web.Services
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderItemRepository _orderItemRepository;
         private readonly ICustomerRepository _customerRepository;
+        private readonly IProductRepository _productRepository;
         private readonly ILogger<OrderService> _logger;
 
         public OrderService(
             IOrderRepository orderRepository,
             IOrderItemRepository orderItemRepository,
             ICustomerRepository customerRepository,
+            IProductRepository productRepository,
             ILogger<OrderService> logger)
         {
             _orderRepository = orderRepository;
             _orderItemRepository = orderItemRepository;
             _customerRepository = customerRepository;
+            _productRepository = productRepository;
             _logger = logger;
         }
 
@@ -56,9 +59,8 @@ namespace GesN.Web.Services
                 
                 if (order != null)
                 {
-                    // Carrega os itens do pedido
-                    var items = await _orderItemRepository.GetByOrderIdAsync(id);
-                    order.Items = items.ToList();
+                    // Carrega os itens do pedido com dados dos produtos
+                    order = await LoadOrderWithProductsAsync(order);
                 }
 
                 return order;
@@ -84,9 +86,8 @@ namespace GesN.Web.Services
                 
                 if (order != null)
                 {
-                    // Carrega os itens do pedido
-                    var items = await _orderItemRepository.GetByOrderIdAsync(order.Id);
-                    order.Items = items.ToList();
+                    // Carrega os itens do pedido com dados dos produtos
+                    order = await LoadOrderWithProductsAsync(order);
                 }
 
                 return order;
@@ -576,6 +577,101 @@ namespace GesN.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao validar dados do pedido");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Carrega um pedido com os dados dos produtos nos OrderItems
+        /// </summary>
+        /// <param name="order">Pedido a ser carregado com dados dos produtos</param>
+        /// <returns>Pedido com dados dos produtos carregados</returns>
+        private async Task<OrderEntry> LoadOrderWithProductsAsync(OrderEntry order)
+        {
+            try
+            {
+                // Carrega os itens do pedido
+                var items = await _orderItemRepository.GetByOrderIdAsync(order.Id);
+                var itemsList = items.ToList();
+
+                // Para cada item, carrega os dados do produto
+                foreach (var item in itemsList)
+                {
+                    if (!string.IsNullOrEmpty(item.ProductId))
+                    {
+                        var product = await _productRepository.GetByIdAsync(item.ProductId);
+                        if (product != null)
+                        {
+                            item.Product = product;
+                        }
+                    }
+                }
+
+                order.Items = itemsList;
+                return order;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar dados dos produtos para o pedido: {OrderId}", order.Id);
+                // Em caso de erro, retorna o pedido sem os dados dos produtos
+                var items = await _orderItemRepository.GetByOrderIdAsync(order.Id);
+                order.Items = items.ToList();
+                return order;
+            }
+        }
+
+        /// <summary>
+        /// Recalcula os totais do pedido baseado nos itens atuais
+        /// </summary>
+        public async Task<bool> RecalculateOrderTotalsAsync(string orderId)
+        {
+            try
+            {
+                var order = await _orderRepository.GetByIdAsync(orderId);
+                if (order == null)
+                {
+                    _logger.LogWarning("Pedido não encontrado para recalcular totais: {OrderId}", orderId);
+                    return false;
+                }
+
+                // Carregar todos os itens do pedido
+                var items = await _orderItemRepository.GetByOrderIdAsync(orderId);
+                var itemsList = items.ToList();
+
+                // Calcular totais
+                decimal subtotal = 0;
+                decimal totalDiscounts = 0;
+                decimal totalTaxes = 0;
+
+                foreach (var item in itemsList)
+                {
+                    var itemSubtotal = item.Quantity * item.UnitPrice;
+                    subtotal += itemSubtotal;
+                    totalDiscounts += item.DiscountAmount;
+                    totalTaxes += item.TaxAmount;
+                }
+
+                // Atualizar campos calculados do pedido
+                order.Subtotal = subtotal;
+                order.DiscountAmount = totalDiscounts;
+                order.TaxAmount = totalTaxes;
+                order.TotalAmount = subtotal + totalTaxes - totalDiscounts;
+                order.LastModifiedAt = DateTime.UtcNow;
+
+                // Salvar as alterações
+                var result = await _orderRepository.UpdateAsync(order);
+                
+                if (result)
+                {
+                    _logger.LogInformation("Totais do pedido recalculados com sucesso: {OrderId}, Total: {Total}", 
+                        orderId, order.TotalAmount);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao recalcular totais do pedido: {OrderId}", orderId);
                 return false;
             }
         }

@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using GesN.Web.Interfaces.Services;
 using GesN.Web.Models.ViewModels.Production;
 using GesN.Web.Models.Entities.Production;
+using GesN.Web.Models.Entities.Sales;
 using GesN.Web.Models.Enumerators;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace GesN.Web.Controllers
@@ -729,6 +731,134 @@ namespace GesN.Web.Controllers
             }
         }
 
+        // GET: Product/CatalogProducts - Para uso no catálogo de edição de pedidos
+        [HttpGet]
+        public async Task<IActionResult> CatalogProducts(
+            string? category = null,
+            string? search = null,
+            int page = 1,
+            int pageSize = 8,
+            bool returnJson = false)
+        {
+            try
+            {
+                var allProducts = await _productService.GetActiveAsync();
+                
+                // Aplicar filtros
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    allProducts = allProducts.Where(p =>
+                        p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(p.SKU) && p.SKU.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                        (p.Description?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
+                }
+
+                if (!string.IsNullOrWhiteSpace(category))
+                {
+                    // Filtrar por nome da categoria (assumindo que categoria é o nome, não o ID)
+                    allProducts = allProducts.Where(p =>
+                        !string.IsNullOrWhiteSpace(p.Category) &&
+                        p.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
+                }
+
+                var totalProducts = allProducts.Count();
+                
+                // Aplicar paginação
+                var paginatedProducts = allProducts
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var viewModel = new ProductCatalogViewModel
+                {
+                    Products = paginatedProducts,
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalProducts = totalProducts,
+                    CurrentCategory = category,
+                    SearchTerm = search
+                };
+
+                // Retornar JSON se solicitado (para TypeScript)
+                if (returnJson)
+                {
+                    var catalogData = new
+                    {
+                        success = true,
+                        message = "Produtos carregados com sucesso",
+                        data = new
+                        {
+                            products = paginatedProducts.Select(p => new
+                            {
+                                id = p.Id,
+                                name = p.Name,
+                                description = p.Description,
+                                sku = p.SKU,
+                                price = p.Price,
+                                unitPrice = p.UnitPrice,
+                                cost = p.Cost,
+                                categoryId = p.CategoryId,
+                                categoryName = p.Category,
+                                productType = p.ProductType.ToString(),
+                                imageUrl = p.ImageUrl,
+                                assemblyTime = p.AssemblyTime,
+                                isActive = p.StateCode == ObjectState.Active,
+                                createdAt = p.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss")
+                            }),
+                            currentPage = page,
+                            totalProducts = totalProducts,
+                            totalPages = (int)Math.Ceiling((double)totalProducts / pageSize),
+                            hasNextPage = page < Math.Ceiling((double)totalProducts / pageSize),
+                            hasPreviousPage = page > 1,
+                            filters = new
+                            {
+                                category = category,
+                                search = search,
+                                page = page,
+                                pageSize = pageSize
+                            }
+                        }
+                    };
+
+                    return Json(catalogData);
+                }
+
+                // Retornar partial view (comportamento original)
+                return PartialView("_ProductList", viewModel.Products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar catálogo de produtos");
+                
+                if (returnJson)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Erro ao carregar produtos: " + ex.Message,
+                        data = new
+                        {
+                            products = new List<object>(),
+                            currentPage = 1,
+                            totalProducts = 0,
+                            totalPages = 0,
+                            hasNextPage = false,
+                            hasPreviousPage = false,
+                            filters = new
+                            {
+                                category = category,
+                                search = search,
+                                page = page,
+                                pageSize = pageSize
+                            }
+                        }
+                    });
+                }
+
+                return PartialView("_ProductList", new List<Product>());
+            }
+        }
+
         // GET: Product/BuscarProduct
         [HttpGet]
         public async Task<IActionResult> BuscarProduct(string termo)
@@ -1167,5 +1297,400 @@ namespace GesN.Web.Controllers
 
         #endregion
 
+        #region Product Validation for Cart
+
+        /// <summary>
+        /// Valida um produto simples antes de adicionar ao carrinho
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> ValidateSimpleProduct([FromBody] ValidateSimpleProductRequest request)
+        {
+            try
+            {
+                // Validar dados básicos
+                if (string.IsNullOrEmpty(request.ProductId))
+                {
+                    return Json(new { success = false, message = "ID do produto é obrigatório" });
+                }
+
+                // Verificar se o produto existe e é do tipo Simple
+                var product = await _productService.GetByIdAsync(request.ProductId);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = "Produto não encontrado" });
+                }
+
+                if (product.ProductType != ProductType.Simple)
+                {
+                    return Json(new { success = false, message = "Produto não é do tipo simples" });
+                }
+
+                // Verificar se o produto está ativo
+                if (product.StateCode != ObjectState.Active)
+                {
+                    return Json(new { success = false, message = "Produto não está disponível" });
+                }
+
+                // Retornar dados validados do produto
+                return Json(new 
+                { 
+                    success = true, 
+                    message = "Produto validado com sucesso",
+                    product = new 
+                    {
+                        id = product.Id,
+                        name = product.Name,
+                        description = product.Description,
+                        sku = product.SKU,
+                        price = product.Price,
+                        unitPrice = product.UnitPrice,
+                        cost = product.Cost,
+                        categoryId = product.CategoryId,
+                        categoryName = product.Category,
+                        productType = product.ProductType.ToString(),
+                        assemblyTime = product.AssemblyTime,
+                        assemblyInstructions = product.AssemblyInstructions,
+                        imageUrl = product.ImageUrl
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao validar produto simples. ProductId: {ProductId}", request.ProductId);
+                return Json(new { success = false, message = "Erro interno do servidor ao validar produto" });
+            }
+        }
+
+        /// <summary>
+        /// Valida um produto composto e retorna sua configuração completa
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> ValidateCompositeProduct([FromBody] ValidateCompositeProductRequest request)
+        {
+            try
+            {
+                // Validar dados básicos
+                if (string.IsNullOrEmpty(request.ProductId))
+                {
+                    return Json(new { success = false, message = "ID do produto é obrigatório" });
+                }
+
+                // Verificar se o produto existe e é do tipo Composite
+                var product = await _productService.GetByIdAsync(request.ProductId);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = "Produto não encontrado" });
+                }
+
+                if (product.ProductType != ProductType.Composite)
+                {
+                    return Json(new { success = false, message = "Produto não é do tipo composto" });
+                }
+
+                // Verificar se o produto está ativo
+                if (product.StateCode != ObjectState.Active)
+                {
+                    return Json(new { success = false, message = "Produto não está disponível" });
+                }
+
+                // Carregar configuração de hierarquias
+                var hierarchies = await _compositeProductXHierarchyService.GetActiveProductHierarchiesAsync(request.ProductId);
+                var hierarchyList = hierarchies.ToList();
+
+                if (!hierarchyList.Any())
+                {
+                    return Json(new { success = false, message = "Produto composto não possui hierarquias configuradas" });
+                }
+
+                // Validar configuração do produto
+                var (isValid, validationErrors) = await _compositeProductXHierarchyService.ValidateHierarchyConfigurationAsync(request.ProductId);
+                if (!isValid)
+                {
+                    return Json(new { success = false, message = $"Configuração do produto inválida: {string.Join("; ", validationErrors)}" });
+                }
+
+                // Carregar componentes para cada hierarquia
+                var hierarchiesWithComponents = new List<object>();
+
+                foreach (var hierarchy in hierarchyList.OrderBy(h => h.AssemblyOrder))
+                {
+                    // Buscar hierarquia completa
+                    var hierarchyEntity = await _productComponentService.GetByHierarchyIdAsync(hierarchy.ProductComponentHierarchyId);
+                    var hierarchyInfo = await _compositeProductXHierarchyService.GetRelationByIdAsync(hierarchy.Id);
+                    
+                    if (hierarchyInfo == null) continue;
+
+                    // Buscar componentes da hierarquia
+                    var components = await _productComponentService.GetByHierarchyIdAsync(hierarchy.ProductComponentHierarchyId);
+                    var activeComponents = components.Where(c => c.StateCode == ObjectState.Active).ToList();
+
+                    if (!activeComponents.Any())
+                    {
+                        _logger.LogWarning("Hierarquia {HierarchyName} não possui componentes ativos", hierarchyInfo.HierarchyName);
+                        continue;
+                    }
+
+                    hierarchiesWithComponents.Add(new
+                    {
+                        id = hierarchy.ProductComponentHierarchyId,
+                        name = hierarchyInfo.HierarchyName,
+                        description = hierarchyEntity.FirstOrDefault()?.Description ?? "",
+                        minQuantity = hierarchy.MinQuantity,
+                        maxQuantity = hierarchy.MaxQuantity,
+                        isOptional = hierarchy.IsOptional,
+                        assemblyOrder = hierarchy.AssemblyOrder,
+                        components = activeComponents.Select(c => new
+                        {
+                            id = c.Id,
+                            name = c.Name,
+                            description = c.Description,
+                            additionalCost = c.AdditionalCost,
+                            hierarchyId = c.ProductComponentHierarchyId
+                        }).OrderBy(c => c.name).ToList()
+                    });
+                }
+
+                if (!hierarchiesWithComponents.Any())
+                {
+                    return Json(new { success = false, message = "Produto composto não possui hierarquias com componentes ativos" });
+                }
+
+                // Retornar configuração completa
+                return Json(new 
+                { 
+                    success = true, 
+                    message = "Produto composto validado com sucesso",
+                    product = new 
+                    {
+                        id = product.Id,
+                        name = product.Name,
+                        description = product.Description,
+                        sku = product.SKU,
+                        price = product.Price,
+                        unitPrice = product.UnitPrice,
+                        cost = product.Cost,
+                        categoryId = product.CategoryId,
+                        categoryName = product.Category,
+                        productType = product.ProductType.ToString(),
+                        assemblyTime = product.AssemblyTime,
+                        assemblyInstructions = product.AssemblyInstructions,
+                        imageUrl = product.ImageUrl,
+                        hierarchies = hierarchiesWithComponents
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao validar produto composto. ProductId: {ProductId}", request.ProductId);
+                return Json(new { success = false, message = "Erro interno do servidor ao validar produto composto" });
+            }
+        }
+
+        /// <summary>
+        /// Calcula o preço de um produto composto baseado nas seleções de componentes
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> CalculateCompositePrice([FromBody] CalculateCompositePriceRequest request)
+        {
+            try
+            {
+                // Validar dados básicos
+                if (string.IsNullOrEmpty(request.ProductId))
+                {
+                    return Json(new { success = false, message = "ID do produto é obrigatório" });
+                }
+
+                if (request.ComponentSelections == null || !request.ComponentSelections.Any())
+                {
+                    return Json(new { success = false, message = "Seleções de componentes são obrigatórias" });
+                }
+
+                // Verificar se o produto existe e é do tipo Composite
+                var product = await _productService.GetByIdAsync(request.ProductId);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = "Produto não encontrado" });
+                }
+
+                if (product.ProductType != ProductType.Composite)
+                {
+                    return Json(new { success = false, message = "Produto não é do tipo composto" });
+                }
+
+                // Calcular preço total
+                decimal totalPrice = product.UnitPrice; // Preço base
+                decimal totalAdditionalCost = 0;
+
+                // Validar e somar custos adicionais dos componentes selecionados
+                foreach (var selection in request.ComponentSelections)
+                {
+                    var component = await _productComponentService.GetByIdAsync(selection.ComponentId);
+                    if (component == null)
+                    {
+                        return Json(new { success = false, message = $"Componente {selection.ComponentId} não encontrado" });
+                    }
+
+                    if (component.StateCode != ObjectState.Active)
+                    {
+                        return Json(new { success = false, message = $"Componente '{component.Name}' não está disponível" });
+                    }
+
+                    totalAdditionalCost += component.AdditionalCost * selection.Quantity;
+                }
+
+                totalPrice += totalAdditionalCost;
+
+                // Aplicar quantidade do produto
+                decimal finalPrice = totalPrice * request.ProductQuantity;
+
+                return Json(new 
+                { 
+                    success = true, 
+                    message = "Preço calculado com sucesso",
+                    pricing = new 
+                    {
+                        basePrice = product.UnitPrice,
+                        additionalCost = totalAdditionalCost,
+                        unitPrice = totalPrice,
+                        quantity = request.ProductQuantity,
+                        totalPrice = finalPrice
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao calcular preço do produto composto. ProductId: {ProductId}", request.ProductId);
+                return Json(new { success = false, message = "Erro interno do servidor ao calcular preço" });
+            }
+        }
+
+        // GET: Product/CatalogDataTable - Endpoint específico para DataTables.net do catálogo
+        [HttpGet]
+        public async Task<IActionResult> CatalogDataTable(
+            string? category = null, 
+            string? search = null)
+        {
+            try
+            {
+                var allProducts = await _productService.GetActiveAsync();
+                
+                // Aplicar filtros
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    allProducts = allProducts.Where(p =>
+                        p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(p.SKU) && p.SKU.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                        (p.Description?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
+                }
+
+                if (!string.IsNullOrWhiteSpace(category))
+                {
+                    allProducts = allProducts.Where(p =>
+                        !string.IsNullOrWhiteSpace(p.Category) &&
+                        p.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
+                }
+
+                // Preparar dados para DataTables
+                var catalogData = allProducts.Select(p => new
+                {
+                    id = p.Id,
+                    sku = !string.IsNullOrWhiteSpace(p.SKU) ? p.SKU : "-",
+                    name = p.Name,
+                    description = p.Description ?? "",
+                    productType = p.ProductType.ToString(),
+                    productTypeDisplay = p.ProductType switch
+                    {
+                        ProductType.Simple => "Simples",
+                        ProductType.Composite => "Composto", 
+                        ProductType.Group => "Grupo",
+                        _ => "Desconhecido"
+                    },
+                    categoryName = p.Category ?? "Sem categoria",
+                    price = p.Price,
+                    unitPrice = p.UnitPrice,
+                    priceFormatted = p.Price.ToString("C") ?? "Não definido",
+                    imageUrl = p.ImageUrl,
+                    assemblyTime = p.AssemblyTime,
+                    isActive = p.StateCode == ObjectState.Active
+                }).ToList();
+
+                // Retornar no formato esperado pelo DataTables
+                var result = new
+                {
+                    draw = 1, // DataTables request counter
+                    recordsTotal = catalogData.Count,
+                    recordsFiltered = catalogData.Count,
+                    data = catalogData
+                };
+
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar dados do catálogo para DataTables");
+                return Json(new
+                {
+                    draw = 1,
+                    recordsTotal = 0,
+                    recordsFiltered = 0,
+                    data = new List<object>(),
+                    error = "Erro interno do servidor"
+                });
+            }
+        }
+
+        #endregion
+
     }
-} 
+
+#region "Request and Response DTOs"
+
+/// <summary>
+/// Request para validar produto simples
+/// </summary>
+public class ValidateSimpleProductRequest
+{
+    [Required(ErrorMessage = "O ID do produto é obrigatório")]
+    public string ProductId { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Request para validar produto composto (FASE 2)
+/// </summary>
+public class ValidateCompositeProductRequest
+{
+    [Required(ErrorMessage = "O ID do produto é obrigatório")]
+    public string ProductId { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Seleção de componente para cálculo de preço
+/// </summary>
+public class ComponentSelection
+{
+    [Required(ErrorMessage = "O ID do componente é obrigatório")]
+    public string ComponentId { get; set; } = string.Empty;
+
+    [Range(1, int.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
+    public int Quantity { get; set; } = 1;
+
+    public string? HierarchyId { get; set; }
+}
+
+/// <summary>
+/// Request para calcular preço de produto composto
+/// </summary>
+public class CalculateCompositePriceRequest
+{
+    [Required(ErrorMessage = "O ID do produto é obrigatório")]
+    public string ProductId { get; set; } = string.Empty;
+
+    [Range(1, int.MaxValue, ErrorMessage = "A quantidade do produto deve ser maior que zero")]
+    public int ProductQuantity { get; set; } = 1;
+
+    [Required(ErrorMessage = "Seleções de componentes são obrigatórias")]
+    public List<ComponentSelection> ComponentSelections { get; set; } = new();
+}
+
+#endregion
+}

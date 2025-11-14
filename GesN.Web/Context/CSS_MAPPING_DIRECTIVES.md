@@ -1,60 +1,60 @@
-# 📋 MAPEAMENTO COMPLETO CSS - SITE.CSS
+﻿# ðŸ“‹ MAPEAMENTO COMPLETO CSS - SITE.CSS
 
-## 🎯 OBJETIVO
-Mapear todas as classes CSS em `site.css` e identificar onde são utilizadas para permitir migração estratégica para arquivos especializados por domínio.
+## ðŸŽ¯ OBJETIVO
+Mapear todas as classes CSS em `site.css` e identificar onde sÃ£o utilizadas para permitir migraÃ§Ã£o estratÃ©gica para arquivos especializados por domÃ­nio.
 
 ---
 
-## 🔍 CLASSES IDENTIFICADAS E SUAS UTILIZAÇÕES
+## ðŸ” CLASSES IDENTIFICADAS E SUAS UTILIZAÃ‡Ã•ES
 
-### **📦 DOMÍNIO PRODUCT (Candidatas para ProductDomain.css)**
+### **ðŸ“¦ DOMÃNIO PRODUCT (Candidatas para ProductDomain.css)**
 
 #### **1. Floating Labels System**
 - **Classes**: `.floating-input-group`, `.floating-input`, `.floating-label`, `.floating-textarea`
-- **Localização no site.css**: Linhas 494-509
+- **LocalizaÃ§Ã£o no site.css**: Linhas 494-509
 - **Utilizadas em**:
-  - ✅ `Product/_Create.cshtml` (19 ocorrências)
-  - ✅ `Product/_EditBasicData.cshtml` (múltiplas)
-  - ✅ `ProductComponent/_CreateComponent.cshtml` (9 ocorrências) 
-  - ✅ `ProductComponent/_EditComponent.cshtml` (10 ocorrências)
-  - ✅ `ProductComponentHierarchy/_CreateHierarchy.cshtml` (4 ocorrências)
-  - ✅ `ProductComponentHierarchy/_CreateCompositeProductXHierarchy.cshtml` (7 ocorrências)
-  - ✅ `ProductComponentHierarchy/_EditCompositeHierarchyRelation.cshtml` (5 ocorrências)
-  - ✅ `ProductGroup/_CreateGroupItem.cshtml` (11 ocorrências)
-  - ✅ `ProductGroup/_EditGroupItem.cshtml` (10 ocorrências)
-  - ✅ `ProductGroup/_CreateGroupExchangeRule.cshtml` (8 ocorrências)
-  - ✅ `ProductGroup/_EditGroupExchangeRule.cshtml` (5 ocorrências)
+  - âœ… `Product/_Create.cshtml` (19 ocorrÃªncias)
+  - âœ… `Product/_EditBasicData.cshtml` (mÃºltiplas)
+  - âœ… `ProductComponent/_CreateComponent.cshtml` (9 ocorrÃªncias) 
+  - âœ… `ProductComponent/_EditComponent.cshtml` (10 ocorrÃªncias)
+  - âœ… `ProductComponentHierarchy/_CreateHierarchy.cshtml` (4 ocorrÃªncias)
+  - âœ… `ProductComponentHierarchy/_CreateCompositeProductXHierarchy.cshtml` (7 ocorrÃªncias)
+  - âœ… `ProductComponentHierarchy/_EditCompositeHierarchyRelation.cshtml` (5 ocorrÃªncias)
+  - âœ… `ProductGroup/_CreateGroupItem.cshtml` (11 ocorrÃªncias)
+  - âœ… `ProductGroup/_EditGroupItem.cshtml` (10 ocorrÃªncias)
+  - âœ… `ProductGroup/_CreateGroupExchangeRule.cshtml` (8 ocorrÃªncias)
+  - âœ… `ProductGroup/_EditGroupExchangeRule.cshtml` (5 ocorrÃªncias)
 
 #### **2. Algolia Autocomplete System**
 - **Classes**: `.aa-autocomplete`, `.aa-dropdown-menu`, `.aa-suggestion`, `.aa-input`, `.aa-empty`, `.modal-dropdown`, `.force-visible`
-- **Localização no site.css**: Linhas 373-492 + 428-492
+- **LocalizaÃ§Ã£o no site.css**: Linhas 373-492 + 428-492
 - **Utilizadas em**:
-  - ✅ `Product/_Create.cshtml` (category-autocomplete aa-input)
-  - ✅ `Product/_EditBasicData.cshtml` (category-autocomplete aa-input)
-  - ✅ `ProductComponentHierarchy/_CreateCompositeProductXHierarchy.cshtml` (autocomplete-input)
-  - ✅ `ProductComponent/_CreateComponent.cshtml` (autocomplete-input)
-  - ✅ `ProductComponent/_EditComponent.cshtml` (autocomplete-input)
+  - âœ… `Product/_Create.cshtml` (category-autocomplete aa-input)
+  - âœ… `Product/_EditBasicData.cshtml` (category-autocomplete aa-input)
+  - âœ… `ProductComponentHierarchy/_CreateCompositeProductXHierarchy.cshtml` (autocomplete-input)
+  - âœ… `ProductComponent/_CreateComponent.cshtml` (autocomplete-input)
+  - âœ… `ProductComponent/_EditComponent.cshtml` (autocomplete-input)
 
 #### **3. Product Form Cards**
 - **Classes**: `.product-form-card`
-- **Localização no site.css**: Linhas 521-523
+- **LocalizaÃ§Ã£o no site.css**: Linhas 521-523
 - **Utilizadas em**:
-  - ✅ `Product/_Create.cshtml` (2 ocorrências)
-  - ✅ `Product/_EditBasicData.cshtml` (4 ocorrências)
+  - âœ… `Product/_Create.cshtml` (2 ocorrÃªncias)
+  - âœ… `Product/_EditBasicData.cshtml` (4 ocorrÃªncias)
 
 #### **4. Product Edit Container**
 - **Classes**: `.product-edit-container`
 - **Utilizadas em**:
-  - ✅ `Product/_Edit.cshtml` (1 ocorrência)
+  - âœ… `Product/_Edit.cshtml` (1 ocorrÃªncia)
 
 #### **5. Hierarchy Animations & States**
 - **Classes**: `.hierarchy-row`, `.table-warning`, `.table-danger`, `.loading`, `.newly-added`, `@keyframes highlight-new`
-- **Localização no site.css**: Linhas 536-575
+- **LocalizaÃ§Ã£o no site.css**: Linhas 536-575
 - **Utilizadas em**: JavaScript (CompositeProduct.js, ProductComponentHierarchy.js)
 
 ---
 
-### **📊 CLASSES GERAIS (Permanecer em site.css)**
+### **ðŸ“Š CLASSES GERAIS (Permanecer em site.css)**
 
 #### **1. Layout Base**
 - **Classes**: `html`, `body`, `.home`, `.logo-gesn`, `.btn-lg-home`
@@ -62,7 +62,7 @@ Mapear todas as classes CSS em `site.css` e identificar onde são utilizadas par
 
 #### **2. Components Globais**
 - **Classes**: `.spinner-border`, `.d-none`, `.toast-top-right`
-- **Utilizadas em**: Múltiplas views e JavaScript
+- **Utilizadas em**: MÃºltiplas views e JavaScript
 
 #### **3. Table & DataTables**
 - **Classes**: `.table td`, `.btn-group .btn`, `#ordersTable`
@@ -70,46 +70,46 @@ Mapear todas as classes CSS em `site.css` e identificar onde são utilizadas par
 
 #### **4. UI Autocomplete (Legacy - jQuery UI)**
 - **Classes**: `.ui-autocomplete`, `.ui-menu`, `.autocomplete-modal-menu`
-- **Localização no site.css**: Linhas 155-240
-- **Status**: ⚠️ Legacy - verificar se ainda é usado
+- **LocalizaÃ§Ã£o no site.css**: Linhas 155-240
+- **Status**: âš ï¸ Legacy - verificar se ainda Ã© usado
 
 ---
 
-## 🚨 CLASSES PROBLEMÁTICAS (Duplicações/Conflitos)
+## ðŸš¨ CLASSES PROBLEMÃTICAS (DuplicaÃ§Ãµes/Conflitos)
 
 ### **1. Floating Labels Duplicadas**
-- **Problema**: Definições inline em algumas views (ex: `_EditCompositeHierarchyRelation.cshtml` linhas 182-239)
+- **Problema**: DefiniÃ§Ãµes inline em algumas views (ex: `_EditCompositeHierarchyRelation.cshtml` linhas 182-239)
 - **Conflito**: Sobrescreve estilos do site.css
-- **Solução**: Remover definições inline, centralizar no ProductDomain.css
+- **SoluÃ§Ã£o**: Remover definiÃ§Ãµes inline, centralizar no ProductDomain.css
 
 ### **2. Algolia Autocomplete Duplicada**
-- **Problema**: Definições inline em `_CreateCompositeProductXHierarchy.cshtml` linhas 227-267
+- **Problema**: DefiniÃ§Ãµes inline em `_CreateCompositeProductXHierarchy.cshtml` linhas 227-267
 - **Conflito**: CSS duplicado e conflitante
-- **Solução**: Consolidar no ProductDomain.css
+- **SoluÃ§Ã£o**: Consolidar no ProductDomain.css
 
 ---
 
-## 📋 ESTRATÉGIA DE MIGRAÇÃO
+## ðŸ“‹ ESTRATÃ‰GIA DE MIGRAÃ‡ÃƒO
 
-### **🎯 FASE 1: Preparação (SEM QUEBRAR NADA)**
-1. ✅ **Criar ProductDomain.css** (feito)
-2. ✅ **Referenciar nas views Product** 
-3. ✅ **Copiar classes do site.css para ProductDomain.css** (não mover ainda)
-4. ✅ **Testar todas as funcionalidades**
+### **ðŸŽ¯ FASE 1: PreparaÃ§Ã£o (SEM QUEBRAR NADA)**
+1. âœ… **Criar ProductDomain.css** (feito)
+2. âœ… **Referenciar nas views Product** 
+3. âœ… **Copiar classes do site.css para ProductDomain.css** (nÃ£o mover ainda)
+4. âœ… **Testar todas as funcionalidades**
 
-### **🎯 FASE 2: Consolidação (REMOVER DUPLICAÇÕES)**
+### **ðŸŽ¯ FASE 2: ConsolidaÃ§Ã£o (REMOVER DUPLICAÃ‡Ã•ES)**
 1. **Remover CSS inline** das views individuais
 2. **Substituir por classes no ProductDomain.css**
 3. **Teste funcionalidade por funcionalidade**
 
-### **🎯 FASE 3: Migração Final (LIMPEZA)**
+### **ðŸŽ¯ FASE 3: MigraÃ§Ã£o Final (LIMPEZA)**
 1. **Remover classes migradas do site.css**
-2. **Validação completa de todas as views**
-3. **Documentar mudanças**
+2. **ValidaÃ§Ã£o completa de todas as views**
+3. **Documentar mudanÃ§as**
 
 ---
 
-## 📦 ARQUIVOS DE REFERÊNCIA NECESSÁRIOS
+## ðŸ“¦ ARQUIVOS DE REFERÃŠNCIA NECESSÃRIOS
 
 ### **Views que precisam referenciar ProductDomain.css:**
 ```html
@@ -117,39 +117,39 @@ Mapear todas as classes CSS em `site.css` e identificar onde são utilizadas par
 ```
 
 **Lista de views:**
-- Product/_Create.cshtml ✅ (já tem product-form.css)
-- Product/_Edit.cshtml ✅ (já tem product-form.css)
-- Product/_EditBasicData.cshtml ❌ (adicionar)
-- ProductComponent/_CreateComponent.cshtml ❌ (adicionar)
-- ProductComponent/_EditComponent.cshtml ❌ (adicionar)
-- ProductComponentHierarchy/_CreateHierarchy.cshtml ❌ (adicionar)  
-- ProductComponentHierarchy/_CreateCompositeProductXHierarchy.cshtml ❌ (adicionar)
-- ProductComponentHierarchy/_EditCompositeHierarchyRelation.cshtml ❌ (adicionar)
-- ProductGroup/_CreateGroupItem.cshtml ❌ (adicionar)
-- ProductGroup/_EditGroupItem.cshtml ❌ (adicionar)
-- ProductGroup/_CreateGroupExchangeRule.cshtml ❌ (adicionar)
-- ProductGroup/_EditGroupExchangeRule.cshtml ❌ (adicionar)
+- Product/_Create.cshtml âœ… (jÃ¡ tem product-form.css)
+- Product/_Edit.cshtml âœ… (jÃ¡ tem product-form.css)
+- Product/_EditBasicData.cshtml âŒ (adicionar)
+- ProductComponent/_CreateComponent.cshtml âŒ (adicionar)
+- ProductComponent/_EditComponent.cshtml âŒ (adicionar)
+- ProductComponentHierarchy/_CreateHierarchy.cshtml âŒ (adicionar)  
+- ProductComponentHierarchy/_CreateCompositeProductXHierarchy.cshtml âŒ (adicionar)
+- ProductComponentHierarchy/_EditCompositeHierarchyRelation.cshtml âŒ (adicionar)
+- ProductGroup/_CreateGroupItem.cshtml âŒ (adicionar)
+- ProductGroup/_EditGroupItem.cshtml âŒ (adicionar)
+- ProductGroup/_CreateGroupExchangeRule.cshtml âŒ (adicionar)
+- ProductGroup/_EditGroupExchangeRule.cshtml âŒ (adicionar)
 
 ---
 
-## ⚠️ RISCOS IDENTIFICADOS
+## âš ï¸ RISCOS IDENTIFICADOS
 
-1. **Alto Impacto**: Floating labels são usadas em 12+ views
-2. **Dependências JavaScript**: CompositeProduct.js referencia classes CSS
-3. **CSS Inline**: Definições duplicadas em views podem causar conflitos
-4. **Teste Necessário**: Todas as combinações modal/tab/form precisam ser testadas
+1. **Alto Impacto**: Floating labels sÃ£o usadas em 12+ views
+2. **DependÃªncias JavaScript**: CompositeProduct.js referencia classes CSS
+3. **CSS Inline**: DefiniÃ§Ãµes duplicadas em views podem causar conflitos
+4. **Teste NecessÃ¡rio**: Todas as combinaÃ§Ãµes modal/tab/form precisam ser testadas
 
 ---
 
-## 🎯 RECOMENDAÇÃO
+## ðŸŽ¯ RECOMENDAÃ‡ÃƒO
 
-**COMEÇAR IMPLEMENTANDO A FASE 1**:
-1. Adicionar referência ao ProductDomain.css nas views que faltam
+**COMEÃ‡AR IMPLEMENTANDO A FASE 1**:
+1. Adicionar referÃªncia ao ProductDomain.css nas views que faltam
 2. Consolidar todas as classes Product no ProductDomain.css 
 3. Testar uma view por vez
-4. Só depois remover do site.css
+4. SÃ³ depois remover do site.css
 
 **PRIORIDADE**:
-1. 🔥 **Alta**: Autocomplete (problemas ativos)
-2. 🔶 **Média**: Floating labels (impacto visual)
-3. 🔵 **Baixa**: Animações (funcionalidade secundária)
+1. ðŸ”¥ **Alta**: Autocomplete (problemas ativos)
+2. ðŸ”¶ **MÃ©dia**: Floating labels (impacto visual)
+3. ðŸ”µ **Baixa**: AnimaÃ§Ãµes (funcionalidade secundÃ¡ria)

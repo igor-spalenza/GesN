@@ -1,0 +1,407 @@
+{
+  "domains": {
+    "DOMINIO_DE_PRODUTO": {
+      "tables": {
+        "Product": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "ProductType": "TEXT",
+            "Name": "TEXT",
+            "Description": "TEXT",
+            "Price": "REAL",
+            "QuantityPrice": "INTEGER",
+            "UnitPrice": "REAL",
+            "Cost": "REAL",
+            "CategoryId": "TEXT",
+            "Category": "TEXT",
+            "SKU": "TEXT",
+            "ImageUrl": "TEXT",
+            "Note": "TEXT",
+            "AssemblyTime": "INTEGER",
+            "AssemblyInstructions": "TEXT"
+          }
+        },
+        "ProductCategory": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "Name": "TEXT",
+            "Description": "TEXT"
+          }
+        },
+        "ProductComponent": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "Name": "TEXT",
+            "Description": "TEXT",
+            "ProductComponentHierarchyId": "TEXT",
+            "AdditionalCost": "REAL"
+          }
+        },
+        "ProductComponentHierarchy": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "Name": "TEXT",
+            "Description": "TEXT",
+            "Notes": "TEXT"
+          }
+        },
+        "CompositeProductXHierarchy": {
+          "columns": {
+            "Id": "INTEGER",
+            "ProductComponentHierarchyId": "TEXT",
+            "ProductId": "TEXT",
+            "MinQuantity": "INTEGER",
+            "MaxQuantity": "INTEGER",
+            "IsOptional": "INTEGER",
+            "AssemblyOrder": "INTEGER",
+            "Notes": "TEXT"
+          }
+        },
+        "ProductGroupItem": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "ProductGroupId": "TEXT",
+            "ProductId": "TEXT",
+            "ProductCategoryId": "TEXT",
+            "Quantity": "INTEGER",
+            "MinQuantity": "INTEGER",
+            "MaxQuantity": "INTEGER",
+            "DefaultQuantity": "INTEGER",
+            "IsOptional": "INTEGER",
+            "ExtraPrice": "REAL"
+          }
+        },
+        "ProductGroupExchangeRule": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "ProductGroupId": "TEXT",
+            "SourceGroupItemId": "TEXT",
+            "SourceGroupItemWeight": "INTEGER",
+            "TargetGroupItemId": "TEXT",
+            "TargetGroupItemWeight": "INTEGER",
+            "ExchangeRatio": "REAL",
+            "IsActive": "INTEGER"
+          }
+        },
+        "ProductIngredient": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "ProductId": "TEXT",
+            "IngredientId": "TEXT",
+            "Quantity": "REAL",
+            "Unit": "TEXT",
+            "IsOptional": "INTEGER",
+            "Notes": "TEXT"
+          }
+        }
+      }
+    },
+    "DOMINIO_DE_VENDAS": {
+      "tables": {
+        "Customer": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "FirstName": "TEXT",
+            "LastName": "TEXT",
+            "Email": "TEXT",
+            "Phone": "TEXT",
+            "DocumentType": "TEXT",
+            "DocumentNumber": "TEXT",
+            "GoogleContactId": "TEXT"
+          }
+        },
+        "Contract": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "ContractNumber": "TEXT",
+            "Title": "TEXT",
+            "Description": "TEXT",
+            "StartDate": "TEXT",
+            "EndDate": "TEXT",
+            "TotalValue": "REAL",
+            "Status": "TEXT",
+            "CustomerId": "TEXT",
+            "TermsAndConditions": "TEXT",
+            "SignedDate": "TEXT",
+            "SignedByCustomer": "TEXT",
+            "Notes": "TEXT"
+          }
+        },
+        "OrderEntry": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "NumberSequence": "TEXT",
+            "OrderDate": "TEXT",
+            "DeliveryDate": "TEXT",
+            "CustomerId": "TEXT",
+            "Status": "TEXT",
+            "Type": "TEXT",
+            "TotalAmount": "REAL",
+            "Subtotal": "REAL",
+            "TaxAmount": "REAL",
+            "DiscountAmount": "REAL",
+            "Notes": "TEXT",
+            "DeliveryAddressId": "TEXT",
+            "RequiresFiscalReceipt": "INTEGER",
+            "FiscalDataId": "TEXT",
+            "PrintStatus": "TEXT",
+            "PrintBatchNumber": "INTEGER"
+          }
+        },
+        "OrderItem": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "OrderId": "TEXT",
+            "ProductId": "TEXT",
+            "Quantity": "INTEGER",
+            "UnitPrice": "REAL",
+            "DiscountAmount": "REAL",
+            "TaxAmount": "REAL",
+            "Notes": "TEXT"
+          }
+        }
+      }
+    },
+    "DOMINIO_DE_PRODUCAO": {
+      "tables": {
+        "Demand": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "OrderItemId": "TEXT",
+            "ProductionOrderId": "TEXT",
+            "ProductId": "TEXT",
+            "Quantity": "TEXT",
+            "Notes": "TEXT",
+            "Status": "TEXT",
+            "ExpectedDate": "TEXT",
+            "StartedAt": "TEXT",
+            "CompletedAt": "TEXT"
+          }
+        },
+        "ProductComposition": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "DemandId": "TEXT",
+            "ProductComponentId": "TEXT",
+            "HierarchyName": "TEXT",
+            "Quantity": "REAL",
+            "Unit": "TEXT",
+            "IsOptional": "INTEGER",
+            "ProcessingOrder": "INTEGER",
+            "IsActive": "INTEGER",
+            "Notes": "TEXT",
+            "ProcessingStartedAt": "TEXT",
+            "ProcessingCompletedAt": "TEXT"
+          }
+        },
+        "ProductionOrder": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "OrderId": "TEXT",
+            "OrderItemId": "TEXT",
+            "ProductId": "TEXT",
+            "Quantity": "INTEGER",
+            "Status": "TEXT",
+            "Priority": "TEXT",
+            "ScheduledStartDate": "TEXT",
+            "ScheduledEndDate": "TEXT",
+            "ActualStartDate": "TEXT",
+            "ActualEndDate": "TEXT",
+            "AssignedTo": "TEXT",
+            "Notes": "TEXT",
+            "EstimatedTime": "INTEGER",
+            "ActualTime": "INTEGER"
+          }
+        }
+      }
+    },
+    "DOMINIO_DE_COMPRAS": {
+      "tables": {
+        "Supplier": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "Name": "TEXT",
+            "CompanyName": "TEXT",
+            "DocumentNumber": "TEXT",
+            "DocumentType": "TEXT",
+            "Email": "TEXT",
+            "Phone": "TEXT",
+            "AddressId": "TEXT"
+          }
+        },
+        "Ingredient": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "Name": "TEXT",
+            "Description": "TEXT",
+            "Unit": "TEXT",
+            "CostPerUnit": "REAL",
+            "SupplierId": "TEXT",
+            "MinStock": "REAL",
+            "CurrentStock": "REAL",
+            "ExpirationDays": "INTEGER"
+          }
+        }
+      }
+    },
+    "DOMINIO_FINANCEIRO": {
+      "tables": {
+        "AccountReceivable": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "Description": "TEXT",
+            "Amount": "REAL",
+            "DueDate": "TEXT",
+            "Status": "TEXT",
+            "CustomerId": "TEXT",
+            "OrderId": "TEXT"
+          }
+        },
+        "AccountPayable": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "Description": "TEXT",
+            "Amount": "REAL",
+            "DueDate": "TEXT",
+            "Status": "TEXT",
+            "SupplierId": "TEXT",
+            "PurchaseOrderId": "TEXT"
+          }
+        },
+        "Transaction": {
+          "columns": {
+            "Id": "TEXT",
+            "CreatedAt": "TEXT",
+            "CreatedBy": "TEXT",
+            "LastModifiedAt": "TEXT",
+            "LastModifiedBy": "TEXT",
+            "StateCode": "INTEGER",
+            "Type": "TEXT",
+            "Amount": "REAL",
+            "Description": "TEXT",
+            "TransactionDate": "TEXT",
+            "AccountReceivableId": "TEXT",
+            "AccountPayableId": "TEXT"
+          }
+        }
+      }
+    },
+    "VALUE_OBJECTS": {
+      "tables": {
+        "Address": {
+          "columns": {
+            "Id": "TEXT",
+            "Street": "TEXT",
+            "Number": "TEXT",
+            "Complement": "TEXT",
+            "Neighborhood": "TEXT",
+            "City": "TEXT",
+            "State": "TEXT",
+            "ZipCode": "TEXT",
+            "Country": "TEXT"
+          }
+        },
+        "FiscalData": {
+          "columns": {
+            "Id": "TEXT",
+            "TaxNumber": "TEXT",
+            "StateRegistration": "TEXT",
+            "MunicipalRegistration": "TEXT",
+            "CompanyName": "TEXT",
+            "TradeName": "TEXT"
+          }
+        }
+      }
+    }
+  }
+}

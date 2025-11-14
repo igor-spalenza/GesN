@@ -1,34 +1,34 @@
-# 🤖 SEQUENCE DIAGRAM - IA Processing Flow (Fiscal Document)
+﻿# ðŸ¤– SEQUENCE DIAGRAM - IA Processing Flow (Fiscal Document)
 
-## 🎯 Visão Geral
-Diagrama de sequência detalhado mostrando o fluxo completo de processamento inteligente de documentos fiscais com IA, desde o upload até o pré-preenchimento do formulário de compra. Este fluxo inovador utiliza OCR, Machine Learning e validação humana para automatizar a criação de ordens de compra.
+## ðŸŽ¯ VisÃ£o Geral
+Diagrama de sequÃªncia detalhado mostrando o fluxo completo de processamento inteligente de documentos fiscais com IA, desde o upload atÃ© o prÃ©-preenchimento do formulÃ¡rio de compra. Este fluxo inovador utiliza OCR, Machine Learning e validaÃ§Ã£o humana para automatizar a criaÃ§Ã£o de ordens de compra.
 
-## 📊 Complexidade do Fluxo
-- **🚨 Alta Complexidade**: AI processing pipeline, human validation workflow, complex data mapping
-- **👥 Participantes**: 10+ system components including AI services
-- **🔄 Interações**: 25+ interactions per document
-- **🤖 AI Integration**: OCR, ML classification, entity extraction
-- **👤 Human Validation**: Manual review and correction workflow
+## ðŸ“Š Complexidade do Fluxo
+- **ðŸš¨ Alta Complexidade**: AI processing pipeline, human validation workflow, complex data mapping
+- **ðŸ‘¥ Participantes**: 10+ system components including AI services
+- **ðŸ”„ InteraÃ§Ãµes**: 25+ interactions per document
+- **ðŸ¤– AI Integration**: OCR, ML classification, entity extraction
+- **ðŸ‘¤ Human Validation**: Manual review and correction workflow
 
-## 🎯 Trigger Event
-**FiscalDocumentUploaded** (Purchasing Domain) → AI processing pipeline activation
+## ðŸŽ¯ Trigger Event
+**FiscalDocumentUploaded** (Purchasing Domain) â†’ AI processing pipeline activation
 
-## 📝 Sequence Diagram
+## ðŸ“ Sequence Diagram
 
 ```mermaid
 sequenceDiagram
-    participant UI as 👤 User Interface
-    participant PC as 🛒 Purchasing Controller
-    participant PS as ⚙️ Purchasing Service
-    participant FS as 📁 File Storage
-    participant AIS as 🤖 AI Service
-    participant OCRS as 📄 OCR Service
-    participant MLS as 🧠 ML Service
-    participant VS as ✅ Validation Service
-    participant BGS as ⚙️ Background Service
-    participant NS as 🔔 Notification Service
-    participant PR as 🗄️ Purchasing Repository
-    participant DB as 💾 Database
+    participant UI as ðŸ‘¤ User Interface
+    participant PC as ðŸ›’ Purchasing Controller
+    participant PS as âš™ï¸ Purchasing Service
+    participant FS as ðŸ“ File Storage
+    participant AIS as ðŸ¤– AI Service
+    participant OCRS as ðŸ“„ OCR Service
+    participant MLS as ðŸ§  ML Service
+    participant VS as âœ… Validation Service
+    participant BGS as âš™ï¸ Background Service
+    participant NS as ðŸ”” Notification Service
+    participant PR as ðŸ—„ï¸ Purchasing Repository
+    participant DB as ðŸ’¾ Database
     
     Note over UI, DB: AI Processing Flow for Fiscal Document (PDF/Image Upload)
     
@@ -381,396 +381,396 @@ sequenceDiagram
     end
 ```
 
-## 🎯 Detailed Component Responsibilities
+## ðŸŽ¯ Detailed Component Responsibilities
 
-### **🛒 Purchasing Controller**
+### **ðŸ›’ Purchasing Controller**
 ```
 File Upload Management:
-├── 📁 Multi-format file validation (PDF, JPG, PNG)
-├── 🔒 File size and security validation (max 10MB)
-├── 📋 Metadata extraction and validation
-├── 🚨 Virus scanning and security checks
-└── 📊 Upload progress tracking and user feedback
+â”œâ”€â”€ ðŸ“ Multi-format file validation (PDF, JPG, PNG)
+â”œâ”€â”€ ðŸ”’ File size and security validation (max 10MB)
+â”œâ”€â”€ ðŸ“‹ Metadata extraction and validation
+â”œâ”€â”€ ðŸš¨ Virus scanning and security checks
+â””â”€â”€ ðŸ“Š Upload progress tracking and user feedback
 
 API Endpoints:
-├── POST /PurchaseOrder/UploadFiscalDocument
-├── GET /PurchaseOrder/ValidationQueue
-├── POST /PurchaseOrder/ValidateExtraction
-├── GET /PurchaseOrder/CreateFromDocument/{id}
-└── GET /PurchaseOrder/ProcessingStatus/{id}
+â”œâ”€â”€ POST /PurchaseOrder/UploadFiscalDocument
+â”œâ”€â”€ GET /PurchaseOrder/ValidationQueue
+â”œâ”€â”€ POST /PurchaseOrder/ValidateExtraction
+â”œâ”€â”€ GET /PurchaseOrder/CreateFromDocument/{id}
+â””â”€â”€ GET /PurchaseOrder/ProcessingStatus/{id}
 ```
 
-### **🤖 AI Service**
+### **ðŸ¤– AI Service**
 ```
 AI Processing Orchestration:
-├── 🎯 Document type classification coordination
-├── 📄 OCR text extraction management
-├── 🧠 ML data extraction orchestration
-├── 📊 Confidence score calculation and evaluation
-└── 🔄 Pipeline state management and error handling
+â”œâ”€â”€ ðŸŽ¯ Document type classification coordination
+â”œâ”€â”€ ðŸ“„ OCR text extraction management
+â”œâ”€â”€ ðŸ§  ML data extraction orchestration
+â”œâ”€â”€ ðŸ“Š Confidence score calculation and evaluation
+â””â”€â”€ ðŸ”„ Pipeline state management and error handling
 
 Quality Control:
-├── ✅ Confidence threshold management (85% default)
-├── 🎯 Field-level accuracy validation
-├── 📊 Model performance monitoring
-├── 🔍 Error pattern detection and reporting
-└── 📈 Continuous learning from human corrections
+â”œâ”€â”€ âœ… Confidence threshold management (85% default)
+â”œâ”€â”€ ðŸŽ¯ Field-level accuracy validation
+â”œâ”€â”€ ðŸ“Š Model performance monitoring
+â”œâ”€â”€ ðŸ” Error pattern detection and reporting
+â””â”€â”€ ðŸ“ˆ Continuous learning from human corrections
 
 Data Orchestration:
-├── 🗂️ Structured data compilation from multiple sources
-├── 🔗 Cross-field validation and consistency checking
-├── 📋 Business rule application and validation
-├── 🎯 Entity resolution and mapping coordination
-└── 📊 Final output preparation and formatting
+â”œâ”€â”€ ðŸ—‚ï¸ Structured data compilation from multiple sources
+â”œâ”€â”€ ðŸ”— Cross-field validation and consistency checking
+â”œâ”€â”€ ðŸ“‹ Business rule application and validation
+â”œâ”€â”€ ðŸŽ¯ Entity resolution and mapping coordination
+â””â”€â”€ ðŸ“Š Final output preparation and formatting
 ```
 
-### **📄 OCR Service**
+### **ðŸ“„ OCR Service**
 ```
 Text Extraction Pipeline:
-├── 🖼️ Image preprocessing and enhancement
-├── 📐 Text region detection and segmentation
-├── 🔤 Character recognition and text extraction
-├── 📝 Post-processing and text cleaning
-└── 📊 Confidence scoring per text region
+â”œâ”€â”€ ðŸ–¼ï¸ Image preprocessing and enhancement
+â”œâ”€â”€ ðŸ“ Text region detection and segmentation
+â”œâ”€â”€ ðŸ”¤ Character recognition and text extraction
+â”œâ”€â”€ ðŸ“ Post-processing and text cleaning
+â””â”€â”€ ðŸ“Š Confidence scoring per text region
 
 Document Handling:
-├── 📄 PDF text layer extraction (when available)
-├── 🖼️ Image-based OCR for scanned documents
-├── 📐 Table structure recognition and parsing
-├── 🎯 Multi-language text detection (PT/EN)
-└── 📊 Layout analysis and structure preservation
+â”œâ”€â”€ ðŸ“„ PDF text layer extraction (when available)
+â”œâ”€â”€ ðŸ–¼ï¸ Image-based OCR for scanned documents
+â”œâ”€â”€ ðŸ“ Table structure recognition and parsing
+â”œâ”€â”€ ðŸŽ¯ Multi-language text detection (PT/EN)
+â””â”€â”€ ðŸ“Š Layout analysis and structure preservation
 
 Quality Optimization:
-├── 🔍 Image quality assessment and enhancement
-├── 📐 Skew correction and orientation normalization
-├── 🎯 Noise reduction and clarity improvement
-├── 📊 Multi-pass extraction for low-quality images
-└── ✅ Result validation and confidence calculation
+â”œâ”€â”€ ðŸ” Image quality assessment and enhancement
+â”œâ”€â”€ ðŸ“ Skew correction and orientation normalization
+â”œâ”€â”€ ðŸŽ¯ Noise reduction and clarity improvement
+â”œâ”€â”€ ðŸ“Š Multi-pass extraction for low-quality images
+â””â”€â”€ âœ… Result validation and confidence calculation
 ```
 
-### **🧠 ML Service**
+### **ðŸ§  ML Service**
 ```
 Machine Learning Models:
-├── 🏷️ Document Classification Model (Invoice, Receipt, etc.)
-├── 🔤 Named Entity Recognition (NER) for key fields
-├── 📊 Information Extraction for structured data
-├── 🎯 Entity Resolution for supplier/product mapping
-└── 📈 Confidence Prediction for extraction quality
+â”œâ”€â”€ ðŸ·ï¸ Document Classification Model (Invoice, Receipt, etc.)
+â”œâ”€â”€ ðŸ”¤ Named Entity Recognition (NER) for key fields
+â”œâ”€â”€ ðŸ“Š Information Extraction for structured data
+â”œâ”€â”€ ðŸŽ¯ Entity Resolution for supplier/product mapping
+â””â”€â”€ ðŸ“ˆ Confidence Prediction for extraction quality
 
 Entity Extraction:
-├── 🏢 Supplier Information (Name, CNPJ, Address, Contact)
-├── 📦 Item Details (Name, Quantity, Unit Price, Total)
-├── 💰 Financial Data (Subtotal, Taxes, Discounts, Total)
-├── 📅 Dates and Numbers (Issue Date, Due Date, Invoice Number)
-└── 📋 Additional Metadata (Payment Terms, Delivery Info)
+â”œâ”€â”€ ðŸ¢ Supplier Information (Name, CNPJ, Address, Contact)
+â”œâ”€â”€ ðŸ“¦ Item Details (Name, Quantity, Unit Price, Total)
+â”œâ”€â”€ ðŸ’° Financial Data (Subtotal, Taxes, Discounts, Total)
+â”œâ”€â”€ ðŸ“… Dates and Numbers (Issue Date, Due Date, Invoice Number)
+â””â”€â”€ ðŸ“‹ Additional Metadata (Payment Terms, Delivery Info)
 
 Model Management:
-├── 📈 Performance monitoring and metric tracking
-├── 🔄 Model versioning and deployment management
-├── 📊 Training data collection from human corrections
-├── 🎯 A/B testing for model improvements
-└── 📋 Feedback loop integration for continuous learning
+â”œâ”€â”€ ðŸ“ˆ Performance monitoring and metric tracking
+â”œâ”€â”€ ðŸ”„ Model versioning and deployment management
+â”œâ”€â”€ ðŸ“Š Training data collection from human corrections
+â”œâ”€â”€ ðŸŽ¯ A/B testing for model improvements
+â””â”€â”€ ðŸ“‹ Feedback loop integration for continuous learning
 ```
 
-### **✅ Validation Service**
+### **âœ… Validation Service**
 ```
 Business Rule Validation:
-├── 🏢 Supplier Data Validation (CNPJ format, exists in system)
-├── 📦 Product Data Validation (reasonable quantities, prices)
-├── 💰 Financial Data Validation (calculations, tax compliance)
-├── 📅 Date Validation (logical dates, business calendar)
-└── 📋 Cross-field Consistency (totals match line items)
+â”œâ”€â”€ ðŸ¢ Supplier Data Validation (CNPJ format, exists in system)
+â”œâ”€â”€ ðŸ“¦ Product Data Validation (reasonable quantities, prices)
+â”œâ”€â”€ ðŸ’° Financial Data Validation (calculations, tax compliance)
+â”œâ”€â”€ ðŸ“… Date Validation (logical dates, business calendar)
+â””â”€â”€ ðŸ“‹ Cross-field Consistency (totals match line items)
 
 Data Quality Checks:
-├── 🔍 Format validation (numbers, dates, identifiers)
-├── 📊 Range validation (reasonable values, business limits)
-├── 🎯 Completeness validation (required fields present)
-├── 🔗 Relationship validation (FK constraints, dependencies)
-└── 📈 Historical data comparison (price trends, supplier history)
+â”œâ”€â”€ ðŸ” Format validation (numbers, dates, identifiers)
+â”œâ”€â”€ ðŸ“Š Range validation (reasonable values, business limits)
+â”œâ”€â”€ ðŸŽ¯ Completeness validation (required fields present)
+â”œâ”€â”€ ðŸ”— Relationship validation (FK constraints, dependencies)
+â””â”€â”€ ðŸ“ˆ Historical data comparison (price trends, supplier history)
 
 Human Validation Workflow:
-├── 👤 Task assignment and priority management
-├── 📋 Validation interface and user experience
-├── 🎯 Field-level correction tracking
-├── 📊 Validator performance and accuracy monitoring
-└── 🔄 Feedback collection for model improvement
+â”œâ”€â”€ ðŸ‘¤ Task assignment and priority management
+â”œâ”€â”€ ðŸ“‹ Validation interface and user experience
+â”œâ”€â”€ ðŸŽ¯ Field-level correction tracking
+â”œâ”€â”€ ðŸ“Š Validator performance and accuracy monitoring
+â””â”€â”€ ðŸ”„ Feedback collection for model improvement
 ```
 
-## 🤖 AI Processing Pipeline Details
+## ðŸ¤– AI Processing Pipeline Details
 
-### **📄 Document Classification**
+### **ðŸ“„ Document Classification**
 ```
 Supported Document Types:
-├── 📄 Nota Fiscal Eletrônica (NFe)
-├── 🧾 Nota Fiscal de Serviço (NFSe)
-├── 📋 Recibo de Compra
-├── 🏪 Cupom Fiscal
-└── 📑 Invoice/Receipt (International)
+â”œâ”€â”€ ðŸ“„ Nota Fiscal EletrÃ´nica (NFe)
+â”œâ”€â”€ ðŸ§¾ Nota Fiscal de ServiÃ§o (NFSe)
+â”œâ”€â”€ ðŸ“‹ Recibo de Compra
+â”œâ”€â”€ ðŸª Cupom Fiscal
+â””â”€â”€ ðŸ“‘ Invoice/Receipt (International)
 
 Classification Features:
-├── 📐 Layout structure analysis
-├── 🔤 Header text pattern recognition
-├── 🏷️ Watermark and logo detection
-├── 📊 Field arrangement patterns
-└── 🎯 Document format signatures
+â”œâ”€â”€ ðŸ“ Layout structure analysis
+â”œâ”€â”€ ðŸ”¤ Header text pattern recognition
+â”œâ”€â”€ ðŸ·ï¸ Watermark and logo detection
+â”œâ”€â”€ ðŸ“Š Field arrangement patterns
+â””â”€â”€ ðŸŽ¯ Document format signatures
 
 Confidence Thresholds:
-├── 🟢 High Confidence: > 90% - Auto-process
-├── 🟡 Medium Confidence: 70-90% - Additional validation
-├── 🟠 Low Confidence: 50-70% - Manual review
-└── 🔴 Very Low: < 50% - Manual processing
+â”œâ”€â”€ ðŸŸ¢ High Confidence: > 90% - Auto-process
+â”œâ”€â”€ ðŸŸ¡ Medium Confidence: 70-90% - Additional validation
+â”œâ”€â”€ ðŸŸ  Low Confidence: 50-70% - Manual review
+â””â”€â”€ ðŸ”´ Very Low: < 50% - Manual processing
 ```
 
-### **🔤 OCR Processing Strategy**
+### **ðŸ”¤ OCR Processing Strategy**
 ```
 Multi-Stage OCR Pipeline:
-├── 📐 Stage 1: Layout analysis and region detection
-├── 🔍 Stage 2: Text region classification (header, body, footer)
-├── 🔤 Stage 3: Character recognition with multiple engines
-├── 📝 Stage 4: Text reconstruction and formatting
-└── ✅ Stage 5: Quality assessment and validation
+â”œâ”€â”€ ðŸ“ Stage 1: Layout analysis and region detection
+â”œâ”€â”€ ðŸ” Stage 2: Text region classification (header, body, footer)
+â”œâ”€â”€ ðŸ”¤ Stage 3: Character recognition with multiple engines
+â”œâ”€â”€ ðŸ“ Stage 4: Text reconstruction and formatting
+â””â”€â”€ âœ… Stage 5: Quality assessment and validation
 
 OCR Engine Selection:
-├── 🎯 Primary: Google Vision API (high accuracy)
-├── 🔄 Fallback: Tesseract (open source backup)
-├── 📊 Specialized: Table extraction engine
-├── 🌐 Multi-language: PT-BR optimized models
-└── 📈 Adaptive: Quality-based engine selection
+â”œâ”€â”€ ðŸŽ¯ Primary: Google Vision API (high accuracy)
+â”œâ”€â”€ ðŸ”„ Fallback: Tesseract (open source backup)
+â”œâ”€â”€ ðŸ“Š Specialized: Table extraction engine
+â”œâ”€â”€ ðŸŒ Multi-language: PT-BR optimized models
+â””â”€â”€ ðŸ“ˆ Adaptive: Quality-based engine selection
 
 Quality Enhancement:
-├── 🖼️ Image preprocessing (contrast, brightness, noise)
-├── 📐 Geometric correction (rotation, skew, perspective)
-├── 🔍 Resolution optimization (upscaling, sharpening)
-├── 🎯 Region-of-interest focusing
-└── 📊 Multi-pass extraction for difficult areas
+â”œâ”€â”€ ðŸ–¼ï¸ Image preprocessing (contrast, brightness, noise)
+â”œâ”€â”€ ðŸ“ Geometric correction (rotation, skew, perspective)
+â”œâ”€â”€ ðŸ” Resolution optimization (upscaling, sharpening)
+â”œâ”€â”€ ðŸŽ¯ Region-of-interest focusing
+â””â”€â”€ ðŸ“Š Multi-pass extraction for difficult areas
 ```
 
-### **🧠 Machine Learning Extraction**
+### **ðŸ§  Machine Learning Extraction**
 ```
 Named Entity Recognition (NER):
-├── 🏢 ORGANIZATION: Company names, suppliers
-├── 👤 PERSON: Contact names, signatures
-├── 💰 MONEY: Amounts, prices, totals
-├── 📅 DATE: Issue dates, due dates, periods
-├── 📦 PRODUCT: Item names, descriptions, codes
-├── 📍 LOCATION: Addresses, delivery locations
-├── 📋 IDENTIFIER: CNPJ, CPF, invoice numbers
-└── 📊 QUANTITY: Amounts, units, measurements
+â”œâ”€â”€ ðŸ¢ ORGANIZATION: Company names, suppliers
+â”œâ”€â”€ ðŸ‘¤ PERSON: Contact names, signatures
+â”œâ”€â”€ ðŸ’° MONEY: Amounts, prices, totals
+â”œâ”€â”€ ðŸ“… DATE: Issue dates, due dates, periods
+â”œâ”€â”€ ðŸ“¦ PRODUCT: Item names, descriptions, codes
+â”œâ”€â”€ ðŸ“ LOCATION: Addresses, delivery locations
+â”œâ”€â”€ ðŸ“‹ IDENTIFIER: CNPJ, CPF, invoice numbers
+â””â”€â”€ ðŸ“Š QUANTITY: Amounts, units, measurements
 
 Information Extraction Patterns:
-├── 📊 Table structure recognition and parsing
-├── 🎯 Key-value pair extraction (label: value)
-├── 🔗 Relationship extraction (item → price → total)
-├── 📋 List processing (multiple items, line items)
-└── 🧮 Mathematical validation (totals, calculations)
+â”œâ”€â”€ ðŸ“Š Table structure recognition and parsing
+â”œâ”€â”€ ðŸŽ¯ Key-value pair extraction (label: value)
+â”œâ”€â”€ ðŸ”— Relationship extraction (item â†’ price â†’ total)
+â”œâ”€â”€ ðŸ“‹ List processing (multiple items, line items)
+â””â”€â”€ ðŸ§® Mathematical validation (totals, calculations)
 
 Confidence Scoring:
-├── 📊 Field-level confidence (per extracted value)
-├── 🎯 Context-based confidence (surrounding text quality)
-├── 🔗 Cross-validation confidence (internal consistency)
-├── 📈 Historical confidence (similar document patterns)
-└── 🧮 Overall document confidence (weighted average)
+â”œâ”€â”€ ðŸ“Š Field-level confidence (per extracted value)
+â”œâ”€â”€ ðŸŽ¯ Context-based confidence (surrounding text quality)
+â”œâ”€â”€ ðŸ”— Cross-validation confidence (internal consistency)
+â”œâ”€â”€ ðŸ“ˆ Historical confidence (similar document patterns)
+â””â”€â”€ ðŸ§® Overall document confidence (weighted average)
 ```
 
-## 👤 Human Validation Workflow
+## ðŸ‘¤ Human Validation Workflow
 
-### **🎯 Validation Interface Design**
+### **ðŸŽ¯ Validation Interface Design**
 ```
 User Experience Features:
-├── 📊 Side-by-side document view and form
-├── 🎨 Color-coded confidence indicators
-├── 🔍 Zoom and annotation tools for document review
-├── ⌨️ Keyboard shortcuts for efficient editing
-└── 📋 Bulk validation for multiple documents
+â”œâ”€â”€ ðŸ“Š Side-by-side document view and form
+â”œâ”€â”€ ðŸŽ¨ Color-coded confidence indicators
+â”œâ”€â”€ ðŸ” Zoom and annotation tools for document review
+â”œâ”€â”€ âŒ¨ï¸ Keyboard shortcuts for efficient editing
+â””â”€â”€ ðŸ“‹ Bulk validation for multiple documents
 
 Confidence Visualization:
-├── 🟢 Green: High confidence (> 85%) - minimal review needed
-├── 🟡 Yellow: Medium confidence (60-85%) - verify accuracy
-├── 🟠 Orange: Low confidence (40-60%) - likely needs correction
-├── 🔴 Red: Very low confidence (< 40%) - manual entry required
-└── ⚪ Gray: Not extracted - requires manual input
+â”œâ”€â”€ ðŸŸ¢ Green: High confidence (> 85%) - minimal review needed
+â”œâ”€â”€ ðŸŸ¡ Yellow: Medium confidence (60-85%) - verify accuracy
+â”œâ”€â”€ ðŸŸ  Orange: Low confidence (40-60%) - likely needs correction
+â”œâ”€â”€ ðŸ”´ Red: Very low confidence (< 40%) - manual entry required
+â””â”€â”€ âšª Gray: Not extracted - requires manual input
 
 Validation Tracking:
-├── ⏱️ Time tracking per validation task
-├── 📊 Accuracy metrics per validator
-├── 🎯 Common error pattern identification
-├── 📈 Validator performance analytics
-└── 🔄 Feedback integration for model improvement
+â”œâ”€â”€ â±ï¸ Time tracking per validation task
+â”œâ”€â”€ ðŸ“Š Accuracy metrics per validator
+â”œâ”€â”€ ðŸŽ¯ Common error pattern identification
+â”œâ”€â”€ ðŸ“ˆ Validator performance analytics
+â””â”€â”€ ðŸ”„ Feedback integration for model improvement
 ```
 
-### **📊 Validation Quality Control**
+### **ðŸ“Š Validation Quality Control**
 ```
 Validation Rules:
-├── ✅ Required field completeness check
-├── 🧮 Mathematical validation (totals, tax calculations)
-├── 📅 Date logic validation (issue < due date)
-├── 🏢 Supplier existence and active status
-└── 📦 Product/ingredient existence or creation flags
+â”œâ”€â”€ âœ… Required field completeness check
+â”œâ”€â”€ ðŸ§® Mathematical validation (totals, tax calculations)
+â”œâ”€â”€ ðŸ“… Date logic validation (issue < due date)
+â”œâ”€â”€ ðŸ¢ Supplier existence and active status
+â””â”€â”€ ðŸ“¦ Product/ingredient existence or creation flags
 
 Quality Metrics:
-├── 📊 Validation accuracy rate (% correct validations)
-├── ⏱️ Average validation time per document
-├── 🎯 Inter-validator agreement rates
-├── 📈 Validation complexity scoring
-└── 🔄 Model improvement impact from validations
+â”œâ”€â”€ ðŸ“Š Validation accuracy rate (% correct validations)
+â”œâ”€â”€ â±ï¸ Average validation time per document
+â”œâ”€â”€ ðŸŽ¯ Inter-validator agreement rates
+â”œâ”€â”€ ðŸ“ˆ Validation complexity scoring
+â””â”€â”€ ðŸ”„ Model improvement impact from validations
 
 Validator Training:
-├── 📚 Training materials and best practices
-├── 🎯 Practice documents with known correct answers
-├── 📊 Performance feedback and coaching
-├── 🏆 Gamification and quality incentives
-└── 📈 Continuous skill development tracking
+â”œâ”€â”€ ðŸ“š Training materials and best practices
+â”œâ”€â”€ ðŸŽ¯ Practice documents with known correct answers
+â”œâ”€â”€ ðŸ“Š Performance feedback and coaching
+â”œâ”€â”€ ðŸ† Gamification and quality incentives
+â””â”€â”€ ðŸ“ˆ Continuous skill development tracking
 ```
 
-## 🔗 Entity Mapping and Resolution
+## ðŸ”— Entity Mapping and Resolution
 
-### **🏢 Supplier Mapping Strategy**
+### **ðŸ¢ Supplier Mapping Strategy**
 ```
 Supplier Identification:
-├── 🎯 Exact CNPJ match (highest priority)
-├── 📋 Company name fuzzy matching (Levenshtein distance)
-├── 📍 Address and contact information matching
-├── 🏪 Trade name and brand matching
-└── 📞 Phone and email contact matching
+â”œâ”€â”€ ðŸŽ¯ Exact CNPJ match (highest priority)
+â”œâ”€â”€ ðŸ“‹ Company name fuzzy matching (Levenshtein distance)
+â”œâ”€â”€ ðŸ“ Address and contact information matching
+â”œâ”€â”€ ðŸª Trade name and brand matching
+â””â”€â”€ ðŸ“ž Phone and email contact matching
 
 Fuzzy Matching Algorithm:
-├── 🎯 String similarity scoring (0-100%)
-├── 📊 Weighted feature matching (CNPJ=50%, Name=30%, Address=20%)
-├── 🔍 Threshold-based decision making (>80% = match)
-├── 👥 Human review queue for 60-80% matches
-└── 🆕 Auto-suggest new supplier creation for <60%
+â”œâ”€â”€ ðŸŽ¯ String similarity scoring (0-100%)
+â”œâ”€â”€ ðŸ“Š Weighted feature matching (CNPJ=50%, Name=30%, Address=20%)
+â”œâ”€â”€ ðŸ” Threshold-based decision making (>80% = match)
+â”œâ”€â”€ ðŸ‘¥ Human review queue for 60-80% matches
+â””â”€â”€ ðŸ†• Auto-suggest new supplier creation for <60%
 
 New Supplier Creation:
-├── 📋 Pre-populated supplier form with extracted data
-├── ✅ Mandatory field validation and completion
-├── 🔍 Duplicate prevention checks
-├── 📊 Credit check and risk assessment initiation
-└── 🎯 Workflow routing for approval based on supplier size
+â”œâ”€â”€ ðŸ“‹ Pre-populated supplier form with extracted data
+â”œâ”€â”€ âœ… Mandatory field validation and completion
+â”œâ”€â”€ ðŸ” Duplicate prevention checks
+â”œâ”€â”€ ðŸ“Š Credit check and risk assessment initiation
+â””â”€â”€ ðŸŽ¯ Workflow routing for approval based on supplier size
 ```
 
-### **📦 Product/Ingredient Mapping**
+### **ðŸ“¦ Product/Ingredient Mapping**
 ```
 Product Identification:
-├── 🏷️ SKU/barcode exact matching
-├── 📋 Product name fuzzy matching
-├── 📏 Unit of measure compatibility
-├── 🏪 Supplier-specific product codes
-└── 📊 Historical purchase pattern matching
+â”œâ”€â”€ ðŸ·ï¸ SKU/barcode exact matching
+â”œâ”€â”€ ðŸ“‹ Product name fuzzy matching
+â”œâ”€â”€ ðŸ“ Unit of measure compatibility
+â”œâ”€â”€ ðŸª Supplier-specific product codes
+â””â”€â”€ ðŸ“Š Historical purchase pattern matching
 
 Intelligent Suggestions:
-├── 🎯 ML-based product recommendations
-├── 📊 Purchase history analysis
-├── 🔗 Category-based suggestions
-├── 💰 Price range validation
-└── 📈 Trending product identification
+â”œâ”€â”€ ðŸŽ¯ ML-based product recommendations
+â”œâ”€â”€ ðŸ“Š Purchase history analysis
+â”œâ”€â”€ ðŸ”— Category-based suggestions
+â”œâ”€â”€ ðŸ’° Price range validation
+â””â”€â”€ ðŸ“ˆ Trending product identification
 
 New Product Creation Workflow:
-├── 📋 Product master data form pre-population
-├── 🏷️ Category suggestion based on description
-├── 📏 Unit of measure detection and validation
-├── 💰 Price reasonableness validation
-└── 📊 Integration with product catalog management
+â”œâ”€â”€ ðŸ“‹ Product master data form pre-population
+â”œâ”€â”€ ðŸ·ï¸ Category suggestion based on description
+â”œâ”€â”€ ðŸ“ Unit of measure detection and validation
+â”œâ”€â”€ ðŸ’° Price reasonableness validation
+â””â”€â”€ ðŸ“Š Integration with product catalog management
 ```
 
-## 📊 Performance and Quality Metrics
+## ðŸ“Š Performance and Quality Metrics
 
-### **⚡ Processing Performance**
+### **âš¡ Processing Performance**
 ```
 Speed Targets:
-├── 📄 Document upload: < 30 seconds
-├── 🔤 OCR processing: < 2 minutes
-├── 🧠 ML extraction: < 3 minutes
-├── 👤 Validation queue time: < 4 hours
-└── 🔗 Entity mapping: < 1 minute
+â”œâ”€â”€ ðŸ“„ Document upload: < 30 seconds
+â”œâ”€â”€ ðŸ”¤ OCR processing: < 2 minutes
+â”œâ”€â”€ ðŸ§  ML extraction: < 3 minutes
+â”œâ”€â”€ ðŸ‘¤ Validation queue time: < 4 hours
+â””â”€â”€ ðŸ”— Entity mapping: < 1 minute
 
 Throughput Targets:
-├── 📊 100+ documents per hour (peak processing)
-├── 👥 10+ concurrent validation sessions
-├── 🎯 1000+ documents per day capacity
-└── 📈 99.5% uptime for AI services
+â”œâ”€â”€ ðŸ“Š 100+ documents per hour (peak processing)
+â”œâ”€â”€ ðŸ‘¥ 10+ concurrent validation sessions
+â”œâ”€â”€ ðŸŽ¯ 1000+ documents per day capacity
+â””â”€â”€ ðŸ“ˆ 99.5% uptime for AI services
 
 Quality Targets:
-├── 🎯 OCR accuracy: > 95% character accuracy
-├── 🧠 ML extraction: > 85% field accuracy
-├── 👤 Human validation: > 98% final accuracy
-└── 🔗 Entity mapping: > 90% auto-match rate
+â”œâ”€â”€ ðŸŽ¯ OCR accuracy: > 95% character accuracy
+â”œâ”€â”€ ðŸ§  ML extraction: > 85% field accuracy
+â”œâ”€â”€ ðŸ‘¤ Human validation: > 98% final accuracy
+â””â”€â”€ ðŸ”— Entity mapping: > 90% auto-match rate
 ```
 
-### **📈 Business Impact Metrics**
+### **ðŸ“ˆ Business Impact Metrics**
 ```
 Automation Benefits:
-├── ⏱️ Time savings: 80% reduction in manual data entry
-├── 🎯 Accuracy improvement: 95%+ vs 85% manual entry
-├── 💰 Cost reduction: 60% lower processing costs
-└── 📊 Throughput increase: 300% more documents processed
+â”œâ”€â”€ â±ï¸ Time savings: 80% reduction in manual data entry
+â”œâ”€â”€ ðŸŽ¯ Accuracy improvement: 95%+ vs 85% manual entry
+â”œâ”€â”€ ðŸ’° Cost reduction: 60% lower processing costs
+â””â”€â”€ ðŸ“Š Throughput increase: 300% more documents processed
 
 User Experience Metrics:
-├── 😊 User satisfaction: > 4.5/5 rating
-├── 🎯 Task completion rate: > 95%
-├── ⏱️ Learning curve: < 2 hours to proficiency
-└── 🔄 Feature adoption rate: > 80% regular usage
+â”œâ”€â”€ ðŸ˜Š User satisfaction: > 4.5/5 rating
+â”œâ”€â”€ ðŸŽ¯ Task completion rate: > 95%
+â”œâ”€â”€ â±ï¸ Learning curve: < 2 hours to proficiency
+â””â”€â”€ ðŸ”„ Feature adoption rate: > 80% regular usage
 
 Business Process Metrics:
-├── 📋 Purchase order creation time: 70% reduction
-├── 🎯 Supplier onboarding speed: 50% faster
-├── 💰 Error-related costs: 80% reduction
-└── 📊 Compliance accuracy: > 99% regulatory compliance
+â”œâ”€â”€ ðŸ“‹ Purchase order creation time: 70% reduction
+â”œâ”€â”€ ðŸŽ¯ Supplier onboarding speed: 50% faster
+â”œâ”€â”€ ðŸ’° Error-related costs: 80% reduction
+â””â”€â”€ ðŸ“Š Compliance accuracy: > 99% regulatory compliance
 ```
 
-## 🔧 Error Handling and Recovery
+## ðŸ”§ Error Handling and Recovery
 
-### **❌ Common Error Scenarios**
+### **âŒ Common Error Scenarios**
 ```
 Document Processing Errors:
-├── 📄 Corrupted or unreadable files
-├── 🔤 OCR failure on poor quality images
-├── 🧠 ML model confidence below thresholds
-├── 📊 Inconsistent or contradictory data extraction
-└── 🔗 Entity mapping failures
+â”œâ”€â”€ ðŸ“„ Corrupted or unreadable files
+â”œâ”€â”€ ðŸ”¤ OCR failure on poor quality images
+â”œâ”€â”€ ðŸ§  ML model confidence below thresholds
+â”œâ”€â”€ ðŸ“Š Inconsistent or contradictory data extraction
+â””â”€â”€ ðŸ”— Entity mapping failures
 
 Technical Infrastructure Errors:
-├── 🤖 AI service unavailability
-├── 💾 Storage system failures
-├── 🔌 Network connectivity issues
-├── 📊 Database transaction failures
-└── 🔄 Queue processing bottlenecks
+â”œâ”€â”€ ðŸ¤– AI service unavailability
+â”œâ”€â”€ ðŸ’¾ Storage system failures
+â”œâ”€â”€ ðŸ”Œ Network connectivity issues
+â”œâ”€â”€ ðŸ“Š Database transaction failures
+â””â”€â”€ ðŸ”„ Queue processing bottlenecks
 
 Business Logic Errors:
-├── ✅ Validation rule violations
-├── 🏢 Supplier data inconsistencies
-├── 📦 Product catalog mismatches
-├── 💰 Financial calculation errors
-└── 📅 Date and timeline logical conflicts
+â”œâ”€â”€ âœ… Validation rule violations
+â”œâ”€â”€ ðŸ¢ Supplier data inconsistencies
+â”œâ”€â”€ ðŸ“¦ Product catalog mismatches
+â”œâ”€â”€ ðŸ’° Financial calculation errors
+â””â”€â”€ ðŸ“… Date and timeline logical conflicts
 ```
 
-### **🔄 Recovery Mechanisms**
+### **ðŸ”„ Recovery Mechanisms**
 ```
 Automatic Recovery:
-├── 🔁 Retry mechanisms with exponential backoff
-├── 🎯 Fallback AI engines for processing failures
-├── 💾 Data backup and restoration procedures
-├── 🔄 Queue redistribution for load balancing
-└── 📊 Health check monitoring and auto-scaling
+â”œâ”€â”€ ðŸ” Retry mechanisms with exponential backoff
+â”œâ”€â”€ ðŸŽ¯ Fallback AI engines for processing failures
+â”œâ”€â”€ ðŸ’¾ Data backup and restoration procedures
+â”œâ”€â”€ ðŸ”„ Queue redistribution for load balancing
+â””â”€â”€ ðŸ“Š Health check monitoring and auto-scaling
 
 Manual Recovery:
-├── 👤 Human operator intervention workflows
-├── 📋 Manual processing fallback procedures
-├── 🔍 Error investigation and resolution tools
-├── 📊 Data correction and reprocessing capabilities
-└── 📈 Root cause analysis and prevention measures
+â”œâ”€â”€ ðŸ‘¤ Human operator intervention workflows
+â”œâ”€â”€ ðŸ“‹ Manual processing fallback procedures
+â”œâ”€â”€ ðŸ” Error investigation and resolution tools
+â”œâ”€â”€ ðŸ“Š Data correction and reprocessing capabilities
+â””â”€â”€ ðŸ“ˆ Root cause analysis and prevention measures
 
 Quality Assurance:
-├── ✅ Multi-stage validation and verification
-├── 📊 Cross-reference validation with external sources
-├── 🎯 Confidence threshold management
-├── 👥 Peer review for critical documents
-└── 📋 Audit trail maintenance for compliance
+â”œâ”€â”€ âœ… Multi-stage validation and verification
+â”œâ”€â”€ ðŸ“Š Cross-reference validation with external sources
+â”œâ”€â”€ ðŸŽ¯ Confidence threshold management
+â”œâ”€â”€ ðŸ‘¥ Peer review for critical documents
+â””â”€â”€ ðŸ“‹ Audit trail maintenance for compliance
 ```
 
 ---
 
 **Arquivo**: `04-ai-processing-flow.md`  
-**Fluxo**: IA Processing (Fiscal Document Upload → Purchase Order Creation)  
-**Domínio**: Purchasing (with AI/ML integration)  
-**Complexidade**: 🚨 Alta (10+ participantes, 25+ interações, AI pipeline)  
-**Atualização**: 16/06/2025
+**Fluxo**: IA Processing (Fiscal Document Upload â†’ Purchase Order Creation)  
+**DomÃ­nio**: Purchasing (with AI/ML integration)  
+**Complexidade**: ðŸš¨ Alta (10+ participantes, 25+ interaÃ§Ãµes, AI pipeline)  
+**AtualizaÃ§Ã£o**: 16/06/2025

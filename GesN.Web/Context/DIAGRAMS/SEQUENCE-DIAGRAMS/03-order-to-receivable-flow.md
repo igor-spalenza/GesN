@@ -1,35 +1,35 @@
-# 🔄 SEQUENCE DIAGRAM - OrderEntry → AccountReceivable Flow
+﻿# ðŸ”„ SEQUENCE DIAGRAM - OrderEntry â†’ AccountReceivable Flow
 
-## 🎯 Visão Geral
-Diagrama de sequência detalhado mostrando o fluxo automático de criação de contas a receber a partir da confirmação de pedidos de venda. Este fluxo fundamental conecta os domínios de Vendas e Financeiro, garantindo que toda receita seja devidamente registrada e acompanhada para cobrança.
+## ðŸŽ¯ VisÃ£o Geral
+Diagrama de sequÃªncia detalhado mostrando o fluxo automÃ¡tico de criaÃ§Ã£o de contas a receber a partir da confirmaÃ§Ã£o de pedidos de venda. Este fluxo fundamental conecta os domÃ­nios de Vendas e Financeiro, garantindo que toda receita seja devidamente registrada e acompanhada para cobranÃ§a.
 
-## 📊 Complexidade do Fluxo
-- **⚠️ Média Complexidade**: Cross-domain integration, payment terms processing, installment calculations
-- **👥 Participantes**: 7+ system components
-- **🔄 Interações**: 15+ interactions per order
-- **🌐 Cross-Domain**: Sales → Financial integration
-- **📋 Validações**: Customer credit, payment terms, installment calculations
+## ðŸ“Š Complexidade do Fluxo
+- **âš ï¸ MÃ©dia Complexidade**: Cross-domain integration, payment terms processing, installment calculations
+- **ðŸ‘¥ Participantes**: 7+ system components
+- **ðŸ”„ InteraÃ§Ãµes**: 15+ interactions per order
+- **ðŸŒ Cross-Domain**: Sales â†’ Financial integration
+- **ðŸ“‹ ValidaÃ§Ãµes**: Customer credit, payment terms, installment calculations
 
-## 🎯 Trigger Event
-**OrderConfirmed** (Sales Domain) → Automatic AccountReceivable creation
+## ðŸŽ¯ Trigger Event
+**OrderConfirmed** (Sales Domain) â†’ Automatic AccountReceivable creation
 
-## 📝 Sequence Diagram
+## ðŸ“ Sequence Diagram
 
 ```mermaid
 sequenceDiagram
-    participant UI as 👤 User Interface
-    participant SC as 🎮 Sales Controller
-    participant SS as ⚙️ Sales Service
-    participant SR as 🗄️ Sales Repository
-    participant EB as 📡 Event Bus
-    participant FS as 💳 Financial Service
-    participant FR as 🗄️ Financial Repository
-    participant VS as ✅ Validation Service
-    participant CS as 👤 Customer Service
-    participant NS as 🔔 Notification Service
-    participant DB as 💾 Database
+    participant UI as ðŸ‘¤ User Interface
+    participant SC as ðŸŽ® Sales Controller
+    participant SS as âš™ï¸ Sales Service
+    participant SR as ðŸ—„ï¸ Sales Repository
+    participant EB as ðŸ“¡ Event Bus
+    participant FS as ðŸ’³ Financial Service
+    participant FR as ðŸ—„ï¸ Financial Repository
+    participant VS as âœ… Validation Service
+    participant CS as ðŸ‘¤ Customer Service
+    participant NS as ðŸ”” Notification Service
+    participant DB as ðŸ’¾ Database
     
-    Note over UI, DB: OrderEntry → AccountReceivable Flow (Triggered by Order Confirmation)
+    Note over UI, DB: OrderEntry â†’ AccountReceivable Flow (Triggered by Order Confirmation)
     
     %% ==========================================
     %% SALES DOMAIN - ORDER CONFIRMATION
@@ -127,7 +127,7 @@ sequenceDiagram
     %% ==========================================
     
     Note over FS: Process payment terms and create payment schedule
-    alt Payment Terms = "À Vista" (Cash)
+    alt Payment Terms = "Ã€ Vista" (Cash)
         FS->>FS: CreateCashPayment(orderData)
         FS->>FS: CalculateImmediateDueDate(orderDate, terms)
         FS->>FS: ApplyCashDiscountIfApplicable()
@@ -336,181 +336,181 @@ sequenceDiagram
     end
 ```
 
-## 🎯 Detailed Component Responsibilities
+## ðŸŽ¯ Detailed Component Responsibilities
 
-### **🎮 Sales Controller**
+### **ðŸŽ® Sales Controller**
 ```
 Responsibilities:
-├── 🔐 Validate user authorization for order confirmation
-├── 📋 HTTP request validation and sanitization  
-├── 💰 Order confirmation workflow coordination
-├── 📊 Return appropriate HTTP response codes
-└── 🔍 Log confirmation-related activities
+â”œâ”€â”€ ðŸ” Validate user authorization for order confirmation
+â”œâ”€â”€ ðŸ“‹ HTTP request validation and sanitization  
+â”œâ”€â”€ ðŸ’° Order confirmation workflow coordination
+â”œâ”€â”€ ðŸ“Š Return appropriate HTTP response codes
+â””â”€â”€ ðŸ” Log confirmation-related activities
 
 Authorization Validation:
-├── 👤 User role verification
-├── 💰 Order amount vs authorization limits
-├── 🏢 Customer account access permissions
-├── 📅 Business hours confirmation rules
-└── 🚨 Fraud detection checks
+â”œâ”€â”€ ðŸ‘¤ User role verification
+â”œâ”€â”€ ðŸ’° Order amount vs authorization limits
+â”œâ”€â”€ ðŸ¢ Customer account access permissions
+â”œâ”€â”€ ðŸ“… Business hours confirmation rules
+â””â”€â”€ ðŸš¨ Fraud detection checks
 ```
 
-### **⚙️ Sales Service**
+### **âš™ï¸ Sales Service**
 ```
 Order Confirmation Logic:
-├── 📋 Comprehensive order validation
-├── 👤 Customer credit verification
-├── 💰 Financial calculations and verification
-├── 📅 Delivery date validation and commitment
-└── 📡 Cross-domain event orchestration
+â”œâ”€â”€ ðŸ“‹ Comprehensive order validation
+â”œâ”€â”€ ðŸ‘¤ Customer credit verification
+â”œâ”€â”€ ðŸ’° Financial calculations and verification
+â”œâ”€â”€ ðŸ“… Delivery date validation and commitment
+â””â”€â”€ ðŸ“¡ Cross-domain event orchestration
 
 Financial Data Preparation:
-├── 💰 Order total calculation and verification
-├── 📊 Tax calculation and application
-├── 💸 Discount application and validation
-├── 📅 Payment terms determination
-└── 🏦 Revenue recognition rule application
+â”œâ”€â”€ ðŸ’° Order total calculation and verification
+â”œâ”€â”€ ðŸ“Š Tax calculation and application
+â”œâ”€â”€ ðŸ’¸ Discount application and validation
+â”œâ”€â”€ ðŸ“… Payment terms determination
+â””â”€â”€ ðŸ¦ Revenue recognition rule application
 
 Customer Relationship Management:
-├── 👤 Customer status verification
-├── 💳 Credit limit and utilization checking
-├── 📊 Payment history analysis
-├── 🎯 Customer risk assessment
-└── 📈 Customer lifetime value updates
+â”œâ”€â”€ ðŸ‘¤ Customer status verification
+â”œâ”€â”€ ðŸ’³ Credit limit and utilization checking
+â”œâ”€â”€ ðŸ“Š Payment history analysis
+â”œâ”€â”€ ðŸŽ¯ Customer risk assessment
+â””â”€â”€ ðŸ“ˆ Customer lifetime value updates
 ```
 
-### **💳 Financial Service**
+### **ðŸ’³ Financial Service**
 ```
 AccountReceivable Creation Logic:
-├── 📊 Financial validation and compliance
-├── 💰 Payment terms processing and application
-├── 📅 Installment schedule generation
-├── 💸 Revenue recognition processing
-└── 📈 Financial metrics and projections
+â”œâ”€â”€ ðŸ“Š Financial validation and compliance
+â”œâ”€â”€ ðŸ’° Payment terms processing and application
+â”œâ”€â”€ ðŸ“… Installment schedule generation
+â”œâ”€â”€ ðŸ’¸ Revenue recognition processing
+â””â”€â”€ ðŸ“ˆ Financial metrics and projections
 
 Payment Processing Strategy:
-├── 💵 Cash payments: Immediate processing
-├── 📊 Installments: Complex schedule creation
-├── 📅 Credit terms: Due date calculations
-├── 🎯 Custom terms: Flexible rule application
-└── 🏦 Payment method validation
+â”œâ”€â”€ ðŸ’µ Cash payments: Immediate processing
+â”œâ”€â”€ ðŸ“Š Installments: Complex schedule creation
+â”œâ”€â”€ ðŸ“… Credit terms: Due date calculations
+â”œâ”€â”€ ðŸŽ¯ Custom terms: Flexible rule application
+â””â”€â”€ ðŸ¦ Payment method validation
 
 Financial Impact Management:
-├── 💸 Cash flow projection updates
-├── 📊 Customer credit utilization tracking
-├── 📈 Revenue recognition compliance
-├── 🎯 Financial ratio impact assessment
-└── ⚠️ Risk threshold monitoring
+â”œâ”€â”€ ðŸ’¸ Cash flow projection updates
+â”œâ”€â”€ ðŸ“Š Customer credit utilization tracking
+â”œâ”€â”€ ðŸ“ˆ Revenue recognition compliance
+â”œâ”€â”€ ðŸŽ¯ Financial ratio impact assessment
+â””â”€â”€ âš ï¸ Risk threshold monitoring
 ```
 
-### **👤 Customer Service**
+### **ðŸ‘¤ Customer Service**
 ```
 Credit Management:
-├── 💳 Credit limit verification and management
-├── 📊 Payment history analysis and scoring
-├── 🎯 Risk assessment and categorization
-├── 💰 Current debt calculation and tracking
-└── 📈 Credit utilization monitoring
+â”œâ”€â”€ ðŸ’³ Credit limit verification and management
+â”œâ”€â”€ ðŸ“Š Payment history analysis and scoring
+â”œâ”€â”€ ðŸŽ¯ Risk assessment and categorization
+â”œâ”€â”€ ðŸ’° Current debt calculation and tracking
+â””â”€â”€ ðŸ“ˆ Credit utilization monitoring
 
 Customer Validation:
-├── ✅ Account status verification (active/inactive)
-├── 🚨 Fraud detection and prevention
-├── 📋 KYC (Know Your Customer) compliance
-├── 🏦 Banking and payment information validation
-└── 📊 Customer relationship health assessment
+â”œâ”€â”€ âœ… Account status verification (active/inactive)
+â”œâ”€â”€ ðŸš¨ Fraud detection and prevention
+â”œâ”€â”€ ðŸ“‹ KYC (Know Your Customer) compliance
+â”œâ”€â”€ ðŸ¦ Banking and payment information validation
+â””â”€â”€ ðŸ“Š Customer relationship health assessment
 ```
 
-## 💰 Payment Terms and Revenue Recognition
+## ðŸ’° Payment Terms and Revenue Recognition
 
-### **📅 Payment Terms Processing**
+### **ðŸ“… Payment Terms Processing**
 ```
-À Vista (Cash Payment):
-├── 📅 Due Date: Order date + 0-7 days
-├── 💰 Discount: 2-5% early payment discount typically
-├── 🏦 Method: Cash, debit, immediate bank transfer
-├── 💸 Cash Flow: Immediate or near-immediate inflow
-└── 📊 Risk: Lowest credit risk, immediate recognition
+Ã€ Vista (Cash Payment):
+â”œâ”€â”€ ðŸ“… Due Date: Order date + 0-7 days
+â”œâ”€â”€ ðŸ’° Discount: 2-5% early payment discount typically
+â”œâ”€â”€ ðŸ¦ Method: Cash, debit, immediate bank transfer
+â”œâ”€â”€ ðŸ’¸ Cash Flow: Immediate or near-immediate inflow
+â””â”€â”€ ðŸ“Š Risk: Lowest credit risk, immediate recognition
 
 Parcelado (Installment Payment):
-├── 📅 Due Dates: Monthly payments over 2-24 months
-├── 💰 Interest: 1-3% monthly compound interest
-├── 📊 Installments: Equal payments with interest
-├── 💸 Cash Flow: Spread over installment period
-└── 📋 Risk: Medium risk, payment tracking required
+â”œâ”€â”€ ðŸ“… Due Dates: Monthly payments over 2-24 months
+â”œâ”€â”€ ðŸ’° Interest: 1-3% monthly compound interest
+â”œâ”€â”€ ðŸ“Š Installments: Equal payments with interest
+â”œâ”€â”€ ðŸ’¸ Cash Flow: Spread over installment period
+â””â”€â”€ ðŸ“‹ Risk: Medium risk, payment tracking required
 
 Prazo (Credit Terms):
-├── 📅 Due Date: 15/30/45/60 days from order date
-├── 💰 Standard: Most common B2B payment terms
-├── 🏦 Method: Bank transfer, check, credit
-├── 💸 Cash Flow: Single future inflow
-└── 📊 Risk: Standard business credit risk
+â”œâ”€â”€ ðŸ“… Due Date: 15/30/45/60 days from order date
+â”œâ”€â”€ ðŸ’° Standard: Most common B2B payment terms
+â”œâ”€â”€ ðŸ¦ Method: Bank transfer, check, credit
+â”œâ”€â”€ ðŸ’¸ Cash Flow: Single future inflow
+â””â”€â”€ ðŸ“Š Risk: Standard business credit risk
 
 Customizado (Custom Terms):
-├── 📅 Due Date: Negotiated based on customer relationship
-├── 💰 Complex: May include milestones, conditions
-├── 📊 Special Cases: Large customers, strategic accounts
-├── 💸 Cash Flow: Varies by agreement terms
-└── 📋 Approval: Requires manager/director approval
+â”œâ”€â”€ ðŸ“… Due Date: Negotiated based on customer relationship
+â”œâ”€â”€ ðŸ’° Complex: May include milestones, conditions
+â”œâ”€â”€ ðŸ“Š Special Cases: Large customers, strategic accounts
+â”œâ”€â”€ ðŸ’¸ Cash Flow: Varies by agreement terms
+â””â”€â”€ ðŸ“‹ Approval: Requires manager/director approval
 ```
 
-### **📊 Revenue Recognition Rules**
+### **ðŸ“Š Revenue Recognition Rules**
 ```
 Immediate Recognition (FOB Origin):
-├── 🚚 Recognition: When goods shipped from warehouse
-├── 📅 Timing: Order confirmation + shipping
-├── 💰 Amount: Full order amount recognized
-├── 📊 Risk: Standard revenue recognition
-└── 📋 Compliance: GAAP/IFRS standard approach
+â”œâ”€â”€ ðŸšš Recognition: When goods shipped from warehouse
+â”œâ”€â”€ ðŸ“… Timing: Order confirmation + shipping
+â”œâ”€â”€ ðŸ’° Amount: Full order amount recognized
+â”œâ”€â”€ ðŸ“Š Risk: Standard revenue recognition
+â””â”€â”€ ðŸ“‹ Compliance: GAAP/IFRS standard approach
 
 Deferred Recognition (FOB Destination):
-├── 🚚 Recognition: When goods delivered to customer
-├── 📅 Timing: Delivery confirmation required
-├── 💰 Amount: Revenue held in deferred account
-├── 📊 Risk: Delivery completion required
-└── 📋 Compliance: Conservative approach
+â”œâ”€â”€ ðŸšš Recognition: When goods delivered to customer
+â”œâ”€â”€ ðŸ“… Timing: Delivery confirmation required
+â”œâ”€â”€ ðŸ’° Amount: Revenue held in deferred account
+â”œâ”€â”€ ðŸ“Š Risk: Delivery completion required
+â””â”€â”€ ðŸ“‹ Compliance: Conservative approach
 
 Milestone Recognition (Custom):
-├── 🎯 Recognition: Based on completion milestones
-├── 📅 Timing: Percentage completion method
-├── 💰 Amount: Proportional to milestone completion
-├── 📊 Risk: Complex tracking required
-└── 📋 Compliance: Project accounting standards
+â”œâ”€â”€ ðŸŽ¯ Recognition: Based on completion milestones
+â”œâ”€â”€ ðŸ“… Timing: Percentage completion method
+â”œâ”€â”€ ðŸ’° Amount: Proportional to milestone completion
+â”œâ”€â”€ ðŸ“Š Risk: Complex tracking required
+â””â”€â”€ ðŸ“‹ Compliance: Project accounting standards
 
 Service Recognition (Ongoing):
-├── ⏰ Recognition: Over service delivery period
-├── 📅 Timing: Monthly/periodic recognition
-├── 💰 Amount: Straight-line over service period
-├── 📊 Risk: Service delivery performance risk
-└── 📋 Compliance: Subscription revenue standards
+â”œâ”€â”€ â° Recognition: Over service delivery period
+â”œâ”€â”€ ðŸ“… Timing: Monthly/periodic recognition
+â”œâ”€â”€ ðŸ’° Amount: Straight-line over service period
+â”œâ”€â”€ ðŸ“Š Risk: Service delivery performance risk
+â””â”€â”€ ðŸ“‹ Compliance: Subscription revenue standards
 ```
 
-## 🔒 Credit Management and Risk Assessment
+## ðŸ”’ Credit Management and Risk Assessment
 
-### **💳 Customer Credit Framework**
+### **ðŸ’³ Customer Credit Framework**
 ```
 Credit Limit Determination:
-├── 📊 Credit Score: External credit bureau data
-├── 💰 Financial Statements: Customer financial health
-├── 📈 Payment History: Past payment performance
-├── 🏢 Business Relationship: Length and depth
-└── 🎯 Industry Risk: Sector-specific risk factors
+â”œâ”€â”€ ðŸ“Š Credit Score: External credit bureau data
+â”œâ”€â”€ ðŸ’° Financial Statements: Customer financial health
+â”œâ”€â”€ ðŸ“ˆ Payment History: Past payment performance
+â”œâ”€â”€ ðŸ¢ Business Relationship: Length and depth
+â””â”€â”€ ðŸŽ¯ Industry Risk: Sector-specific risk factors
 
 Credit Utilization Monitoring:
-├── 💰 Current Outstanding: All unpaid invoices
-├── 📊 Available Credit: Limit - outstanding
-├── 📈 Utilization Ratio: Outstanding / limit
-├── ⚠️ Alert Thresholds: 75%, 90%, 100% utilization
-└── 🚨 Actions: Hold orders, require payment
+â”œâ”€â”€ ðŸ’° Current Outstanding: All unpaid invoices
+â”œâ”€â”€ ðŸ“Š Available Credit: Limit - outstanding
+â”œâ”€â”€ ðŸ“ˆ Utilization Ratio: Outstanding / limit
+â”œâ”€â”€ âš ï¸ Alert Thresholds: 75%, 90%, 100% utilization
+â””â”€â”€ ðŸš¨ Actions: Hold orders, require payment
 
 Risk Assessment Categories:
-├── 🟢 Low Risk: Excellent credit, long relationship
-├── 🟡 Medium Risk: Good credit, standard terms
-├── 🟠 High Risk: Fair credit, restricted terms
-├── 🔴 Very High Risk: Poor credit, cash only
-└── ⚫ Blocked: No new orders, collection required
+â”œâ”€â”€ ðŸŸ¢ Low Risk: Excellent credit, long relationship
+â”œâ”€â”€ ðŸŸ¡ Medium Risk: Good credit, standard terms
+â”œâ”€â”€ ðŸŸ  High Risk: Fair credit, restricted terms
+â”œâ”€â”€ ðŸ”´ Very High Risk: Poor credit, cash only
+â””â”€â”€ âš« Blocked: No new orders, collection required
 ```
 
-### **📊 Credit Decision Matrix**
+### **ðŸ“Š Credit Decision Matrix**
 | Credit Score | Payment History | Order Amount | Decision | Terms |
 |--------------|----------------|--------------|----------|-------|
 | **Excellent (750+)** | Perfect | Any | Auto-Approve | Standard |
@@ -518,163 +518,163 @@ Risk Assessment Categories:
 | **Fair (550-649)** | Mixed | < $25K | Manager Review | Restricted |
 | **Poor (< 550)** | Poor | Any | Director Review | Cash Only |
 
-### **🚨 Alert and Action Framework**
+### **ðŸš¨ Alert and Action Framework**
 ```
 Credit Alerts:
-├── 🟡 Warning: 75% credit utilization reached
-├── 🟠 Caution: 90% credit utilization reached
-├── 🔴 Critical: 100% credit utilization reached
-├── ⚫ Block: Payment overdue > 30 days
-└── 🚨 Escalate: Manager review required
+â”œâ”€â”€ ðŸŸ¡ Warning: 75% credit utilization reached
+â”œâ”€â”€ ðŸŸ  Caution: 90% credit utilization reached
+â”œâ”€â”€ ðŸ”´ Critical: 100% credit utilization reached
+â”œâ”€â”€ âš« Block: Payment overdue > 30 days
+â””â”€â”€ ðŸš¨ Escalate: Manager review required
 
 Automated Actions:
-├── 📧 Email: Customer payment reminder
-├── 📞 Call: Sales team follow-up required
-├── 🚫 Hold: New orders temporarily suspended
-├── 🔒 Block: No new orders until payment
-└── 📋 Review: Manual credit review triggered
+â”œâ”€â”€ ðŸ“§ Email: Customer payment reminder
+â”œâ”€â”€ ðŸ“ž Call: Sales team follow-up required
+â”œâ”€â”€ ðŸš« Hold: New orders temporarily suspended
+â”œâ”€â”€ ðŸ”’ Block: No new orders until payment
+â””â”€â”€ ðŸ“‹ Review: Manual credit review triggered
 ```
 
-## 📊 Financial Calculations and Metrics
+## ðŸ“Š Financial Calculations and Metrics
 
-### **💰 Order Financial Calculations**
+### **ðŸ’° Order Financial Calculations**
 ```
 Base Calculations:
-├── 🧮 Subtotal = Sum of (quantity × unit_price) for all items
-├── 💸 Discounts = Customer discounts + promotional discounts
-├── 📊 Taxes = Subtotal × applicable tax rates
-├── 🚚 Shipping = Based on delivery terms and distance
-└── 💰 Total = Subtotal - Discounts + Taxes + Shipping
+â”œâ”€â”€ ðŸ§® Subtotal = Sum of (quantity Ã— unit_price) for all items
+â”œâ”€â”€ ðŸ’¸ Discounts = Customer discounts + promotional discounts
+â”œâ”€â”€ ðŸ“Š Taxes = Subtotal Ã— applicable tax rates
+â”œâ”€â”€ ðŸšš Shipping = Based on delivery terms and distance
+â””â”€â”€ ðŸ’° Total = Subtotal - Discounts + Taxes + Shipping
 
 Installment Calculations:
-├── 📊 Principal = Total amount / number of installments
-├── 💰 Interest = Principal × monthly interest rate
-├── 📅 Payment = Principal + accrued interest
-├── 🧮 Total Interest = Sum of all interest payments
-└── ✅ Validation = Sum of payments = total + total interest
+â”œâ”€â”€ ðŸ“Š Principal = Total amount / number of installments
+â”œâ”€â”€ ðŸ’° Interest = Principal Ã— monthly interest rate
+â”œâ”€â”€ ðŸ“… Payment = Principal + accrued interest
+â”œâ”€â”€ ðŸ§® Total Interest = Sum of all interest payments
+â””â”€â”€ âœ… Validation = Sum of payments = total + total interest
 
 Tax Calculations:
-├── 📊 Sales Tax = Subtotal × local sales tax rate
-├── 💰 VAT = (Subtotal + shipping) × VAT rate
-├── 🎯 Service Tax = Service items × service tax rate
-├── 📋 Compliance = Tax jurisdiction determination
-└── ✅ Validation = Tax calculations per regulations
+â”œâ”€â”€ ðŸ“Š Sales Tax = Subtotal Ã— local sales tax rate
+â”œâ”€â”€ ðŸ’° VAT = (Subtotal + shipping) Ã— VAT rate
+â”œâ”€â”€ ðŸŽ¯ Service Tax = Service items Ã— service tax rate
+â”œâ”€â”€ ðŸ“‹ Compliance = Tax jurisdiction determination
+â””â”€â”€ âœ… Validation = Tax calculations per regulations
 ```
 
-### **📈 Cash Flow Impact**
+### **ðŸ“ˆ Cash Flow Impact**
 ```
 Immediate Impact:
-├── 💰 Expected Inflow = Order total amount
-├── 📅 Expected Date = Based on payment terms
-├── 🎯 Probability = Based on customer credit score
-├── 💸 Present Value = Discounted for time value
-└── 📊 Confidence = Risk-adjusted expected value
+â”œâ”€â”€ ðŸ’° Expected Inflow = Order total amount
+â”œâ”€â”€ ðŸ“… Expected Date = Based on payment terms
+â”œâ”€â”€ ðŸŽ¯ Probability = Based on customer credit score
+â”œâ”€â”€ ðŸ’¸ Present Value = Discounted for time value
+â””â”€â”€ ðŸ“Š Confidence = Risk-adjusted expected value
 
 Projected Impact:
-├── 📈 7-day projection: Payment due this week
-├── 📊 30-day projection: Payment due this month
-├── 💰 90-day projection: Quarterly cash impact
-├── 📅 Annual projection: Yearly revenue impact
-└── 🎯 Scenario Analysis: Best/worst/likely cases
+â”œâ”€â”€ ðŸ“ˆ 7-day projection: Payment due this week
+â”œâ”€â”€ ðŸ“Š 30-day projection: Payment due this month
+â”œâ”€â”€ ðŸ’° 90-day projection: Quarterly cash impact
+â”œâ”€â”€ ðŸ“… Annual projection: Yearly revenue impact
+â””â”€â”€ ðŸŽ¯ Scenario Analysis: Best/worst/likely cases
 ```
 
-## 🔄 Error Handling and Business Rules
+## ðŸ”„ Error Handling and Business Rules
 
-### **❌ Common Error Scenarios**
+### **âŒ Common Error Scenarios**
 ```
 Customer Credit Issues:
-├── 💳 Credit limit exceeded by order amount
-├── 📊 Customer payment history poor
-├── 🚨 Customer account flagged for collection
-├── 💰 Outstanding invoices past due
-└── 🔒 Customer account temporarily suspended
+â”œâ”€â”€ ðŸ’³ Credit limit exceeded by order amount
+â”œâ”€â”€ ðŸ“Š Customer payment history poor
+â”œâ”€â”€ ðŸš¨ Customer account flagged for collection
+â”œâ”€â”€ ðŸ’° Outstanding invoices past due
+â””â”€â”€ ðŸ”’ Customer account temporarily suspended
 
 Payment Terms Issues:
-├── 📅 Invalid payment terms for customer type
-├── 💰 Installment terms exceed maximum allowed
-├── 🏦 Payment method not supported for customer
-├── 📊 Custom terms require additional approval
-└── 💸 Early payment discount calculation error
+â”œâ”€â”€ ðŸ“… Invalid payment terms for customer type
+â”œâ”€â”€ ðŸ’° Installment terms exceed maximum allowed
+â”œâ”€â”€ ðŸ¦ Payment method not supported for customer
+â”œâ”€â”€ ðŸ“Š Custom terms require additional approval
+â””â”€â”€ ðŸ’¸ Early payment discount calculation error
 
 Financial Validation Issues:
-├── 🧮 Order total calculation mismatch
-├── 📊 Tax calculation errors or missing rates
-├── 💰 Revenue recognition rule violations
-├── 📅 Due date calculation outside business rules
-└── 🏦 Chart of accounts mapping errors
+â”œâ”€â”€ ðŸ§® Order total calculation mismatch
+â”œâ”€â”€ ðŸ“Š Tax calculation errors or missing rates
+â”œâ”€â”€ ðŸ’° Revenue recognition rule violations
+â”œâ”€â”€ ðŸ“… Due date calculation outside business rules
+â””â”€â”€ ðŸ¦ Chart of accounts mapping errors
 ```
 
-### **🔧 Recovery and Resolution**
+### **ðŸ”§ Recovery and Resolution**
 ```
 Credit Resolution Process:
-├── 🔄 Automatic retry after payment received
-├── 👤 Sales team customer contact for resolution
-├── 💳 Temporary credit increase approval process
-├── 💰 Payment plan negotiation and setup
-└── 📋 Escalation to finance manager for decisions
+â”œâ”€â”€ ðŸ”„ Automatic retry after payment received
+â”œâ”€â”€ ðŸ‘¤ Sales team customer contact for resolution
+â”œâ”€â”€ ðŸ’³ Temporary credit increase approval process
+â”œâ”€â”€ ðŸ’° Payment plan negotiation and setup
+â””â”€â”€ ðŸ“‹ Escalation to finance manager for decisions
 
 Financial Error Resolution:
-├── 🧮 Automatic recalculation triggers
-├── 📊 Manual review queue for complex cases
-├── 💰 Finance team notification and intervention
-├── 🔄 Transaction rollback and retry mechanisms
-└── 📋 Audit trail maintenance for all corrections
+â”œâ”€â”€ ðŸ§® Automatic recalculation triggers
+â”œâ”€â”€ ðŸ“Š Manual review queue for complex cases
+â”œâ”€â”€ ðŸ’° Finance team notification and intervention
+â”œâ”€â”€ ðŸ”„ Transaction rollback and retry mechanisms
+â””â”€â”€ ðŸ“‹ Audit trail maintenance for all corrections
 
 Business Rule Updates:
-├── 📋 Dynamic rule engine updates
-├── 🎯 A/B testing for new rule implementations
-├── 📊 Impact analysis before rule changes
-├── 🔄 Rollback capabilities for failed changes
-└── 📈 Performance monitoring post-changes
+â”œâ”€â”€ ðŸ“‹ Dynamic rule engine updates
+â”œâ”€â”€ ðŸŽ¯ A/B testing for new rule implementations
+â”œâ”€â”€ ðŸ“Š Impact analysis before rule changes
+â”œâ”€â”€ ðŸ”„ Rollback capabilities for failed changes
+â””â”€â”€ ðŸ“ˆ Performance monitoring post-changes
 ```
 
-## 📈 Performance and Monitoring
+## ðŸ“ˆ Performance and Monitoring
 
-### **⚡ Performance Targets**
+### **âš¡ Performance Targets**
 ```
 Response Time SLAs:
-├── 🎯 Order confirmation: < 3 seconds
-├── 📊 Credit validation: < 2 seconds
-├── 💰 AR creation: < 5 seconds
-├── 📧 Customer notification: < 10 seconds
-└── 🔄 Cross-domain sync: < 15 seconds
+â”œâ”€â”€ ðŸŽ¯ Order confirmation: < 3 seconds
+â”œâ”€â”€ ðŸ“Š Credit validation: < 2 seconds
+â”œâ”€â”€ ðŸ’° AR creation: < 5 seconds
+â”œâ”€â”€ ðŸ“§ Customer notification: < 10 seconds
+â””â”€â”€ ðŸ”„ Cross-domain sync: < 15 seconds
 
 Business Process SLAs:
-├── 💳 Credit decision: < 30 seconds automated
-├── 📊 Invoice generation: < 2 minutes
-├── 📧 Customer communication: < 5 minutes
-├── 💰 Payment processing: < 1 hour
-└── 📋 Financial reporting: < 4 hours
+â”œâ”€â”€ ðŸ’³ Credit decision: < 30 seconds automated
+â”œâ”€â”€ ðŸ“Š Invoice generation: < 2 minutes
+â”œâ”€â”€ ðŸ“§ Customer communication: < 5 minutes
+â”œâ”€â”€ ðŸ’° Payment processing: < 1 hour
+â””â”€â”€ ðŸ“‹ Financial reporting: < 4 hours
 ```
 
-### **📊 Key Metrics and KPIs**
+### **ðŸ“Š Key Metrics and KPIs**
 ```
 Business Metrics:
-├── 💰 Order-to-cash cycle time
-├── 📊 Customer payment compliance rate
-├── 💳 Credit utilization efficiency
-├── 📈 Revenue recognition accuracy
-└── 🎯 Customer satisfaction scores
+â”œâ”€â”€ ðŸ’° Order-to-cash cycle time
+â”œâ”€â”€ ðŸ“Š Customer payment compliance rate
+â”œâ”€â”€ ðŸ’³ Credit utilization efficiency
+â”œâ”€â”€ ðŸ“ˆ Revenue recognition accuracy
+â””â”€â”€ ðŸŽ¯ Customer satisfaction scores
 
 Technical Metrics:
-├── 🔌 API response times and reliability
-├── 💾 Database transaction performance
-├── 📡 Event processing latency
-├── 🚨 Error rates by component
-└── 📈 System throughput under load
+â”œâ”€â”€ ðŸ”Œ API response times and reliability
+â”œâ”€â”€ ðŸ’¾ Database transaction performance
+â”œâ”€â”€ ðŸ“¡ Event processing latency
+â”œâ”€â”€ ðŸš¨ Error rates by component
+â””â”€â”€ ðŸ“ˆ System throughput under load
 
 Financial Metrics:
-├── 💰 Days Sales Outstanding (DSO)
-├── 📊 Bad debt write-off percentage
-├── 💳 Credit limit utilization trends
-├── 📈 Revenue per order trends
-└── 🎯 Cash flow forecast accuracy
+â”œâ”€â”€ ðŸ’° Days Sales Outstanding (DSO)
+â”œâ”€â”€ ðŸ“Š Bad debt write-off percentage
+â”œâ”€â”€ ðŸ’³ Credit limit utilization trends
+â”œâ”€â”€ ðŸ“ˆ Revenue per order trends
+â””â”€â”€ ðŸŽ¯ Cash flow forecast accuracy
 ```
 
 ---
 
 **Arquivo**: `03-order-to-receivable-flow.md`  
-**Fluxo**: OrderEntry → AccountReceivable (Automático)  
-**Domínios**: Sales → Financial  
-**Complexidade**: ⚠️ Média (7+ participantes, 15+ interações)  
-**Atualização**: 16/06/2025
+**Fluxo**: OrderEntry â†’ AccountReceivable (AutomÃ¡tico)  
+**DomÃ­nios**: Sales â†’ Financial  
+**Complexidade**: âš ï¸ MÃ©dia (7+ participantes, 15+ interaÃ§Ãµes)  
+**AtualizaÃ§Ã£o**: 16/06/2025

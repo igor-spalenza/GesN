@@ -5,6 +5,7 @@ using GesN.Web.Models.ViewModels.Sales;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace GesN.Web.Controllers
@@ -17,15 +18,33 @@ namespace GesN.Web.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly ICustomerService _customerService;
+        private readonly IProductService _productService;
+        private readonly ICompositeProductXHierarchyService _compositeProductXHierarchyService;
+        private readonly IProductComponentService _productComponentService;
+        private readonly IProductGroupService _productGroupService;
+        private readonly IProductCategoryService _productCategoryService;
+        private readonly IOrderItemService _orderItemService;
         private readonly ILogger<OrderController> _logger;
 
         public OrderController(
             IOrderService orderService,
             ICustomerService customerService,
+            IProductService productService,
+            ICompositeProductXHierarchyService compositeProductXHierarchyService,
+            IProductComponentService productComponentService,
+            IProductGroupService productGroupService,
+            IProductCategoryService productCategoryService,
+            IOrderItemService orderItemService,
             ILogger<OrderController> logger)
         {
             _orderService = orderService;
             _customerService = customerService;
+            _productService = productService;
+            _compositeProductXHierarchyService = compositeProductXHierarchyService;
+            _productComponentService = productComponentService;
+            _productGroupService = productGroupService;
+            _productCategoryService = productCategoryService;
+            _orderItemService = orderItemService;
             _logger = logger;
         }
 
@@ -781,5 +800,472 @@ namespace GesN.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+        /// <summary>
+        /// Adiciona um produto ao carrinho do pedido
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> AdicionarProdutoAoCarrinho([FromBody] AdicionarProdutoRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.OrderId) || string.IsNullOrEmpty(request.ProductId))
+                {
+                    return Json(new { success = false, message = "Dados incompletos" });
+                }
+
+                // Verifica se o pedido existe
+                var order = await _orderService.GetOrderByIdAsync(request.OrderId);
+                if (order == null)
+                {
+                    return Json(new { success = false, message = "Pedido não encontrado" });
+                }
+
+                // Buscar dados do produto para preencher o OrderItem
+                var product = await _productService.GetByIdAsync(request.ProductId);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = "Produto não encontrado" });
+                }
+
+                // Criar OrderItem
+                var orderItem = new OrderItem
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    OrderId = request.OrderId,
+                    ProductId = request.ProductId,
+                    Quantity = request.Quantity > 0 ? request.Quantity : 1,
+                    UnitPrice = product.UnitPrice,
+                    DiscountAmount = 0,
+                    TaxAmount = 0,
+                    Notes = "",
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = User.Identity?.Name ?? "Sistema"
+                };
+
+                await _orderItemService.CreateAsync(orderItem);
+
+                // Recarregar os itens do pedido para retornar
+                var updatedOrder = await _orderService.GetOrderByIdAsync(request.OrderId);
+                var itemsViewModel = updatedOrder?.Items?.Select(i => new OrderEntryItemViewModel
+                {
+                    Id = i.Id,
+                    ProductId = i.ProductId,
+                    ProductName = i.Product?.Name,
+                    Quantity = i.Quantity,
+                    UnitPrice = i.UnitPrice,
+                    DiscountAmount = i.DiscountAmount,
+                    TaxAmount = i.TaxAmount,
+                    Notes = i.Notes
+                }).ToList() ?? new List<OrderEntryItemViewModel>();
+
+                return Json(new { 
+                    success = true, 
+                    message = $"Produto '{product.Name}' adicionado ao carrinho!",
+                    totalItems = itemsViewModel.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao adicionar produto ao carrinho");
+                return Json(new { success = false, message = "Erro interno do servidor" });
+            }
+        }
+
+        /// <summary>
+        /// [MIGRADO] Método movido para OrderItemController.ReloadItems
+        /// Mantido temporariamente para compatibilidade
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> RecarregarItens(string orderId)
+        {
+            // Redirecionar para OrderItemController
+            return RedirectToAction("ReloadItems", "OrderItem", new { orderId = orderId });
+        }
+
+        // GET: Order/CompositeProductModal
+        // GET: Order/ProductCatalog - Endpoint para carregar catálogo seguindo padrão _Grid.cshtml
+        [HttpGet]
+        public async Task<IActionResult> ProductCatalog(string? category = null, string? search = null)
+        {
+            try
+            {
+                // Usar ProductController para obter dados (reutilizando lógica existente)
+                var catalogResult = await GetProductCatalogData(category, search);
+                
+                return PartialView("_ProductCatalog", catalogResult);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar catálogo de produtos");
+                var emptyViewModel = new GesN.Web.Models.ViewModels.Production.ProductCatalogViewModel
+                {
+                    Products = new List<GesN.Web.Models.Entities.Production.Product>(),
+                    TotalProducts = 0
+                };
+                return PartialView("_ProductCatalog", emptyViewModel);
+            }
+        }
+
+        private async Task<GesN.Web.Models.ViewModels.Production.ProductCatalogViewModel> GetProductCatalogData(string? category, string? search)
+        {
+            // Obter produtos ativos usando o padrão do projeto
+            var allProducts = await _productService.GetActiveAsync();
+            
+            // Aplicar filtros nas entidades Product
+            var filteredProducts = allProducts.AsEnumerable();
+            
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                filteredProducts = filteredProducts.Where(p =>
+                    p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrWhiteSpace(p.SKU) && p.SKU.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                    (p.Description?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
+            }
+
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                filteredProducts = filteredProducts.Where(p =>
+                    !string.IsNullOrWhiteSpace(p.Category) &&
+                    p.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // ProductCatalogViewModel espera IEnumerable<Product> (entidades)
+            var viewModel = new GesN.Web.Models.ViewModels.Production.ProductCatalogViewModel
+            {
+                Products = filteredProducts, // Usar entidades Product diretamente
+                CurrentCategory = category,
+                SearchTerm = search,
+                TotalProducts = filteredProducts.Count()
+            };
+
+            return viewModel;
+        }
+
+        // GET: Order/SimpleProductModal
+        [HttpGet]
+        public async Task<IActionResult> SimpleProductModal(string productId, int initialQuantity = 1)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(productId))
+                    return BadRequest("ProductId é obrigatório");
+
+                // Buscar dados do produto simples
+                var product = await _productService.GetByIdAsync(productId);
+                
+                if (product == null)
+                {
+                    return PartialView("_Error", "Produto não encontrado");
+                }
+
+                if (product.ProductType != ProductType.Simple)
+                {
+                    return PartialView("_Error", "Este endpoint é específico para produtos simples");
+                }
+
+                if (product.StateCode != ObjectState.Active)
+                {
+                    return PartialView("_Error", "Produto não está disponível");
+                }
+
+                // Criar objeto dinâmico com dados do produto
+                var productData = new
+                {
+                    id = product.Id,
+                    name = product.Name,
+                    sku = product.SKU,
+                    description = product.Description,
+                    category = product.Category,
+                    unitPrice = product.UnitPrice,
+                    assemblyTime = product.AssemblyTime,
+                    assemblyInstructions = product.AssemblyInstructions,
+                    imageUrl = product.ImageUrl,
+                    initialQuantity = initialQuantity
+                };
+
+                return PartialView("_SimpleProductModal", productData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar modal de produto simples: {ProductId}", productId);
+                return PartialView("_Error", "Erro ao carregar configuração do produto");
+            }
+        }
+
+        // GET: Order/CompositeProductModal
+        [HttpGet]
+        public async Task<IActionResult> CompositeProductModal(string productId, int initialQuantity = 1)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(productId))
+                    return BadRequest("ProductId é obrigatório");
+
+                // Buscar dados do produto composto
+                var product = await _productService.GetByIdAsync(productId);
+                
+                if (product == null)
+                {
+                    return PartialView("_Error", "Produto não encontrado");
+                }
+
+                if (product.ProductType != ProductType.Composite)
+                {
+                    return PartialView("_Error", "Este endpoint é específico para produtos compostos");
+                }
+
+                if (product.StateCode != ObjectState.Active)
+                {
+                    return PartialView("_Error", "Produto não está disponível");
+                }
+
+                // Carregar hierarquias e componentes reais
+                var hierarchyRelations = await _compositeProductXHierarchyService.GetActiveProductHierarchiesAsync(productId);
+                var hierarchyList = hierarchyRelations.ToList();
+
+                if (!hierarchyList.Any())
+                {
+                    return PartialView("_Error", "Produto composto não possui hierarquias configuradas");
+                }
+
+                // Carregar componentes para cada hierarquia
+                var hierarchiesWithComponents = new List<object>();
+
+                foreach (var hierarchyRelation in hierarchyList.OrderBy(h => h.AssemblyOrder))
+                {
+                    // Buscar componentes da hierarquia
+                    var components = await _productComponentService.GetByHierarchyIdAsync(hierarchyRelation.ProductComponentHierarchyId);
+                    var activeComponents = components.Where(c => c.StateCode == ObjectState.Active).ToList();
+
+                    if (!activeComponents.Any())
+                    {
+                        _logger.LogWarning("Hierarquia {HierarchyName} não possui componentes ativos", hierarchyRelation.HierarchyName);
+                        continue;
+                    }
+
+                    hierarchiesWithComponents.Add(new
+                    {
+                        id = hierarchyRelation.ProductComponentHierarchyId,
+                        name = hierarchyRelation.HierarchyName,
+                        isOptional = hierarchyRelation.IsOptional,
+                        minQuantity = hierarchyRelation.MinQuantity,
+                        maxQuantity = hierarchyRelation.MaxQuantity,
+                        assemblyOrder = hierarchyRelation.AssemblyOrder,
+                        notes = hierarchyRelation.Notes,
+                        components = activeComponents.Select(c => new
+                        {
+                            id = c.Id,
+                            name = c.Name,
+                            description = c.Description,
+                            additionalCost = c.AdditionalCost
+                        }).ToArray()
+                    });
+                }
+
+                // Criar objeto dinâmico com dados reais do produto
+                var productData = new
+                {
+                    id = product.Id,
+                    name = product.Name,
+                    sku = product.SKU,
+                    description = product.Description,
+                    category = product.Category,
+                    unitPrice = product.UnitPrice,
+                    assemblyTime = product.AssemblyTime,
+                    assemblyInstructions = product.AssemblyInstructions,
+                    imageUrl = product.ImageUrl,
+                    initialQuantity = initialQuantity,
+                    hierarchies = hierarchiesWithComponents.ToArray()
+                };
+
+                return PartialView("_CompositeProductModal", productData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar modal de produto composto: {ProductId}", productId);
+                return PartialView("_Error", "Erro ao carregar configuração do produto");
+            }
+        }
+
+        // GET: Order/GroupProductModal
+        [HttpGet]
+        public async Task<IActionResult> GroupProductModal(string productId, int initialQuantity = 1)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(productId))
+                    return BadRequest("ProductId é obrigatório");
+
+                // Buscar dados do produto grupo
+                var product = await _productService.GetByIdAsync(productId);
+                
+                if (product == null)
+                {
+                    return PartialView("_Error", "Produto não encontrado");
+                }
+
+                if (product.ProductType != ProductType.Group)
+                {
+                    return PartialView("_Error", "Este endpoint é específico para grupos de produtos");
+                }
+
+                if (product.StateCode != ObjectState.Active)
+                {
+                    return PartialView("_Error", "Produto não está disponível");
+                }
+
+                // Carregar itens do grupo com dados reais
+                var groupItems = await _productGroupService.GetGroupItemsWithProductDataAsync(productId);
+                var groupItemsList = groupItems.ToList();
+
+                if (!groupItemsList.Any())
+                {
+                    return PartialView("_Error", "Grupo de produtos não possui itens configurados");
+                }
+
+                // Carregar regras de troca
+                var exchangeRules = await _productGroupService.GetExchangeRulesAsync(productId);
+                var exchangeRulesList = exchangeRules.ToList();
+
+                // Processar itens do grupo com opções de produtos
+                var processedGroupItems = new List<object>();
+
+                foreach (var groupItem in groupItemsList)
+                {
+                    var productOptions = new List<object>();
+
+                    // Se o item se relaciona diretamente com um produto
+                    if (!string.IsNullOrEmpty(groupItem.ProductId) && groupItem.Product != null)
+                    {
+                        productOptions.Add(new
+                        {
+                            id = groupItem.Product.Id,
+                            name = groupItem.Product.Name,
+                            description = groupItem.Product.Description ?? "",
+                            price = groupItem.Product.UnitPrice,
+                            effectivePrice = groupItem.Product.UnitPrice + groupItem.ExtraPrice,
+                            isAvailable = groupItem.Product.StateCode == ObjectState.Active,
+                            productType = groupItem.Product.ProductType.ToString(),
+                            sku = groupItem.Product.SKU ?? ""
+                        });
+                    }
+                    // Se o item se relaciona indiretamente através de categoria
+                    else if (!string.IsNullOrEmpty(groupItem.ProductCategoryId))
+                    {
+                        // Buscar produtos da categoria
+                        var categoryProducts = await _productService.GetActiveAsync();
+                        var productsInCategory = categoryProducts
+                            .Where(p => p.CategoryId == groupItem.ProductCategoryId && p.StateCode == ObjectState.Active)
+                            .ToList();
+
+                        foreach (var categoryProduct in productsInCategory)
+                        {
+                            productOptions.Add(new
+                            {
+                                id = categoryProduct.Id,
+                                name = categoryProduct.Name,
+                                description = categoryProduct.Description ?? "",
+                                price = categoryProduct.UnitPrice,
+                                effectivePrice = categoryProduct.UnitPrice + groupItem.ExtraPrice,
+                                isAvailable = categoryProduct.StateCode == ObjectState.Active,
+                                productType = categoryProduct.ProductType.ToString(),
+                                sku = categoryProduct.SKU ?? ""
+                            });
+                        }
+                    }
+
+                    processedGroupItems.Add(new
+                    {
+                        id = groupItem.Id,
+                        displayName = _productGroupService.GetGroupItemDisplayName(groupItem),
+                        itemType = groupItem.GetItemType(),
+                        isOptional = groupItem.IsOptional,
+                        minQuantity = groupItem.MinQuantity,
+                        maxQuantity = groupItem.MaxQuantity,
+                        defaultQuantity = groupItem.DefaultQuantity,
+                        extraPrice = groupItem.ExtraPrice,
+                        productOptions = productOptions.ToArray()
+                    });
+                }
+
+                // Processar regras de troca
+                var processedExchangeRules = exchangeRulesList.Select(rule => new
+                {
+                    id = rule.Id,
+                    description = $"{rule.SourceGroupItemWeight} → {rule.TargetGroupItemWeight}",
+                    ratioDescription = $"Proporção {rule.ExchangeRatio}:1",
+                    sourceGroupItemId = rule.SourceGroupItemId,
+                    targetGroupItemId = rule.TargetGroupItemId,
+                    exchangeRatio = rule.ExchangeRatio,
+                    isActive = rule.IsActive
+                }).ToArray();
+
+                // Calcular estatísticas do grupo
+                var requiredItems = groupItemsList.Count(item => !item.IsOptional);
+                var optionalItems = groupItemsList.Count(item => item.IsOptional);
+
+                // Criar objeto dinâmico com dados reais do grupo
+                var productData = new
+                {
+                    id = product.Id,
+                    name = product.Name,
+                    sku = product.SKU,
+                    description = product.Description,
+                    category = product.Category,
+                    unitPrice = product.UnitPrice,
+                    assemblyTime = product.AssemblyTime,
+                    assemblyInstructions = product.AssemblyInstructions,
+                    imageUrl = product.ImageUrl,
+                    initialQuantity = initialQuantity,
+                    totalItems = groupItemsList.Count,
+                    requiredItems = requiredItems,
+                    optionalItems = optionalItems,
+                    groupItems = processedGroupItems.ToArray(),
+                    exchangeRules = processedExchangeRules
+                };
+
+                return PartialView("_GroupProductModal", productData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar modal de grupo de produtos: {ProductId}", productId);
+                return PartialView("_Error", "Erro ao carregar configuração do grupo");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Request para adicionar produto ao carrinho
+    /// </summary>
+    public class AdicionarProdutoRequest
+    {
+        public string OrderId { get; set; } = string.Empty;
+        public string ProductId { get; set; } = string.Empty;
+        public int Quantity { get; set; } = 1;
+    }
+
+    /// <summary>
+    /// Request específico para adicionar produto simples ao carrinho
+    /// </summary>
+    public class AddSimpleProductRequest
+    {
+        [Required(ErrorMessage = "O ID do pedido é obrigatório")]
+        public string OrderId { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "O ID do produto é obrigatório")]
+        public string ProductId { get; set; } = string.Empty;
+
+        [Range(1, int.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
+        public int Quantity { get; set; } = 1;
+
+        [Range(0, double.MaxValue, ErrorMessage = "O desconto não pode ser negativo")]
+        public decimal DiscountAmount { get; set; } = 0;
+
+        [Range(0, double.MaxValue, ErrorMessage = "Os impostos não podem ser negativos")]
+        public decimal TaxAmount { get; set; } = 0;
+
+        [StringLength(500, ErrorMessage = "As observações devem ter no máximo {1} caracteres")]
+        public string? Notes { get; set; }
     }
 } 

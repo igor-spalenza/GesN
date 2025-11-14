@@ -1,91 +1,91 @@
-# 🛒 FLUXOGRAMA - PROCESSO DE COMPRAS
+﻿# ðŸ›’ FLUXOGRAMA - PROCESSO DE COMPRAS
 
-## 🎯 Visão Geral
-Fluxograma completo do processo de criação manual de compras com apoio de IA para interpretação de notas fiscais, incluindo extração automática de dados, validação, conferência pelo usuário e persistência final no sistema. Também abrange sugestões automáticas de compra baseadas em estoque mínimo.
+## ðŸŽ¯ VisÃ£o Geral
+Fluxograma completo do processo de criaÃ§Ã£o manual de compras com apoio de IA para interpretaÃ§Ã£o de notas fiscais, incluindo extraÃ§Ã£o automÃ¡tica de dados, validaÃ§Ã£o, conferÃªncia pelo usuÃ¡rio e persistÃªncia final no sistema. TambÃ©m abrange sugestÃµes automÃ¡ticas de compra baseadas em estoque mÃ­nimo.
 
-## 🤖 Fluxo Principal: Criação Manual com IA
+## ðŸ¤– Fluxo Principal: CriaÃ§Ã£o Manual com IA
 
 ```mermaid
 flowchart TD
-    %% === INÍCIO DO PROCESSO ===
-    A[🚀 Usuário inicia<br/>nova compra] --> B{📋 Tipo de criação}
+    %% === INÃCIO DO PROCESSO ===
+    A[ðŸš€ UsuÃ¡rio inicia<br/>nova compra] --> B{ðŸ“‹ Tipo de criaÃ§Ã£o}
     
-    B -->|Manual tradicional| Manual[📝 Formulário manual]
-    B -->|Com IA| C[📄 Upload nota fiscal]
+    B -->|Manual tradicional| Manual[ðŸ“ FormulÃ¡rio manual]
+    B -->|Com IA| C[ðŸ“„ Upload nota fiscal]
     
     %% === PROCESSAMENTO DE IA ===
-    C --> D[💾 Salvar documento<br/>em FISCAL_DOCUMENT]
-    D --> E[🤖 IA inicia processamento<br/>DocumentStatus: Processing]
+    C --> D[ðŸ’¾ Salvar documento<br/>em FISCAL_DOCUMENT]
+    D --> E[ðŸ¤– IA inicia processamento<br/>DocumentStatus: Processing]
     
-    E --> F[🔍 Extrair dados do documento]
-    F --> G[📊 OCR + Machine Learning]
-    G --> H[🧠 Identificar campos-chave]
+    E --> F[ðŸ” Extrair dados do documento]
+    F --> G[ðŸ“Š OCR + Machine Learning]
+    G --> H[ðŸ§  Identificar campos-chave]
     
-    H --> I[📋 Dados extraídos]
-    I --> J{✅ Processamento<br/>bem-sucedido?}
+    H --> I[ðŸ“‹ Dados extraÃ­dos]
+    I --> J{âœ… Processamento<br/>bem-sucedido?}
     
-    J -->|Erro| K[❌ DocumentStatus: Error<br/>Mostrar erro ao usuário]
-    K --> L[🔄 Usuário pode tentar novamente<br/>ou ir para modo manual]
+    J -->|Erro| K[âŒ DocumentStatus: Error<br/>Mostrar erro ao usuÃ¡rio]
+    K --> L[ðŸ”„ UsuÃ¡rio pode tentar novamente<br/>ou ir para modo manual]
     L --> B
     
-    J -->|Sucesso| M[✅ DocumentStatus: Processed<br/>AIExtractedData preenchida]
+    J -->|Sucesso| M[âœ… DocumentStatus: Processed<br/>AIExtractedData preenchida]
     
-    %% === IDENTIFICAÇÃO E MAPEAMENTO ===
-    M --> N[🔍 Identificar fornecedor<br/>por CNPJ/Nome]
-    N --> O{🏢 Fornecedor existe<br/>no sistema?}
+    %% === IDENTIFICAÃ‡ÃƒO E MAPEAMENTO ===
+    M --> N[ðŸ” Identificar fornecedor<br/>por CNPJ/Nome]
+    N --> O{ðŸ¢ Fornecedor existe<br/>no sistema?}
     
-    O -->|Não| P[➕ Criar registro temporário<br/>de Supplier]
-    O -->|Sim| Q[✅ Supplier identificado]
+    O -->|NÃ£o| P[âž• Criar registro temporÃ¡rio<br/>de Supplier]
+    O -->|Sim| Q[âœ… Supplier identificado]
     P --> Q
     
-    Q --> R[🥘 Para cada item extraído]
-    R --> S[🔍 Mapear ingrediente<br/>por nome/código]
-    S --> T{🧪 Ingrediente existe<br/>no sistema?}
+    Q --> R[ðŸ¥˜ Para cada item extraÃ­do]
+    R --> S[ðŸ” Mapear ingrediente<br/>por nome/cÃ³digo]
+    S --> T{ðŸ§ª Ingrediente existe<br/>no sistema?}
     
-    T -->|Não| U[⚠️ Marcar para revisão<br/>manual obrigatória]
-    T -->|Sim| V[✅ Ingredient mapeado]
+    T -->|NÃ£o| U[âš ï¸ Marcar para revisÃ£o<br/>manual obrigatÃ³ria]
+    T -->|Sim| V[âœ… Ingredient mapeado]
     
-    U --> W[📊 Adicionar à lista<br/>de itens para revisão]
+    U --> W[ðŸ“Š Adicionar Ã  lista<br/>de itens para revisÃ£o]
     V --> W
-    W --> X{🔄 Mais itens<br/>extraídos?}
+    W --> X{ðŸ”„ Mais itens<br/>extraÃ­dos?}
     
     X -->|Sim| R
-    X -->|Não| Y[📋 Gerar formulário<br/>pré-preenchido]
+    X -->|NÃ£o| Y[ðŸ“‹ Gerar formulÃ¡rio<br/>prÃ©-preenchido]
     
-    %% === CONFERÊNCIA PELO USUÁRIO ===
-    Y --> Z[👀 Exibir formulário<br/>com dados extraídos]
-    Z --> AA[🔍 Usuário revisa dados]
+    %% === CONFERÃŠNCIA PELO USUÃRIO ===
+    Y --> Z[ðŸ‘€ Exibir formulÃ¡rio<br/>com dados extraÃ­dos]
+    Z --> AA[ðŸ” UsuÃ¡rio revisa dados]
     
-    AA --> BB{🏢 Fornecedor correto?}
-    BB -->|Não| CC[✏️ Corrigir/selecionar fornecedor]
+    AA --> BB{ðŸ¢ Fornecedor correto?}
+    BB -->|NÃ£o| CC[âœï¸ Corrigir/selecionar fornecedor]
     CC --> DD
-    BB -->|Sim| DD[📦 Revisar itens]
+    BB -->|Sim| DD[ðŸ“¦ Revisar itens]
     
-    DD --> EE[📋 Para cada item]
-    EE --> FF{🧪 Ingrediente<br/>mapeado corretamente?}
+    DD --> EE[ðŸ“‹ Para cada item]
+    EE --> FF{ðŸ§ª Ingrediente<br/>mapeado corretamente?}
     
-    FF -->|Não| GG[🔍 Buscar ingrediente correto<br/>ou criar novo]
-    FF -->|Sim| HH[💱 Validar quantidade<br/>e unidade de medida]
+    FF -->|NÃ£o| GG[ðŸ” Buscar ingrediente correto<br/>ou criar novo]
+    FF -->|Sim| HH[ðŸ’± Validar quantidade<br/>e unidade de medida]
     
     GG --> HH
-    HH --> II[💰 Validar preço unitário]
-    II --> JJ{🔄 Mais itens<br/>para revisar?}
+    HH --> II[ðŸ’° Validar preÃ§o unitÃ¡rio]
+    II --> JJ{ðŸ”„ Mais itens<br/>para revisar?}
     
     JJ -->|Sim| EE
-    JJ -->|Não| KK[📝 Adicionar observações<br/>de qualidade/entrega]
+    JJ -->|NÃ£o| KK[ðŸ“ Adicionar observaÃ§Ãµes<br/>de qualidade/entrega]
     
-    KK --> LL[✅ Usuário confirma<br/>dados revisados]
+    KK --> LL[âœ… UsuÃ¡rio confirma<br/>dados revisados]
     
-    %% === PERSISTÊNCIA FINAL ===
-    LL --> MM[💾 Criar PurchaseOrder]
-    MM --> NN[📦 Criar PurchaseOrderItem<br/>para cada item]
-    NN --> OO[🔗 Vincular FISCAL_DOCUMENT<br/>à PurchaseOrder]
-    OO --> PP[📈 PurchaseStatus: Draft]
-    PP --> QQ[🎉 Compra criada<br/>pronta para envio]
+    %% === PERSISTÃŠNCIA FINAL ===
+    LL --> MM[ðŸ’¾ Criar PurchaseOrder]
+    MM --> NN[ðŸ“¦ Criar PurchaseOrderItem<br/>para cada item]
+    NN --> OO[ðŸ”— Vincular FISCAL_DOCUMENT<br/>Ã  PurchaseOrder]
+    OO --> PP[ðŸ“ˆ PurchaseStatus: Draft]
+    PP --> QQ[ðŸŽ‰ Compra criada<br/>pronta para envio]
     
     %% === FLUXO MANUAL TRADICIONAL ===
-    Manual --> ManualForm[📝 Formulário em branco]
-    ManualForm --> ManualFill[👤 Usuário preenche tudo]
+    Manual --> ManualForm[ðŸ“ FormulÃ¡rio em branco]
+    ManualForm --> ManualFill[ðŸ‘¤ UsuÃ¡rio preenche tudo]
     ManualFill --> MM
     
     %% === STYLING ===
@@ -112,9 +112,9 @@ flowchart TD
     class Manual,ManualForm,ManualFill manualStyle
 ```
 
-## 🤖 Detalhamento do Processamento de IA
+## ðŸ¤– Detalhamento do Processamento de IA
 
-### **📄 Estrutura de Dados Extraídos (AIExtractedData JSON):**
+### **ðŸ“„ Estrutura de Dados ExtraÃ­dos (AIExtractedData JSON):**
 
 ```json
 {
@@ -143,7 +143,7 @@ flowchart TD
       "mappingConfidence": 0.88
     },
     {
-      "description": "Açúcar Cristal 50kg", 
+      "description": "AÃ§Ãºcar Cristal 50kg", 
       "quantity": 5,
       "unitOfMeasure": "saco",
       "unitCost": 95.15,
@@ -162,28 +162,28 @@ flowchart TD
 }
 ```
 
-### **🔍 Algoritmo de Mapeamento de Ingredientes:**
+### **ðŸ” Algoritmo de Mapeamento de Ingredientes:**
 
 ```mermaid
 flowchart TD
-    A[📝 Item extraído da nota] --> B[🔍 Buscar por nome exato<br/>no INGREDIENT]
-    B --> C{✅ Encontrou<br/>match exato?}
+    A[ðŸ“ Item extraÃ­do da nota] --> B[ðŸ” Buscar por nome exato<br/>no INGREDIENT]
+    B --> C{âœ… Encontrou<br/>match exato?}
     
-    C -->|Sim| D[🎯 Confidence = 1.0<br/>Mapeamento confirmado]
+    C -->|Sim| D[ðŸŽ¯ Confidence = 1.0<br/>Mapeamento confirmado]
     
-    C -->|Não| E[🔤 Buscar por similaridade<br/>Levenshtein Distance]
-    E --> F{📊 Similaridade > 80%?}
+    C -->|NÃ£o| E[ðŸ”¤ Buscar por similaridade<br/>Levenshtein Distance]
+    E --> F{ðŸ“Š Similaridade > 80%?}
     
-    F -->|Sim| G[🎯 Confidence = 0.8-0.95<br/>Mapeamento sugerido]
+    F -->|Sim| G[ðŸŽ¯ Confidence = 0.8-0.95<br/>Mapeamento sugerido]
     
-    F -->|Não| H[🔍 Buscar por palavras-chave<br/>na descrição]
-    H --> I{🔑 Palavras-chave<br/>encontradas?}
+    F -->|NÃ£o| H[ðŸ” Buscar por palavras-chave<br/>na descriÃ§Ã£o]
+    H --> I{ðŸ”‘ Palavras-chave<br/>encontradas?}
     
-    I -->|Sim| J[🎯 Confidence = 0.6-0.8<br/>Mapeamento possível]
+    I -->|Sim| J[ðŸŽ¯ Confidence = 0.6-0.8<br/>Mapeamento possÃ­vel]
     
-    I -->|Não| K[❓ Confidence = 0.0<br/>Mapeamento manual necessário]
+    I -->|NÃ£o| K[â“ Confidence = 0.0<br/>Mapeamento manual necessÃ¡rio]
     
-    D --> L[✅ Adicionar à lista<br/>com confiança]
+    D --> L[âœ… Adicionar Ã  lista<br/>com confianÃ§a]
     G --> L
     J --> L
     K --> L
@@ -204,47 +204,47 @@ flowchart TD
     class L resultStyle
 ```
 
-## 📋 Processo de Conferência e Validação
+## ðŸ“‹ Processo de ConferÃªncia e ValidaÃ§Ã£o
 
-### **👤 Interface de Conferência:**
+### **ðŸ‘¤ Interface de ConferÃªncia:**
 
 ```mermaid
 flowchart TD
-    A[📋 Formulário pré-preenchido] --> B[🏢 Seção Fornecedor]
-    B --> C[📦 Seção Itens]
+    A[ðŸ“‹ FormulÃ¡rio prÃ©-preenchido] --> B[ðŸ¢ SeÃ§Ã£o Fornecedor]
+    B --> C[ðŸ“¦ SeÃ§Ã£o Itens]
     
     %% FORNECEDOR
-    B --> B1[👀 Nome: Fornecedor ABC Ltda ✅]
-    B1 --> B2[🆔 CNPJ: 12.345.678/0001-99 ✅]
-    B2 --> B3[📞 Contato: (11) 99999-9999 ⚠️ Validar]
-    B3 --> B4{📝 Dados do fornecedor<br/>precisam correção?}
+    B --> B1[ðŸ‘€ Nome: Fornecedor ABC Ltda âœ…]
+    B1 --> B2[ðŸ†” CNPJ: 12.345.678/0001-99 âœ…]
+    B2 --> B3[ðŸ“ž Contato: (11) 99999-9999 âš ï¸ Validar]
+    B3 --> B4{ðŸ“ Dados do fornecedor<br/>precisam correÃ§Ã£o?}
     
-    B4 -->|Sim| B5[✏️ Editar dados<br/>ou criar novo fornecedor]
-    B4 -->|Não| C
+    B4 -->|Sim| B5[âœï¸ Editar dados<br/>ou criar novo fornecedor]
+    B4 -->|NÃ£o| C
     B5 --> C
     
     %% ITENS
-    C --> C1[📋 Lista de itens extraídos]
-    C1 --> C2[📦 Para cada item]
+    C --> C1[ðŸ“‹ Lista de itens extraÃ­dos]
+    C1 --> C2[ðŸ“¦ Para cada item]
     
-    C2 --> C3[🎯 Status do mapeamento]
-    C3 --> C4{🧪 Ingrediente<br/>mapeado automaticamente?}
+    C2 --> C3[ðŸŽ¯ Status do mapeamento]
+    C3 --> C4{ðŸ§ª Ingrediente<br/>mapeado automaticamente?}
     
-    C4 -->|✅ Sim, confidence > 80%| C5[👀 Revisar mapeamento<br/>Farinha Trigo ✅]
-    C4 -->|⚠️ Sim, confidence < 80%| C6[🔍 Validar mapeamento<br/>sugerido]
-    C4 -->|❌ Não mapeado| C7[🔍 Buscar ingrediente<br/>ou criar novo]
+    C4 -->|âœ… Sim, confidence > 80%| C5[ðŸ‘€ Revisar mapeamento<br/>Farinha Trigo âœ…]
+    C4 -->|âš ï¸ Sim, confidence < 80%| C6[ðŸ” Validar mapeamento<br/>sugerido]
+    C4 -->|âŒ NÃ£o mapeado| C7[ðŸ” Buscar ingrediente<br/>ou criar novo]
     
-    C5 --> C8[💱 Validar quantidade<br/>e unidade]
+    C5 --> C8[ðŸ’± Validar quantidade<br/>e unidade]
     C6 --> C8
     C7 --> C8
     
-    C8 --> C9[💰 Validar preço<br/>unitário]
-    C9 --> C10{🔄 Mais itens?}
+    C8 --> C9[ðŸ’° Validar preÃ§o<br/>unitÃ¡rio]
+    C9 --> C10{ðŸ”„ Mais itens?}
     
     C10 -->|Sim| C2
-    C10 -->|Não| D[📝 Observações finais]
+    C10 -->|NÃ£o| D[ðŸ“ ObservaÃ§Ãµes finais]
     
-    D --> E[✅ Confirmar e salvar]
+    D --> E[âœ… Confirmar e salvar]
     
     classDef formStyle fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:black
     class A,B,C,C1,C2,D,E formStyle
@@ -262,41 +262,41 @@ flowchart TD
     class C7 itemErrorStyle
 ```
 
-## 🔄 Fluxo de Sugestões Automáticas
+## ðŸ”„ Fluxo de SugestÃµes AutomÃ¡ticas
 
-### **📊 Sistema de Alerta de Estoque Mínimo:**
+### **ðŸ“Š Sistema de Alerta de Estoque MÃ­nimo:**
 
 ```mermaid
 flowchart TD
-    A[⏰ Job automático<br/>executa diariamente] --> B[🔍 Verificar ingredientes<br/>abaixo do estoque mínimo]
+    A[â° Job automÃ¡tico<br/>executa diariamente] --> B[ðŸ” Verificar ingredientes<br/>abaixo do estoque mÃ­nimo]
     
-    B --> C[📊 Query estoque crítico]
-    C --> D[📋 Para cada ingrediente<br/>em situação crítica]
+    B --> C[ðŸ“Š Query estoque crÃ­tico]
+    C --> D[ðŸ“‹ Para cada ingrediente<br/>em situaÃ§Ã£o crÃ­tica]
     
-    D --> E[🏢 Identificar fornecedor<br/>preferencial]
-    E --> F{✅ Fornecedor preferencial<br/>existe?}
+    D --> E[ðŸ¢ Identificar fornecedor<br/>preferencial]
+    E --> F{âœ… Fornecedor preferencial<br/>existe?}
     
-    F -->|Não| G[⚠️ Usar fornecedor<br/>com menor custo]
-    F -->|Sim| H[🎯 Usar fornecedor preferencial]
+    F -->|NÃ£o| G[âš ï¸ Usar fornecedor<br/>com menor custo]
+    F -->|Sim| H[ðŸŽ¯ Usar fornecedor preferencial]
     
-    G --> I[📏 Calcular quantidade<br/>sugerida]
+    G --> I[ðŸ“ Calcular quantidade<br/>sugerida]
     H --> I
     
-    I --> J[🧮 Fórmula sugestão:<br/>MaxStock - CurrentStock]
-    J --> K[💰 Calcular custo estimado<br/>baseado no histórico]
-    K --> L[📋 Gerar sugestão<br/>de compra]
+    I --> J[ðŸ§® FÃ³rmula sugestÃ£o:<br/>MaxStock - CurrentStock]
+    J --> K[ðŸ’° Calcular custo estimado<br/>baseado no histÃ³rico]
+    K --> L[ðŸ“‹ Gerar sugestÃ£o<br/>de compra]
     
-    L --> M{🔄 Mais ingredientes<br/>críticos?}
+    L --> M{ðŸ”„ Mais ingredientes<br/>crÃ­ticos?}
     M -->|Sim| D
-    M -->|Não| N[📧 Notificar usuários<br/>responsáveis]
+    M -->|NÃ£o| N[ðŸ“§ Notificar usuÃ¡rios<br/>responsÃ¡veis]
     
-    N --> O[📊 Exibir dashboard<br/>de sugestões]
-    O --> P{👤 Usuário decide<br/>criar compra?}
+    N --> O[ðŸ“Š Exibir dashboard<br/>de sugestÃµes]
+    O --> P{ðŸ‘¤ UsuÃ¡rio decide<br/>criar compra?}
     
-    P -->|Sim| Q[📝 Gerar PurchaseOrder<br/>pré-preenchida]
-    P -->|Não| R[⏰ Aguardar próxima<br/>verificação]
+    P -->|Sim| Q[ðŸ“ Gerar PurchaseOrder<br/>prÃ©-preenchida]
+    P -->|NÃ£o| R[â° Aguardar prÃ³xima<br/>verificaÃ§Ã£o]
     
-    Q --> S[✅ Usuário pode ajustar<br/>e confirmar]
+    Q --> S[âœ… UsuÃ¡rio pode ajustar<br/>e confirmar]
     
     classDef autoStyle fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:white
     class A,B,C,D autoStyle
@@ -314,10 +314,10 @@ flowchart TD
     class Q,R,S resultStyle
 ```
 
-### **📏 Algoritmo de Cálculo de Quantidade:**
+### **ðŸ“ Algoritmo de CÃ¡lculo de Quantidade:**
 
 ```sql
--- Query para ingredientes críticos
+-- Query para ingredientes crÃ­ticos
 SELECT 
     i.Id,
     i.Name,
@@ -336,42 +336,42 @@ WHERE s.CurrentQuantity <= s.MinimumStockLevel
 ORDER BY (s.CurrentQuantity / s.MinimumStockLevel) ASC
 ```
 
-## 🚚 Processo de Recebimento
+## ðŸšš Processo de Recebimento
 
-### **📦 Fluxo de Recebimento de Compra:**
+### **ðŸ“¦ Fluxo de Recebimento de Compra:**
 
 ```mermaid
 flowchart TD
-    A[📦 Mercadoria chega] --> B[🔍 Localizar PurchaseOrder<br/>pelo número]
-    B --> C[📋 Verificar itens<br/>contra PurchaseOrderItem]
+    A[ðŸ“¦ Mercadoria chega] --> B[ðŸ” Localizar PurchaseOrder<br/>pelo nÃºmero]
+    B --> C[ðŸ“‹ Verificar itens<br/>contra PurchaseOrderItem]
     
-    C --> D[📊 Para cada item recebido]
-    D --> E[⚖️ Conferir quantidade<br/>física vs pedida]
-    E --> F[🧪 Verificar qualidade]
-    F --> G[📅 Verificar validade]
+    C --> D[ðŸ“Š Para cada item recebido]
+    D --> E[âš–ï¸ Conferir quantidade<br/>fÃ­sica vs pedida]
+    E --> F[ðŸ§ª Verificar qualidade]
+    F --> G[ðŸ“… Verificar validade]
     
-    G --> H{✅ Item conforme<br/>especificação?}
+    G --> H{âœ… Item conforme<br/>especificaÃ§Ã£o?}
     
-    H -->|Sim| I[✅ QuantityReceived += Qty]
-    H -->|Não| J[❌ Registrar discrepância<br/>em QualityNotes]
+    H -->|Sim| I[âœ… QuantityReceived += Qty]
+    H -->|NÃ£o| J[âŒ Registrar discrepÃ¢ncia<br/>em QualityNotes]
     
-    I --> K[📈 Atualizar ItemStatus]
+    I --> K[ðŸ“ˆ Atualizar ItemStatus]
     J --> K
     
-    K --> L{🔄 Mais itens<br/>para conferir?}
+    K --> L{ðŸ”„ Mais itens<br/>para conferir?}
     L -->|Sim| D
-    L -->|Não| M[📊 Verificar status geral<br/>da PurchaseOrder]
+    L -->|NÃ£o| M[ðŸ“Š Verificar status geral<br/>da PurchaseOrder]
     
-    M --> N{📋 Todos itens<br/>totalmente recebidos?}
+    M --> N{ðŸ“‹ Todos itens<br/>totalmente recebidos?}
     
-    N -->|Sim| O[📈 PurchaseStatus:<br/>FullyReceived]
-    N -->|Não| P[📈 PurchaseStatus:<br/>PartiallyReceived]
+    N -->|Sim| O[ðŸ“ˆ PurchaseStatus:<br/>FullyReceived]
+    N -->|NÃ£o| P[ðŸ“ˆ PurchaseStatus:<br/>PartiallyReceived]
     
-    O --> Q[🏭 Atualizar INGREDIENT_STOCK<br/>automaticamente]
+    O --> Q[ðŸ­ Atualizar INGREDIENT_STOCK<br/>automaticamente]
     P --> Q
     
-    Q --> R[💰 Gerar ACCOUNT_PAYABLE<br/>no Financeiro]
-    R --> S[🎉 Recebimento concluído]
+    Q --> R[ðŸ’° Gerar ACCOUNT_PAYABLE<br/>no Financeiro]
+    R --> S[ðŸŽ‰ Recebimento concluÃ­do]
     
     classDef receiveStyle fill:#0562aa,stroke:#0562aa,stroke-width:2px,color:white
     class A,B,C,D,E,F,G receiveStyle
@@ -386,74 +386,74 @@ flowchart TD
     class Q,R,S integrationStyle
 ```
 
-## 🎯 Estados e Validações
+## ðŸŽ¯ Estados e ValidaÃ§Ãµes
 
-### **📈 Ciclo de Status da PurchaseOrder:**
+### **ðŸ“ˆ Ciclo de Status da PurchaseOrder:**
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Draft : Criação inicial
+    [*] --> Draft : CriaÃ§Ã£o inicial
     Draft --> Sent : Enviada ao fornecedor
     Sent --> PartiallyReceived : Recebimento parcial
     PartiallyReceived --> FullyReceived : Recebimento total
-    FullyReceived --> [*] : Processo concluído
+    FullyReceived --> [*] : Processo concluÃ­do
     
     Draft --> Cancelled : Cancelamento antes envio
-    Sent --> Cancelled : Cancelamento após envio
+    Sent --> Cancelled : Cancelamento apÃ³s envio
     PartiallyReceived --> Cancelled : Cancelamento parcial
     
     Cancelled --> [*] : Processo cancelado
 ```
 
-### **🧪 Validações Críticas:**
+### **ðŸ§ª ValidaÃ§Ãµes CrÃ­ticas:**
 
 #### **Durante Processamento IA:**
-- ✅ Documento deve ser PDF ou imagem (JPG/PNG)
-- ✅ Tamanho máximo: 10MB
-- ✅ Qualidade OCR mínima: 70%
-- ✅ CNPJ do fornecedor deve ser válido
+- âœ… Documento deve ser PDF ou imagem (JPG/PNG)
+- âœ… Tamanho mÃ¡ximo: 10MB
+- âœ… Qualidade OCR mÃ­nima: 70%
+- âœ… CNPJ do fornecedor deve ser vÃ¡lido
 
-#### **Durante Conferência:**
-- ✅ Fornecedor deve existir ou ser criado
-- ✅ Ingredientes devem estar ativos
-- ✅ Quantidades > 0
-- ✅ Preços unitários > 0
-- ✅ Unidades de medida consistentes
+#### **Durante ConferÃªncia:**
+- âœ… Fornecedor deve existir ou ser criado
+- âœ… Ingredientes devem estar ativos
+- âœ… Quantidades > 0
+- âœ… PreÃ§os unitÃ¡rios > 0
+- âœ… Unidades de medida consistentes
 
 #### **Durante Recebimento:**
-- ✅ Quantidade recebida ≤ quantidade pedida
-- ✅ Validade deve ser futura
-- ✅ Qualidade dentro dos padrões
-- ✅ Estoque suficiente para armazenagem
+- âœ… Quantidade recebida â‰¤ quantidade pedida
+- âœ… Validade deve ser futura
+- âœ… Qualidade dentro dos padrÃµes
+- âœ… Estoque suficiente para armazenagem
 
-## 🎯 Eventos de Domínio Gerados
+## ðŸŽ¯ Eventos de DomÃ­nio Gerados
 
 - **FiscalDocumentUploaded**: Documento fiscal enviado
 - **FiscalDocumentProcessed**: IA processou documento
 - **PurchaseOrderCreated**: Nova ordem de compra criada
 - **PurchaseOrderSent**: Ordem enviada ao fornecedor
-- **ItemReceived**: Item específico recebido
+- **ItemReceived**: Item especÃ­fico recebido
 - **StockUpdated**: Estoque atualizado automaticamente
-- **LowStockAlert**: Alerta de estoque mínimo
-- **SupplierEvaluated**: Avaliação de fornecedor
+- **LowStockAlert**: Alerta de estoque mÃ­nimo
+- **SupplierEvaluated**: AvaliaÃ§Ã£o de fornecedor
 
-## 🚨 Alertas e Monitoramento
+## ðŸš¨ Alertas e Monitoramento
 
-### **Alertas Críticos:**
-- 🚨 **IA Processing Error**: Falha no processamento de documento
-- 🚨 **Estoque Crítico**: Ingrediente abaixo de 10% do mínimo
-- 🚨 **Fornecedor Atrasado**: Entrega > 3 dias do prazo
-- 🚨 **Qualidade Rejeitada**: Item reprovado na conferência
+### **Alertas CrÃ­ticos:**
+- ðŸš¨ **IA Processing Error**: Falha no processamento de documento
+- ðŸš¨ **Estoque CrÃ­tico**: Ingrediente abaixo de 10% do mÃ­nimo
+- ðŸš¨ **Fornecedor Atrasado**: Entrega > 3 dias do prazo
+- ðŸš¨ **Qualidade Rejeitada**: Item reprovado na conferÃªncia
 
-### **Métricas de Performance:**
-- **Accuracy IA**: % de dados extraídos corretamente
-- **Tempo Processamento**: Média de tempo para processar documentos
-- **Taxa Conferência**: % de itens que precisam correção manual
+### **MÃ©tricas de Performance:**
+- **Accuracy IA**: % de dados extraÃ­dos corretamente
+- **Tempo Processamento**: MÃ©dia de tempo para processar documentos
+- **Taxa ConferÃªncia**: % de itens que precisam correÃ§Ã£o manual
 - **Pontualidade Fornecedores**: % entregas no prazo
 
 ---
 
 **Arquivo**: `04-purchasing-flow.md`  
-**Domínio**: Compras (#0562aa)  
+**DomÃ­nio**: Compras (#0562aa)  
 **Tipo**: Process Flowchart  
 **Foco**: IA Integration + Manual Creation + Stock Management

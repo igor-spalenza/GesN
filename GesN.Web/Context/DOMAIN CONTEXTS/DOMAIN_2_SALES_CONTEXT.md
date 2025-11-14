@@ -1,102 +1,102 @@
-# DescriÁ„o Funcional de Software - DomÌnio de Vendas
+Ôªø# Descri√ß√£o Funcional de Software - Dom√≠nio de Vendas
 
-## 1. Vis„o Geral
+## 1. Vis√£o Geral
 
-O **DomÌnio de Vendas** È o coraÁ„o operacional do GesN. Ele È respons·vel por capturar, gerenciar e concretizar as transaÁıes comerciais com os clientes. Este domÌnio consome diretamente os itens do **Cat·logo de Produtos** e serve como o principal gatilho para os fluxos de trabalho dos domÌnios de **ProduÁ„o** e **Financeiro**.
+O **Dom√≠nio de Vendas** √© o cora√ß√£o operacional do GesN. Ele √© respons√°vel por capturar, gerenciar e concretizar as transa√ß√µes comerciais com os clientes. Este dom√≠nio consome diretamente os itens do **Cat√°logo de Produtos** e serve como o principal gatilho para os fluxos de trabalho dos dom√≠nios de **Produ√ß√£o** e **Financeiro**.
 
-A gest„o de um pedido (`OrderEntry`) È o processo central deste domÌnio. Um pedido bem-sucedido representa n„o apenas uma entrada de receita, mas tambÈm uma demanda a ser produzida e uma sÈrie de transaÁıes financeiras a serem rastreadas. A interface de gerenciamento de pedidos foi projetada para ser flexÌvel, permitindo o manuseio de m˙ltiplos pedidos simultaneamente atravÈs de um sistema de abas din‚micas.
+A gest√£o de um pedido (`OrderEntry`) √© o processo central deste dom√≠nio. Um pedido bem-sucedido representa n√£o apenas uma entrada de receita, mas tamb√©m uma demanda a ser produzida e uma s√©rie de transa√ß√µes financeiras a serem rastreadas. A interface de gerenciamento de pedidos foi projetada para ser flex√≠vel, permitindo o manuseio de m√∫ltiplos pedidos simultaneamente atrav√©s de um sistema de abas din√¢micas.
 
-- **IntegraÁ„o com Produtos**: Um pedido È essencialmente uma lista de produtos do cat·logo. O tipo de cada produto (`Simple`, `Composite`, `Group`) influencia diretamente a forma como ele È adicionado e configurado no pedido.
-- **IntegraÁ„o com ProduÁ„o**: A confirmaÁ„o de um pedido contendo itens produzÌveis (especialmente os `Composite`) gera automaticamente uma `Demand` (Demanda) no domÌnio de ProduÁ„o, detalhando exatamente o que precisa ser feito.
-- **IntegraÁ„o com Financeiro**: Cada pedido gera registros financeiros, desde a previs„o de receita no momento da criaÁ„o atÈ o registro de contas a receber e a conciliaÁ„o dos pagamentos.
+- **Integra√ß√£o com Produtos**: Um pedido √© essencialmente uma lista de produtos do cat√°logo. O tipo de cada produto (`Simple`, `Composite`, `Group`) influencia diretamente a forma como ele √© adicionado e configurado no pedido.
+- **Integra√ß√£o com Produ√ß√£o**: A confirma√ß√£o de um pedido contendo itens produz√≠veis (especialmente os `Composite`) gera automaticamente uma `Demand` (Demanda) no dom√≠nio de Produ√ß√£o, detalhando exatamente o que precisa ser feito.
+- **Integra√ß√£o com Financeiro**: Cada pedido gera registros financeiros, desde a previs√£o de receita no momento da cria√ß√£o at√© o registro de contas a receber e a concilia√ß√£o dos pagamentos.
 
 ## 2. Entidades Principais
 
-As seguintes entidades formam a espinha dorsal do DomÌnio de Vendas:
+As seguintes entidades formam a espinha dorsal do Dom√≠nio de Vendas:
 
-- **`OrderEntry`**: A entidade central que representa um pedido de um cliente. ContÈm informaÁıes do cabeÁalho da venda, como o cliente, datas (pedido, entrega), valor total, status atual (ex: Pendente, Confirmado, Em ProduÁ„o), e informaÁıes de entrega.
-- **`OrderItem`**: Representa um item de linha dentro de um `OrderEntry`. Cada `OrderItem` est· associado a um `Product` do cat·logo e especifica a quantidade, o preÁo unit·rio e o preÁo total para aquele item. Para produtos configur·veis, o `OrderItem` tambÈm armazena a "vers„o" customizada escolhida pelo cliente.
-- **`Customer`**: Representa o cliente (pessoa fÌsica ou jurÌdica) que realizou o pedido.
-- **`Demand` (Entidade do DomÌnio de ProduÁ„o)**: Atua como uma ponte crucial. Um `OrderItem` de um produto que necessita de fabricaÁ„o (como um `ProductType.Composite`) gera uma `Demand` correspondente, sinalizando ‡ equipe de produÁ„o o que precisa ser fabricado e para quando.
-- **`ProductComposition` (Entidade do DomÌnio de ProduÁ„o)**: Detalha as escolhas especÌficas feitas para um produto composto dentro de um pedido. Por exemplo, se um cliente pede um bolo, os registros de `ProductComposition` especificar„o a massa, o recheio e a cobertura escolhidos, todos vinculados ‡ `Demand` do pedido.
+- **`OrderEntry`**: A entidade central que representa um pedido de um cliente. Cont√©m informa√ß√µes do cabe√ßalho da venda, como o cliente, datas (pedido, entrega), valor total, status atual (ex: Pendente, Confirmado, Em Produ√ß√£o), e informa√ß√µes de entrega.
+- **`OrderItem`**: Representa um item de linha dentro de um `OrderEntry`. Cada `OrderItem` est√° associado a um `Product` do cat√°logo e especifica a quantidade, o pre√ßo unit√°rio e o pre√ßo total para aquele item. Para produtos configur√°veis, o `OrderItem` tamb√©m armazena a "vers√£o" customizada escolhida pelo cliente.
+- **`Customer`**: Representa o cliente (pessoa f√≠sica ou jur√≠dica) que realizou o pedido.
+- **`Demand` (Entidade do Dom√≠nio de Produ√ß√£o)**: Atua como uma ponte crucial. Um `OrderItem` de um produto que necessita de fabrica√ß√£o (como um `ProductType.Composite`) gera uma `Demand` correspondente, sinalizando √† equipe de produ√ß√£o o que precisa ser fabricado e para quando.
+- **`ProductComposition` (Entidade do Dom√≠nio de Produ√ß√£o)**: Detalha as escolhas espec√≠ficas feitas para um produto composto dentro de um pedido. Por exemplo, se um cliente pede um bolo, os registros de `ProductComposition` especificar√£o a massa, o recheio e a cobertura escolhidos, todos vinculados √† `Demand` do pedido.
 
-## 3. Jornada do Usu·rio e Fluxos de Trabalho
+## 3. Jornada do Usu√°rio e Fluxos de Trabalho
 
-A gest„o de vendas no GesN segue um fluxo lÛgico e interativo, desde a criaÁ„o atÈ a conclus„o de um pedido.
+A gest√£o de vendas no GesN segue um fluxo l√≥gico e interativo, desde a cria√ß√£o at√© a conclus√£o de um pedido.
 
 ### 3.1. Listagem e Acesso aos Pedidos
 
-O ponto de entrada È uma grade (`Grid`) que exibe todos os pedidos. Esta tela oferece funcionalidades robustas:
-- **VisualizaÁ„o R·pida**: Exibe informaÁıes chave como n˙mero do pedido, cliente, data, valor e status.
-- **Busca e Filtragem**: Permite encontrar pedidos rapidamente por qualquer critÈrio (cliente, status, perÌodo).
-- **OrdenaÁ„o**: As colunas podem ser ordenadas para melhor an·lise.
-- **AÁıes R·pidas**: Botıes para editar, visualizar detalhes ou excluir um pedido.
+O ponto de entrada √© uma grade (`Grid`) que exibe todos os pedidos. Esta tela oferece funcionalidades robustas:
+- **Visualiza√ß√£o R√°pida**: Exibe informa√ß√µes chave como n√∫mero do pedido, cliente, data, valor e status.
+- **Busca e Filtragem**: Permite encontrar pedidos rapidamente por qualquer crit√©rio (cliente, status, per√≠odo).
+- **Ordena√ß√£o**: As colunas podem ser ordenadas para melhor an√°lise.
+- **A√ß√µes R√°pidas**: Bot√µes para editar, visualizar detalhes ou excluir um pedido.
 
-### 3.2. CriaÁ„o de um Novo Pedido
+### 3.2. Cria√ß√£o de um Novo Pedido
 
-O processo È projetado para ser r·pido e eficiente, dividido em duas etapas:
+O processo √© projetado para ser r√°pido e eficiente, dividido em duas etapas:
 
-1.  **CriaÁ„o R·pida (Modal)**:
-    - O usu·rio clica em "Novo Pedido".
-    - Um modal È exibido para capturar as informaÁıes essenciais:
-        - **`Customer`**: Selecionado atravÈs de um campo de busca inteligente (autocomplete).
+1.  **Cria√ß√£o R√°pida (Modal)**:
+    - O usu√°rio clica em "Novo Pedido".
+    - Um modal √© exibido para capturar as informa√ß√µes essenciais:
+        - **`Customer`**: Selecionado atrav√©s de um campo de busca inteligente (autocomplete).
         - **Datas**: Data do Pedido e Data de Entrega/Retirada.
         - **Tipo de Pedido**: (Ex: Delivery, Retirada no local).
-    - Ao salvar, o sistema cria o `OrderEntry` com o status inicial "Pendente" e um n˙mero sequencial.
+    - Ao salvar, o sistema cria o `OrderEntry` com o status inicial "Pendente" e um n√∫mero sequencial.
 
-2.  **EdiÁ„o Detalhada (Aba Din‚mica)**:
-    - Imediatamente apÛs a criaÁ„o, o sistema abre o pedido recÈm-criado em uma nova aba na interface.
-    - Esta vis„o de ediÁ„o È onde o pedido È de fato construÌdo, permitindo ao usu·rio adicionar os itens.
+2.  **Edi√ß√£o Detalhada (Aba Din√¢mica)**:
+    - Imediatamente ap√≥s a cria√ß√£o, o sistema abre o pedido rec√©m-criado em uma nova aba na interface.
+    - Esta vis√£o de edi√ß√£o √© onde o pedido √© de fato constru√≠do, permitindo ao usu√°rio adicionar os itens.
 
 ### 3.3. Adicionando Itens a um Pedido
 
-Esta È a etapa mais interativa, onde a integraÁ„o com o DomÌnio de Produto se torna evidente.
+Esta √© a etapa mais interativa, onde a integra√ß√£o com o Dom√≠nio de Produto se torna evidente.
 
 - **Adicionar Produto Simples (`ProductType.Simple`)**:
-    - O usu·rio busca e seleciona o produto (ex: "Coxinha Comum").
+    - O usu√°rio busca e seleciona o produto (ex: "Coxinha Comum").
     - Informa a quantidade desejada.
-    - O item È adicionado ao pedido com seu preÁo padr„o.
+    - O item √© adicionado ao pedido com seu pre√ßo padr√£o.
 
 - **Adicionar Produto Composto (`ProductType.Composite`)**:
-    - O usu·rio busca e seleciona o produto (ex: "Bolo de Anivers·rio").
-    - O sistema exibe uma interface de configuraÁ„o, apresentando as `ProductComponentHierarchy` (camadas) definidas para aquele produto (ex: "Massa", "Recheio", "Cobertura").
-    - Para cada camada, o usu·rio seleciona os `ProductComponent` (opÁıes) desejados, respeitando as regras de quantidade (`MinQuantity`, `MaxQuantity`) e opcionalidade (`IsOptional`).
-    - O preÁo do item È calculado somando o preÁo base do produto com o `AdditionalCost` dos componentes selecionados.
-    - Ao confirmar, o `OrderItem` È adicionado ao pedido, e em segundo plano, uma `Demand` com os respectivos registros de `ProductComposition` È criada, ligando a Venda ‡ ProduÁ„o.
+    - O usu√°rio busca e seleciona o produto (ex: "Bolo de Anivers√°rio").
+    - O sistema exibe uma interface de configura√ß√£o, apresentando as `ProductComponentHierarchy` (camadas) definidas para aquele produto (ex: "Massa", "Recheio", "Cobertura").
+    - Para cada camada, o usu√°rio seleciona os `ProductComponent` (op√ß√µes) desejados, respeitando as regras de quantidade (`MinQuantity`, `MaxQuantity`) e opcionalidade (`IsOptional`).
+    - O pre√ßo do item √© calculado somando o pre√ßo base do produto com o `AdditionalCost` dos componentes selecionados.
+    - Ao confirmar, o `OrderItem` √© adicionado ao pedido, e em segundo plano, uma `Demand` com os respectivos registros de `ProductComposition` √© criada, ligando a Venda √† Produ√ß√£o.
 
 - **Adicionar Grupo de Produtos (`ProductType.Group`)**:
-    - O usu·rio busca e seleciona o kit (ex: "Kit Festa p/ 20 pessoas").
-    - O sistema exibe os itens que compıem o grupo.
-    - Se houver `ProductGroupExchangeRule` (Regras de Troca), o sistema permite que o usu·rio faÁa substituiÁıes proporcionais (ex: trocar 50 salgados por 50 doces).
-    - O kit È adicionado ao pedido como um ˙nico `OrderItem` principal, possivelmente com sub-itens detalhando a composiÁ„o final.
+    - O usu√°rio busca e seleciona o kit (ex: "Kit Festa p/ 20 pessoas").
+    - O sistema exibe os itens que comp√µem o grupo.
+    - Se houver `ProductGroupExchangeRule` (Regras de Troca), o sistema permite que o usu√°rio fa√ßa substitui√ß√µes proporcionais (ex: trocar 50 salgados por 50 doces).
+    - O kit √© adicionado ao pedido como um √∫nico `OrderItem` principal, possivelmente com sub-itens detalhando a composi√ß√£o final.
 
-### 3.4. FinalizaÁ„o e ConfirmaÁ„o do Pedido
+### 3.4. Finaliza√ß√£o e Confirma√ß√£o do Pedido
 
-ApÛs adicionar todos os itens, o usu·rio finaliza o pedido:
-1.  **Revis„o**: O sistema exibe um resumo completo do pedido, com o valor total calculado.
-2.  **InformaÁıes de Pagamento**: O usu·rio registra as condiÁıes de pagamento acordadas com o cliente.
-3.  **ConfirmaÁ„o**: O usu·rio clica em "Confirmar Pedido". O status do pedido muda de "Pendente" para "Confirmado".
+Ap√≥s adicionar todos os itens, o usu√°rio finaliza o pedido:
+1.  **Revis√£o**: O sistema exibe um resumo completo do pedido, com o valor total calculado.
+2.  **Informa√ß√µes de Pagamento**: O usu√°rio registra as condi√ß√µes de pagamento acordadas com o cliente.
+3.  **Confirma√ß√£o**: O usu√°rio clica em "Confirmar Pedido". O status do pedido muda de "Pendente" para "Confirmado".
 
-## 4. Regras de NegÛcio e Status
+## 4. Regras de Neg√≥cio e Status
 
-O ciclo de vida de um pedido È gerenciado por status que ditam as aÁıes permitidas.
+O ciclo de vida de um pedido √© gerenciado por status que ditam as a√ß√µes permitidas.
 
 - **Status do Pedido (Exemplo de fluxo)**:
-    1.  **Pendente**: Pedido recÈm-criado. Pode ser editado livremente.
-    2.  **Confirmado**: O cliente concordou com o pedido. As ediÁıes s„o bloqueadas ou restritas. A `Demand` È formalmente enviada para a fila de produÁ„o.
-    3.  **Em ProduÁ„o**: A equipe de produÁ„o iniciou o trabalho no pedido.
-    4.  **Pronto para Entrega/Retirada**: A produÁ„o foi concluÌda.
+    1.  **Pendente**: Pedido rec√©m-criado. Pode ser editado livremente.
+    2.  **Confirmado**: O cliente concordou com o pedido. As edi√ß√µes s√£o bloqueadas ou restritas. A `Demand` √© formalmente enviada para a fila de produ√ß√£o.
+    3.  **Em Produ√ß√£o**: A equipe de produ√ß√£o iniciou o trabalho no pedido.
+    4.  **Pronto para Entrega/Retirada**: A produ√ß√£o foi conclu√≠da.
     5.  **Entregue**: O pedido foi fisicamente entregue ao cliente.
     6.  **Faturado**: O pagamento foi totalmente recebido e conciliado.
     7.  **Cancelado**: O pedido foi cancelado.
 
-- **Regras de ValidaÁ„o**:
-    - Um `OrderEntry` n„o pode ser confirmado sem um `Customer` e pelo menos um `OrderItem`.
-    - O valor total (`Order.TotalValue`) È sempre a soma dos totais de seus `OrderItem`s.
-    - N„o È possÌvel adicionar um `Product` com status "Inativo" a um novo pedido.
-    - A exclus„o de um pedido sÛ È permitida em status iniciais (ex: "Pendente"). Para outros casos, o fluxo correto È o cancelamento.
+- **Regras de Valida√ß√£o**:
+    - Um `OrderEntry` n√£o pode ser confirmado sem um `Customer` e pelo menos um `OrderItem`.
+    - O valor total (`Order.TotalValue`) √© sempre a soma dos totais de seus `OrderItem`s.
+    - N√£o √© poss√≠vel adicionar um `Product` com status "Inativo" a um novo pedido.
+    - A exclus√£o de um pedido s√≥ √© permitida em status iniciais (ex: "Pendente"). Para outros casos, o fluxo correto √© o cancelamento.
 
-## 5. Conclus„o
+## 5. Conclus√£o
 
-O DomÌnio de Vendas È a engrenagem que conecta a oferta (Cat·logo de Produtos) com a execuÁ„o (ProduÁ„o e Financeiro). Sua arquitetura funcional permite desde a criaÁ„o r·pida de um pedido simples atÈ a complexa configuraÁ„o de produtos personalizados, garantindo que todas as informaÁıes necess·rias fluam corretamente para as outras ·reas do sistema GesN.
+O Dom√≠nio de Vendas √© a engrenagem que conecta a oferta (Cat√°logo de Produtos) com a execu√ß√£o (Produ√ß√£o e Financeiro). Sua arquitetura funcional permite desde a cria√ß√£o r√°pida de um pedido simples at√© a complexa configura√ß√£o de produtos personalizados, garantindo que todas as informa√ß√µes necess√°rias fluam corretamente para as outras √°reas do sistema GesN.
 

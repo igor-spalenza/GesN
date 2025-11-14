@@ -1,4 +1,4 @@
-# 🏭 SISTEMA GesN - Gestão de Negócios
+﻿# 🏭 SISTEMA GesN - Gestão de Negócios
 
 ## 📋 Índice
 
@@ -710,7 +710,3 @@ Esta documentação serve como referência completa para desenvolvedores, analis
 **Última atualização**: Janeiro 2025  
 **Versão**: 1.0  
 **Autor**: Sistema GesN - Gestão de Negócios
-
-
-
-

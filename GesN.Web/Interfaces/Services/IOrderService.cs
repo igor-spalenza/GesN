@@ -118,5 +118,10 @@ namespace GesN.Web.Interfaces.Services
         /// Valida os dados de um pedido
         /// </summary>
         Task<bool> ValidateCreateOrderDataAsync(CreateOrderEntryViewModel order);
+
+        /// <summary>
+        /// Recalcula os totais do pedido baseado nos itens atuais
+        /// </summary>
+        Task<bool> RecalculateOrderTotalsAsync(string orderId);
     }
 } 

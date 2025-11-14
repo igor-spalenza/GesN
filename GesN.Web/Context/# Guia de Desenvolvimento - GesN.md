@@ -1,66 +1,66 @@
-# Guia de Desenvolvimento - GesN
+﻿# Guia de Desenvolvimento - GesN
 
-Este documento descreve os padrões de arquitetura e as convenções de código para o projeto GesN. O objetivo é manter a consistência e a qualidade do código em toda a aplicação.
+Este documento descreve os padrÃµes de arquitetura e as convenÃ§Ãµes de cÃ³digo para o projeto GesN. O objetivo Ã© manter a consistÃªncia e a qualidade do cÃ³digo em toda a aplicaÃ§Ã£o.
 
-## 🏗️ Arquitetura
+## ðŸ—ï¸ Arquitetura
 
 ### Backend (ASP.NET Core)
 
--   **Padrão MVC:** A aplicação segue o padrão Model-View-Controller.
--   **Acesso a Dados:** Utilizamos **Dapper** para comunicação com o banco de dados **SQLite**. A lógica de acesso a dados deve ser encapsulada em classes de Repositório ou Serviço.
--   **Inicialização do BD:** A estrutura das tabelas é definida e criada via código na classe `Data/Migrations/DbInit.cs`.
--   **ViewModels:** Cada `View` ou `PartialView` deve ter seu próprio ViewModel (ex: `CreateProductViewModel`, `EditProductViewModel`). Isso evita o uso de `ViewBag`/`ViewData` e o acoplamento das entidades de domínio às views.
--   **Respostas AJAX:** Actions que respondem a chamadas AJAX devem retornar `JsonResult` com um formato padrão: `{ success: boolean, message: string, data: object | null }`.
+-   **PadrÃ£o MVC:** A aplicaÃ§Ã£o segue o padrÃ£o Model-View-Controller.
+-   **Acesso a Dados:** Utilizamos **Dapper** para comunicaÃ§Ã£o com o banco de dados **SQLite**. A lÃ³gica de acesso a dados deve ser encapsulada em classes de RepositÃ³rio ou ServiÃ§o.
+-   **InicializaÃ§Ã£o do BD:** A estrutura das tabelas Ã© definida e criada via cÃ³digo na classe `Data/Migrations/DbInit.cs`.
+-   **ViewModels:** Cada `View` ou `PartialView` deve ter seu prÃ³prio ViewModel (ex: `CreateProductViewModel`, `EditProductViewModel`). Isso evita o uso de `ViewBag`/`ViewData` e o acoplamento das entidades de domÃ­nio Ã s views.
+-   **Respostas AJAX:** Actions que respondem a chamadas AJAX devem retornar `JsonResult` com um formato padrÃ£o: `{ success: boolean, message: string, data: object | null }`.
 
 ### Frontend (JavaScript/jQuery)
 
--   **Padrão "Manager Object":** Para cada módulo/entidade (ex: Pedidos, Produtos, Clientes), deve ser criado um objeto JavaScript que encapsula toda a sua funcionalidade. Isso organiza o código e evita poluir o escopo global.
-    -   **Exemplo:** `Order.js` contém `const ordersManager = { ... }`.
-    -   **Exemplo:** `Product.js` contém `const productManager = { ... }`.
+-   **PadrÃ£o "Manager Object":** Para cada mÃ³dulo/entidade (ex: Pedidos, Produtos, Clientes), deve ser criado um objeto JavaScript que encapsula toda a sua funcionalidade. Isso organiza o cÃ³digo e evita poluir o escopo global.
+    -   **Exemplo:** `Order.js` contÃ©m `const ordersManager = { ... }`.
+    -   **Exemplo:** `Product.js` contÃ©m `const productManager = { ... }`.
 
--   **Padrões de Interface (UI/UX):**
-    -   **Listagem Principal:** As telas de índice de cada módulo devem apresentar uma grid de dados carregada via AJAX.
-    -   **Criação e Detalhes:** Formulários de criação e telas de detalhes devem ser carregados em **modais do Bootstrap**.
-    -   **Edição:** A edição de registros complexos (como Pedidos, Produtos, Categorias) deve ser feita em um sistema de **abas dinâmicas**. A edição de um item abre uma nova aba, permitindo que o usuário trabalhe em múltiplos registros simultaneamente.
+-   **PadrÃµes de Interface (UI/UX):**
+    -   **Listagem Principal:** As telas de Ã­ndice de cada mÃ³dulo devem apresentar uma grid de dados carregada via AJAX.
+    -   **CriaÃ§Ã£o e Detalhes:** FormulÃ¡rios de criaÃ§Ã£o e telas de detalhes devem ser carregados em **modais do Bootstrap**.
+    -   **EdiÃ§Ã£o:** A ediÃ§Ã£o de registros complexos (como Pedidos, Produtos, Categorias) deve ser feita em um sistema de **abas dinÃ¢micas**. A ediÃ§Ã£o de um item abre uma nova aba, permitindo que o usuÃ¡rio trabalhe em mÃºltiplos registros simultaneamente.
 
--   **Bibliotecas Padrão:**
+-   **Bibliotecas PadrÃ£o:**
     -   **Grids e Tabelas:** Utilizar **DataTables.js** para todas as tabelas de dados.
-    -   **Notificações:** Utilizar **Toastr.js** para todo feedback ao usuário (sucesso, erro, aviso).
-    -   **Seleção com Busca (Dropdowns):** Utilizar **Select2.js** para campos de seleção que necessitam de busca.
-    -   **Autocompletar:** Utilizar **Algolia Autocomplete.js** para campos de busca com sugestões dinâmicas (ex: busca de clientes).
+    -   **NotificaÃ§Ãµes:** Utilizar **Toastr.js** para todo feedback ao usuÃ¡rio (sucesso, erro, aviso).
+    -   **SeleÃ§Ã£o com Busca (Dropdowns):** Utilizar **Select2.js** para campos de seleÃ§Ã£o que necessitam de busca.
+    -   **Autocompletar:** Utilizar **Algolia Autocomplete.js** para campos de busca com sugestÃµes dinÃ¢micas (ex: busca de clientes).
 
-## ✍️ Convenções de Código
+## âœï¸ ConvenÃ§Ãµes de CÃ³digo
 
 ### C# (Backend)
 
--   Utilize `async/await` para todas as operações de I/O (acesso ao banco de dados).
--   Siga as convenções de nomenclatura do .NET (PascalCase para métodos e propriedades, camelCase para parâmetros).
--   Use os Data Annotations do `System.ComponentModel.DataAnnotations` para validação nos ViewModels.
+-   Utilize `async/await` para todas as operaÃ§Ãµes de I/O (acesso ao banco de dados).
+-   Siga as convenÃ§Ãµes de nomenclatura do .NET (PascalCase para mÃ©todos e propriedades, camelCase para parÃ¢metros).
+-   Use os Data Annotations do `System.ComponentModel.DataAnnotations` para validaÃ§Ã£o nos ViewModels.
 
 ### JavaScript (Frontend)
 
 -   Use `const` e `let` em vez de `var`.
 -   Nomeie os "manager objects" com camelCase e sufixo `Manager` (ex: `ordersManager`, `productCategoriesManager`).
--   Funções dentro do manager devem ser claras, diretas e em camelCase (ex: `carregarListaOrders`, `salvarNovoModal`).
--   Use `$` como prefixo para variáveis que armazenam objetos jQuery (ex: `const $form = ...`).
--   As chamadas AJAX devem sempre implementar os callbacks `success`, `error`, e `complete` para um feedback adequado ao usuário e controle de estado (ex: desabilitar/reabilitar botões).
+-   FunÃ§Ãµes dentro do manager devem ser claras, diretas e em camelCase (ex: `carregarListaOrders`, `salvarNovoModal`).
+-   Use `$` como prefixo para variÃ¡veis que armazenam objetos jQuery (ex: `const $form = ...`).
+-   As chamadas AJAX devem sempre implementar os callbacks `success`, `error`, e `complete` para um feedback adequado ao usuÃ¡rio e controle de estado (ex: desabilitar/reabilitar botÃµes).
 
-## 📋 Instruções para o Gemini Code Assist
+## ðŸ“‹ InstruÃ§Ãµes para o Gemini Code Assist
 
-Ao solicitar a criação de novas funcionalidades, siga estes padrões:
+Ao solicitar a criaÃ§Ã£o de novas funcionalidades, siga estes padrÃµes:
 
 1.  **Para um novo CRUD completo (ex: Fornecedores):**
-    -   Peça a criação do Controller, ViewModels, e o arquivo JavaScript (`Supplier.js` com `supplierManager`).
-    -   Especifique que a **edição deve usar o sistema de abas dinâmicas**, similar ao `ordersManager` ou `productCategoriesManager`.
-    -   Especifique que a **criação e os detalhes devem usar modais**, similar ao `ordersManager`.
+    -   PeÃ§a a criaÃ§Ã£o do Controller, ViewModels, e o arquivo JavaScript (`Supplier.js` com `supplierManager`).
+    -   Especifique que a **ediÃ§Ã£o deve usar o sistema de abas dinÃ¢micas**, similar ao `ordersManager` ou `productCategoriesManager`.
+    -   Especifique que a **criaÃ§Ã£o e os detalhes devem usar modais**, similar ao `ordersManager`.
 
-2.  **Para adicionar um campo a um formulário:**
+2.  **Para adicionar um campo a um formulÃ¡rio:**
     -   Indique o ViewModel a ser modificado.
     -   Indique a View ou PartialView a ser alterada.
-    -   Se for um campo de seleção com busca, especifique o uso de `Select2.js` e o endpoint para buscar os dados.
+    -   Se for um campo de seleÃ§Ã£o com busca, especifique o uso de `Select2.js` e o endpoint para buscar os dados.
 
-3.  **Para refatoração:**
-    -   Se um arquivo JS não segue o padrão "manager object" (como o `Customer.js` atual), peça para refatorá-lo para se alinhar com `Order.js` ou `Product.js`.
+3.  **Para refatoraÃ§Ã£o:**
+    -   Se um arquivo JS nÃ£o segue o padrÃ£o "manager object" (como o `Customer.js` atual), peÃ§a para refatorÃ¡-lo para se alinhar com `Order.js` ou `Product.js`.
 
 **Exemplo de Prompt:**
-> "Crie o CRUD para Fornecedores (`Supplier`). A edição deve abrir em uma nova aba e a criação em um modal, seguindo o padrão do módulo de Produtos. O formulário deve conter os campos Nome, Razão Social e CNPJ."
+> "Crie o CRUD para Fornecedores (`Supplier`). A ediÃ§Ã£o deve abrir em uma nova aba e a criaÃ§Ã£o em um modal, seguindo o padrÃ£o do mÃ³dulo de Produtos. O formulÃ¡rio deve conter os campos Nome, RazÃ£o Social e CNPJ."

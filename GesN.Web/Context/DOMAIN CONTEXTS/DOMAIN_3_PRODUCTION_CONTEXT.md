@@ -1,81 +1,81 @@
-# DescriÁ„o Funcional de Software - DomÌnio de ProduÁ„o
+Ôªø# Descri√ß√£o Funcional de Software - Dom√≠nio de Produ√ß√£o
 
-## 1. Vis„o Geral
+## 1. Vis√£o Geral
 
-O **DomÌnio de ProduÁ„o** È o centro de execuÁ„o do GesN, respons·vel por traduzir os pedidos de venda confirmados em tarefas de produÁ„o tangÌveis e rastre·veis. Ele funciona como a "esteira de produÁ„o" do negÛcio, garantindo que os produtos, especialmente os personalizados (`Composite`), sejam montados corretamente e dentro do prazo estipulado.
+O **Dom√≠nio de Produ√ß√£o** √© o centro de execu√ß√£o do GesN, respons√°vel por traduzir os pedidos de venda confirmados em tarefas de produ√ß√£o tang√≠veis e rastre√°veis. Ele funciona como a "esteira de produ√ß√£o" do neg√≥cio, garantindo que os produtos, especialmente os personalizados (`Composite`), sejam montados corretamente e dentro do prazo estipulado.
 
-Este domÌnio È ativado principalmente pelo **DomÌnio de Vendas**. Quando um `OrderEntry` (Pedido) contendo itens que exigem fabricaÁ„o È confirmado, uma ou mais `Demand` (Demandas de ProduÁ„o) s„o geradas automaticamente, iniciando o fluxo de trabalho da produÁ„o.
+Este dom√≠nio √© ativado principalmente pelo **Dom√≠nio de Vendas**. Quando um `OrderEntry` (Pedido) contendo itens que exigem fabrica√ß√£o √© confirmado, uma ou mais `Demand` (Demandas de Produ√ß√£o) s√£o geradas automaticamente, iniciando o fluxo de trabalho da produ√ß√£o.
 
-- **IntegraÁ„o com Vendas**: A confirmaÁ„o de um `OrderItem` de um produto composto ou de fabricaÁ„o interna dispara a criaÁ„o de uma `Demand`. A data de entrega do pedido (`Order.DeliveryDate`) define o prazo para a produÁ„o.
-- **IntegraÁ„o com Produtos**: A produÁ„o consome as "receitas" e "regras de montagem" definidas no DomÌnio de Produto. As `ProductComponentHierarchy` e os `ProductComponent` de um produto composto se transformam na lista de tarefas (`ProductComposition`) de uma demanda.
-- **IntegraÁ„o com Estoque/Compras**: A conclus„o das demandas informa o consumo de `Ingredient` (ingredientes/insumos), permitindo que o sistema atualize os nÌveis de estoque e auxilie na geraÁ„o de novas ordens de compra.
+- **Integra√ß√£o com Vendas**: A confirma√ß√£o de um `OrderItem` de um produto composto ou de fabrica√ß√£o interna dispara a cria√ß√£o de uma `Demand`. A data de entrega do pedido (`Order.DeliveryDate`) define o prazo para a produ√ß√£o.
+- **Integra√ß√£o com Produtos**: A produ√ß√£o consome as "receitas" e "regras de montagem" definidas no Dom√≠nio de Produto. As `ProductComponentHierarchy` e os `ProductComponent` de um produto composto se transformam na lista de tarefas (`ProductComposition`) de uma demanda.
+- **Integra√ß√£o com Estoque/Compras**: A conclus√£o das demandas informa o consumo de `Ingredient` (ingredientes/insumos), permitindo que o sistema atualize os n√≠veis de estoque e auxilie na gera√ß√£o de novas ordens de compra.
 
-O objetivo principal È fornecer ‡ equipe de produÁ„o uma vis„o clara e organizada do que precisa ser feito, em que ordem e para quando, ao mesmo tempo que oferece aos gestores visibilidade sobre o andamento e a capacidade da produÁ„o.
+O objetivo principal √© fornecer √† equipe de produ√ß√£o uma vis√£o clara e organizada do que precisa ser feito, em que ordem e para quando, ao mesmo tempo que oferece aos gestores visibilidade sobre o andamento e a capacidade da produ√ß√£o.
 
 ## 2. Entidades Principais
 
-As seguintes entidades s„o fundamentais para o funcionamento do DomÌnio de ProduÁ„o:
+As seguintes entidades s√£o fundamentais para o funcionamento do Dom√≠nio de Produ√ß√£o:
 
-- **`Demand`**: A entidade central, representando uma ordem de produÁ„o. Geralmente, uma `Demand` est· ligada a um `OrderItem` especÌfico de um pedido de venda. Ela agrega todas as informaÁıes necess·rias para a produÁ„o: o produto final a ser montado, a quantidade, o prazo de entrega e o seu status geral no fluxo de produÁ„o.
-- **`ProductComposition`**: Representa uma tarefa ou um componente especÌfico dentro de uma `Demand`. … a unidade de trabalho da produÁ„o. Se uma demanda È para "1 Bolo de Anivers·rio", haver· registros de `ProductComposition` para "Massa Branca", "Recheio de Ninho", "Cobertura de Chocolate", etc., cada um com sua prÛpria quantidade e status de processamento.
-- **`Product` (Entidade do DomÌnio de Produto)**: A especificaÁ„o do item a ser produzido. A produÁ„o consulta as propriedades do produto, como `AssemblyTime` e `AssemblyInstructions`.
-- **`ProductComponent` (Entidade do DomÌnio de Produto)**: A especificaÁ„o do componente a ser usado em uma tarefa `ProductComposition`.
+- **`Demand`**: A entidade central, representando uma ordem de produ√ß√£o. Geralmente, uma `Demand` est√° ligada a um `OrderItem` espec√≠fico de um pedido de venda. Ela agrega todas as informa√ß√µes necess√°rias para a produ√ß√£o: o produto final a ser montado, a quantidade, o prazo de entrega e o seu status geral no fluxo de produ√ß√£o.
+- **`ProductComposition`**: Representa uma tarefa ou um componente espec√≠fico dentro de uma `Demand`. √â a unidade de trabalho da produ√ß√£o. Se uma demanda √© para "1 Bolo de Anivers√°rio", haver√° registros de `ProductComposition` para "Massa Branca", "Recheio de Ninho", "Cobertura de Chocolate", etc., cada um com sua pr√≥pria quantidade e status de processamento.
+- **`Product` (Entidade do Dom√≠nio de Produto)**: A especifica√ß√£o do item a ser produzido. A produ√ß√£o consulta as propriedades do produto, como `AssemblyTime` e `AssemblyInstructions`.
+- **`ProductComponent` (Entidade do Dom√≠nio de Produto)**: A especifica√ß√£o do componente a ser usado em uma tarefa `ProductComposition`.
 
-## 3. Jornada do Usu·rio e Fluxos de Trabalho
+## 3. Jornada do Usu√°rio e Fluxos de Trabalho
 
-O fluxo de produÁ„o È projetado para ser um processo gerenciado por status, desde o recebimento da demanda atÈ a sua conclus„o.
+O fluxo de produ√ß√£o √© projetado para ser um processo gerenciado por status, desde o recebimento da demanda at√© a sua conclus√£o.
 
 ### 3.1. Painel de Demandas (Production Dashboard)
 
-O ponto de entrada para a equipe de produÁ„o È o painel de demandas (`Demand/Index.cshtml`). Esta tela centraliza o gerenciamento e oferece:
+O ponto de entrada para a equipe de produ√ß√£o √© o painel de demandas (`Demand/Index.cshtml`). Esta tela centraliza o gerenciamento e oferece:
 
-- **Vis„o Geral com Status**: Cards de resumo exibem a quantidade de demandas em cada est·gio do processo: `Pendente`, `Confirmado`, `Em ProduÁ„o`, `Finalizando`, `Entregue` e `Atrasado`.
-- **Grade de Demandas**: Uma lista detalhada de todas as demandas, mostrando informaÁıes cruciais como o produto, quantidade, cliente (via pedido), data de entrega e status atual.
-- **Filtros AvanÁados**: Ferramentas poderosas para que o gerente de produÁ„o possa focar no que È mais importante, filtrando por:
+- **Vis√£o Geral com Status**: Cards de resumo exibem a quantidade de demandas em cada est√°gio do processo: `Pendente`, `Confirmado`, `Em Produ√ß√£o`, `Finalizando`, `Entregue` e `Atrasado`.
+- **Grade de Demandas**: Uma lista detalhada de todas as demandas, mostrando informa√ß√µes cruciais como o produto, quantidade, cliente (via pedido), data de entrega e status atual.
+- **Filtros Avan√ßados**: Ferramentas poderosas para que o gerente de produ√ß√£o possa focar no que √© mais importante, filtrando por:
     - Status da demanda.
-    - Produto especÌfico.
-    - PerÌodo de entrega (data inicial e final).
+    - Produto espec√≠fico.
+    - Per√≠odo de entrega (data inicial e final).
     - Apenas demandas atrasadas.
 
-### 3.2. GeraÁ„o da Demanda
+### 3.2. Gera√ß√£o da Demanda
 
-- **Autom·tica (Fluxo Padr„o)**: Ao confirmar um `OrderEntry` no DomÌnio de Vendas, o sistema analisa cada `OrderItem`. Para itens que s„o `ProductType.Composite` ou que necessitam de produÁ„o, uma `Demand` È criada automaticamente. As escolhas feitas pelo cliente (ex: recheios do bolo) s„o transformadas em registros de `ProductComposition` vinculados a essa nova `Demand`.
-- **Manual**: A interface permite a criaÁ„o de uma "Nova Demanda" manual. Isso È ˙til para ordens de produÁ„o internas, produÁ„o para estoque (sem um pedido de cliente atrelado) ou para corrigir falhas no processo autom·tico.
+- **Autom√°tica (Fluxo Padr√£o)**: Ao confirmar um `OrderEntry` no Dom√≠nio de Vendas, o sistema analisa cada `OrderItem`. Para itens que s√£o `ProductType.Composite` ou que necessitam de produ√ß√£o, uma `Demand` √© criada automaticamente. As escolhas feitas pelo cliente (ex: recheios do bolo) s√£o transformadas em registros de `ProductComposition` vinculados a essa nova `Demand`.
+- **Manual**: A interface permite a cria√ß√£o de uma "Nova Demanda" manual. Isso √© √∫til para ordens de produ√ß√£o internas, produ√ß√£o para estoque (sem um pedido de cliente atrelado) ou para corrigir falhas no processo autom√°tico.
 
-### 3.3. Gerenciamento e ExecuÁ„o de uma Demanda
+### 3.3. Gerenciamento e Execu√ß√£o de uma Demanda
 
-1.  **An·lise e ConfirmaÁ„o**: Uma nova demanda entra no painel com status `Pendente`. O gerente de produÁ„o a revisa e a move para `Confirmado`, sinalizando que ela est· pronta para ser iniciada.
+1.  **An√°lise e Confirma√ß√£o**: Uma nova demanda entra no painel com status `Pendente`. O gerente de produ√ß√£o a revisa e a move para `Confirmado`, sinalizando que ela est√° pronta para ser iniciada.
 
-2.  **InÌcio da ProduÁ„o**: A equipe seleciona uma demanda `Confirmada` e altera seu status para `Em ProduÁ„o`.
+2.  **In√≠cio da Produ√ß√£o**: A equipe seleciona uma demanda `Confirmada` e altera seu status para `Em Produ√ß√£o`.
 
-3.  **ExecuÁ„o das Tarefas (`ProductComposition`)**: O detalhe da demanda exibe a lista de todos os seus itens de `ProductComposition`. A equipe de produÁ„o executa cada tarefa:
-    - O sistema permite marcar o inÌcio e o fim do processamento de cada componente (`StartProcessing()`, `CompleteProcessing()`).
-    - Isso oferece um rastreamento granular do progresso. … possÌvel saber, por exemplo, que a "massa" e o "recheio" de um bolo j· est„o prontos, mas a "cobertura" ainda est· pendente.
+3.  **Execu√ß√£o das Tarefas (`ProductComposition`)**: O detalhe da demanda exibe a lista de todos os seus itens de `ProductComposition`. A equipe de produ√ß√£o executa cada tarefa:
+    - O sistema permite marcar o in√≠cio e o fim do processamento de cada componente (`StartProcessing()`, `CompleteProcessing()`).
+    - Isso oferece um rastreamento granular do progresso. √â poss√≠vel saber, por exemplo, que a "massa" e o "recheio" de um bolo j√° est√£o prontos, mas a "cobertura" ainda est√° pendente.
 
-4.  **FinalizaÁ„o**: Uma vez que todos os itens de `ProductComposition` de uma demanda s„o marcados como `Completed`, a demanda principal pode ter seu status alterado para `Finalizando` (para etapas de embalagem, por exemplo) e, posteriormente, para `Pronto para Entrega`.
+4.  **Finaliza√ß√£o**: Uma vez que todos os itens de `ProductComposition` de uma demanda s√£o marcados como `Completed`, a demanda principal pode ter seu status alterado para `Finalizando` (para etapas de embalagem, por exemplo) e, posteriormente, para `Pronto para Entrega`.
 
-5.  **Entrega**: Quando o produto È efetivamente entregue ou retirado (informaÁ„o que pode vir do DomÌnio de Vendas), o status da demanda È atualizado para `Entregue`, concluindo seu ciclo de vida na produÁ„o.
+5.  **Entrega**: Quando o produto √© efetivamente entregue ou retirado (informa√ß√£o que pode vir do Dom√≠nio de Vendas), o status da demanda √© atualizado para `Entregue`, concluindo seu ciclo de vida na produ√ß√£o.
 
-## 4. Regras de NegÛcio e Status
+## 4. Regras de Neg√≥cio e Status
 
-O ciclo de vida de uma `Demand` È governado por uma m·quina de estados que reflete o processo fÌsico na f·brica.
+O ciclo de vida de uma `Demand` √© governado por uma m√°quina de estados que reflete o processo f√≠sico na f√°brica.
 
 - **Status da Demanda**:
-    - **Pendente**: RecÈm-criada, aguardando revis„o da produÁ„o.
-    - **Confirmado**: Revisada e apta para iniciar a produÁ„o.
-    - **Em ProduÁ„o**: O trabalho na demanda foi iniciado.
+    - **Pendente**: Rec√©m-criada, aguardando revis√£o da produ√ß√£o.
+    - **Confirmado**: Revisada e apta para iniciar a produ√ß√£o.
+    - **Em Produ√ß√£o**: O trabalho na demanda foi iniciado.
     - **Finalizando**: Todos os componentes foram produzidos; em fase de montagem final/embalagem.
-    - **Pronto para Entrega**: ProduÁ„o concluÌda e aguardando a logÌstica.
-    - **Entregue**: Ciclo de produÁ„o finalizado.
+    - **Pronto para Entrega**: Produ√ß√£o conclu√≠da e aguardando a log√≠stica.
+    - **Entregue**: Ciclo de produ√ß√£o finalizado.
     - **Cancelado**: A demanda foi cancelada (geralmente devido ao cancelamento do pedido de venda).
-    - **Atrasado**: Um estado de alerta, n„o um status de fluxo. Uma demanda È considerada atrasada se a data atual ultrapassar a data de entrega e ela ainda n„o estiver `Pronta para Entrega` ou `Entregue`.
+    - **Atrasado**: Um estado de alerta, n√£o um status de fluxo. Uma demanda √© considerada atrasada se a data atual ultrapassar a data de entrega e ela ainda n√£o estiver `Pronta para Entrega` ou `Entregue`.
 
-- **Regras de ValidaÁ„o**:
-    - Uma `Demand` n„o pode ser movida para `Em ProduÁ„o` sem antes ser `Confirmada`.
-    - O status de uma `Demand` sÛ pode ser alterado para `Pronto para Entrega` se todos os seus `ProductComposition`s estiverem concluÌdos.
-    - A criaÁ„o de uma `ProductComposition` requer um `DemandId`, um `ProductComponentId` e o nome da hierarquia (`HierarchyName`) para manter o contexto, mesmo que a hierarquia original seja alterada no futuro.
+- **Regras de Valida√ß√£o**:
+    - Uma `Demand` n√£o pode ser movida para `Em Produ√ß√£o` sem antes ser `Confirmada`.
+    - O status de uma `Demand` s√≥ pode ser alterado para `Pronto para Entrega` se todos os seus `ProductComposition`s estiverem conclu√≠dos.
+    - A cria√ß√£o de uma `ProductComposition` requer um `DemandId`, um `ProductComponentId` e o nome da hierarquia (`HierarchyName`) para manter o contexto, mesmo que a hierarquia original seja alterada no futuro.
 
-## 5. Conclus„o
+## 5. Conclus√£o
 
-O DomÌnio de ProduÁ„o È o elo vital que transforma a promessa de uma venda em um produto real. Ele organiza o caos da "cozinha" ou "f·brica", fornecendo um fluxo de trabalho estruturado, rastreabilidade de ponta a ponta e dados valiosos para a gest„o de capacidade e eficiÍncia operacional. A sua integraÁ„o direta com Vendas e Produtos garante que a produÁ„o esteja sempre alinhada com a demanda do cliente e com as especificaÁıes do cat·logo.
+O Dom√≠nio de Produ√ß√£o √© o elo vital que transforma a promessa de uma venda em um produto real. Ele organiza o caos da "cozinha" ou "f√°brica", fornecendo um fluxo de trabalho estruturado, rastreabilidade de ponta a ponta e dados valiosos para a gest√£o de capacidade e efici√™ncia operacional. A sua integra√ß√£o direta com Vendas e Produtos garante que a produ√ß√£o esteja sempre alinhada com a demanda do cliente e com as especifica√ß√µes do cat√°logo.
 

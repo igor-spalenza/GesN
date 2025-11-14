@@ -239,3 +239,247 @@
 .user-select-none {
     user-select: none !important;
 }
+
+/* ===================================
+   ORDER WORKSPACE - LAYOUT SLIDE
+   ===================================*/
+
+/* Container principal do workspace */
+.order-workspace {
+    display: flex;
+    min-height: calc(100vh - 140px);
+    position: relative;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+/* Área das abas - responsiva */
+.tabs-area {
+    flex: 1;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    position: relative;
+}
+
+/* Quando catálogo está ativo */
+.order-workspace.catalog-active .tabs-area {
+    flex: 0 0 66.66%;
+    border-right: 2px solid #e9ecef;
+}
+
+/* Catálogo lateral - slide panel */
+.catalog-sidebar {
+    width: 33.33%;
+    position: fixed;
+    top: 0;
+    right: -35%;
+    height: 100vh;
+    background: white;
+    box-shadow: -3px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 1040;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 2px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Catálogo visível */
+.order-workspace.catalog-active .catalog-sidebar {
+    right: 0;
+}
+
+/* Conteúdo do catálogo */
+.catalog-sidebar-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Catálogo dentro da sidebar */
+.catalog-sidebar .product-catalog-modern {
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+}
+
+/* Backdrop quando catálogo está ativo */
+.catalog-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1035;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.order-workspace.catalog-active .catalog-backdrop {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Botão para fechar catálogo */
+.catalog-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #dee2e6;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1050;
+    transition: all 0.2s ease;
+    color: #6c757d;
+}
+
+.catalog-close-btn:hover {
+    background: white;
+    color: #dc3545;
+    border-color: #dc3545;
+    transform: scale(1.1);
+}
+
+/* Responsividade do slide layout */
+@media (max-width: 1199.98px) {
+    .order-workspace.catalog-active .tabs-area {
+        flex: 0 0 60%;
+    }
+    
+    .catalog-sidebar {
+        width: 40%;
+        right: -42%;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .order-workspace.catalog-active .tabs-area {
+        flex: 0 0 50%;
+    }
+    
+    .catalog-sidebar {
+        width: 50%;
+        right: -52%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    /* Mobile: catálogo ocupa tela inteira */
+    .catalog-sidebar {
+        width: 100%;
+        right: -100%;
+    }
+    
+    .order-workspace.catalog-active .tabs-area {
+        flex: 0 0 0%;
+        opacity: 0.3;
+    }
+}
+
+/* ===================================
+   CONTROLES DO CATÁLOGO
+   ===================================*/
+
+/* Botão toggle para mostrar catálogo */
+.catalog-toggle-btn {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    z-index: 1030;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.catalog-toggle-btn:hover {
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.5);
+}
+
+.catalog-toggle-btn.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-50%) scale(0.8);
+}
+
+/* Esconder o botão quando catálogo está ativo */
+.order-workspace.catalog-active .catalog-toggle-btn {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-50%) scale(0.8);
+}
+
+/* Indicador de aba ativa com edição */
+.nav-tabs .nav-link.editing-active {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-color: #28a745;
+    position: relative;
+}
+
+.nav-tabs .nav-link.editing-active::after {
+    content: '🏪';
+    position: absolute;
+    top: -5px;
+    right: 5px;
+    font-size: 0.8rem;
+    animation: pulse-catalog 2s infinite;
+}
+
+@keyframes pulse-catalog {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* ===================================
+   TRANSIÇÕES E ANIMAÇÕES
+   ===================================*/
+
+/* Suavização geral */
+.tabs-area,
+.catalog-sidebar,
+.catalog-backdrop,
+.catalog-toggle-btn {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animação de entrada dos produtos */
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.catalog-sidebar.animating .product-list-item {
+    animation: slideInFromRight 0.3s ease-out;
+}

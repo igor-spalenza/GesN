@@ -1,4 +1,4 @@
-# 📖 Documentação de Domínios – GesN SaaS
+﻿# 📖 Documentação de Domínios – GesN SaaS
 
 ## 📋 Índice
 

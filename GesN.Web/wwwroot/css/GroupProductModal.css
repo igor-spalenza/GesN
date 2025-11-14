@@ -1,0 +1,591 @@
+/* ===================================
+   GROUP PRODUCT MODAL STYLES - FASE 3
+   =================================== */
+
+/* Modal específico para configuração de grupos */
+#groupProductModal .modal-dialog {
+    max-width: 900px;
+    width: 90%;
+}
+
+#groupProductModal .modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+#groupProductModal .modal-header {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    padding: 1.5rem;
+}
+
+#groupProductModal .modal-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+#groupProductModal .modal-body {
+    padding: 2rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Cabeçalho do grupo */
+.group-header {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.group-header h5 {
+    color: #495057;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.group-description {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.group-stats {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #495057;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.25rem;
+}
+
+/* Seção de itens do grupo */
+.group-items-section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Item individual do grupo */
+.group-item-section {
+    background: #ffffff;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.group-item-section:hover {
+    border-color: #6c757d;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.group-item-section.item-selected {
+    border-color: #28a745;
+    background: #f8fff9;
+}
+
+.group-item-section.item-disabled {
+    background: #f8f9fa;
+    border-color: #dee2e6;
+    opacity: 0.7;
+}
+
+.group-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.item-title {
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.item-badges {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.item-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.item-badge.required {
+    background: #dc3545;
+    color: white;
+}
+
+.item-badge.optional {
+    background: #6c757d;
+    color: white;
+}
+
+.item-badge.direct {
+    background: #17a2b8;
+    color: white;
+}
+
+.item-badge.category {
+    background: #ffc107;
+    color: #212529;
+}
+
+/* Informações do item */
+.item-info {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+/* Configuração do item */
+.item-config {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: end;
+}
+
+/* Seletor de produto */
+.product-selection {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-selection label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.product-selector {
+    padding: 0.75rem;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    background: white;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease;
+}
+
+.product-selector:focus {
+    border-color: #6c757d;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+.product-selector option[value=""] {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Campo de quantidade */
+.quantity-control {
+    display: flex;
+    flex-direction: column;
+    width: 120px;
+}
+
+.quantity-control label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.item-quantity {
+    padding: 0.75rem;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    background: white;
+    transition: border-color 0.3s ease;
+}
+
+.item-quantity:focus {
+    border-color: #6c757d;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+.item-quantity:disabled {
+    background: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Regras de troca */
+.exchange-rules-section {
+    margin-bottom: 2rem;
+}
+
+.exchange-rules-list {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.exchange-rule-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.exchange-rule-item:last-child {
+    margin-bottom: 0;
+}
+
+.rule-description {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.rule-ratio {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Controles de quantidade do grupo */
+.group-quantity-section {
+    background: #e8f4fd;
+    border: 1px solid #bee5eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.group-quantity-section h6 {
+    color: #0c5460;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.group-quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.group-quantity-control label {
+    font-weight: 500;
+    color: #495057;
+    margin: 0;
+    min-width: 120px;
+}
+
+#groupQuantity {
+    width: 120px;
+    padding: 0.75rem;
+    border: 2px solid #bee5eb;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    background: white;
+}
+
+#groupQuantity:focus {
+    border-color: #17a2b8;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+}
+
+/* Resumo de preços */
+.pricing-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.pricing-section h6 {
+    color: #495057;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+#selectionSummary {
+    min-height: 60px;
+}
+
+.selected-items {
+    margin-bottom: 1rem;
+}
+
+.selected-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.selected-item:last-child {
+    border-bottom: none;
+}
+
+.total-summary {
+    background: white;
+    border: 2px solid #28a745;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.total-summary strong {
+    color: #28a745;
+    font-size: 1.1rem;
+}
+
+#groupTotalDisplay {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #28a745;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+/* Rodapé do modal */
+#groupProductModal .modal-footer {
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    border-radius: 0 0 12px 12px;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+#btnConfirmGroupAdd {
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-width: 180px;
+}
+
+#btnConfirmGroupAdd:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-secondary.modal-close {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: white;
+}
+
+.btn-secondary.modal-close:hover {
+    background: #6c757d;
+    color: white;
+}
+
+/* Estados responsivos */
+@media (max-width: 768px) {
+    #groupProductModal .modal-dialog {
+        width: 95%;
+        margin: 1rem auto;
+    }
+    
+    #groupProductModal .modal-body {
+        padding: 1rem;
+        max-height: 60vh;
+    }
+    
+    .group-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        min-width: auto;
+    }
+    
+    .item-config {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .quantity-control {
+        width: 100%;
+    }
+    
+    .group-quantity-control {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .group-quantity-control label {
+        min-width: auto;
+        text-align: center;
+    }
+    
+    #groupQuantity {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    #groupProductModal .modal-body {
+        max-height: 50vh;
+    }
+    
+    .group-header {
+        padding: 1rem;
+    }
+    
+    .pricing-section {
+        padding: 1rem;
+    }
+    
+    #groupProductModal .modal-footer {
+        padding: 1rem;
+        flex-direction: column;
+    }
+    
+    #btnConfirmGroupAdd {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+/* Animações e transições */
+.group-item-section {
+    animation: fadeInSlide 0.3s ease-out;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.selected-item {
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Estados de hover e focus melhorados */
+.product-selector:hover,
+.item-quantity:hover {
+    border-color: #adb5bd;
+}
+
+.group-item-section.item-selected:hover {
+    border-color: #20c997;
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.15);
+}
+
+/* Loading states */
+#btnConfirmGroupAdd .fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Melhorias visuais para select2 se ainda estiver presente */
+.group-item-section .select2-container {
+    width: 100% !important;
+}
+
+.group-item-section .select2-selection {
+    border: 2px solid #dee2e6 !important;
+    border-radius: 8px !important;
+    padding: 0.5rem !important;
+    min-height: 48px !important;
+}
+
+.group-item-section .select2-selection:focus-within {
+    border-color: #6c757d !important;
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25) !important;
+}
+
+
+
+
+
+
+

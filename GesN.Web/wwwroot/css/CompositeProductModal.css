@@ -1,0 +1,239 @@
+/* ===================================
+   MODAL DE CONFIGURAÇÃO - PRODUTO COMPOSTO
+   =================================== */
+
+#compositeProductModal {
+    z-index: 1060;
+}
+
+#compositeProductModal .modal-dialog {
+    max-width: 900px;
+}
+
+#compositeProductModal .modal-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Product Summary Section */
+.product-summary {
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+}
+
+/* Hierarchies Container */
+.hierarchies-container {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.hierarchy-section {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    margin-bottom: 1.5rem;
+    background-color: #ffffff;
+}
+
+.hierarchy-header {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 0.375rem 0.375rem 0 0;
+}
+
+.hierarchy-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Components Grid */
+.components-grid {
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 0.75rem;
+}
+
+.component-option {
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.component-option:hover {
+    border-color: #6c757d;
+    background-color: #f8f9fa;
+}
+
+.component-option:has(input[type="radio"]:checked) {
+    border-color: #0d6efd;
+    background-color: #e7f1ff;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+}
+
+.component-label {
+    cursor: pointer;
+    margin: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.component-label input[type="radio"] {
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+.component-info {
+    flex: 1;
+}
+
+.component-name {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.component-desc {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.component-cost {
+    font-size: 0.875rem;
+    color: #198754;
+    font-weight: 600;
+}
+
+.component-quantity {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.component-quantity input[type="number"] {
+    text-align: center;
+}
+
+/* Pricing Summary */
+.pricing-summary {
+    border: 1px solid #0d6efd;
+    background-color: #e7f1ff !important;
+}
+
+.pricing-summary p {
+    margin-bottom: 0.5rem;
+}
+
+.pricing-summary p:last-child {
+    margin-bottom: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #compositeProductModal .modal-dialog {
+        max-width: 95%;
+        margin: 1rem auto;
+    }
+    
+    .components-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .component-option {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .component-quantity {
+        width: 100%;
+        align-self: stretch;
+    }
+    
+    .hierarchies-container {
+        max-height: 50vh;
+    }
+}
+
+/* Loading States */
+#compositeProductModal .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#compositeProductModal .fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Form Validation States */
+.hierarchy-section.invalid {
+    border-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+.hierarchy-section.invalid .hierarchy-header {
+    background-color: #f5c2c7;
+    color: #721c24;
+}
+
+.component-option.invalid {
+    border-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+/* Success States */
+.hierarchy-section.valid {
+    border-color: #198754;
+}
+
+.component-option.valid {
+    border-color: #198754;
+    background-color: #d1e7dd;
+}
+
+/* Accessibility */
+.component-label:focus-within {
+    outline: 2px solid #0d6efd;
+    outline-offset: 2px;
+}
+
+.component-quantity input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Component Required Indicators */
+.hierarchy-title .text-danger {
+    font-size: 1.2em;
+}
+
+.hierarchy-title .text-muted {
+    font-weight: 400;
+    font-size: 0.85em;
+}
+
+
+
+
+
+
+

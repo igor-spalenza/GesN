@@ -1,34 +1,34 @@
-# 💳 DIAGRAMA DE ESTADOS - CICLO DE VIDA DAS CONTAS FINANCEIRAS
+﻿# ðŸ’³ DIAGRAMA DE ESTADOS - CICLO DE VIDA DAS CONTAS FINANCEIRAS
 
-## 🎯 Visão Geral
-Diagrama de estados completo mostrando o ciclo de vida das contas financeiras (AccountReceivable e AccountPayable), desde sua criação automática até a liquidação total, incluindo controle de vencimentos, inadimplência e conciliação bancária.
+## ðŸŽ¯ VisÃ£o Geral
+Diagrama de estados completo mostrando o ciclo de vida das contas financeiras (AccountReceivable e AccountPayable), desde sua criaÃ§Ã£o automÃ¡tica atÃ© a liquidaÃ§Ã£o total, incluindo controle de vencimentos, inadimplÃªncia e conciliaÃ§Ã£o bancÃ¡ria.
 
-## 💰 Diagrama de Estados - Contas a Receber (AccountReceivable)
+## ðŸ’° Diagrama de Estados - Contas a Receber (AccountReceivable)
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Pending : 🆕 Criação automática<br/>OrderEntry confirmada
+    [*] --> Pending : ðŸ†• CriaÃ§Ã£o automÃ¡tica<br/>OrderEntry confirmada
     
     %% === ESTADOS PRINCIPAIS ===
-    Pending --> PartiallyPaid : 💰 Pagamento parcial<br/>Manual: Usuário registra
-    PartiallyPaid --> Paid : 💰 Pagamento total<br/>Manual: Liquidação final
-    Pending --> Paid : 💰 Pagamento total direto<br/>Manual: Quitação integral
+    Pending --> PartiallyPaid : ðŸ’° Pagamento parcial<br/>Manual: UsuÃ¡rio registra
+    PartiallyPaid --> Paid : ðŸ’° Pagamento total<br/>Manual: LiquidaÃ§Ã£o final
+    Pending --> Paid : ðŸ’° Pagamento total direto<br/>Manual: QuitaÃ§Ã£o integral
     
     %% === VENCIMENTO ===
-    Pending --> Overdue : ⏰ Vencimento sem pagamento<br/>Auto: Job diário verifica
-    PartiallyPaid --> Overdue : ⏰ Vencimento parcial<br/>Auto: Saldo em atraso
-    Overdue --> Paid : 💰 Pagamento após vencimento<br/>Manual: Com juros/multa
+    Pending --> Overdue : â° Vencimento sem pagamento<br/>Auto: Job diÃ¡rio verifica
+    PartiallyPaid --> Overdue : â° Vencimento parcial<br/>Auto: Saldo em atraso
+    Overdue --> Paid : ðŸ’° Pagamento apÃ³s vencimento<br/>Manual: Com juros/multa
     
     %% === CANCELAMENTOS ===
-    Pending --> Cancelled : ❌ Pedido cancelado<br/>Auto: OrderEntry cancelled
-    PartiallyPaid --> Cancelled : ❌ Acordo cancelamento<br/>Manual: Negociação
-    Overdue --> Cancelled : ❌ Perda definitiva<br/>Manual: Baixa por perda
+    Pending --> Cancelled : âŒ Pedido cancelado<br/>Auto: OrderEntry cancelled
+    PartiallyPaid --> Cancelled : âŒ Acordo cancelamento<br/>Manual: NegociaÃ§Ã£o
+    Overdue --> Cancelled : âŒ Perda definitiva<br/>Manual: Baixa por perda
     
     %% === ESTADOS FINAIS ===
-    Paid --> [*] : 🎉 Conta totalmente quitada
-    Cancelled --> [*] : 🚫 Conta cancelada
+    Paid --> [*] : ðŸŽ‰ Conta totalmente quitada
+    Cancelled --> [*] : ðŸš« Conta cancelada
     
-    %% === STYLING POR SITUAÇÃO ===
+    %% === STYLING POR SITUAÃ‡ÃƒO ===
     
     classDef pending fill:#fef3c7,stroke:#f59e0b,stroke-width:3px,color:black
     class Pending pending
@@ -46,32 +46,32 @@ stateDiagram-v2
     class Cancelled cancelled
 ```
 
-## 💸 Diagrama de Estados - Contas a Pagar (AccountPayable)
+## ðŸ’¸ Diagrama de Estados - Contas a Pagar (AccountPayable)
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Pending : 🆕 Criação automática<br/>PurchaseOrder recebida
+    [*] --> Pending : ðŸ†• CriaÃ§Ã£o automÃ¡tica<br/>PurchaseOrder recebida
     
     %% === ESTADOS PRINCIPAIS ===
-    Pending --> PartiallyPaid : 💳 Pagamento parcial<br/>Manual: Usuário efetua
-    PartiallyPaid --> Paid : 💳 Pagamento total<br/>Manual: Liquidação final
-    Pending --> Paid : 💳 Pagamento total direto<br/>Manual: Quitação integral
+    Pending --> PartiallyPaid : ðŸ’³ Pagamento parcial<br/>Manual: UsuÃ¡rio efetua
+    PartiallyPaid --> Paid : ðŸ’³ Pagamento total<br/>Manual: LiquidaÃ§Ã£o final
+    Pending --> Paid : ðŸ’³ Pagamento total direto<br/>Manual: QuitaÃ§Ã£o integral
     
     %% === VENCIMENTO ===
-    Pending --> Overdue : ⏰ Vencimento sem pagamento<br/>Auto: Job diário verifica
-    PartiallyPaid --> Overdue : ⏰ Vencimento parcial<br/>Auto: Saldo em atraso
-    Overdue --> Paid : 💳 Pagamento após vencimento<br/>Manual: Com multa
+    Pending --> Overdue : â° Vencimento sem pagamento<br/>Auto: Job diÃ¡rio verifica
+    PartiallyPaid --> Overdue : â° Vencimento parcial<br/>Auto: Saldo em atraso
+    Overdue --> Paid : ðŸ’³ Pagamento apÃ³s vencimento<br/>Manual: Com multa
     
     %% === CANCELAMENTOS ===
-    Pending --> Cancelled : ❌ Compra cancelada<br/>Auto: PurchaseOrder cancelled
-    PartiallyPaid --> Cancelled : ❌ Acordo cancelamento<br/>Manual: Negociação
-    Overdue --> Cancelled : ❌ Dispensa pagamento<br/>Manual: Acordo fornecedor
+    Pending --> Cancelled : âŒ Compra cancelada<br/>Auto: PurchaseOrder cancelled
+    PartiallyPaid --> Cancelled : âŒ Acordo cancelamento<br/>Manual: NegociaÃ§Ã£o
+    Overdue --> Cancelled : âŒ Dispensa pagamento<br/>Manual: Acordo fornecedor
     
     %% === ESTADOS FINAIS ===
-    Paid --> [*] : 🎉 Conta totalmente paga
-    Cancelled --> [*] : 🚫 Conta cancelada
+    Paid --> [*] : ðŸŽ‰ Conta totalmente paga
+    Cancelled --> [*] : ðŸš« Conta cancelada
     
-    %% === STYLING POR SITUAÇÃO ===
+    %% === STYLING POR SITUAÃ‡ÃƒO ===
     
     classDef pending fill:#fef3c7,stroke:#f59e0b,stroke-width:3px,color:black
     class Pending pending
@@ -89,56 +89,56 @@ stateDiagram-v2
     class Cancelled cancelled
 ```
 
-## 📋 Detalhamento dos Estados
+## ðŸ“‹ Detalhamento dos Estados
 
-### **🟡 PENDING (Pendente)**
+### **ðŸŸ¡ PENDING (Pendente)**
 
-#### **💰 AccountReceivable:**
+#### **ðŸ’° AccountReceivable:**
 ```
-📌 Estado Inicial para Contas a Receber
-├── Origem: OrderEntry.OrderStatus = "Confirmed"
-├── Descrição: Valor devido pelo cliente
-├── Permitido: Aguardar pagamento ou registrar recebimento
-├── Bloqueado: Não pode ser alterado diretamente
-└── Próximo Estado: PartiallyPaid, Paid, Overdue ou Cancelled
+ðŸ“Œ Estado Inicial para Contas a Receber
+â”œâ”€â”€ Origem: OrderEntry.OrderStatus = "Confirmed"
+â”œâ”€â”€ DescriÃ§Ã£o: Valor devido pelo cliente
+â”œâ”€â”€ Permitido: Aguardar pagamento ou registrar recebimento
+â”œâ”€â”€ Bloqueado: NÃ£o pode ser alterado diretamente
+â””â”€â”€ PrÃ³ximo Estado: PartiallyPaid, Paid, Overdue ou Cancelled
 
-Criação Automática:
-├── 🔗 OrderEntryId: Pedido origem
-├── 👤 CustomerId: Cliente devedor  
-├── 💵 TotalAmount: OrderEntry.TotalValue
-├── 📅 DueDate: DeliveryDate + PaymentTerms
-└── 📄 InstallmentNumber: 1..N (se parcelado)
-```
-
-#### **💸 AccountPayable:**
-```
-📌 Estado Inicial para Contas a Pagar
-├── Origem: PurchaseOrder.PurchaseStatus = "FullyReceived"
-├── Descrição: Valor devido ao fornecedor
-├── Permitido: Agendar ou efetuar pagamento
-├── Bloqueado: Não pode ser alterado diretamente
-└── Próximo Estado: PartiallyPaid, Paid, Overdue ou Cancelled
-
-Criação Automática:
-├── 🔗 PurchaseOrderId: Compra origem
-├── 🏢 SupplierId: Fornecedor credor
-├── 💵 TotalAmount: PurchaseOrder.TotalValue  
-├── 📅 DueDate: ActualDeliveryDate + PaymentTerms
-└── 📄 PaymentMethod: Baseado no fornecedor
+CriaÃ§Ã£o AutomÃ¡tica:
+â”œâ”€â”€ ðŸ”— OrderEntryId: Pedido origem
+â”œâ”€â”€ ðŸ‘¤ CustomerId: Cliente devedor  
+â”œâ”€â”€ ðŸ’µ TotalAmount: OrderEntry.TotalValue
+â”œâ”€â”€ ðŸ“… DueDate: DeliveryDate + PaymentTerms
+â””â”€â”€ ðŸ“„ InstallmentNumber: 1..N (se parcelado)
 ```
 
-**Cálculo de DueDate:**
+#### **ðŸ’¸ AccountPayable:**
+```
+ðŸ“Œ Estado Inicial para Contas a Pagar
+â”œâ”€â”€ Origem: PurchaseOrder.PurchaseStatus = "FullyReceived"
+â”œâ”€â”€ DescriÃ§Ã£o: Valor devido ao fornecedor
+â”œâ”€â”€ Permitido: Agendar ou efetuar pagamento
+â”œâ”€â”€ Bloqueado: NÃ£o pode ser alterado diretamente
+â””â”€â”€ PrÃ³ximo Estado: PartiallyPaid, Paid, Overdue ou Cancelled
+
+CriaÃ§Ã£o AutomÃ¡tica:
+â”œâ”€â”€ ðŸ”— PurchaseOrderId: Compra origem
+â”œâ”€â”€ ðŸ¢ SupplierId: Fornecedor credor
+â”œâ”€â”€ ðŸ’µ TotalAmount: PurchaseOrder.TotalValue  
+â”œâ”€â”€ ðŸ“… DueDate: ActualDeliveryDate + PaymentTerms
+â””â”€â”€ ðŸ“„ PaymentMethod: Baseado no fornecedor
+```
+
+**CÃ¡lculo de DueDate:**
 ```mermaid
 flowchart TD
-    A[Account criada] --> B[📊 Analisar PaymentTerms]
-    B --> C{💳 Tipo de<br/>pagamento?}
+    A[Account criada] --> B[ðŸ“Š Analisar PaymentTerms]
+    B --> C{ðŸ’³ Tipo de<br/>pagamento?}
     
-    C -->|À vista| D[📅 DueDate = ReferenceDate]
-    C -->|15 dias| E[📅 DueDate = ReferenceDate + 15]
-    C -->|30 dias| F[📅 DueDate = ReferenceDate + 30]
-    C -->|Parcelado| G[📅 DueDate = ReferenceDate + (30 * N)]
+    C -->|Ã€ vista| D[ðŸ“… DueDate = ReferenceDate]
+    C -->|15 dias| E[ðŸ“… DueDate = ReferenceDate + 15]
+    C -->|30 dias| F[ðŸ“… DueDate = ReferenceDate + 30]
+    C -->|Parcelado| G[ðŸ“… DueDate = ReferenceDate + (30 * N)]
     
-    D --> H[✅ DueDate calculada]
+    D --> H[âœ… DueDate calculada]
     E --> H
     F --> H  
     G --> H
@@ -147,26 +147,26 @@ flowchart TD
     class A,B,C,D,E,F,G,H calcStyle
 ```
 
-### **🔵 PARTIALLY_PAID (Parcialmente Paga)**
+### **ðŸ”µ PARTIALLY_PAID (Parcialmente Paga)**
 
 #### **Processo de Pagamento Parcial:**
 ```mermaid
 flowchart TD
-    A[💰 Usuário registra<br/>recebimento/pagamento] --> B[🔍 Localizar Account<br/>por cliente/fornecedor]
-    B --> C[💵 Informar valor<br/>recebido/pago]
-    C --> D[💳 Selecionar método<br/>de pagamento]
-    D --> E[🏦 Selecionar conta<br/>bancária]
+    A[ðŸ’° UsuÃ¡rio registra<br/>recebimento/pagamento] --> B[ðŸ” Localizar Account<br/>por cliente/fornecedor]
+    B --> C[ðŸ’µ Informar valor<br/>recebido/pago]
+    C --> D[ðŸ’³ Selecionar mÃ©todo<br/>de pagamento]
+    D --> E[ðŸ¦ Selecionar conta<br/>bancÃ¡ria]
     
-    E --> F[💾 Criar Transaction<br/>vinculada à Account]
-    F --> G[📊 PaidAmount += Valor]
-    G --> H[🧮 RemainingAmount = Total - Paid]
-    H --> I{💯 RemainingAmount = 0?}
+    E --> F[ðŸ’¾ Criar Transaction<br/>vinculada Ã  Account]
+    F --> G[ðŸ“Š PaidAmount += Valor]
+    G --> H[ðŸ§® RemainingAmount = Total - Paid]
+    H --> I{ðŸ’¯ RemainingAmount = 0?}
     
-    I -->|Sim| J[📈 Status: Paid]
-    I -->|Não| K[📈 Status: PartiallyPaid]
+    I -->|Sim| J[ðŸ“ˆ Status: Paid]
+    I -->|NÃ£o| K[ðŸ“ˆ Status: PartiallyPaid]
     
-    J --> L[🎉 Account liquidada]
-    K --> M[⏰ Aguardar próximo<br/>pagamento]
+    J --> L[ðŸŽ‰ Account liquidada]
+    K --> M[â° Aguardar prÃ³ximo<br/>pagamento]
     
     classDef paymentStyle fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:black
     class A,B,C,D,E,F,G,H,I,J,K,L,M paymentStyle
@@ -177,80 +177,80 @@ flowchart TD
 Para AccountReceivable parcelada:
 
 Pedido R$ 3.000 em 3x:
-├── Parcela 1: R$ 1.000 (venc: 30 dias) → PartiallyPaid
-├── Parcela 2: R$ 1.000 (venc: 60 dias) → PartiallyPaid  
-└── Parcela 3: R$ 1.000 (venc: 90 dias) → Paid (final)
+â”œâ”€â”€ Parcela 1: R$ 1.000 (venc: 30 dias) â†’ PartiallyPaid
+â”œâ”€â”€ Parcela 2: R$ 1.000 (venc: 60 dias) â†’ PartiallyPaid  
+â””â”€â”€ Parcela 3: R$ 1.000 (venc: 90 dias) â†’ Paid (final)
 
-Cada parcela é uma AccountReceivable separada
+Cada parcela Ã© uma AccountReceivable separada
 Status individual por parcela
 ```
 
-### **🟢 PAID (Paga)**
+### **ðŸŸ¢ PAID (Paga)**
 ```
-📌 Estado Final de Sucesso
-├── Trigger: RemainingAmount = 0
-├── Descrição: Conta totalmente liquidada
-├── Permitido: Consulta e análise histórica
-├── Bloqueado: Qualquer alteração
-└── Próximo Estado: [Finalizado]
+ðŸ“Œ Estado Final de Sucesso
+â”œâ”€â”€ Trigger: RemainingAmount = 0
+â”œâ”€â”€ DescriÃ§Ã£o: Conta totalmente liquidada
+â”œâ”€â”€ Permitido: Consulta e anÃ¡lise histÃ³rica
+â”œâ”€â”€ Bloqueado: Qualquer alteraÃ§Ã£o
+â””â”€â”€ PrÃ³ximo Estado: [Finalizado]
 
-Atualizações Automáticas:
-├── 📊 Atualizar métricas de cobrança/pagamento
-├── 💹 Calcular lucratividade (para AR)
-├── 🤝 Avaliar relacionamento cliente/fornecedor
-└── 📈 Atualizar fluxo de caixa realizado
+AtualizaÃ§Ãµes AutomÃ¡ticas:
+â”œâ”€â”€ ðŸ“Š Atualizar mÃ©tricas de cobranÃ§a/pagamento
+â”œâ”€â”€ ðŸ’¹ Calcular lucratividade (para AR)
+â”œâ”€â”€ ðŸ¤ Avaliar relacionamento cliente/fornecedor
+â””â”€â”€ ðŸ“ˆ Atualizar fluxo de caixa realizado
 ```
 
-**Análise de Lucratividade (AccountReceivable):**
+**AnÃ¡lise de Lucratividade (AccountReceivable):**
 ```mermaid
 flowchart TD
-    A[AccountReceivable: Paid] --> B[📊 Buscar OrderEntry<br/>relacionada]
-    B --> C[💰 Receita = TotalAmount]
-    C --> D[🏭 Buscar custos de produção<br/>via Demands]
-    D --> E[🛒 Buscar custos de compras<br/>via ingredientes]
-    E --> F[💼 Alocar custos operacionais]
-    F --> G[🧮 Lucro = Receita - Custos]
-    G --> H[📈 Margem = Lucro / Receita]
-    H --> I[💾 Salvar análise<br/>para relatórios]
+    A[AccountReceivable: Paid] --> B[ðŸ“Š Buscar OrderEntry<br/>relacionada]
+    B --> C[ðŸ’° Receita = TotalAmount]
+    C --> D[ðŸ­ Buscar custos de produÃ§Ã£o<br/>via Demands]
+    D --> E[ðŸ›’ Buscar custos de compras<br/>via ingredientes]
+    E --> F[ðŸ’¼ Alocar custos operacionais]
+    F --> G[ðŸ§® Lucro = Receita - Custos]
+    G --> H[ðŸ“ˆ Margem = Lucro / Receita]
+    H --> I[ðŸ’¾ Salvar anÃ¡lise<br/>para relatÃ³rios]
     
     classDef profitabilityStyle fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:black
     class A,B,C,D,E,F,G,H,I profitabilityStyle
 ```
 
-### **🔴 OVERDUE (Vencida)**
+### **ðŸ”´ OVERDUE (Vencida)**
 ```
-📌 Estado de Inadimplência
-├── Trigger: DueDate < hoje E RemainingAmount > 0
-├── Descrição: Conta vencida não paga
-├── Permitido: Ações de cobrança ou negociação
-├── Bloqueado: Novos créditos (AR) ou atraso acumulado (AP)
-└── Próximo Estado: Paid ou Cancelled
+ðŸ“Œ Estado de InadimplÃªncia
+â”œâ”€â”€ Trigger: DueDate < hoje E RemainingAmount > 0
+â”œâ”€â”€ DescriÃ§Ã£o: Conta vencida nÃ£o paga
+â”œâ”€â”€ Permitido: AÃ§Ãµes de cobranÃ§a ou negociaÃ§Ã£o
+â”œâ”€â”€ Bloqueado: Novos crÃ©ditos (AR) ou atraso acumulado (AP)
+â””â”€â”€ PrÃ³ximo Estado: Paid ou Cancelled
 
-Ações Automáticas no Vencimento:
-├── 📧 Notificar responsáveis
-├── 💰 Aplicar juros/multa (se configurado)
-├── 🚨 Gerar alertas críticos
-└── 📊 Atualizar score de inadimplência
+AÃ§Ãµes AutomÃ¡ticas no Vencimento:
+â”œâ”€â”€ ðŸ“§ Notificar responsÃ¡veis
+â”œâ”€â”€ ðŸ’° Aplicar juros/multa (se configurado)
+â”œâ”€â”€ ðŸš¨ Gerar alertas crÃ­ticos
+â””â”€â”€ ðŸ“Š Atualizar score de inadimplÃªncia
 ```
 
-**Job de Verificação de Vencimentos:**
+**Job de VerificaÃ§Ã£o de Vencimentos:**
 ```mermaid
 flowchart TD
-    A[⏰ Job diário executa<br/>às 06:00] --> B[🔍 Buscar contas com<br/>DueDate < hoje]
-    B --> C[📋 Para cada conta<br/>com saldo pendente]
+    A[â° Job diÃ¡rio executa<br/>Ã s 06:00] --> B[ðŸ” Buscar contas com<br/>DueDate < hoje]
+    B --> C[ðŸ“‹ Para cada conta<br/>com saldo pendente]
     
-    C --> D{💰 Tem saldo<br/>RemainingAmount > 0?}
-    D -->|Não| E[✅ Conta já paga<br/>pular]
-    D -->|Sim| F[📈 Status: Overdue]
+    C --> D{ðŸ’° Tem saldo<br/>RemainingAmount > 0?}
+    D -->|NÃ£o| E[âœ… Conta jÃ¡ paga<br/>pular]
+    D -->|Sim| F[ðŸ“ˆ Status: Overdue]
     
-    F --> G[📧 Enviar notificação<br/>ao responsável]
-    G --> H[💰 Calcular juros/multa<br/>se configurado]
-    H --> I[📊 Atualizar métricas<br/>de inadimplência]
+    F --> G[ðŸ“§ Enviar notificaÃ§Ã£o<br/>ao responsÃ¡vel]
+    G --> H[ðŸ’° Calcular juros/multa<br/>se configurado]
+    H --> I[ðŸ“Š Atualizar mÃ©tricas<br/>de inadimplÃªncia]
     
-    E --> J{🔄 Mais contas?}
+    E --> J{ðŸ”„ Mais contas?}
     I --> J
     J -->|Sim| C
-    J -->|Não| K[📈 Relatório diário<br/>de vencimentos]
+    J -->|NÃ£o| K[ðŸ“ˆ RelatÃ³rio diÃ¡rio<br/>de vencimentos]
     
     classDef jobStyle fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:white
     class A,B,C jobStyle
@@ -262,37 +262,37 @@ flowchart TD
     class E,J skipStyle
 ```
 
-**Cálculo de Juros e Multa:**
+**CÃ¡lculo de Juros e Multa:**
 ```
-Configuração por tipo de conta:
+ConfiguraÃ§Ã£o por tipo de conta:
 
 AccountReceivable (cliente inadimplente):
-├── 💰 Multa: 2% sobre valor em atraso
-├── 📈 Juros: 1% ao mês pro-rata
-├── 📅 Base: dias em atraso
-└── 🧮 Valor atualizado = Original + Multa + Juros
+â”œâ”€â”€ ðŸ’° Multa: 2% sobre valor em atraso
+â”œâ”€â”€ ðŸ“ˆ Juros: 1% ao mÃªs pro-rata
+â”œâ”€â”€ ðŸ“… Base: dias em atraso
+â””â”€â”€ ðŸ§® Valor atualizado = Original + Multa + Juros
 
 AccountPayable (fornecedor):  
-├── 💰 Multa: Conforme contrato (se aplicável)
-├── 📈 Juros: Conforme contrato
-├── 📊 Impacto: Rating da empresa com fornecedor
-└── 🤝 Relacionamento: Pode impactar futuros pedidos
+â”œâ”€â”€ ðŸ’° Multa: Conforme contrato (se aplicÃ¡vel)
+â”œâ”€â”€ ðŸ“ˆ Juros: Conforme contrato
+â”œâ”€â”€ ðŸ“Š Impacto: Rating da empresa com fornecedor
+â””â”€â”€ ðŸ¤ Relacionamento: Pode impactar futuros pedidos
 ```
 
-### **❌ CANCELLED (Cancelada)**
+### **âŒ CANCELLED (Cancelada)**
 ```
-📌 Estado Final de Cancelamento
-├── Trigger: Cancelamento da origem ou acordo
-├── Descrição: Conta cancelada por motivo específico
-├── Permitido: Consulta e auditoria
-├── Bloqueado: Reativação
-└── Próximo Estado: [Finalizado]
+ðŸ“Œ Estado Final de Cancelamento
+â”œâ”€â”€ Trigger: Cancelamento da origem ou acordo
+â”œâ”€â”€ DescriÃ§Ã£o: Conta cancelada por motivo especÃ­fico
+â”œâ”€â”€ Permitido: Consulta e auditoria
+â”œâ”€â”€ Bloqueado: ReativaÃ§Ã£o
+â””â”€â”€ PrÃ³ximo Estado: [Finalizado]
 
 Motivos de Cancelamento:
-├── 🚫 OrderEntry/PurchaseOrder cancelada (automático)
-├── 🤝 Acordo de cancelamento entre partes
-├── 💔 Perda definitiva (baixa por perda)
-└── 📄 Erro na criação (estorno)
+â”œâ”€â”€ ðŸš« OrderEntry/PurchaseOrder cancelada (automÃ¡tico)
+â”œâ”€â”€ ðŸ¤ Acordo de cancelamento entre partes
+â”œâ”€â”€ ðŸ’” Perda definitiva (baixa por perda)
+â””â”€â”€ ðŸ“„ Erro na criaÃ§Ã£o (estorno)
 ```
 
 **Impactos do Cancelamento:**
@@ -300,11 +300,11 @@ Motivos de Cancelamento:
 #### **AccountReceivable Cancelada:**
 ```mermaid
 flowchart TD
-    A[OrderEntry cancelada] --> B[📈 AccountReceivable: Cancelled]
-    B --> C[🔄 Reverter Transactions<br/>já registradas]
-    C --> D[🏦 Estornar valores<br/>em conta bancária]
-    D --> E[📊 Atualizar fluxo<br/>de caixa projetado]
-    E --> F[📧 Notificar cliente<br/>sobre cancelamento]
+    A[OrderEntry cancelada] --> B[ðŸ“ˆ AccountReceivable: Cancelled]
+    B --> C[ðŸ”„ Reverter Transactions<br/>jÃ¡ registradas]
+    C --> D[ðŸ¦ Estornar valores<br/>em conta bancÃ¡ria]
+    D --> E[ðŸ“Š Atualizar fluxo<br/>de caixa projetado]
+    E --> F[ðŸ“§ Notificar cliente<br/>sobre cancelamento]
     
     classDef cancelStyle fill:#fecaca,stroke:#ef4444,stroke-width:2px,color:black
     class A,B,C,D,E,F cancelStyle
@@ -313,218 +313,218 @@ flowchart TD
 #### **AccountPayable Cancelada:**
 ```mermaid
 flowchart TD
-    A[PurchaseOrder cancelada] --> B[📈 AccountPayable: Cancelled]
-    B --> C[🤝 Verificar se parcialmente<br/>paga ao fornecedor]
-    C --> D{💰 Tem pagamentos<br/>já efetuados?}
+    A[PurchaseOrder cancelada] --> B[ðŸ“ˆ AccountPayable: Cancelled]
+    B --> C[ðŸ¤ Verificar se parcialmente<br/>paga ao fornecedor]
+    C --> D{ðŸ’° Tem pagamentos<br/>jÃ¡ efetuados?}
     
-    D -->|Não| E[✅ Cancelamento simples]
-    D -->|Sim| F[🔄 Negociar com fornecedor<br/>devolução ou crédito]
+    D -->|NÃ£o| E[âœ… Cancelamento simples]
+    D -->|Sim| F[ðŸ”„ Negociar com fornecedor<br/>devoluÃ§Ã£o ou crÃ©dito]
     
-    E --> G[📊 Remover do fluxo<br/>de caixa projetado]
-    F --> H[💳 Registrar acordo<br/>ou ajuste financeiro]
+    E --> G[ðŸ“Š Remover do fluxo<br/>de caixa projetado]
+    F --> H[ðŸ’³ Registrar acordo<br/>ou ajuste financeiro]
     H --> G
     
     classDef cancelStyle fill:#fecaca,stroke:#ef4444,stroke-width:2px,color:black
     class A,B,C,D,E,F,G,H cancelStyle
 ```
 
-## 🔄 Sincronização entre Domínios
+## ðŸ”„ SincronizaÃ§Ã£o entre DomÃ­nios
 
-### **🛍️ Vendas → AccountReceivable:**
+### **ðŸ›ï¸ Vendas â†’ AccountReceivable:**
 ```
-OrderEntry Status Changes → AccountReceivable Actions:
+OrderEntry Status Changes â†’ AccountReceivable Actions:
 
 OrderEntry: Confirmed
-├── 🆕 Criar AccountReceivable(s)
-├── 📅 Calcular DueDate(s)
-├── 💵 Definir TotalAmount por parcela
-└── 📈 Status inicial: Pending
+â”œâ”€â”€ ðŸ†• Criar AccountReceivable(s)
+â”œâ”€â”€ ðŸ“… Calcular DueDate(s)
+â”œâ”€â”€ ðŸ’µ Definir TotalAmount por parcela
+â””â”€â”€ ðŸ“ˆ Status inicial: Pending
 
 OrderEntry: Delivered  
-├── 🔓 Liberar para cobrança
-├── 📧 Notificar financeiro
-└── ⏰ Iniciar tracking de vencimento
+â”œâ”€â”€ ðŸ”“ Liberar para cobranÃ§a
+â”œâ”€â”€ ðŸ“§ Notificar financeiro
+â””â”€â”€ â° Iniciar tracking de vencimento
 
 OrderEntry: Cancelled
-├── 📈 AccountReceivable: Cancelled
-├── 🔄 Reverter Transactions
-└── 📊 Ajustar projeções
+â”œâ”€â”€ ðŸ“ˆ AccountReceivable: Cancelled
+â”œâ”€â”€ ðŸ”„ Reverter Transactions
+â””â”€â”€ ðŸ“Š Ajustar projeÃ§Ãµes
 ```
 
-### **🛒 Compras → AccountPayable:**
+### **ðŸ›’ Compras â†’ AccountPayable:**
 ```
-PurchaseOrder Status Changes → AccountPayable Actions:
+PurchaseOrder Status Changes â†’ AccountPayable Actions:
 
 PurchaseOrder: FullyReceived
-├── 🆕 Criar AccountPayable
-├── 📅 DueDate = ActualDeliveryDate + PaymentTerms
-├── 💵 TotalAmount = PurchaseOrder.TotalValue
-└── 📈 Status inicial: Pending
+â”œâ”€â”€ ðŸ†• Criar AccountPayable
+â”œâ”€â”€ ðŸ“… DueDate = ActualDeliveryDate + PaymentTerms
+â”œâ”€â”€ ðŸ’µ TotalAmount = PurchaseOrder.TotalValue
+â””â”€â”€ ðŸ“ˆ Status inicial: Pending
 
 PurchaseOrder: Cancelled
-├── 📈 AccountPayable: Cancelled
-├── 🔄 Tratar pagamentos já efetuados
-└── 📊 Ajustar projeções
+â”œâ”€â”€ ðŸ“ˆ AccountPayable: Cancelled
+â”œâ”€â”€ ðŸ”„ Tratar pagamentos jÃ¡ efetuados
+â””â”€â”€ ðŸ“Š Ajustar projeÃ§Ãµes
 ```
 
-## 💳 Integração com Transações Bancárias
+## ðŸ’³ IntegraÃ§Ã£o com TransaÃ§Ãµes BancÃ¡rias
 
-### **Registro de Transação:**
+### **Registro de TransaÃ§Ã£o:**
 ```mermaid
 flowchart TD
-    A[💰 Pagamento recebido/efetuado] --> B[💾 Criar Transaction]
-    B --> C[🔗 Vincular à Account<br/>Receivable ou Payable]
-    C --> D[🏦 Definir BankAccount<br/>origem/destino]
-    D --> E[📊 Atualizar saldos<br/>da Account]
-    E --> F[💹 Atualizar saldo<br/>da BankAccount]
-    F --> G[📈 Verificar se Account<br/>está totalmente paga]
-    G --> H{💯 RemainingAmount = 0?}
+    A[ðŸ’° Pagamento recebido/efetuado] --> B[ðŸ’¾ Criar Transaction]
+    B --> C[ðŸ”— Vincular Ã  Account<br/>Receivable ou Payable]
+    C --> D[ðŸ¦ Definir BankAccount<br/>origem/destino]
+    D --> E[ðŸ“Š Atualizar saldos<br/>da Account]
+    E --> F[ðŸ’¹ Atualizar saldo<br/>da BankAccount]
+    F --> G[ðŸ“ˆ Verificar se Account<br/>estÃ¡ totalmente paga]
+    G --> H{ðŸ’¯ RemainingAmount = 0?}
     
-    H -->|Sim| I[📈 Account Status: Paid]
-    H -->|Não| J[📈 Account Status: PartiallyPaid]
+    H -->|Sim| I[ðŸ“ˆ Account Status: Paid]
+    H -->|NÃ£o| J[ðŸ“ˆ Account Status: PartiallyPaid]
     
-    I --> K[🎉 Transaction concluída]
+    I --> K[ðŸŽ‰ Transaction concluÃ­da]
     J --> K
     
     classDef transactionStyle fill:#083e61,stroke:#083e61,stroke-width:2px,color:white
     class A,B,C,D,E,F,G,H,I,J,K transactionStyle
 ```
 
-### **Conciliação Bancária:**
+### **ConciliaÃ§Ã£o BancÃ¡ria:**
 ```
-Transaction.IsReconciled = false → Pendente conciliação
+Transaction.IsReconciled = false â†’ Pendente conciliaÃ§Ã£o
 
-Processo de conciliação:
-├── 📄 Import extrato bancário
-├── 🔍 Match automático por valor/data
-├── ✅ Marcar Transaction.IsReconciled = true
-├── 📅 Transaction.ReconciledDate = hoje
-└── 📊 Gerar relatório de conciliação
+Processo de conciliaÃ§Ã£o:
+â”œâ”€â”€ ðŸ“„ Import extrato bancÃ¡rio
+â”œâ”€â”€ ðŸ” Match automÃ¡tico por valor/data
+â”œâ”€â”€ âœ… Marcar Transaction.IsReconciled = true
+â”œâ”€â”€ ðŸ“… Transaction.ReconciledDate = hoje
+â””â”€â”€ ðŸ“Š Gerar relatÃ³rio de conciliaÃ§Ã£o
 ```
 
-## 🚨 Validações e Regras de Negócio
+## ðŸš¨ ValidaÃ§Ãµes e Regras de NegÃ³cio
 
-### **Validações Críticas:**
+### **ValidaÃ§Ãµes CrÃ­ticas:**
 ```
 AccountReceivable:
-├── ✅ DueDate ≥ OrderEntry.DeliveryDate
-├── ✅ TotalAmount = OrderEntry.TotalValue (soma parcelas)
-├── ✅ PaidAmount ≤ TotalAmount
-├── ✅ CustomerId = OrderEntry.CustomerId
+â”œâ”€â”€ âœ… DueDate â‰¥ OrderEntry.DeliveryDate
+â”œâ”€â”€ âœ… TotalAmount = OrderEntry.TotalValue (soma parcelas)
+â”œâ”€â”€ âœ… PaidAmount â‰¤ TotalAmount
+â”œâ”€â”€ âœ… CustomerId = OrderEntry.CustomerId
 
 AccountPayable:
-├── ✅ DueDate ≥ PurchaseOrder.ActualDeliveryDate  
-├── ✅ TotalAmount = PurchaseOrder.TotalValue
-├── ✅ PaidAmount ≤ TotalAmount
-├── ✅ SupplierId = PurchaseOrder.SupplierId
+â”œâ”€â”€ âœ… DueDate â‰¥ PurchaseOrder.ActualDeliveryDate  
+â”œâ”€â”€ âœ… TotalAmount = PurchaseOrder.TotalValue
+â”œâ”€â”€ âœ… PaidAmount â‰¤ TotalAmount
+â”œâ”€â”€ âœ… SupplierId = PurchaseOrder.SupplierId
 
 Transaction:
-├── ✅ Amount > 0
-├── ✅ Deve referenciar AccountReceivable OU AccountPayable
-├── ✅ TransactionDate ≤ hoje
-├── ✅ BankAccount deve existir e estar ativa
+â”œâ”€â”€ âœ… Amount > 0
+â”œâ”€â”€ âœ… Deve referenciar AccountReceivable OU AccountPayable
+â”œâ”€â”€ âœ… TransactionDate â‰¤ hoje
+â”œâ”€â”€ âœ… BankAccount deve existir e estar ativa
 ```
 
-### **Regras de Inadimplência:**
+### **Regras de InadimplÃªncia:**
 ```
 AccountReceivable Overdue:
-├── 🚫 Cliente não pode fazer novos pedidos
-├── ⚠️ Alertas escalados por tempo de atraso
-├── 📞 Ações de cobrança automatizadas
-└── 💰 Juros/multa aplicados conforme configuração
+â”œâ”€â”€ ðŸš« Cliente nÃ£o pode fazer novos pedidos
+â”œâ”€â”€ âš ï¸ Alertas escalados por tempo de atraso
+â”œâ”€â”€ ðŸ“ž AÃ§Ãµes de cobranÃ§a automatizadas
+â””â”€â”€ ðŸ’° Juros/multa aplicados conforme configuraÃ§Ã£o
 
 AccountPayable Overdue:
-├── 🚨 Alerta crítico para financeiro
-├── 📉 Impacto no rating com fornecedor
-├── 🤝 Pode afetar relacionamento comercial
-└── 💰 Multas contratuais se aplicáveis
+â”œâ”€â”€ ðŸš¨ Alerta crÃ­tico para financeiro
+â”œâ”€â”€ ðŸ“‰ Impacto no rating com fornecedor
+â”œâ”€â”€ ðŸ¤ Pode afetar relacionamento comercial
+â””â”€â”€ ðŸ’° Multas contratuais se aplicÃ¡veis
 ```
 
-## 🎯 Eventos de Domínio e Alertas
+## ðŸŽ¯ Eventos de DomÃ­nio e Alertas
 
 ### **Eventos Gerados:**
 ```
 AccountStatusChanged:
-├── AccountId: ID da conta
-├── AccountType: Receivable ou Payable
-├── From: Status anterior
-├── To: Novo status
-├── Amount: Valor da transação (se aplicável)
-├── RemainingAmount: Saldo restante
-└── Timestamp: Data/hora da mudança
+â”œâ”€â”€ AccountId: ID da conta
+â”œâ”€â”€ AccountType: Receivable ou Payable
+â”œâ”€â”€ From: Status anterior
+â”œâ”€â”€ To: Novo status
+â”œâ”€â”€ Amount: Valor da transaÃ§Ã£o (se aplicÃ¡vel)
+â”œâ”€â”€ RemainingAmount: Saldo restante
+â””â”€â”€ Timestamp: Data/hora da mudanÃ§a
 
-Eventos Específicos:
-├── AccountCreated: Nova conta criada
-├── PaymentReceived: Pagamento de cliente
-├── PaymentMade: Pagamento a fornecedor  
-├── AccountOverdue: Conta vencida
-├── AccountPaid: Conta totalmente quitada
-├── AccountCancelled: Conta cancelada
-└── CashFlowUpdated: Fluxo de caixa atualizado
+Eventos EspecÃ­ficos:
+â”œâ”€â”€ AccountCreated: Nova conta criada
+â”œâ”€â”€ PaymentReceived: Pagamento de cliente
+â”œâ”€â”€ PaymentMade: Pagamento a fornecedor  
+â”œâ”€â”€ AccountOverdue: Conta vencida
+â”œâ”€â”€ AccountPaid: Conta totalmente quitada
+â”œâ”€â”€ AccountCancelled: Conta cancelada
+â””â”€â”€ CashFlowUpdated: Fluxo de caixa atualizado
 ```
 
 ### **Sistema de Alertas:**
 ```
-🚨 Alertas Críticos:
-├── Conta vencida > 30 dias
-├── Cliente com múltiplas contas vencidas
-├── Fluxo de caixa negativo projetado
-├── Fornecedor não pago no prazo
+ðŸš¨ Alertas CrÃ­ticos:
+â”œâ”€â”€ Conta vencida > 30 dias
+â”œâ”€â”€ Cliente com mÃºltiplas contas vencidas
+â”œâ”€â”€ Fluxo de caixa negativo projetado
+â”œâ”€â”€ Fornecedor nÃ£o pago no prazo
 
-⚠️ Alertas de Atenção:
-├── Conta vencendo em 3 dias
-├── Pagamento recebido para conciliar
-├── Cliente atingindo limite de crédito
-├── Fornecedor com desconto por antecipação
+âš ï¸ Alertas de AtenÃ§Ã£o:
+â”œâ”€â”€ Conta vencendo em 3 dias
+â”œâ”€â”€ Pagamento recebido para conciliar
+â”œâ”€â”€ Cliente atingindo limite de crÃ©dito
+â”œâ”€â”€ Fornecedor com desconto por antecipaÃ§Ã£o
 
-💡 Alertas Informativos:
-├── Recebimento antecipado de cliente
-├── Oportunidade de desconto fornecedor
-├── Meta de recebimento atingida
-├── Fluxo de caixa positivo acima do esperado
+ðŸ’¡ Alertas Informativos:
+â”œâ”€â”€ Recebimento antecipado de cliente
+â”œâ”€â”€ Oportunidade de desconto fornecedor
+â”œâ”€â”€ Meta de recebimento atingida
+â”œâ”€â”€ Fluxo de caixa positivo acima do esperado
 ```
 
-## 📊 Métricas e KPIs
+## ðŸ“Š MÃ©tricas e KPIs
 
 ### **Indicadores de Recebimento:**
 ```
 DSO (Days Sales Outstanding):
-├── Fórmula: (AR médio / Vendas diárias)
-├── Meta: ≤ 30 dias
-├── Cálculo: Média móvel 12 meses
+â”œâ”€â”€ FÃ³rmula: (AR mÃ©dio / Vendas diÃ¡rias)
+â”œâ”€â”€ Meta: â‰¤ 30 dias
+â”œâ”€â”€ CÃ¡lculo: MÃ©dia mÃ³vel 12 meses
 
-Taxa de Inadimplência:
-├── Fórmula: (Valor vencido / Total AR) * 100
-├── Meta: ≤ 5%
-├── Segmentação: Por cliente, produto, região
+Taxa de InadimplÃªncia:
+â”œâ”€â”€ FÃ³rmula: (Valor vencido / Total AR) * 100
+â”œâ”€â”€ Meta: â‰¤ 5%
+â”œâ”€â”€ SegmentaÃ§Ã£o: Por cliente, produto, regiÃ£o
 
-Eficiência de Cobrança:
-├── Fórmula: (Recebido no prazo / Total devido) * 100
-├── Meta: ≥ 95%
-├── Tracking: Mensal e acumulado
+EficiÃªncia de CobranÃ§a:
+â”œâ”€â”€ FÃ³rmula: (Recebido no prazo / Total devido) * 100
+â”œâ”€â”€ Meta: â‰¥ 95%
+â”œâ”€â”€ Tracking: Mensal e acumulado
 ```
 
 ### **Indicadores de Pagamento:**
 ```
 DPO (Days Payable Outstanding):
-├── Fórmula: (AP médio / Compras diárias)
-├── Estratégia: Maximizar sem prejudicar relacionamento
-├── Balance: Fluxo de caixa vs desconto por antecipação
+â”œâ”€â”€ FÃ³rmula: (AP mÃ©dio / Compras diÃ¡rias)
+â”œâ”€â”€ EstratÃ©gia: Maximizar sem prejudicar relacionamento
+â”œâ”€â”€ Balance: Fluxo de caixa vs desconto por antecipaÃ§Ã£o
 
 Pontualidade de Pagamentos:
-├── Fórmula: (Pagos no prazo / Total devido) * 100
-├── Meta: ≥ 98%
-├── Impacto: Rating creditício da empresa
+â”œâ”€â”€ FÃ³rmula: (Pagos no prazo / Total devido) * 100
+â”œâ”€â”€ Meta: â‰¥ 98%
+â”œâ”€â”€ Impacto: Rating creditÃ­cio da empresa
 
 Economia com Descontos:
-├── Fórmula: Σ descontos obtidos por antecipação
-├── Oportunidade: vs custo do dinheiro
-├── ROI: Desconto vs juros de caixa
+â”œâ”€â”€ FÃ³rmula: Î£ descontos obtidos por antecipaÃ§Ã£o
+â”œâ”€â”€ Oportunidade: vs custo do dinheiro
+â”œâ”€â”€ ROI: Desconto vs juros de caixa
 ```
 
 ---
 
 **Arquivo**: `account-lifecycle.md`  
-**Domínio**: Financeiro (#083e61)  
+**DomÃ­nio**: Financeiro (#083e61)  
 **Tipo**: State Diagram  
-**Foco**: Ciclo Completo AR/AP + Inadimplência + Conciliação Bancária
+**Foco**: Ciclo Completo AR/AP + InadimplÃªncia + ConciliaÃ§Ã£o BancÃ¡ria

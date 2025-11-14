@@ -1,63 +1,63 @@
-# 💳 FLUXOGRAMA - PROCESSO FINANCEIRO
+﻿# ðŸ’³ FLUXOGRAMA - PROCESSO FINANCEIRO
 
-## 🎯 Visão Geral
-Fluxograma completo dos processos financeiros, mostrando o controle de fluxo de caixa através de contas a receber (originadas das vendas) e contas a pagar (originadas das compras), com rastreamento detalhado de transações e análise de lucratividade.
+## ðŸŽ¯ VisÃ£o Geral
+Fluxograma completo dos processos financeiros, mostrando o controle de fluxo de caixa atravÃ©s de contas a receber (originadas das vendas) e contas a pagar (originadas das compras), com rastreamento detalhado de transaÃ§Ãµes e anÃ¡lise de lucratividade.
 
-## 💰 Fluxo de Contas a Receber
+## ðŸ’° Fluxo de Contas a Receber
 
 ```mermaid
 flowchart TD
     %% === ORIGEM: VENDAS ===
-    A[🛍️ OrderEntry confirmada<br/>no Domínio Vendas] --> B[📊 Analisar PaymentTerms<br/>do pedido]
+    A[ðŸ›ï¸ OrderEntry confirmada<br/>no DomÃ­nio Vendas] --> B[ðŸ“Š Analisar PaymentTerms<br/>do pedido]
     
-    B --> C{💳 Tipo de<br/>pagamento?}
+    B --> C{ðŸ’³ Tipo de<br/>pagamento?}
     
-    %% PAGAMENTO À VISTA
-    C -->|À Vista| D1[💰 Pagamento à vista]
-    D1 --> D2[💾 Criar 1 AccountReceivable<br/>DueDate = DeliveryDate]
-    D2 --> D3[💵 TotalAmount = OrderEntry.TotalValue<br/>InstallmentNumber = 1]
+    %% PAGAMENTO Ã€ VISTA
+    C -->|Ã€ Vista| D1[ðŸ’° Pagamento Ã  vista]
+    D1 --> D2[ðŸ’¾ Criar 1 AccountReceivable<br/>DueDate = DeliveryDate]
+    D2 --> D3[ðŸ’µ TotalAmount = OrderEntry.TotalValue<br/>InstallmentNumber = 1]
     
     %% PAGAMENTO PARCELADO
-    C -->|Parcelado| E1[📋 Pagamento parcelado]
-    E1 --> E2[🔢 Dividir valor total<br/>pelo número de parcelas]
-    E2 --> E3[📅 Para cada parcela]
-    E3 --> E4[💾 Criar AccountReceivable<br/>DueDate = DeliveryDate + (30 * N)]
-    E4 --> E5[💵 TotalAmount = Valor/Parcelas<br/>InstallmentNumber = N]
-    E5 --> E6{🔄 Mais parcelas?}
+    C -->|Parcelado| E1[ðŸ“‹ Pagamento parcelado]
+    E1 --> E2[ðŸ”¢ Dividir valor total<br/>pelo nÃºmero de parcelas]
+    E2 --> E3[ðŸ“… Para cada parcela]
+    E3 --> E4[ðŸ’¾ Criar AccountReceivable<br/>DueDate = DeliveryDate + (30 * N)]
+    E4 --> E5[ðŸ’µ TotalAmount = Valor/Parcelas<br/>InstallmentNumber = N]
+    E5 --> E6{ðŸ”„ Mais parcelas?}
     E6 -->|Sim| E3
-    E6 -->|Não| F
+    E6 -->|NÃ£o| F
     
-    D3 --> F[📈 AccountStatus: Pending<br/>Aguardar recebimento]
+    D3 --> F[ðŸ“ˆ AccountStatus: Pending<br/>Aguardar recebimento]
     
     %% === PROCESSO DE RECEBIMENTO ===
-    F --> G[⏰ Vencimento se aproxima<br/>ou cliente paga]
-    G --> H[👤 Usuário registra<br/>recebimento]
+    F --> G[â° Vencimento se aproxima<br/>ou cliente paga]
+    G --> H[ðŸ‘¤ UsuÃ¡rio registra<br/>recebimento]
     
-    H --> I[🔍 Localizar AccountReceivable<br/>pelo cliente/pedido]
-    I --> J[💰 Informar valor recebido<br/>e forma de pagamento]
-    J --> K[🏦 Selecionar conta bancária<br/>de destino]
+    H --> I[ðŸ” Localizar AccountReceivable<br/>pelo cliente/pedido]
+    I --> J[ðŸ’° Informar valor recebido<br/>e forma de pagamento]
+    J --> K[ðŸ¦ Selecionar conta bancÃ¡ria<br/>de destino]
     
-    K --> L[💾 Criar Transaction]
-    L --> M[📊 Atualizar AccountReceivable<br/>PaidAmount += Valor]
-    M --> N[🧮 Calcular RemainingAmount<br/>= TotalAmount - PaidAmount]
+    K --> L[ðŸ’¾ Criar Transaction]
+    L --> M[ðŸ“Š Atualizar AccountReceivable<br/>PaidAmount += Valor]
+    M --> N[ðŸ§® Calcular RemainingAmount<br/>= TotalAmount - PaidAmount]
     
-    N --> O{💯 Valor pago<br/>completamente?}
+    N --> O{ðŸ’¯ Valor pago<br/>completamente?}
     
-    O -->|Sim| P1[✅ AccountStatus: Paid]
-    O -->|Não| P2[⚠️ AccountStatus: PartiallyPaid]
+    O -->|Sim| P1[âœ… AccountStatus: Paid]
+    O -->|NÃ£o| P2[âš ï¸ AccountStatus: PartiallyPaid]
     
-    P1 --> Q[🎉 Conta recebida<br/>com sucesso]
+    P1 --> Q[ðŸŽ‰ Conta recebida<br/>com sucesso]
     P2 --> Q
     
-    %% === CONTROLE DE INADIMPLÊNCIA ===
-    F --> R[📅 Job automático verifica<br/>vencimentos diários]
-    R --> S{⏰ Conta vencida<br/>e não paga?}
+    %% === CONTROLE DE INADIMPLÃŠNCIA ===
+    F --> R[ðŸ“… Job automÃ¡tico verifica<br/>vencimentos diÃ¡rios]
+    R --> S{â° Conta vencida<br/>e nÃ£o paga?}
     
-    S -->|Sim| T[📈 AccountStatus: Overdue]
-    T --> U[📧 Notificar cliente<br/>sobre vencimento]
-    U --> V[📊 Aplicar juros/multa<br/>se configurado]
+    S -->|Sim| T[ðŸ“ˆ AccountStatus: Overdue]
+    T --> U[ðŸ“§ Notificar cliente<br/>sobre vencimento]
+    U --> V[ðŸ“Š Aplicar juros/multa<br/>se configurado]
     
-    S -->|Não| Q
+    S -->|NÃ£o| Q
     V --> Q
     
     %% === STYLING ===
@@ -81,53 +81,53 @@ flowchart TD
     class R,S,T,U,V overdueStyle
 ```
 
-## 💸 Fluxo de Contas a Pagar
+## ðŸ’¸ Fluxo de Contas a Pagar
 
 ```mermaid
 flowchart TD
     %% === ORIGEM: COMPRAS ===
-    A[📦 PurchaseOrder totalmente<br/>recebida no Domínio Compras] --> B[📊 Analisar PaymentTerms<br/>do fornecedor]
+    A[ðŸ“¦ PurchaseOrder totalmente<br/>recebida no DomÃ­nio Compras] --> B[ðŸ“Š Analisar PaymentTerms<br/>do fornecedor]
     
-    B --> C[📅 Calcular DueDate<br/>= ActualDeliveryDate + PaymentTerms]
-    C --> D[💾 Criar AccountPayable]
-    D --> E[💵 TotalAmount = PurchaseOrder.TotalValue<br/>AccountStatus: Pending]
+    B --> C[ðŸ“… Calcular DueDate<br/>= ActualDeliveryDate + PaymentTerms]
+    C --> D[ðŸ’¾ Criar AccountPayable]
+    D --> E[ðŸ’µ TotalAmount = PurchaseOrder.TotalValue<br/>AccountStatus: Pending]
     
     %% === PLANEJAMENTO DE PAGAMENTO ===
-    E --> F[📋 Conta criada<br/>aguardando pagamento]
-    F --> G[📊 Dashboard de contas a pagar<br/>mostra vencimentos]
+    E --> F[ðŸ“‹ Conta criada<br/>aguardando pagamento]
+    F --> G[ðŸ“Š Dashboard de contas a pagar<br/>mostra vencimentos]
     
-    G --> H[⏰ Vencimento se aproxima<br/>ou usuário decide pagar]
-    H --> I[👤 Usuário inicia<br/>processo de pagamento]
+    G --> H[â° Vencimento se aproxima<br/>ou usuÃ¡rio decide pagar]
+    H --> I[ðŸ‘¤ UsuÃ¡rio inicia<br/>processo de pagamento]
     
     %% === PROCESSO DE PAGAMENTO ===
-    I --> J[🔍 Localizar AccountPayable<br/>pelo fornecedor/compra]
-    J --> K[💰 Definir valor a pagar<br/>(total ou parcial)]
-    K --> L[💳 Selecionar método<br/>de pagamento]
-    L --> M[🏦 Selecionar conta bancária<br/>de origem]
+    I --> J[ðŸ” Localizar AccountPayable<br/>pelo fornecedor/compra]
+    J --> K[ðŸ’° Definir valor a pagar<br/>(total ou parcial)]
+    K --> L[ðŸ’³ Selecionar mÃ©todo<br/>de pagamento]
+    L --> M[ðŸ¦ Selecionar conta bancÃ¡ria<br/>de origem]
     
-    M --> N{💯 Valor pago<br/>completamente?}
+    M --> N{ðŸ’¯ Valor pago<br/>completamente?}
     
-    N -->|Sim| O1[💾 Criar Transaction<br/>Amount = TotalAmount]
-    N -->|Não| O2[💾 Criar Transaction<br/>Amount = ValorParcial]
+    N -->|Sim| O1[ðŸ’¾ Criar Transaction<br/>Amount = TotalAmount]
+    N -->|NÃ£o| O2[ðŸ’¾ Criar Transaction<br/>Amount = ValorParcial]
     
-    O1 --> P1[📊 PaidAmount = TotalAmount<br/>RemainingAmount = 0]
-    O2 --> P2[📊 PaidAmount += ValorParcial<br/>RemainingAmount = Total - Paid]
+    O1 --> P1[ðŸ“Š PaidAmount = TotalAmount<br/>RemainingAmount = 0]
+    O2 --> P2[ðŸ“Š PaidAmount += ValorParcial<br/>RemainingAmount = Total - Paid]
     
-    P1 --> Q1[✅ AccountStatus: Paid]
-    P2 --> Q2[⚠️ AccountStatus: PartiallyPaid]
+    P1 --> Q1[âœ… AccountStatus: Paid]
+    P2 --> Q2[âš ï¸ AccountStatus: PartiallyPaid]
     
-    Q1 --> R[🎉 Pagamento realizado<br/>com sucesso]
+    Q1 --> R[ðŸŽ‰ Pagamento realizado<br/>com sucesso]
     Q2 --> R
     
     %% === CONTROLE DE VENCIMENTOS ===
-    F --> S[📅 Job automático verifica<br/>vencimentos diários]
-    S --> T{⏰ Conta vencida<br/>e não paga?}
+    F --> S[ðŸ“… Job automÃ¡tico verifica<br/>vencimentos diÃ¡rios]
+    S --> T{â° Conta vencida<br/>e nÃ£o paga?}
     
-    T -->|Sim| U[📈 AccountStatus: Overdue]
-    U --> V[📧 Alertar responsável<br/>financeiro]
-    V --> W[📊 Aplicar multa/juros<br/>se contrato prevê]
+    T -->|Sim| U[ðŸ“ˆ AccountStatus: Overdue]
+    U --> V[ðŸ“§ Alertar responsÃ¡vel<br/>financeiro]
+    V --> W[ðŸ“Š Aplicar multa/juros<br/>se contrato prevÃª]
     
-    T -->|Não| R
+    T -->|NÃ£o| R
     W --> R
     
     %% === STYLING ===
@@ -148,48 +148,48 @@ flowchart TD
     class S,T,U,V,W overdueStyle
 ```
 
-## 📊 Fluxo de Análise e Controle de Caixa
+## ðŸ“Š Fluxo de AnÃ¡lise e Controle de Caixa
 
 ```mermaid
 flowchart TD
     %% === ENTRADAS DE DADOS ===
-    A[💰 Transações de Recebimento] --> C[📊 Consolidação<br/>Fluxo de Caixa]
-    B[💸 Transações de Pagamento] --> C
+    A[ðŸ’° TransaÃ§Ãµes de Recebimento] --> C[ðŸ“Š ConsolidaÃ§Ã£o<br/>Fluxo de Caixa]
+    B[ðŸ’¸ TransaÃ§Ãµes de Pagamento] --> C
     
-    %% === ANÁLISE REALIZADA ===
-    C --> D[📈 Cálculo do Fluxo Realizado]
-    D --> E[📋 Por período:<br/>Entradas - Saídas = Saldo]
-    E --> F[💹 Gerar CASH_FLOW_VIEW<br/>com dados realizados]
+    %% === ANÃLISE REALIZADA ===
+    C --> D[ðŸ“ˆ CÃ¡lculo do Fluxo Realizado]
+    D --> E[ðŸ“‹ Por perÃ­odo:<br/>Entradas - SaÃ­das = Saldo]
+    E --> F[ðŸ’¹ Gerar CASH_FLOW_VIEW<br/>com dados realizados]
     
-    %% === PROJEÇÃO ===
-    C --> G[🔮 Análise de Projeção]
-    G --> H[📅 AccountReceivable<br/>Status: Pending/PartiallyPaid]
-    G --> I[📅 AccountPayable<br/>Status: Pending/PartiallyPaid]
+    %% === PROJEÃ‡ÃƒO ===
+    C --> G[ðŸ”® AnÃ¡lise de ProjeÃ§Ã£o]
+    G --> H[ðŸ“… AccountReceivable<br/>Status: Pending/PartiallyPaid]
+    G --> I[ðŸ“… AccountPayable<br/>Status: Pending/PartiallyPaid]
     
-    H --> J[💰 Somar entradas projetadas<br/>por data de vencimento]
-    I --> K[💸 Somar saídas projetadas<br/>por data de vencimento]
+    H --> J[ðŸ’° Somar entradas projetadas<br/>por data de vencimento]
+    I --> K[ðŸ’¸ Somar saÃ­das projetadas<br/>por data de vencimento]
     
-    J --> L[📊 Projeção de Fluxo<br/>por período futuro]
+    J --> L[ðŸ“Š ProjeÃ§Ã£o de Fluxo<br/>por perÃ­odo futuro]
     K --> L
     
-    L --> M[💹 Atualizar CASH_FLOW_VIEW<br/>com projeções]
+    L --> M[ðŸ’¹ Atualizar CASH_FLOW_VIEW<br/>com projeÃ§Ãµes]
     
-    %% === ALERTAS E DECISÕES ===
-    F --> N[🎯 Análise de Alertas]
+    %% === ALERTAS E DECISÃ•ES ===
+    F --> N[ðŸŽ¯ AnÃ¡lise de Alertas]
     M --> N
     
-    N --> O{⚠️ Saldo projetado<br/>negativo?}
-    O -->|Sim| P[🚨 Alerta de caixa baixo]
-    O -->|Não| Q[✅ Fluxo saudável]
+    N --> O{âš ï¸ Saldo projetado<br/>negativo?}
+    O -->|Sim| P[ðŸš¨ Alerta de caixa baixo]
+    O -->|NÃ£o| Q[âœ… Fluxo saudÃ¡vel]
     
-    P --> R[📧 Notificar gestores<br/>financeiros]
-    Q --> S[📊 Dashboard atualizado]
+    P --> R[ðŸ“§ Notificar gestores<br/>financeiros]
+    Q --> S[ðŸ“Š Dashboard atualizado]
     R --> S
     
-    %% === RELATÓRIOS ===
-    S --> T[📈 Gerar relatórios<br/>de performance]
-    T --> U[💼 Análise de lucratividade<br/>por domínio]
-    U --> V[📊 Dashboard executivo]
+    %% === RELATÃ“RIOS ===
+    S --> T[ðŸ“ˆ Gerar relatÃ³rios<br/>de performance]
+    T --> U[ðŸ’¼ AnÃ¡lise de lucratividade<br/>por domÃ­nio]
+    U --> V[ðŸ“Š Dashboard executivo]
     
     %% === STYLING ===
     
@@ -212,45 +212,45 @@ flowchart TD
     class T,U,V reportStyle
 ```
 
-## 🔄 Processo de Conciliação Bancária
+## ðŸ”„ Processo de ConciliaÃ§Ã£o BancÃ¡ria
 
 ```mermaid
 flowchart TD
     %% === IMPORT DE DADOS ===
-    A[🏦 Extrato bancário<br/>importado/manual] --> B[🔍 Para cada movimentação<br/>do extrato]
+    A[ðŸ¦ Extrato bancÃ¡rio<br/>importado/manual] --> B[ðŸ” Para cada movimentaÃ§Ã£o<br/>do extrato]
     
-    B --> C[📊 Identificar tipo<br/>Crédito ou Débito]
-    C --> D[💰 Buscar Transaction<br/>correspondente no sistema]
+    B --> C[ðŸ“Š Identificar tipo<br/>CrÃ©dito ou DÃ©bito]
+    C --> D[ðŸ’° Buscar Transaction<br/>correspondente no sistema]
     
-    D --> E{🔍 Transaction<br/>encontrada?}
+    D --> E{ðŸ” Transaction<br/>encontrada?}
     
-    %% CONCILIAÇÃO AUTOMÁTICA
-    E -->|Sim| F[✅ Marcar como conciliada<br/>IsReconciled = true]
-    F --> G[📅 ReconciledDate = hoje<br/>ReconciledBy = usuário]
+    %% CONCILIAÃ‡ÃƒO AUTOMÃTICA
+    E -->|Sim| F[âœ… Marcar como conciliada<br/>IsReconciled = true]
+    F --> G[ðŸ“… ReconciledDate = hoje<br/>ReconciledBy = usuÃ¡rio]
     
-    %% MOVIMENTAÇÃO NÃO IDENTIFICADA
-    E -->|Não| H[❓ Movimentação<br/>não identificada]
-    H --> I[👤 Usuário decide ação]
-    I --> J{🎯 Ação do usuário}
+    %% MOVIMENTAÃ‡ÃƒO NÃƒO IDENTIFICADA
+    E -->|NÃ£o| H[â“ MovimentaÃ§Ã£o<br/>nÃ£o identificada]
+    H --> I[ðŸ‘¤ UsuÃ¡rio decide aÃ§Ã£o]
+    I --> J{ðŸŽ¯ AÃ§Ã£o do usuÃ¡rio}
     
-    J -->|Criar Transaction| K[💾 Criar Transaction manual<br/>com dados do extrato]
-    J -->|Ignorar| L[⏭️ Pular movimentação]
-    J -->|Marcar pendente| M[⏰ Deixar para análise<br/>posterior]
+    J -->|Criar Transaction| K[ðŸ’¾ Criar Transaction manual<br/>com dados do extrato]
+    J -->|Ignorar| L[â­ï¸ Pular movimentaÃ§Ã£o]
+    J -->|Marcar pendente| M[â° Deixar para anÃ¡lise<br/>posterior]
     
-    K --> N[✅ Transaction criada<br/>e conciliada]
+    K --> N[âœ… Transaction criada<br/>e conciliada]
     
-    %% CONTINUAÇÃO
-    G --> O{🔄 Mais movimentações<br/>no extrato?}
+    %% CONTINUAÃ‡ÃƒO
+    G --> O{ðŸ”„ Mais movimentaÃ§Ãµes<br/>no extrato?}
     L --> O
     M --> O
     N --> O
     
     O -->|Sim| B
-    O -->|Não| P[📊 Relatório de<br/>conciliação]
+    O -->|NÃ£o| P[ðŸ“Š RelatÃ³rio de<br/>conciliaÃ§Ã£o]
     
-    P --> Q[✅ Conciliações realizadas]
-    P --> R[❓ Movimentações pendentes]
-    P --> S[💹 Saldo conciliado]
+    P --> Q[âœ… ConciliaÃ§Ãµes realizadas]
+    P --> R[â“ MovimentaÃ§Ãµes pendentes]
+    P --> S[ðŸ’¹ Saldo conciliado]
     
     %% === STYLING ===
     
@@ -267,27 +267,27 @@ flowchart TD
     class O,P,Q,R,S reportStyle
 ```
 
-## 📈 Análise de Lucratividade
+## ðŸ“ˆ AnÃ¡lise de Lucratividade
 
-### **💹 Cálculo de Lucratividade por Pedido:**
+### **ðŸ’¹ CÃ¡lculo de Lucratividade por Pedido:**
 
 ```mermaid
 flowchart TD
-    A[📋 OrderEntry finalizada] --> B[💰 Receita Total<br/>= OrderEntry.TotalValue]
-    B --> C[📊 Buscar custos associados]
+    A[ðŸ“‹ OrderEntry finalizada] --> B[ðŸ’° Receita Total<br/>= OrderEntry.TotalValue]
+    B --> C[ðŸ“Š Buscar custos associados]
     
-    C --> D[🏭 Custo de Produção<br/>= Σ Demand.ActualCost]
-    C --> E[🛒 Custo de Ingredientes<br/>= Σ IngredientConsumption]
-    C --> F[💼 Custos Operacionais<br/>= Overhead alocado]
+    C --> D[ðŸ­ Custo de ProduÃ§Ã£o<br/>= Î£ Demand.ActualCost]
+    C --> E[ðŸ›’ Custo de Ingredientes<br/>= Î£ IngredientConsumption]
+    C --> F[ðŸ’¼ Custos Operacionais<br/>= Overhead alocado]
     
-    D --> G[🧮 Custo Total<br/>= Produção + Ingredientes + Operacional]
+    D --> G[ðŸ§® Custo Total<br/>= ProduÃ§Ã£o + Ingredientes + Operacional]
     E --> G
     F --> G
     
-    G --> H[💵 Lucro Bruto<br/>= Receita - Custo Total]
-    H --> I[📊 Margem Bruta<br/>= (Lucro / Receita) * 100]
+    G --> H[ðŸ’µ Lucro Bruto<br/>= Receita - Custo Total]
+    H --> I[ðŸ“Š Margem Bruta<br/>= (Lucro / Receita) * 100]
     
-    I --> J[📈 Salvar análise<br/>para relatórios]
+    I --> J[ðŸ“ˆ Salvar anÃ¡lise<br/>para relatÃ³rios]
     
     classDef revenueStyle fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:black
     class A,B revenueStyle
@@ -299,9 +299,9 @@ flowchart TD
     class H,I,J profitStyle
 ```
 
-## 🎯 Estados e Validações
+## ðŸŽ¯ Estados e ValidaÃ§Ãµes
 
-### **📈 Ciclo de Status AccountReceivable:**
+### **ðŸ“ˆ Ciclo de Status AccountReceivable:**
 
 ```mermaid
 stateDiagram-v2
@@ -312,7 +312,7 @@ stateDiagram-v2
     
     Pending --> Overdue : Vencimento sem pagamento
     PartiallyPaid --> Overdue : Vencimento parcial
-    Overdue --> Paid : Pagamento após vencimento
+    Overdue --> Paid : Pagamento apÃ³s vencimento
     
     Pending --> Cancelled : Pedido cancelado
     PartiallyPaid --> Cancelled : Pedido cancelado
@@ -322,7 +322,7 @@ stateDiagram-v2
     Cancelled --> [*] : Processo cancelado
 ```
 
-### **📉 Ciclo de Status AccountPayable:**
+### **ðŸ“‰ Ciclo de Status AccountPayable:**
 
 ```mermaid
 stateDiagram-v2
@@ -333,7 +333,7 @@ stateDiagram-v2
     
     Pending --> Overdue : Vencimento sem pagamento
     PartiallyPaid --> Overdue : Vencimento parcial
-    Overdue --> Paid : Pagamento após vencimento
+    Overdue --> Paid : Pagamento apÃ³s vencimento
     
     Pending --> Cancelled : Compra cancelada
     PartiallyPaid --> Cancelled : Acordo de cancelamento
@@ -342,43 +342,43 @@ stateDiagram-v2
     Cancelled --> [*] : Processo cancelado
 ```
 
-## 🚨 Regras de Validação e Alertas
+## ðŸš¨ Regras de ValidaÃ§Ã£o e Alertas
 
-### **Validações Críticas:**
+### **ValidaÃ§Ãµes CrÃ­ticas:**
 
 #### **AccountReceivable:**
-- ✅ DueDate ≥ OrderEntry.DeliveryDate
-- ✅ TotalAmount = OrderEntry.TotalValue (soma de parcelas)
-- ✅ InstallmentNumber único por OrderEntry
-- ✅ PaidAmount ≤ TotalAmount
+- âœ… DueDate â‰¥ OrderEntry.DeliveryDate
+- âœ… TotalAmount = OrderEntry.TotalValue (soma de parcelas)
+- âœ… InstallmentNumber Ãºnico por OrderEntry
+- âœ… PaidAmount â‰¤ TotalAmount
 
 #### **AccountPayable:**
-- ✅ DueDate ≥ PurchaseOrder.ActualDeliveryDate
-- ✅ TotalAmount = PurchaseOrder.TotalValue
-- ✅ SupplierId = PurchaseOrder.SupplierId
-- ✅ PaidAmount ≤ TotalAmount
+- âœ… DueDate â‰¥ PurchaseOrder.ActualDeliveryDate
+- âœ… TotalAmount = PurchaseOrder.TotalValue
+- âœ… SupplierId = PurchaseOrder.SupplierId
+- âœ… PaidAmount â‰¤ TotalAmount
 
 #### **Transaction:**
-- ✅ Deve referenciar AccountReceivable OU AccountPayable
-- ✅ Amount > 0
-- ✅ TransactionDate ≤ hoje
-- ✅ BankAccount deve existir e estar ativa
+- âœ… Deve referenciar AccountReceivable OU AccountPayable
+- âœ… Amount > 0
+- âœ… TransactionDate â‰¤ hoje
+- âœ… BankAccount deve existir e estar ativa
 
-### **Alertas Automáticos:**
+### **Alertas AutomÃ¡ticos:**
 
-#### **🚨 Alertas Críticos:**
-- **Fluxo Negativo**: Saldo projetado < 0 nos próximos 30 dias
-- **Alta Inadimplência**: % contas vencidas > 15%
-- **Concentração de Risco**: 1 cliente representa > 30% do AR
-- **Descasamento**: Movimentação bancária não conciliada > 7 dias
+#### **ðŸš¨ Alertas CrÃ­ticos:**
+- **Fluxo Negativo**: Saldo projetado < 0 nos prÃ³ximos 30 dias
+- **Alta InadimplÃªncia**: % contas vencidas > 15%
+- **ConcentraÃ§Ã£o de Risco**: 1 cliente representa > 30% do AR
+- **Descasamento**: MovimentaÃ§Ã£o bancÃ¡ria nÃ£o conciliada > 7 dias
 
-#### **⚠️ Alertas de Atenção:**
-- **Vencimento Próximo**: Contas vencendo em 3 dias
+#### **âš ï¸ Alertas de AtenÃ§Ã£o:**
+- **Vencimento PrÃ³ximo**: Contas vencendo em 3 dias
 - **Pagamento Atrasado**: Fornecedor com prazo vencido
 - **Baixa Lucratividade**: Margem < 20% em pedidos
-- **Crescimento AR**: Contas a receber crescendo > 50% mês
+- **Crescimento AR**: Contas a receber crescendo > 50% mÃªs
 
-## 🎯 Eventos de Domínio Gerados
+## ðŸŽ¯ Eventos de DomÃ­nio Gerados
 
 - **AccountReceivableCreated**: Nova conta a receber gerada
 - **PaymentReceived**: Pagamento de cliente recebido
@@ -386,28 +386,28 @@ stateDiagram-v2
 - **AccountOverdue**: Conta vencida detectada
 - **CashFlowAlert**: Alerta de fluxo baixo
 - **ProfitabilityCalculated**: Lucratividade calculada
-- **BankReconciled**: Conciliação bancária realizada
+- **BankReconciled**: ConciliaÃ§Ã£o bancÃ¡ria realizada
 
-## 📊 Métricas e KPIs
+## ðŸ“Š MÃ©tricas e KPIs
 
 ### **Indicadores de Recebimento:**
-- **DSO (Days Sales Outstanding)**: Prazo médio de recebimento
-- **Taxa de Inadimplência**: % valor vencido vs total AR
-- **Eficiência de Cobrança**: % contas pagas no prazo
+- **DSO (Days Sales Outstanding)**: Prazo mÃ©dio de recebimento
+- **Taxa de InadimplÃªncia**: % valor vencido vs total AR
+- **EficiÃªncia de CobranÃ§a**: % contas pagas no prazo
 
 ### **Indicadores de Pagamento:**
-- **DPO (Days Payable Outstanding)**: Prazo médio de pagamento
+- **DPO (Days Payable Outstanding)**: Prazo mÃ©dio de pagamento
 - **Desconto Obtido**: % economia em pagamentos antecipados
 - **Pontualidade**: % pagamentos realizados no prazo
 
 ### **Indicadores de Lucratividade:**
 - **Margem Bruta**: (Receita - Custo) / Receita
 - **ROI por Pedido**: Retorno sobre investimento
-- **Contribuição por Domínio**: Receita líquida por área
+- **ContribuiÃ§Ã£o por DomÃ­nio**: Receita lÃ­quida por Ã¡rea
 
 ---
 
 **Arquivo**: `05-financial-flow.md`  
-**Domínio**: Financeiro (#083e61)  
+**DomÃ­nio**: Financeiro (#083e61)  
 **Tipo**: Process Flowchart  
-**Foco**: Contas a Receber vs Pagar + Análise de Lucratividade
+**Foco**: Contas a Receber vs Pagar + AnÃ¡lise de Lucratividade

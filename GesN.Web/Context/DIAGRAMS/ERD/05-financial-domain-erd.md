@@ -1,171 +1,171 @@
-# 💳 ERD - DOMÍNIO FINANCEIRO
+﻿# ðŸ’³ ERD - DOMÃNIO FINANCEIRO
 
-## 🎯 Visão Geral
-Diagrama Entity-Relationship completo do Domínio Financeiro, mostrando o controle de fluxo de caixa através de contas a receber (originadas das vendas) e contas a pagar (originadas das compras), com rastreamento detalhado de transações e análise de lucratividade.
+## ðŸŽ¯ VisÃ£o Geral
+Diagrama Entity-Relationship completo do DomÃ­nio Financeiro, mostrando o controle de fluxo de caixa atravÃ©s de contas a receber (originadas das vendas) e contas a pagar (originadas das compras), com rastreamento detalhado de transaÃ§Ãµes e anÃ¡lise de lucratividade.
 
-## 🗄️ Diagrama de Entidades e Relacionamentos
+## ðŸ—„ï¸ Diagrama de Entidades e Relacionamentos
 
 ```mermaid
 erDiagram
-    %% === DOMÍNIO FINANCEIRO ===
+    %% === DOMÃNIO FINANCEIRO ===
     
     %% === CONTA A RECEBER ===
     ACCOUNT_RECEIVABLE {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string OrderEntryId FK "Pedido origem"
         string CustomerId FK "Cliente"
-        string ReceivableNumber "Número sequencial"
+        string ReceivableNumber "NÃºmero sequencial"
         decimal TotalAmount "Valor total a receber"
-        decimal PaidAmount "Valor já recebido"
+        decimal PaidAmount "Valor jÃ¡ recebido"
         decimal RemainingAmount "Valor restante"
         datetime DueDate "Data vencimento"
-        datetime IssueDate "Data emissão"
+        datetime IssueDate "Data emissÃ£o"
         string AccountStatus "Pending|PartiallyPaid|Paid|Overdue|Cancelled"
-        string PaymentTerms "Condições pagamento"
-        string PaymentMethod "Método pagamento"
-        int InstallmentNumber "Número da parcela"
+        string PaymentTerms "CondiÃ§Ãµes pagamento"
+        string PaymentMethod "MÃ©todo pagamento"
+        int InstallmentNumber "NÃºmero da parcela"
         int TotalInstallments "Total de parcelas"
         decimal InterestRate "Taxa de juros"
         decimal DiscountRate "Taxa de desconto"
         decimal FineAmount "Valor de multa"
-        string Description "Descrição da conta"
-        string Notes "Observações"
+        string Description "DescriÃ§Ã£o da conta"
+        string Notes "ObservaÃ§Ãµes"
         string StateCode "Active|Inactive"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
-        string CreatedBy "Usuário criador"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
+        string CreatedBy "UsuÃ¡rio criador"
     }
 
     %% === CONTA A PAGAR ===
     ACCOUNT_PAYABLE {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string PurchaseOrderId FK "Ordem compra origem"
         string SupplierId FK "Fornecedor"
-        string PayableNumber "Número sequencial"
+        string PayableNumber "NÃºmero sequencial"
         decimal TotalAmount "Valor total a pagar"
-        decimal PaidAmount "Valor já pago"
+        decimal PaidAmount "Valor jÃ¡ pago"
         decimal RemainingAmount "Valor restante"
         datetime DueDate "Data vencimento"
-        datetime IssueDate "Data emissão"
+        datetime IssueDate "Data emissÃ£o"
         string AccountStatus "Pending|PartiallyPaid|Paid|Overdue|Cancelled"
-        string PaymentTerms "Condições pagamento"
-        string PaymentMethod "Método pagamento"
-        int InstallmentNumber "Número da parcela"
+        string PaymentTerms "CondiÃ§Ãµes pagamento"
+        string PaymentMethod "MÃ©todo pagamento"
+        int InstallmentNumber "NÃºmero da parcela"
         int TotalInstallments "Total de parcelas"
         decimal InterestRate "Taxa de juros"
         decimal DiscountRate "Taxa de desconto"
         decimal FineAmount "Valor de multa"
-        string Description "Descrição da conta"
-        string Notes "Observações"
+        string Description "DescriÃ§Ã£o da conta"
+        string Notes "ObservaÃ§Ãµes"
         string StateCode "Active|Inactive"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
-        string CreatedBy "Usuário criador"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
+        string CreatedBy "UsuÃ¡rio criador"
     }
 
-    %% === TRANSAÇÃO FINANCEIRA ===
+    %% === TRANSAÃ‡ÃƒO FINANCEIRA ===
     TRANSACTION {
-        string Id PK "GUID único"
-        string TransactionNumber "Número sequencial"
+        string Id PK "GUID Ãºnico"
+        string TransactionNumber "NÃºmero sequencial"
         string AccountReceivableId FK "Conta receber (opcional)"
         string AccountPayableId FK "Conta pagar (opcional)"
-        string BankAccountId FK "Conta bancária"
-        decimal Amount "Valor da transação"
-        datetime TransactionDate "Data da transação"
+        string BankAccountId FK "Conta bancÃ¡ria"
+        decimal Amount "Valor da transaÃ§Ã£o"
+        datetime TransactionDate "Data da transaÃ§Ã£o"
         string TransactionType "Credit|Debit"
         string Category "Receita|Despesa|Transferencia"
         string SubCategory "Subcategoria"
-        string PaymentMethod "Dinheiro|Cartão|PIX|Boleto|Transferência"
-        string Description "Descrição da transação"
-        string ReferenceNumber "Número referência"
+        string PaymentMethod "Dinheiro|CartÃ£o|PIX|Boleto|TransferÃªncia"
+        string Description "DescriÃ§Ã£o da transaÃ§Ã£o"
+        string ReferenceNumber "NÃºmero referÃªncia"
         bool IsReconciled "Conciliado?"
-        datetime ReconciledDate "Data conciliação"
+        datetime ReconciledDate "Data conciliaÃ§Ã£o"
         string ReconciledBy "Conciliado por"
-        decimal ExchangeRate "Taxa de câmbio"
+        decimal ExchangeRate "Taxa de cÃ¢mbio"
         string Currency "Moeda"
-        string Notes "Observações"
+        string Notes "ObservaÃ§Ãµes"
         string StateCode "Active|Inactive"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
-        string CreatedBy "Usuário criador"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
+        string CreatedBy "UsuÃ¡rio criador"
     }
 
-    %% === CONTA BANCÁRIA ===
+    %% === CONTA BANCÃRIA ===
     BANK_ACCOUNT {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string AccountName "Nome da conta"
         string BankName "Nome do banco"
-        string AccountNumber "Número da conta"
-        string Agency "Agência"
-        string AccountType "Corrente|Poupança|Aplicação"
+        string AccountNumber "NÃºmero da conta"
+        string Agency "AgÃªncia"
+        string AccountType "Corrente|PoupanÃ§a|AplicaÃ§Ã£o"
         decimal CurrentBalance "Saldo atual"
-        decimal AvailableBalance "Saldo disponível"
+        decimal AvailableBalance "Saldo disponÃ­vel"
         string Currency "Moeda"
-        bool IsDefault "Conta padrão?"
-        string Notes "Observações"
+        bool IsDefault "Conta padrÃ£o?"
+        string Notes "ObservaÃ§Ãµes"
         string StateCode "Active|Inactive"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
     }
 
-    %% === MÉTODO DE PAGAMENTO ===
+    %% === MÃ‰TODO DE PAGAMENTO ===
     PAYMENT_METHOD {
-        string Id PK "GUID único"
-        string Name "Nome do método"
+        string Id PK "GUID Ãºnico"
+        string Name "Nome do mÃ©todo"
         string PaymentType "Cash|Card|Transfer|Check|PIX|Boleto"
         bool IsActive "Ativo?"
         decimal Fee "Taxa/Tarifa"
         int DaysToReceive "Dias para receber"
-        string Description "Descrição"
-        string Notes "Observações"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
+        string Description "DescriÃ§Ã£o"
+        string Notes "ObservaÃ§Ãµes"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
     }
 
     %% === CATEGORIA FINANCEIRA ===
     FINANCIAL_CATEGORY {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string Name "Nome da categoria"
         string CategoryType "Income|Expense|Transfer"
         string ParentCategoryId FK "Categoria pai"
-        string Description "Descrição"
+        string Description "DescriÃ§Ã£o"
         bool IsActive "Ativa?"
-        string Notes "Observações"
-        datetime CreatedDate "Data de criação"
-        datetime ModifiedDate "Data de modificação"
+        string Notes "ObservaÃ§Ãµes"
+        datetime CreatedDate "Data de criaÃ§Ã£o"
+        datetime ModifiedDate "Data de modificaÃ§Ã£o"
     }
 
-    %% === FLUXO DE CAIXA (VISÃO) ===
+    %% === FLUXO DE CAIXA (VISÃƒO) ===
     CASH_FLOW_VIEW {
-        string Id PK "GUID único"
-        datetime PeriodDate "Data do período"
+        string Id PK "GUID Ãºnico"
+        datetime PeriodDate "Data do perÃ­odo"
         string PeriodType "Daily|Weekly|Monthly|Yearly"
         decimal OpeningBalance "Saldo inicial"
         decimal TotalIncome "Total receitas"
         decimal TotalExpense "Total despesas"
-        decimal NetFlow "Fluxo líquido"
+        decimal NetFlow "Fluxo lÃ­quido"
         decimal ClosingBalance "Saldo final"
         decimal ProjectedIncome "Receita projetada"
         decimal ProjectedExpense "Despesa projetada"
         decimal ProjectedBalance "Saldo projetado"
-        datetime GeneratedDate "Data de geração"
+        datetime GeneratedDate "Data de geraÃ§Ã£o"
         string GeneratedBy "Gerado por"
     }
 
-    %% === INTEGRAÇÕES COM OUTROS DOMÍNIOS ===
+    %% === INTEGRAÃ‡Ã•ES COM OUTROS DOMÃNIOS ===
 
     %% VENDAS (ORIGEM DAS CONTAS A RECEBER)
     ORDER_ENTRY {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string CustomerId FK "Cliente"
         decimal TotalValue "Valor total"
         string OrderStatus "Status do pedido"
-        string PaymentTerms "Condições pagamento"
+        string PaymentTerms "CondiÃ§Ãµes pagamento"
         datetime DeliveryDate "Data entrega"
     }
 
     CUSTOMER {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string Name "Nome cliente"
         string Document "CPF/CNPJ"
         string Email "Email"
@@ -174,50 +174,50 @@ erDiagram
 
     %% COMPRAS (ORIGEM DAS CONTAS A PAGAR)
     PURCHASE_ORDER {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string SupplierId FK "Fornecedor"
         decimal TotalValue "Valor total"
         string PurchaseStatus "Status da compra"
-        string PaymentTerms "Condições pagamento"
+        string PaymentTerms "CondiÃ§Ãµes pagamento"
         datetime ActualDeliveryDate "Data entrega"
     }
 
     SUPPLIER {
-        string Id PK "GUID único"
+        string Id PK "GUID Ãºnico"
         string Name "Nome fornecedor"
         string Document "CNPJ"
         string Email "Email"
-        string PaymentTerms "Condições padrão"
+        string PaymentTerms "CondiÃ§Ãµes padrÃ£o"
     }
 
     %% ==========================================
     %% RELACIONAMENTOS PRINCIPAIS
     %% ==========================================
 
-    %% CONTAS E TRANSAÇÕES
+    %% CONTAS E TRANSAÃ‡Ã•ES
     ACCOUNT_RECEIVABLE ||--o{ TRANSACTION : "possui recebimentos"
     ACCOUNT_PAYABLE ||--o{ TRANSACTION : "possui pagamentos"
     BANK_ACCOUNT ||--o{ TRANSACTION : "movimenta conta"
-    PAYMENT_METHOD ||--o{ TRANSACTION : "utiliza método"
+    PAYMENT_METHOD ||--o{ TRANSACTION : "utiliza mÃ©todo"
     FINANCIAL_CATEGORY ||--o{ TRANSACTION : "categoriza"
 
     %% HIERARQUIA DE CATEGORIAS
     FINANCIAL_CATEGORY ||--o{ FINANCIAL_CATEGORY : "categoria pai"
 
     %% ==========================================
-    %% INTEGRAÇÕES COM OUTROS DOMÍNIOS
+    %% INTEGRAÃ‡Ã•ES COM OUTROS DOMÃNIOS
     %% ==========================================
 
-    %% VENDAS → FINANCEIRO (Customer-Supplier)
+    %% VENDAS â†’ FINANCEIRO (Customer-Supplier)
     ORDER_ENTRY ||--o{ ACCOUNT_RECEIVABLE : "gera contas a receber"
     CUSTOMER ||--o{ ACCOUNT_RECEIVABLE : "deve pagar"
 
-    %% COMPRAS → FINANCEIRO (Customer-Supplier)
+    %% COMPRAS â†’ FINANCEIRO (Customer-Supplier)
     PURCHASE_ORDER ||--o{ ACCOUNT_PAYABLE : "gera contas a pagar"
     SUPPLIER ||--o{ ACCOUNT_PAYABLE : "deve receber"
 
     %% ==========================================
-    %% STYLING POR DOMÍNIO
+    %% STYLING POR DOMÃNIO
     %% ==========================================
     
     %% FINANCEIRO = Azul Escuro (#083e61)
@@ -290,56 +290,56 @@ erDiagram
     }
 ```
 
-## 📋 Detalhes das Entidades
+## ðŸ“‹ Detalhes das Entidades
 
-### **💰 ACCOUNT_RECEIVABLE (Contas a Receber)**
-- **Propósito**: Controlar valores que a empresa tem direito de receber de clientes
-- **Origem**: Gerada automaticamente quando OrderEntry é confirmada
-- **Status Flow**: Pending → PartiallyPaid → Paid (ou Overdue se vencer)
-- **Características**: Parcelamento, juros, multas, descontos
+### **ðŸ’° ACCOUNT_RECEIVABLE (Contas a Receber)**
+- **PropÃ³sito**: Controlar valores que a empresa tem direito de receber de clientes
+- **Origem**: Gerada automaticamente quando OrderEntry Ã© confirmada
+- **Status Flow**: Pending â†’ PartiallyPaid â†’ Paid (ou Overdue se vencer)
+- **CaracterÃ­sticas**: Parcelamento, juros, multas, descontos
 
-### **💸 ACCOUNT_PAYABLE (Contas a Pagar)**
-- **Propósito**: Controlar obrigações financeiras com fornecedores
-- **Origem**: Gerada automaticamente quando PurchaseOrder é recebida totalmente
-- **Status Flow**: Pending → PartiallyPaid → Paid (ou Overdue se vencer)
-- **Características**: Parcelamento, juros, multas, descontos
+### **ðŸ’¸ ACCOUNT_PAYABLE (Contas a Pagar)**
+- **PropÃ³sito**: Controlar obrigaÃ§Ãµes financeiras com fornecedores
+- **Origem**: Gerada automaticamente quando PurchaseOrder Ã© recebida totalmente
+- **Status Flow**: Pending â†’ PartiallyPaid â†’ Paid (ou Overdue se vencer)
+- **CaracterÃ­sticas**: Parcelamento, juros, multas, descontos
 
-### **🔄 TRANSACTION (Transação Financeira)**
-- **Propósito**: Registrar movimentações de dinheiro (entradas e saídas)
-- **Tipos**: Credit (entrada) ou Debit (saída)
+### **ðŸ”„ TRANSACTION (TransaÃ§Ã£o Financeira)**
+- **PropÃ³sito**: Registrar movimentaÃ§Ãµes de dinheiro (entradas e saÃ­das)
+- **Tipos**: Credit (entrada) ou Debit (saÃ­da)
 - **Relacionamentos**: Vinculada a AccountReceivable OU AccountPayable
-- **Características**: Conciliação bancária, categorização, métodos de pagamento
+- **CaracterÃ­sticas**: ConciliaÃ§Ã£o bancÃ¡ria, categorizaÃ§Ã£o, mÃ©todos de pagamento
 
-### **🏦 BANK_ACCOUNT (Conta Bancária)**
-- **Propósito**: Controlar contas bancárias da empresa
-- **Características**: Saldo atual/disponível, tipo de conta, moeda
-- **Integração**: Todas Transaction devem ter uma BankAccount
+### **ðŸ¦ BANK_ACCOUNT (Conta BancÃ¡ria)**
+- **PropÃ³sito**: Controlar contas bancÃ¡rias da empresa
+- **CaracterÃ­sticas**: Saldo atual/disponÃ­vel, tipo de conta, moeda
+- **IntegraÃ§Ã£o**: Todas Transaction devem ter uma BankAccount
 
-### **💳 PAYMENT_METHOD (Método de Pagamento)**
-- **Propósito**: Definir formas de pagamento aceitas/utilizadas
-- **Características**: Taxas, prazos para recebimento, tipo
-- **Exemplos**: Dinheiro, PIX, Cartão, Boleto, Transferência
+### **ðŸ’³ PAYMENT_METHOD (MÃ©todo de Pagamento)**
+- **PropÃ³sito**: Definir formas de pagamento aceitas/utilizadas
+- **CaracterÃ­sticas**: Taxas, prazos para recebimento, tipo
+- **Exemplos**: Dinheiro, PIX, CartÃ£o, Boleto, TransferÃªncia
 
-### **📊 FINANCIAL_CATEGORY (Categoria Financeira)**
-- **Propósito**: Categorizar receitas e despesas para relatórios
-- **Estrutura**: Hierárquica (categoria pai/filha)
-- **Tipos**: Income (receita), Expense (despesa), Transfer (transferência)
+### **ðŸ“Š FINANCIAL_CATEGORY (Categoria Financeira)**
+- **PropÃ³sito**: Categorizar receitas e despesas para relatÃ³rios
+- **Estrutura**: HierÃ¡rquica (categoria pai/filha)
+- **Tipos**: Income (receita), Expense (despesa), Transfer (transferÃªncia)
 
-### **📈 CASH_FLOW_VIEW (Visão de Fluxo de Caixa)**
-- **Propósito**: Visão consolidada do fluxo de caixa por período
-- **Características**: Saldos inicial/final, projeções, análises
-- **Períodos**: Diário, semanal, mensal, anual
+### **ðŸ“ˆ CASH_FLOW_VIEW (VisÃ£o de Fluxo de Caixa)**
+- **PropÃ³sito**: VisÃ£o consolidada do fluxo de caixa por perÃ­odo
+- **CaracterÃ­sticas**: Saldos inicial/final, projeÃ§Ãµes, anÃ¡lises
+- **PerÃ­odos**: DiÃ¡rio, semanal, mensal, anual
 
-## 🔄 Fluxos de Integração Automática
+## ðŸ”„ Fluxos de IntegraÃ§Ã£o AutomÃ¡tica
 
-### **💰 Vendas → Contas a Receber**
+### **ðŸ’° Vendas â†’ Contas a Receber**
 
-#### **Geração Automática**
+#### **GeraÃ§Ã£o AutomÃ¡tica**
 ```
 Quando OrderEntry.OrderStatus = "Confirmed":
 
 1. Sistema analisa PaymentTerms:
-   - À vista: 1 AccountReceivable
+   - Ã€ vista: 1 AccountReceivable
    - Parcelado: N AccountReceivable (uma por parcela)
 
 2. Para cada parcela:
@@ -354,19 +354,19 @@ Quando OrderEntry.OrderStatus = "Confirmed":
    }
 ```
 
-#### **Exemplo Prático**
+#### **Exemplo PrÃ¡tico**
 ```
 OrderEntry: R$ 1.000,00 - Pagamento em 3x
 
 Gera 3 AccountReceivable:
-├── Parcela 1: R$ 333,33 - Vencimento: 30 dias
-├── Parcela 2: R$ 333,33 - Vencimento: 60 dias  
-└── Parcela 3: R$ 333,34 - Vencimento: 90 dias
+â”œâ”€â”€ Parcela 1: R$ 333,33 - Vencimento: 30 dias
+â”œâ”€â”€ Parcela 2: R$ 333,33 - Vencimento: 60 dias  
+â””â”€â”€ Parcela 3: R$ 333,34 - Vencimento: 90 dias
 ```
 
-### **💸 Compras → Contas a Pagar**
+### **ðŸ’¸ Compras â†’ Contas a Pagar**
 
-#### **Geração Automática**
+#### **GeraÃ§Ã£o AutomÃ¡tica**
 ```
 Quando PurchaseOrder.PurchaseStatus = "FullyReceived":
 
@@ -380,11 +380,11 @@ Quando PurchaseOrder.PurchaseStatus = "FullyReceived":
    }
 ```
 
-### **🔄 Registro de Transações**
+### **ðŸ”„ Registro de TransaÃ§Ãµes**
 
 #### **Recebimento de Cliente**
 ```
-Usuário registra recebimento:
+UsuÃ¡rio registra recebimento:
 
 1. Localiza AccountReceivable
 2. Cria Transaction:
@@ -403,13 +403,13 @@ Usuário registra recebimento:
    
    Se RemainingAmount = 0:
      AccountStatus = "Paid"
-   Senão:
+   SenÃ£o:
      AccountStatus = "PartiallyPaid"
 ```
 
 #### **Pagamento a Fornecedor**
 ```
-Usuário registra pagamento:
+UsuÃ¡rio registra pagamento:
 
 1. Localiza AccountPayable
 2. Cria Transaction:
@@ -428,9 +428,9 @@ Usuário registra pagamento:
    AccountStatus = "Paid"
 ```
 
-## 📊 Análises e Relatórios Financeiros
+## ðŸ“Š AnÃ¡lises e RelatÃ³rios Financeiros
 
-### **💹 Fluxo de Caixa Realizado**
+### **ðŸ’¹ Fluxo de Caixa Realizado**
 ```sql
 SELECT 
     t.TransactionDate,
@@ -443,7 +443,7 @@ GROUP BY t.TransactionDate
 ORDER BY t.TransactionDate
 ```
 
-### **📈 Fluxo de Caixa Projetado**
+### **ðŸ“ˆ Fluxo de Caixa Projetado**
 ```sql
 -- Entradas Projetadas (Contas a Receber)
 SELECT 
@@ -454,7 +454,7 @@ WHERE ar.AccountStatus IN ('Pending', 'PartiallyPaid')
   AND ar.DueDate BETWEEN @DataInicio AND @DataFim
 GROUP BY ar.DueDate
 
--- Saídas Projetadas (Contas a Pagar)  
+-- SaÃ­das Projetadas (Contas a Pagar)  
 SELECT 
     ap.DueDate,
     SUM(ap.RemainingAmount) AS SaidasProjetadas
@@ -464,9 +464,9 @@ WHERE ap.AccountStatus IN ('Pending', 'PartiallyPaid')
 GROUP BY ap.DueDate
 ```
 
-### **🎯 Indicadores de Performance**
+### **ðŸŽ¯ Indicadores de Performance**
 
-#### **Receitas por Domínio**
+#### **Receitas por DomÃ­nio**
 ```sql
 -- Receitas de Vendas
 SELECT 'Vendas' AS Origem, SUM(ar.TotalAmount) AS Receita
@@ -481,7 +481,7 @@ WHERE ap.AccountStatus = 'Paid'
   AND ap.CreatedDate BETWEEN @DataInicio AND @DataFim
 ```
 
-#### **Análise de Inadimplência**
+#### **AnÃ¡lise de InadimplÃªncia**
 ```sql
 SELECT 
     c.Name AS Cliente,
@@ -495,34 +495,34 @@ GROUP BY c.Id, c.Name
 ORDER BY ValorVencido DESC
 ```
 
-## 🎯 Eventos de Domínio Gerados
+## ðŸŽ¯ Eventos de DomÃ­nio Gerados
 
 - **AccountReceivableCreated**: Nova conta a receber gerada
 - **PaymentReceived**: Pagamento de cliente recebido
 - **PaymentMade**: Pagamento a fornecedor efetuado
 - **AccountOverdue**: Conta vencida detectada
 - **CashFlowAlert**: Alerta de fluxo de caixa baixo
-- **BankAccountReconciled**: Conciliação bancária realizada
+- **BankAccountReconciled**: ConciliaÃ§Ã£o bancÃ¡ria realizada
 - **ProfitabilityCalculated**: Lucratividade recalculada
 
-## 🚨 Alertas e Validações
+## ðŸš¨ Alertas e ValidaÃ§Ãµes
 
-### **Alertas Críticos**
-- **Contas Vencidas**: DueDate < hoje E AccountStatus ≠ Paid
+### **Alertas CrÃ­ticos**
+- **Contas Vencidas**: DueDate < hoje E AccountStatus â‰  Paid
 - **Fluxo de Caixa Baixo**: Saldo projetado < limite configurado
-- **Inadimplência Alta**: % contas vencidas > limite aceitável
-- **Descasamento**: Transaction sem conciliação > 7 dias
+- **InadimplÃªncia Alta**: % contas vencidas > limite aceitÃ¡vel
+- **Descasamento**: Transaction sem conciliaÃ§Ã£o > 7 dias
 
-### **Validações de Negócio**
+### **ValidaÃ§Ãµes de NegÃ³cio**
 - Transaction deve ter AccountReceivable OU AccountPayable
-- Valor de Transaction não pode exceder saldo da conta
-- AccountReceivable não pode ser paga além do valor total
-- Data de Transaction não pode ser futura (exceto projeções)
-- BankAccount deve ter saldo suficiente para débitos
+- Valor de Transaction nÃ£o pode exceder saldo da conta
+- AccountReceivable nÃ£o pode ser paga alÃ©m do valor total
+- Data de Transaction nÃ£o pode ser futura (exceto projeÃ§Ãµes)
+- BankAccount deve ter saldo suficiente para dÃ©bitos
 
 ---
 
 **Arquivo**: `05-financial-domain-erd.md`  
-**Domínio**: Financeiro (#083e61)  
+**DomÃ­nio**: Financeiro (#083e61)  
 **Tipo**: Entity-Relationship Diagram  
-**Nível**: Detalhado + Fluxos Automáticos + Análises
+**NÃ­vel**: Detalhado + Fluxos AutomÃ¡ticos + AnÃ¡lises

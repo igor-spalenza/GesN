@@ -71,6 +71,8 @@ StyleCopReport.xml
 
 # Database files and diretories
 GesN.Web/Past-Context-Docs/
+GesN.Web/*.md
+GesN/*.md
 #GesN.Web/Context/
 ArqInf.svg
 *.drawio.*
