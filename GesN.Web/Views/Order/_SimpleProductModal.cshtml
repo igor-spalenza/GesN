@@ -1,0 +1,150 @@
+@model dynamic
+
+<div class="modal fade" id="simpleProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle text-success"></i>
+                    Adicionar: @Model.name
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="product-summary mb-4">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6>Detalhes do Produto</h6>
+                            <p class="mb-1"><strong>SKU:</strong> @(Model.sku ?? "N/A")</p>
+                            <p class="mb-1"><strong>Preço Unitário:</strong> R$ @Model.unitPrice.ToString("F2")</p>
+                            @if (!string.IsNullOrEmpty(Model.description))
+                            {
+                                <p class="mb-1"><strong>Descrição:</strong> @Model.description</p>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.category))
+                            {
+                                <p class="mb-3"><strong>Categoria:</strong> @Model.category</p>
+                            }
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                @if (!string.IsNullOrEmpty(Model.imageUrl))
+                                {
+                                    <img src="@Model.imageUrl" alt="@Model.name" class="img-fluid rounded mb-2" style="max-height: 80px;">
+                                }
+                                else
+                                {
+                                    <div class="placeholder-image mb-2">
+                                        <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quantity-selection">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="simpleProductQuantity" class="form-label">
+                                <i class="bi bi-hash"></i> Quantidade
+                            </label>
+                            <input type="number" id="simpleProductQuantity" class="form-control" 
+                                   min="1" max="999" value="@Model.initialQuantity" 
+                                   data-product-id="@Model.id">
+                            <small class="text-muted">Unidades do produto</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="bi bi-calculator"></i> Preço Total
+                            </label>
+                            <div class="pricing-display">
+                                <div id="simpleTotalDisplay" class="h5 text-primary mb-0">
+                                    R$ @((Model.unitPrice * Model.initialQuantity).ToString("F2"))
+                                </div>
+                                <small class="text-muted">Calculado automaticamente</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.assemblyTime > 0)
+                {
+                    <div class="assembly-info mt-3 p-3 bg-light rounded">
+                        <h6 class="mb-2">
+                            <i class="bi bi-clock text-warning"></i>
+                            Informações de Produção
+                        </h6>
+                        <p class="mb-1"><strong>Tempo de Montagem:</strong> @Model.assemblyTime dia(s)</p>
+                        @if (!string.IsNullOrEmpty(Model.assemblyInstructions))
+                        {
+                            <p class="mb-0"><strong>Instruções:</strong> @Model.assemblyInstructions</p>
+                        }
+                    </div>
+                }
+
+                <div class="notes-section mt-3">
+                    <label for="simpleProductNotes" class="form-label">
+                        <i class="bi bi-chat-text"></i> Observações (Opcional)
+                    </label>
+                    <textarea id="simpleProductNotes" class="form-control" rows="2" 
+                              placeholder="Observações especiais para este item..."></textarea>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="btnConfirmSimpleAdd">
+                    <i class="bi bi-cart-plus"></i> Adicionar ao Carrinho
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Calcular preço total quando quantidade mudar
+    const quantityInput = document.getElementById('simpleProductQuantity');
+    const totalDisplay = document.getElementById('simpleTotalDisplay');
+    const unitPrice = @Model.unitPrice;
+
+    if (quantityInput && totalDisplay) {
+        quantityInput.addEventListener('input', function() {
+            const quantity = parseInt(this.value) || 1;
+            const total = quantity * unitPrice;
+            totalDisplay.textContent = `R$ ${total.toFixed(2)}`;
+        });
+    }
+
+    // Configurar botão de confirmação
+    const confirmButton = document.getElementById('btnConfirmSimpleAdd');
+    if (confirmButton) {
+        confirmButton.addEventListener('click', function() {
+            const productId = '@Model.id';
+            const quantity = parseInt((document.getElementById('simpleProductQuantity') as HTMLInputElement)?.value) || 1;
+            const notes = (document.getElementById('simpleProductNotes') as HTMLTextAreaElement)?.value || '';
+            
+            // Validar quantidade mínima
+            if (quantity < 1) {
+                toastr.error('Quantidade deve ser maior que zero');
+                return;
+            }
+            
+            // Confirmar adição através do ProductCatalogManager
+            if (window.productCatalogManager) {
+                window.productCatalogManager.confirmSimpleAddToCart(productId, quantity, notes);
+                
+                // Fechar modal
+                $('#simpleProductModal').modal('hide');
+            } else {
+                console.error('❌ ProductCatalogManager não está disponível');
+                toastr.error('Erro interno: gerenciador de catálogo não encontrado');
+            }
+        });
+    }
+});
+</script>
